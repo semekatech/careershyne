@@ -47,13 +47,9 @@ const routes = [
     component: () => import("@/pages/HomeCampaignDetails.vue"),
   },
  
-  {
+{
     path: "/order-cv",
     name: "OrderCV",
-    component: () => import("@/pages/orderCV.vue"),
-  },{
-    path: "/how-it-works",
-    name: "How It Works",
     component: () => import("@/pages/HowItWorks.vue"),
   },
   {

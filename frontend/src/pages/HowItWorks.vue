@@ -3,19 +3,10 @@
     class="bg-gradient-to-br from-rose-50 to-white dark:from-gray-900 dark:to-gray-800"
   >
     <TheWelcome />
-    <HowItWorksPage />
-    <!-- <HowItWorks /> -->
+    <cvForm />
     <FooterSection />
   </main>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import TheWelcome from "@/components/TheWelcome.vue";
-import FooterSection from "@/components/FooterSection.vue";
-import HowItWorksPage from "@/components/HowItWorksPage.vue";
-</script>
 
 
 <style scoped>
@@ -30,4 +21,6 @@ import HowItWorksPage from "@/components/HowItWorksPage.vue";
 .fade-leave-to {
   opacity: 0;
 }
+
+
 </style>
