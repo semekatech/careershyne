@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <div class="relative md:hidden mt-8">
+        <div class="relative hidden mt-8">
           <img
             src="/img/hero-image.png"
             alt="MyPerfectResume AI Resume Builder"
