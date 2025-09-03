@@ -1,7 +1,7 @@
 // src/services/cvOrderService.js
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api"; // change to your backend
+const API_URL = "https://careershyne.com/api"; // change to your backend
 
 export const submitCvOrder = async (form) => {
   const formData = new FormData();
