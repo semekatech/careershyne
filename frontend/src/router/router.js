@@ -145,7 +145,7 @@ router.beforeEach(async (to, from, next) => {
     "/login",
     "/register",
     "/campaigns/:id/:slug",
-    "/campaigns",
+    "/order-cv",
     "/how-it-works",
     "/contact-us",
   ];
