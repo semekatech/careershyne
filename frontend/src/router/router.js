@@ -40,12 +40,7 @@ const routes = [
       },
     ],
   },
-  {
-    path: "/campaigns/:id/:slug",
-    name: "CampaignDetails",
-    component: () => import("@/pages/HomeCampaignDetails.vue"),
-  },
-
+ 
   {
     path: "/order-cv",
     name: "OrderCV",
@@ -82,19 +77,7 @@ const routes = [
       },
     ],
   },
-  {
-    path: "/campaigns/:id",
-    component: DashboardLayout,
-    meta: {
-      title: "Manage Campaign",
-    },
-    children: [
-      {
-        path: "",
-        component: CampaignDetails,
-      },
-    ],
-  },
+  
   {
     path: "/my-profile",
     component: DashboardLayout,
