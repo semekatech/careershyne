@@ -7,7 +7,11 @@
     <FooterSection />
   </main>
 </template>
-
+<script setup>
+import TheWelcome from "@/components/TheWelcome.vue";
+import cvForm from "@/components/CvForm.vue";
+import FooterSection from "@/components/FooterSection.vue";
+</script>
 
 <style scoped>
 .prose {
