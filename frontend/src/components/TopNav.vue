@@ -16,43 +16,29 @@ const isLoggedIn = computed(() => !!auth.token);
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
-          <img src="/logo.png" alt="Logo" class="h-16 w-auto" />
-
-          <!-- <span style="color: #fd624e"
-            class="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-pink-600 bg-clip-text text-transparent"
-          >
-            PROMOTTI
-          </span> -->
+          <img src="/logo.png" alt="Logo" class="h-[80px] w-auto" />
         </router-link>
 
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
           <router-link to="/" class="nav-link" exact>Home</router-link>
-          <router-link to="/" class="nav-link">Custom Cvs </router-link>
+          <router-link to="/" class="nav-link">About Us</router-link>
           <!-- <router-link to="/influencers" class="nav-link"
             >Influencers</router-link
           > -->
           <router-link to="/how-it-works" class="nav-link"
-            >Cover Letters</router-link
+            >Services</router-link
           >
-          <router-link to="/" class="nav-link">How It Works </router-link>
-          <router-link to="/" class="nav-link">Who Are We</router-link>
+          <router-link to="/" class="nav-link">Pricing </router-link>
+          <router-link to="/" class="nav-link">Resources</router-link>
           <router-link to="/" class="nav-link">Contact Us</router-link>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
-            v-if="isLoggedIn"
-            to="/dashboard"
-            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-[#4c85c9] rounded-lg hover:bg-purple-800 transition"
-          >
-            My Dashboard
-          </router-link>
-          <router-link
-            v-else
             to="/login"
-            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-[#4c85c9] rounded-lg hover:bg-purple-800 transition"
+            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-purple-800 transition"
           >
             Get Started
           </router-link>

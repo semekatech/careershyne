@@ -48,9 +48,9 @@ const routes = [
   },
  
   {
-    path: "/campaigns",
-    name: "Campaigns",
-    component: () => import("@/pages/Campaigns.vue"),
+    path: "/order-cv",
+    name: "Order CV",
+    component: () => import("@/pages/OrderCV.vue"),
   },{
     path: "/how-it-works",
     name: "How It Works",
