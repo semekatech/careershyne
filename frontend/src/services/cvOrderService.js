@@ -1,8 +1,9 @@
 // src/services/cvOrderService.js
 import axios from "axios";
 
-const API_URL = "https://careershyne.com/api"; // change to your backend
+const API_URL = "https://careershyne.com/api"; // backend base URL
 
+// Submit new CV order
 export const submitCvOrder = async (form) => {
   const formData = new FormData();
   formData.append("fullname", form.fullname);
@@ -14,5 +15,11 @@ export const submitCvOrder = async (form) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-  return data;
+  return data; // should include { id, fullname, email, phone, ... }
+};
+
+// Get order by ID
+export const getCvOrder = async (id) => {
+  const { data } = await axios.get(`${API_URL}/cv-orders/${id}`);
+  return data; // backend should return the order object
 };

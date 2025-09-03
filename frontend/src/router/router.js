@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth";
 // Layouts
 import HomeLayout from "@/components/HomeLayout.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
+import PaymentPage from "@/pages/PaymentPage.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
@@ -12,9 +13,7 @@ import RegisterPage from "@/pages/RegisterPage.vue";
 import DashboardHome from "@/pages/DashboardHome.vue";
 import AddCampaign from "@/pages/AddCampaign.vue";
 import ProfileEdit from "@/pages/ProfileEdit.vue";
-import MyRequests from "@/pages/MyRequests.vue";
-import Subscription from "@/pages/Subscription.vue";
-import PromoterRequests from "@/pages/PromoterRequests.vue";
+
 const routes = [
   {
     path: "/",
@@ -46,6 +45,7 @@ const routes = [
     name: "OrderCV",
     component: () => import("@/pages/HowItWorks.vue"),
   },
+   { path: "/payment/:id", name: "PaymentPage", component: PaymentPage },
   {
     path: "/contact-us",
     name: "Contacts",
@@ -91,45 +91,8 @@ const routes = [
       },
     ],
   },
-  {
-    path: "/subscription",
-    component: DashboardLayout,
-    meta: {
-      title: "Subscription",
-    },
-    children: [
-      {
-        path: "",
-        component: Subscription,
-      },
-    ],
-  },
-  {
-    path: "/my-requests",
-    component: DashboardLayout,
-    meta: {
-      title: "Manage Requests",
-    },
-    children: [
-      {
-        path: "",
-        component: MyRequests,
-      },
-    ],
-  },
-  {
-    path: "/requests",
-    component: DashboardLayout,
-    meta: {
-      title: "Manage Requests",
-    },
-    children: [
-      {
-        path: "",
-        component: PromoterRequests,
-      },
-    ],
-  },
+ 
+
 ];
 
 const router = createRouter({
@@ -144,7 +107,7 @@ router.beforeEach(async (to, from, next) => {
     "/",
     "/login",
     "/register",
-    "/campaigns/:id/:slug",
+    "/payment/:id",
     "/order-cv",
     "/how-it-works",
     "/contact-us",

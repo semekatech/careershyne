@@ -53,7 +53,11 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
 import { submitCvOrder } from "@/services/cvOrderService";
+
+const router = useRouter();
 
 const form = ref({
   fullname: "",
@@ -63,8 +67,6 @@ const form = ref({
 });
 
 const loading = ref(false);
-const successMessage = ref("");
-const errorMessage = ref("");
 
 const handleFileUpload = (e) => {
   form.value.cv = e.target.files[0];
@@ -72,19 +74,33 @@ const handleFileUpload = (e) => {
 
 const submitForm = async () => {
   loading.value = true;
-  successMessage.value = "";
-  errorMessage.value = "";
 
   try {
     const data = await submitCvOrder(form.value);
-    successMessage.value = "✅ Your request has been submitted successfully!";
-    console.log("Success:", data);
+
+    // ✅ Show SweetAlert2 popup
+    await Swal.fire({
+      title: "Order Saved Successfully 🎉",
+      html: `
+        <p class="mt-2 text-green-600">Redirecting to payment page...</p>
+      `,
+      icon: "success",
+      timer: 4000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+
+    // ✅ Redirect to payment page with order ID
+    router.push({ 
+      name: "PaymentPage", 
+      params: { id: data.id } 
+    });
 
     // Reset form
     form.value = { fullname: "", email: "", phone: "", cv: null };
   } catch (err) {
     console.error(err);
-    errorMessage.value = "❌ Something went wrong. Please try again.";
+    Swal.fire("Error ❌", "Something went wrong. Please try again.", "error");
   } finally {
     loading.value = false;
   }
