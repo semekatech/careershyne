@@ -28,20 +28,16 @@ const isLoggedIn = computed(() => !!auth.token);
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
           <router-link to="/" class="nav-link" exact>Home</router-link>
-          <router-link to="/campaigns" class="nav-link"
-            >Custom Cvs
-          </router-link>
+          <router-link to="/" class="nav-link">Custom Cvs </router-link>
           <!-- <router-link to="/influencers" class="nav-link"
             >Influencers</router-link
           > -->
           <router-link to="/how-it-works" class="nav-link"
             >Cover Letters</router-link
           >
-          <router-link to="/campaigns" class="nav-link"
-            >How It Works
-          </router-link>
-           <router-link to="/contact-us" class="nav-link">Who Are We</router-link>
-          <router-link to="/contact-us" class="nav-link">Contact Us</router-link>
+          <router-link to="/" class="nav-link">How It Works </router-link>
+          <router-link to="/" class="nav-link">Who Are We</router-link>
+          <router-link to="/" class="nav-link">Contact Us</router-link>
         </div>
 
         <!-- Actions -->
@@ -112,9 +108,9 @@ const isLoggedIn = computed(() => !!auth.token);
             >
             <router-link
               @click="toggleMobileMenu"
-              to="/campaigns"
+              to="/"
               class="nav-link-mobile"
-              >Campaigns</router-link
+              >Custom Cvs</router-link
             >
             <!-- <router-link
               @click="toggleMobileMenu"
@@ -124,13 +120,25 @@ const isLoggedIn = computed(() => !!auth.token);
             > -->
             <router-link
               @click="toggleMobileMenu"
-              to="/how-it-works"
+              to="/"
               class="nav-link-mobile"
-              >How it Works</router-link
+              >Cover Letters</router-link
             >
             <router-link
               @click="toggleMobileMenu"
-              to="/contact-us"
+              to="/"
+              class="nav-link-mobile"
+              >How It Works</router-link
+            >
+            <router-link
+              @click="toggleMobileMenu"
+              to="/"
+              class="nav-link-mobile"
+              >Who Are We</router-link
+            >
+            <router-link
+              @click="toggleMobileMenu"
+              to="/"
               class="nav-link-mobile"
               >Contact</router-link
             >
