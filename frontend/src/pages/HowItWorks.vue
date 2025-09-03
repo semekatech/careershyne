@@ -9,7 +9,7 @@
 </template>
 <script setup>
 import TheWelcome from "@/components/TheWelcome.vue";
-import cvForm from "@/components/CvForm.vue";
+import cvForm from "@/components/Faqs.vue";
 import FooterSection from "@/components/FooterSection.vue";
 </script>
 

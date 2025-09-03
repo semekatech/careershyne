@@ -1,117 +1,92 @@
 <template>
-  <section class="bg-blue-50 dark:bg-slate-800 w-full" id="contact">
-    <div class="px-4 py-12 lg:px-20 xl:px-32 w-full">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold  mb-4" style="color: #e11d50" >
-          Frequently Asked Questions
-        </h1>
-        <p class="text-lg text-gray-600">
-          Get quick answers about how our platform works for both promoters and brands.
-        </p>
+  <div class="max-w-lg mx-auto my-10 bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold text-center mb-6">Order Your Custom CV</h2>
+    
+    <form @submit.prevent="submitForm" class="space-y-4">
+      <!-- Full Name -->
+      <div>
+        <label class="block text-gray-700">Full Name</label>
+        <input v-model="form.fullname" type="text" required 
+               class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300"/>
       </div>
 
-
-      
-      <!-- FAQ Items -->
-      <div class="space-y-4">
-        <!-- FAQ 1 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">How do I join as a promoter?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              Simply sign up as a promoter, complete your profile with your social links, and browse available campaigns to apply. Once selected by a brand, you'll receive campaign instructions.
-            </p>
-          </div>
-
-        </div>
-
-        <!-- FAQ 2 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">How do brands create campaigns?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              After signing up as a brand, go to your dashboard and click “Create Campaign.” Add campaign details, budget, target influencers, and submit for review.
-            </p>
-          </div>
-        </div>
-
-        <!-- FAQ 3 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">How do payments work?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              Brands pay per campaign slot. Promoters earn payouts after completing campaigns as per guidelines. All payments are processed securely via M-Pesa and bank transfers.
-            </p>
-          </div>
-        </div>
-
-        <!-- FAQ 4 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">Are campaigns vetted before going live?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              Yes, all campaigns are reviewed for content, budget, and fairness before being made available to promoters.
-            </p>
-          </div>
-        </div>
-
-        <!-- FAQ 5 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">Can I upgrade or downgrade my plan?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              Yes! You can switch plans anytime from your dashboard. Changes will apply in the next billing cycle.
-            </p>
-          </div>
-        </div>
-
-        <!-- FAQ 6 -->
-        <div class="bg-white rounded-xl shadow-md transition hover:shadow-lg overflow-hidden">
-          <button class="faq-toggle w-full flex justify-between items-center p-6 text-left">
-            <h3 class="text-lg font-semibold text-gray-800">Do I need a large following to join as a promoter?</h3>
-            <i class="fas fa-chevron-down text-indigo-600 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content px-6 pb-6 hidden">
-            <p class="text-gray-600">
-              Not necessarily. Some brands target niche audiences or micro-influencers. Just ensure your profile is active and you can deliver engagement.
-            </p>
-          </div>
-        </div>
+      <!-- Email -->
+      <div>
+        <label class="block text-gray-700">Email</label>
+        <input v-model="form.email" type="email" required 
+               class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300"/>
       </div>
-    </div>
-  </section>
+      <!-- Phone -->
+      <div>
+        <label class="block text-gray-700">Phone</label>
+        <input v-model="form.phone" type="tel" required 
+               class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300"/>
+      </div>
+
+      <!-- CV Upload -->
+      <div>
+        <label class="block text-gray-700">Upload CV</label>
+        <input type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx" required
+               class="w-full mt-1 px-4 py-2 border rounded-lg"/>
+      </div>
+
+      <!-- Submit -->
+      <button 
+        type="submit"
+        :disabled="loading"
+        class="w-full bg-[#ff9c30] text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600"
+      >
+        <span v-if="loading">Submitting...</span>
+        <span v-else>Submit Order</span>
+      </button>
+
+      <!-- Feedback Messages -->
+      <p v-if="successMessage" class="text-green-600 font-medium mt-3">
+        {{ successMessage }}
+      </p>
+      <p v-if="errorMessage" class="text-red-600 font-medium mt-3">
+        {{ errorMessage }}
+      </p>
+    </form>
+  </div>
 </template>
 
-<script>
-export default {
-  mounted() {
-    const toggles = document.querySelectorAll(".faq-toggle");
+<script setup>
+import { ref } from "vue";
+import { submitCvOrder } from "@/services/cvOrderService";
 
-    toggles.forEach((toggle) => {
-      toggle.addEventListener("click", () => {
-        const content = toggle.nextElementSibling;
-        const icon = toggle.querySelector("i");
-        content.classList.toggle("hidden");
-        icon.classList.toggle("rotate-180");
-      });
-    });
-  },
+const form = ref({
+  fullname: "",
+  email: "",
+  phone: "",
+  cv: null,
+});
+
+const loading = ref(false);
+const successMessage = ref("");
+const errorMessage = ref("");
+
+const handleFileUpload = (e) => {
+  form.value.cv = e.target.files[0];
+};
+
+const submitForm = async () => {
+  loading.value = true;
+  successMessage.value = "";
+  errorMessage.value = "";
+
+  try {
+    const data = await submitCvOrder(form.value);
+    successMessage.value = "✅ Your request has been submitted successfully!";
+    console.log("Success:", data);
+
+    // Reset form
+    form.value = { fullname: "", email: "", phone: "", cv: null };
+  } catch (err) {
+    console.error(err);
+    errorMessage.value = "❌ Something went wrong. Please try again.";
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
-
