@@ -11,7 +11,7 @@ import LoginPage from "@/pages/LoginPage.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import DashboardHome from "@/pages/DashboardHome.vue";
 import AddCampaign from "@/pages/AddCampaign.vue";
-import CampaignDetails from "@/pages/CampaignDetails.vue";
+import OrderCV from "@/pages/OrderCV.vue";
 import ProfileEdit from "@/pages/ProfileEdit.vue";
 import MyRequests from "@/pages/MyRequests.vue";
 import Subscription from "@/pages/Subscription.vue";
@@ -49,8 +49,8 @@ const routes = [
  
   {
     path: "/order-cv",
-    name: "Order CV",
-    component: () => import("@/pages/OrderCV.vue"),
+    name: "OrderCV",
+    component: () => import("@/pages/orderCV.vue"),
   },{
     path: "/how-it-works",
     name: "How It Works",
