@@ -11,7 +11,6 @@ import LoginPage from "@/pages/LoginPage.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import DashboardHome from "@/pages/DashboardHome.vue";
 import AddCampaign from "@/pages/AddCampaign.vue";
-import OrderCV from "@/pages/OrderCV.vue";
 import ProfileEdit from "@/pages/ProfileEdit.vue";
 import MyRequests from "@/pages/MyRequests.vue";
 import Subscription from "@/pages/Subscription.vue";
@@ -46,8 +45,8 @@ const routes = [
     name: "CampaignDetails",
     component: () => import("@/pages/HomeCampaignDetails.vue"),
   },
- 
-{
+
+  {
     path: "/order-cv",
     name: "OrderCV",
     component: () => import("@/pages/HowItWorks.vue"),
@@ -96,7 +95,7 @@ const routes = [
       },
     ],
   },
-    {
+  {
     path: "/my-profile",
     component: DashboardLayout,
     meta: {
@@ -109,7 +108,7 @@ const routes = [
       },
     ],
   },
-    {
+  {
     path: "/subscription",
     component: DashboardLayout,
     meta: {
@@ -147,8 +146,7 @@ const routes = [
         component: PromoterRequests,
       },
     ],
-  }
-  
+  },
 ];
 
 const router = createRouter({
@@ -159,8 +157,18 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
 
-  const publicRoutes = ["/", "/login", "/register", "/campaigns/:id/:slug","/campaigns","/how-it-works","/contact-us"];
-  const isPublic = to.matched.some((route) => publicRoutes.includes(route.path));
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/register",
+    "/campaigns/:id/:slug",
+    "/campaigns",
+    "/how-it-works",
+    "/contact-us",
+  ];
+  const isPublic = to.matched.some((route) =>
+    publicRoutes.includes(route.path)
+  );
 
   if (!isPublic && !auth.token) {
     return next("/login");
