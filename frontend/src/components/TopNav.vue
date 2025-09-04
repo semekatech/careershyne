@@ -26,10 +26,10 @@ const isLoggedIn = computed(() => !!auth.token);
           <!-- <router-link to="/influencers" class="nav-link"
             >Influencers</router-link
           > -->
-          <router-link to="#services" class="nav-link"
-            >Services</router-link
+          <a href="#services" class="nav-link"
+            >Services</a
           >
-          <router-link to="#pricing" class="nav-link">Pricing </router-link>
+          <a to="#pricing" class="nav-link">Pricing </a>
           <router-link to="/" class="nav-link">Resources</router-link>
           <router-link to="/contact-us" class="nav-link">Contact Us</router-link>
         </div>
