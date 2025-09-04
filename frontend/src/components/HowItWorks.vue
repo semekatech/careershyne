@@ -1,325 +1,89 @@
 <template>
-  <div
-    id="services" class="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20"
-  >
-    <div class="max-w-xl mb-10 md:mx-auto sm:text-center lg:max-w-2xl md:mb-12">
-      <h2
-        class="max-w-lg mb-6 font-sans text-3xl font-bold leading-none tracking-tight text-gray-900 sm:text-4xl md:mx-auto"
-      >
-        <span class="relative inline-block">
-          <svg
-            viewBox="0 0 52 24"
-            fill="currentColor"
-            class="absolute top-0 left-0 z-0 hidden w-32 -mt-8 -ml-20 text-slate-100 lg:w-32 lg:-ml-28 lg:-mt-10 sm:block"
-          >
-            <defs>
-              <pattern
-                id="fdca20a0-aeb4-4caf-ba1b-4351eee42363"
-                x="0"
-                y="0"
-                width=".135"
-                height=".30"
-              >
-                <circle cx="1" cy="1" r=".7"></circle>
-              </pattern>
-            </defs>
-            <rect
-              fill="url(#fdca20a0-aeb4-4caf-ba1b-4351eee42363)"
-              width="52"
-              height="24"
-            ></rect>
-          </svg>
-          <span class="relative">Our</span>
-        </span>
-        Professional CV & Career Services
-      </h2>
-      <p class="text-base text-gray-700 md:text-lg">
-        We go beyond templates. Our services are tailored to help you stand out
-        in today’s competitive job market with a CV that works as hard as you
-        do.
+  <div id="services" class="bg-white dark:bg-gray-800 text-black px-6 py-20">
+    <!-- Section Header -->
+    <div class="max-w-3xl mx-auto text-center mb-16">
+      <h2 class="text-4xl font-bold mb-4">How We Help You Shine</h2>
+      <p class="text-lg text-gray-800 dark:text-gray-800">
+        Practical, affordable, and professional career services designed to increase your
+        visibility, get you noticed, and help you land more interviews.
       </p>
     </div>
 
-    <div
-      class="grid max-w-md gap-8 row-gap-10 sm:mx-auto lg:max-w-full lg:grid-cols-3"
-    >
-      <!-- CV Writing -->
-      <div class="flex flex-col sm:flex-row">
-        <div class="sm:mr-4">
-          <div
-            class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-green-50"
-          >
-            <svg
-              class="w-12 h-12 text-blue-400"
-              stroke="currentColor"
-              viewBox="0 0 52 52"
-            >
-              <polygon
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-                points="29 13 14 29 25 29 23 39 38 23 27 23"
-              ></polygon>
-            </svg>
-          </div>
-        </div>
+    <!-- Services Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-6xl mx-auto">
+      
+      <!-- CV Review & Optimization -->
+      <div class="flex flex-col justify-between">
         <div>
-          <h6 class="mb-2 font-semibold leading-5">Custom CV Writing</h6>
-          <p class="mb-3 text-sm text-gray-900">
-            Professionally crafted CVs designed to showcase your strengths,
-            highlight your achievements, and make recruiters take notice.
+          <h3 class="text-orange-400 font-semibold text-lg mb-2">CV Review & Optimization</h3>
+          <p class="text-gray-800 dark:text-gray-800 text-sm mb-4">
+            Identify weaknesses and get actionable insights to make your CV recruiter-ready.
           </p>
-          <ul class="mb-4 -ml-1 space-y-2">
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Tailored to your career goals
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              ATS-friendly formatting
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Industry-specific keywords
-            </li>
+          <ul class="space-y-2 text-gray-800 dark:text-gray-800 text-sm">
+            <li>⭐ Pinpoint areas holding you back</li>
+            <li>⭐ ATS compliance check</li>
+            <li>⭐ Clear, practical recommendations</li>
           </ul>
-          <router-link
-            to="/order-cv"
-            class="inline-flex items-center font-semibold transition-colors duration-200 text-blue-400 hover:text-blue-800"
-          >
-            Place Order
-          </router-link>
         </div>
+        <a href="mailto:?subject=Free%20CV%20Review" class="mt-6 text-orange-400 font-semibold hover:underline">
+          Start with a Review
+        </a>
       </div>
 
-      <!-- CV Review -->
-      <div class="flex flex-col sm:flex-row">
-        <div class="sm:mr-4">
-          <div
-            class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-green-50"
-          >
-            <svg
-              class="w-12 h-12 text-blue-400"
-              stroke="currentColor"
-              viewBox="0 0 52 52"
-            >
-              <polygon
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-                points="29 13 14 29 25 29 23 39 38 23 27 23"
-              ></polygon>
-            </svg>
-          </div>
-        </div>
+      <!-- CV Revamps -->
+      <div class="flex flex-col justify-between">
         <div>
-          <h6 class="mb-2 font-semibold leading-5">Free CV Review</h6>
-          <p class="mb-3 text-sm text-gray-900">
-            Already have a CV? Our experts will review it and provide
-            personalized feedback to improve structure, clarity, and impact.
+          <h3 class="text-orange-400 font-semibold text-lg mb-2">CV Revamps</h3>
+          <p class="text-gray-800 dark:text-gray-800 text-sm mb-4">
+            Transform your existing CV into a polished, impactful document that highlights your strengths.
           </p>
-          <ul class="mb-4 -ml-1 space-y-2">
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Professional feedback
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Recruiter’s perspective analysis
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Actionable improvement tips
-            </li>
+          <ul class="space-y-2 text-gray-800 dark:text-gray-800 text-sm">
+            <li>⭐ Stronger, sharper presentation</li>
+            <li>⭐ Industry-specific keyword optimization</li>
+            <li>⭐ Clearer alignment with your career goals</li>
           </ul>
-          <a
-            href="mailto:?subject=Free%20CV%20Review"
-            class="inline-flex items-center font-semibold transition-colors duration-200 text-blue-400 hover:text-green-800"
-          >
-            Get Your Free Review
-          </a>
         </div>
+        <router-link to="/order-cv" class="mt-6 text-orange-400 font-semibold hover:underline">
+          Upgrade Your CV
+        </router-link>
+      </div>
+
+      <!-- Cover Letters -->
+      <div class="flex flex-col justify-between">
+        <div>
+          <h3 class="text-orange-400 font-semibold text-lg mb-2">Cover Letters that Impress</h3>
+          <p class="text-gray-800 dark:text-gray-800 text-sm mb-4">
+            Make a strong first impression with tailored cover letters that complement your CV.
+          </p>
+          <ul class="space-y-2 text-gray-800 dark:text-gray-800 text-sm">
+            <li>⭐ Personalized to each role</li>
+            <li>⭐ Highlights your value proposition</li>
+            <li>⭐ Persuasive yet professional tone</li>
+          </ul>
+        </div>
+        <router-link to="/order-cv" class="mt-6 text-orange-400 font-semibold hover:underline">
+          Get Your Cover Letter
+        </router-link>
       </div>
 
       <!-- LinkedIn Optimization -->
-      <div class="flex flex-col sm:flex-row">
-        <div class="sm:mr-4">
-          <div
-            class="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-green-50"
-          >
-            <svg
-              class="w-12 h-12 text-blue-400"
-              stroke="currentColor"
-              viewBox="0 0 52 52"
-            >
-              <polygon
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-                points="29 13 14 29 25 29 23 39 38 23 27 23"
-              ></polygon>
-            </svg>
-          </div>
-        </div>
+      <div class="flex flex-col justify-between">
         <div>
-          <h6 class="mb-2 font-semibold leading-5">
-            LinkedIn Profile Optimization
-          </h6>
-          <p class="mb-3 text-sm text-gray-900">
-            Build a professional online presence with a polished LinkedIn
-            profile that boosts recruiter visibility and complements your CV.
+          <h3 class="text-orange-400 font-semibold text-lg mb-2">LinkedIn Optimization</h3>
+          <p class="text-gray-800 dark:text-gray-800 text-sm mb-4">
+            Boost your visibility and professional brand on the world’s biggest hiring platform.
           </p>
-          <ul class="mb-4 -ml-1 space-y-2">
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Keyword optimization
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Recruiter visibility boost
-            </li>
-            <li class="flex items-start">
-              <span class="mr-1">
-                <svg
-                  class="w-5 h-5 mt-px text-blue-400"
-                  stroke="currentColor"
-                  viewBox="0 0 52 52"
-                >
-                  <polygon
-                    stroke-width="4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    fill="none"
-                    points="29 13 14 29 25 29 23 39 38 23 27 23"
-                  ></polygon>
-                </svg>
-              </span>
-              Branding for your career
-            </li>
+          <ul class="space-y-2 text-gray-800 dark:text-gray-800 text-sm">
+            <li>⭐ Recruiter-focused keywords</li>
+            <li>⭐ Enhanced credibility & reach</li>
+            <li>⭐ Branding aligned with your CV</li>
           </ul>
-          <a
-            href="#"
-            class="inline-flex items-center font-semibold transition-colors duration-200 text-blue-400 hover:text-green-800"
-          >
-            Optimize My LinkedIn
-          </a>
         </div>
+        <a href="#" class="mt-6 text-orange-400 font-semibold hover:underline">
+          Shine on LinkedIn
+        </a>
       </div>
+
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@
     <TheWelcome />
     <HeroSection />
     <HowItWorks />
-    <FeaturedCampaigns />
+    <!-- <FeaturedCampaigns /> -->
        <ForBrands />
     <PricingPlans />
      <!-- <Faqs /> -->
