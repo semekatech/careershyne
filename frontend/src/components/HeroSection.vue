@@ -1,6 +1,6 @@
 <template>
   <section class="bg-white w-full">
-    <div class="grid grid-cols-1 md:grid-cols-[3fr_2fr] h-full">
+    <div class="grid grid-cols-1 md:grid-cols-[2fr_2fr] h-full">
       <!-- Left Image -->
       <div>
         <img
