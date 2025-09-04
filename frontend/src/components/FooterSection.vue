@@ -2,12 +2,11 @@
   <footer class="flex flex-col space-y-10 justify-center m-10">
 
     <nav class="flex justify-center flex-wrap gap-6 text-gray-500 font-medium">
-      <a class="hover:text-gray-900" href="#">Home</a>
-      <a class="hover:text-gray-900" href="#">About</a>
-      <a class="hover:text-gray-900" href="#">Services</a>
-      <a class="hover:text-gray-900" href="#">Media</a>
-      <a class="hover:text-gray-900" href="#">Gallery</a>
-      <a class="hover:text-gray-900" href="#">Contact</a>
+      <router-link to="/" class="hover:text-gray-900" >Home</router-link>
+      <router-link to="/about-us" class="hover:text-gray-900" >About</router-link>
+      <router-link to="#services" class="hover:text-gray-900" >Services</router-link>
+      <router-link to="#pricing" class="hover:text-gray-900" >Pricing</router-link>
+      <router-link to="/contact-us" class="hover:text-gray-900" >Contact</router-link>
     </nav>
 
     <div class="flex justify-center space-x-5">
