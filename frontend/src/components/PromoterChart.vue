@@ -9,9 +9,10 @@
         </h2>
 
         <div v-if="order">
-          <p class="mb-2"><b>Name:</b> {{ order.data.fullname }}</p>
+          <!-- <p class="mb-2"><b>Name:</b> {{ order.data.fullname }}</p>
           <p class="mb-2"><b>Email:</b> {{ order.data.email }}</p>
-          <p class="mb-2"><b>Phone:</b> {{ order.data.phone }}</p>
+          <p class="mb-2"><b>Phone:</b> {{ order.data.phone }}</p> -->
+           <p class="mb-2"><b>Order Date:</b> KES {{ order.data.created_at }}</p>
           <p class="mb-2"><b>Amount:</b> KES {{ order.data.amount }}</p>
           <p class="mb-2"><b>Status:</b> 
             <span class="capitalize" :class="order.data.status === 'pending' ? 'text-yellow-600' : 'text-green-600'">
@@ -25,6 +26,7 @@
               <li>Confirm your details are correct before making payment.</li>
               <li>Payment is processed securely through our system.</li>
               <li>Once payment is successful, you’ll receive a confirmation email.</li>
+              <li>Your Order will be delivered within 24 hours.</li>
               <li>Use your Order ID <b>#{{ orderId }}</b> for reference.</li>
             </ul>
           </div>
