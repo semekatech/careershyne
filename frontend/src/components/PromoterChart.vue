@@ -59,7 +59,7 @@
         <template v-else>
           <div class="text-center">
             <h3 class="text-2xl font-bold text-green-600 mb-4">🎉 Payment Successful!</h3>
-            <p class="text-gray-700 mb-6">Thank you. Your plan has been renewed successfully.</p>
+            <p class="text-gray-700 mb-6">Thank you. Your order has been paid successfully.</p>
           </div>
         </template>
       </div>
@@ -151,7 +151,7 @@ async function confirmPayment(trackID) {
       const res = await checkPaymentStatus(trackID);
 
       if (res.status == 1) {
-        Swal.fire("Success!", "Plan Renewed successfully!", "success").then(() => {
+        Swal.fire("Success!", "Order Payment confirmed successfully!", "success").then(() => {
           paymentSuccess.value = true;
           order.value.data.status = "paid";
         });

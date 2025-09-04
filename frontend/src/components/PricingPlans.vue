@@ -23,7 +23,7 @@
         <!-- CTA -->
         <div class="mt-12 flex items-center justify-center gap-x-6">
           <a
-            href="https://wa.me/your-channel-link" 
+            href="https://whatsapp.com/channel/0029VbBbuYSDZ4LYzXurHm21" 
             target="_blank"
             class="text-md relative inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-6 py-4 font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >

@@ -219,7 +219,7 @@
             </li>
           </ul>
           <a
-            href="#"
+            href="mailto:?subject=Free%20CV%20Review"
             class="inline-flex items-center font-semibold transition-colors duration-200 text-blue-400 hover:text-green-800"
           >
             Get Your Free Review

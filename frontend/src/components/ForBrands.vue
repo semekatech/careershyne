@@ -29,13 +29,13 @@
                 class="text-lg font-semibold leading-8 tracking-tight text-blue-600 dark:text-blue-400"
                 id="tier-basic"
               >
-                CV Review (Starter)
+                Free CV Review
               </h3>
             </div>
             <div
               class="mt-4 flex items-baseline text-5xl tracking-tight text-gray-900 dark:text-gray-200 font-semibold"
             >
-              KES 200
+              KES 0
             </div>
             <p
               class="mt-6 text-base leading-7 text-gray-600 dark:text-gray-300"
@@ -118,6 +118,7 @@
               </ul>
               <div class="mt-8">
                 <a
+                  href="mailto:?subject=Free%20CV%20Review"
                   class="inline-block w-full rounded-lg bg-blue-600 dark:bg-blue-400 px-4 py-2.5 text-center text-sm font-semibold leading-5 text-white shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 cursor-pointer"
                   aria-describedby="tier-basic"
                   >Get Review</a
@@ -140,14 +141,18 @@
                 CV Writing (Most Popular)
               </h3>
               <div class="items-center ml-2">
-                <p class="rounded-full text-white bg-blue-600 dark:bg-blue-400/10 px-2.5 py-1 text-xs font-semibold leading-5 text-blue-600 dark:text-white-400" style="color:white">45% OFF
+                <p
+                  class="rounded-full text-white bg-blue-600 dark:bg-blue-400/10 px-2.5 py-1 text-xs font-semibold leading-5 text-blue-600 dark:text-white-400"
+                  style="color: white"
+                >
+                  45% OFF
                 </p>
               </div>
             </div>
             <div
               class="mt-4 flex items-baseline text-5xl tracking-tight text-gray-900 dark:text-gray-200 font-semibold"
             >
-              KES 500
+              KES 200
             </div>
             <p
               class="mt-6 text-base leading-7 text-gray-600 dark:text-gray-300"
@@ -250,10 +255,11 @@
                 </li>
               </ul>
               <div class="mt-8">
-                <a
+                <router-link
+                  to="/order-cv"
                   class="inline-block w-full rounded-lg bg-blue-600 dark:bg-blue-400 px-4 py-2.5 text-center text-sm font-semibold leading-5 text-white shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 cursor-pointer"
                   aria-describedby="tier-plus"
-                  >Order Now</a
+                  >Order Now</router-link
                 >
               </div>
             </div>
