@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CvOrder;
 use Illuminate\Http\Request;
 use Nette\Utils\Random;
-
+use DB;
 class PaymentController extends Controller
 {
 

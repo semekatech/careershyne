@@ -9,9 +9,8 @@
         </h2>
 
         <div v-if="order">
-          <p class="mb-2"><b>Name:</b> {{ order.data.fullname }}</p>
-          <p class="mb-2"><b>Email:</b> {{ order.data.email }}</p>
-          <p class="mb-2"><b>Phone:</b> {{ order.data.phone }}</p>
+          <p class="mb-2"><b>Order Date:</b> {{ order.data.created_at }}</p>
+
           <p class="mb-2"><b>Amount:</b> KES {{ order.data.amount }}</p>
           <p class="mb-2"><b>Status:</b> 
             <span class="capitalize" :class="order.data.status === 'pending' ? 'text-yellow-600' : 'text-green-600'">
