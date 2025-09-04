@@ -13,26 +13,6 @@ const routes = [
     path: "/",
     component: HomeLayout,
   },
-  {
-    path: "/login",
-    component: AuthLayout,
-    children: [
-      {
-        path: "",
-        component: LoginPage,
-      },
-    ],
-  },
-  {
-    path: "/register",
-    component: AuthLayout,
-    children: [
-      {
-        path: "",
-        component: RegisterPage,
-      },
-    ],
-  },
  
   {
     path: "/order-cv",
