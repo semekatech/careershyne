@@ -4,7 +4,7 @@
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
       <div class="mb-4">
         <div class="mb-6 max-w-3xl text-center sm:text-center md:mx-auto md:mb-12">
-          <h2 style="color: #fd624e" class="font-heading mb-4 font-bold tracking-tight text-gray-900 dark:text-white text-3xl sm:text-5xl">
+          <h2 style="color: orangered" class="font-heading mb-4 font-bold tracking-tight text-gray-900 dark:text-white text-3xl sm:text-5xl">
             Get in Touch
           </h2>
           <p class="mx-auto mt-4 max-w-3xl text-xl text-gray-600 dark:text-slate-400">
@@ -22,7 +22,7 @@
             </p>
             <ul class="mb-6 md:mb-0">
               <li class="flex">
-                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color: #fd624e">
+                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color: orangered">
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
@@ -31,12 +31,12 @@
                 </div>
                 <div class="ml-4 mb-4">
                   <h3 class="mb-2 text-lg font-medium leading-6 text-gray-900 dark:text-white">Our Address</h3>
-                  <p class="text-gray-600 dark:text-slate-400">Ngong Lane, Off Ngong Road</p>
+                  <p class="text-gray-600 dark:text-slate-400">Valley View Office Nairobi, Kenya 00200</p>
                   <p class="text-gray-600 dark:text-slate-400">Nairobi, Kenya</p>
                 </div>
               </li>
               <li class="flex">
-                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color: #fd624e">
+                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color:orangered">
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"></path>
@@ -46,12 +46,12 @@
                 </div>
                 <div class="ml-4 mb-4">
                   <h3 class="mb-2 text-lg font-medium leading-6 text-gray-900 dark:text-white">Contact</h3>
-                  <p class="text-gray-600 dark:text-slate-400">Mobile: +254 712 345 678</p>
-                  <p class="text-gray-600 dark:text-slate-400">Email: info@yourstartup.co.ke</p>
+                  <p class="text-gray-600 dark:text-slate-400">Mobile: +254 758 428 993</p>
+                  <p class="text-gray-600 dark:text-slate-400">Email: info@careershyne.com</p>
                 </div>
               </li>
               <li class="flex">
-                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color: #fd624e">
+                <div class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50" style="background-color: orangered">
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
