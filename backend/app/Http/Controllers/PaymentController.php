@@ -191,6 +191,7 @@ class PaymentController extends Controller
                     'plan_id' => $orderID,
                     'user_id' => $userID,
                 ];
+                info('sd'.$MerchantRequestID);
                 // Check if payment already exists for this request
                 $existingPayment = MpesaPayment::where('plan_id', $orderID)->exists();
                 if (!$existingPayment && MpesaPayment::create($data)) {
