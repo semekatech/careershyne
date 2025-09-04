@@ -73,11 +73,10 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { getCvOrder, initiatePayment } from "@/services/cvOrderService";
+import { getCvOrder, initiatePayment, checkPaymentStatus } from "@/services/cvOrderService"; 
 import Swal from "sweetalert2";
 
 const route = useRoute();
@@ -132,10 +131,47 @@ const makePayment = async () => {
       amount: order.value.data.amount,
       orderID: order.value.data.orderID
     });
-    alert(response.reference);
-    Swal.fire("Success", "Payment request sent. Please complete on your phone.", "success");
+
+    // ✅ Now start checking payment status
+    confirmPayment(response.reference);
+
   } catch (error) {
     Swal.fire("Error", "Failed to initiate payment. Please try again.", "error");
   }
 };
+
+// Function to poll payment status
+async function confirmPayment(trackID) {
+  Swal.fire({
+    title: "Confirming Payment...",
+    text: "Please wait while we confirm your payment.",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  const poll = async () => {
+    try {
+      const res = await checkPaymentStatus(trackID);
+
+      if (res.status == "1") {
+        Swal.fire("Success!", "Plan Renewed successfully!", "success").then(() => {
+          location.reload();
+        });
+      } else if (res.status == "7" || res.status == "0") {
+        // still pending, keep checking
+        setTimeout(poll, 5000);
+      } else if (res.status == "2") {
+        Swal.fire("Oops!", res.message, "error").then(() => {
+          location.reload();
+        });
+      }
+    } catch (err) {
+      console.log("Payment status check failed.", err);
+      setTimeout(poll, 5000);
+    }
+  };
+  poll();
+}
 </script>

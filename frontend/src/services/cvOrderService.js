@@ -11,9 +11,11 @@ export const submitCvOrder = async (form) => {
   formData.append("type", form.type);
   formData.append("phone", form.phone);
   formData.append("cv", form.cv);
+
   const { data } = await axios.post(`${API_URL}/cv-orders`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
   return data;
 };
 
@@ -23,7 +25,16 @@ export const getCvOrder = async (id) => {
   return data; // backend should return the order object
 };
 
+// Initiate M-Pesa STK push
 export async function initiatePayment(payload) {
   const res = await axios.post(`/api/payments/initiate`, payload);
   return res.data;
+}
+
+// ✅ Check payment status (polling)
+export async function checkPaymentStatus(trackID) {
+  const { data } = await axios.post(`/api/payments/status`, {
+    track_link: trackID,
+  });
+  return data; // expected { status: "1" | "0" | "2" | "7", message?: string }
 }

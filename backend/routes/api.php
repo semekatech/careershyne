@@ -10,4 +10,6 @@ use App\Http\Controllers\PaymentController;
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
 Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
-Route::post( '/callback-confirm', [PaymentController::class, 'confirm']);
+Route::post('/callback-confirm', [PaymentController::class, 'confirm']);
+Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
+    ->name('check.stk.status');

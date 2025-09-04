@@ -207,4 +207,24 @@ class PaymentController extends Controller
             }
         }
     }
+      public function checkStatus(Request $request)
+    {
+        $transactionId = $request->input('track_link');
+        $paymentStatus = DB::table('mpesa_stks')
+            ->where('checkout_request_id', $transactionId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        if ($paymentStatus) {
+            $status = $paymentStatus->status;
+            $message = $paymentStatus->resultDescription;
+        } else {
+            $status = 7;
+            $message = 'Failed to initiate STK';
+        }
+        info($status);
+        return response()->json([
+            'status' => $status,
+            'message' => $message,
+        ]);
+    }
 }
