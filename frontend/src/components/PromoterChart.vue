@@ -1,7 +1,6 @@
 <template>
   <div class="w-full min-h-screen bg-gray-50 py-10 px-4">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-      
       <!-- Left Section: Instructions + Order Details -->
       <div class="bg-white p-8 rounded-2xl shadow-lg">
         <h2 class="text-3xl font-bold mb-6">
@@ -9,25 +8,36 @@
         </h2>
 
         <div v-if="order">
-          <!-- <p class="mb-2"><b>Name:</b> {{ order.data.fullname }}</p>
-          <p class="mb-2"><b>Email:</b> {{ order.data.email }}</p>
-          <p class="mb-2"><b>Phone:</b> {{ order.data.phone }}</p> -->
-           <p class="mb-2"><b>Order Date:</b> KES {{ order.data.created_at }}</p>
+          <p class="mb-2"><b>Order Date:</b> KES {{ order.data.created_at }}</p>
           <p class="mb-2"><b>Amount:</b> KES {{ order.data.amount }}</p>
-          <p class="mb-2"><b>Status:</b> 
-            <span class="capitalize" :class="order.data.status === 'pending' ? 'text-yellow-600' : 'text-green-600'">
+          <p class="mb-2">
+            <b>Status:</b>
+            <span
+              class="capitalize"
+              :class="
+                order.data.status === 'pending'
+                  ? 'text-yellow-600'
+                  : 'text-green-600'
+              "
+            >
               {{ order.data.status }}
             </span>
           </p>
 
-          <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+          <div
+            class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg"
+          >
             <h3 class="font-semibold text-lg mb-2">Instructions</h3>
             <ul class="list-disc pl-5 text-gray-700 space-y-1">
               <li>Confirm your details are correct before making payment.</li>
               <li>Payment is processed securely through our system.</li>
-              <li>Once payment is successful, you’ll receive a confirmation email.</li>
+              <li>
+                Once payment is successful, you’ll receive a confirmation email.
+              </li>
               <li>Your Order will be delivered within 24 hours.</li>
-              <li>Use your Order ID <b>#{{ orderId }}</b> for reference.</li>
+              <li>
+                Use your Order ID <b>#{{ orderId }}</b> for reference.
+              </li>
             </ul>
           </div>
         </div>
@@ -41,7 +51,10 @@
         <form @submit.prevent="makePayment" class="space-y-4">
           <div>
             <label class="block text-gray-700 mb-1">Payment Method</label>
-            <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200">
+            <select
+              v-model="payment.method"
+              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+            >
               <option value="mpesa">M-Pesa</option>
               <option value="card">Credit/Debit Card</option>
             </select>
@@ -49,30 +62,44 @@
 
           <div v-if="payment.method === 'mpesa'">
             <label class="block text-gray-700 mb-1">M-Pesa Number</label>
-            <input type="text" v-model="payment.phone" placeholder="Enter M-Pesa number"
-              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
+            <input
+              type="text"
+              v-model="payment.phone"
+              placeholder="Enter M-Pesa number"
+              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+            />
           </div>
 
           <div v-if="payment.method === 'card'">
             <label class="block text-gray-700 mb-1">Card Number</label>
-            <input type="text" placeholder="XXXX XXXX XXXX XXXX"
-              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
+            <input
+              type="text"
+              placeholder="XXXX XXXX XXXX XXXX"
+              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+            />
 
             <div class="grid grid-cols-2 gap-4 mt-2">
-              <input type="text" placeholder="MM/YY"
-                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
-              <input type="text" placeholder="CVV"
-                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
+              <input
+                type="text"
+                placeholder="MM/YY"
+                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+              />
+              <input
+                type="text"
+                placeholder="CVV"
+                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+              />
             </div>
           </div>
 
-          <button type="submit"
-            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+          <button
+            type="submit"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
             Pay Now
           </button>
         </form>
       </div>
-
     </div>
   </div>
 </template>
@@ -88,7 +115,7 @@ const order = ref(null);
 
 const payment = ref({
   method: "mpesa",
-  phone: ""
+  phone: "",
 });
 
 onMounted(async () => {
