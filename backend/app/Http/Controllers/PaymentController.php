@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\CvOrder;
+use App\Models\MpesaPayment;
 use Illuminate\Http\Request;
 use Nette\Utils\Random;
 use DB;
+
 class PaymentController extends Controller
 {
 
@@ -52,13 +54,13 @@ class PaymentController extends Controller
         ];
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $initiate_url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $stkHeader); //setting custom header
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $stkHeader);
         $BusinessShortCode = "4139507";
         $Timestamp = date("YmdHis");
         // $Timestamp = date('YYYYMMDDHHis');
         $PartyA = $phonenumber;
-        $Amount = $amount;
-        $CallBackURL = "https://ngumzo.com/callback-confirm?ngumzo_token=37183551";
+        $Amount = 1;
+        $CallBackURL = "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551";
         $AccountReference = $account_number;
         $TransactionDesc = "Subscription ";
         $Passkey = "5e4e51854f30adce867080e885dc8c19884b0ea2fe6c54fa02f9227dfe9f69da";
@@ -103,12 +105,106 @@ class PaymentController extends Controller
             "updated_at" => now(),
             "status" => 0,
         ]);
-
-        info(collect($mpesa_stk));
-        info('end of stk');
         return response()->json([
+            'reference' => $CheckoutRequestID,
             'success' => true,
             'message' => 'STK Push initiated'
         ]);
+    }
+
+    public function confirm(Request $request)
+    {
+        $ngumzoToken = $request->query('ngumzo_token');
+        if (!$ngumzoToken) {
+            info('Ngumzo token is missing');
+            return response()->json(['error' => 'token is missing'], 400);
+        }
+
+        $failed = 0;
+        info('confirmation started');
+        $data = file_get_contents("php://input");
+        $content = json_decode($request->getContent());
+        $data = json_decode($data);
+        $stkCallback = $data->Body->stkCallback;
+        $MerchantRequestID = $stkCallback->MerchantRequestID;
+        $CheckoutRequestID = $stkCallback->CheckoutRequestID;
+        $ResultCode = $stkCallback->ResultCode;
+        $ResultDesc = $stkCallback->ResultDesc;
+        if (empty($stkCallback->CallbackMetadata)) {
+            $order_detail = DB::table('mpesa_stks')
+                ->where('merchant_request_id', $MerchantRequestID)
+                ->first();
+            $mpesa_stk =  DB::table('mpesa_stks')->where('id', $order_detail->id);
+            $mpesa_stk->update(['status' => 2, 'resultCode' => $ResultCode, 'ResultDescription' => $ResultDesc]);
+        } else {
+            $CallbackMetadata = $stkCallback->CallbackMetadata;
+            echo "Two /";
+            $Amount = null;
+            $MpesaReceiptNumber = null;
+            $Balance = null;
+            $TransactionDate = null;
+            $PhoneNumber = null;
+            info(collect($data));
+            foreach ($CallbackMetadata as $dt) {
+                foreach ($dt as $k) {
+                    $j = 0;
+                    $key = null;
+                    foreach ($k as $x) {
+                        #echo " // ";
+                        if ($j == 0) {
+                            $key = $x;
+                        } elseif ($j == 1) {
+                            if ($key == "Amount") {
+                                $Amount = $x;
+                            }
+                            if ($key == "MpesaReceiptNumber") {
+                                $MpesaReceiptNumber = $x;
+                            }
+                            if ($key == "Balance") {
+                                $Balance = $x;
+                            }
+                            if ($key == "TransactionDate") {
+                                $TransactionDate = $x;
+                            }
+                            if ($key == "PhoneNumber") {
+                                $PhoneNumber = $x;
+                            }
+                        }
+                        $j++;
+                    }
+                }
+            }
+            info('amount' . $Amount);
+            $formattedContact  = str_replace("254", "0", $PhoneNumber);
+            if ($Amount > 0) {
+                info($PhoneNumber . 'paid' . $Amount);
+                $order_details = DB::table('mpesa_stks')
+                    ->where('merchant_request_id', $MerchantRequestID)
+                    ->first();
+                $orderID = $order_details->plan_id;
+                $userID = $order_details->user_id;
+                $data = [
+                    'amount' => $Amount,
+                    'mpesa_receipt_number' => $MpesaReceiptNumber,
+                    'transaction_date' => now(),
+                    'phonenumber' => $PhoneNumber,
+                    'plan_id' => $orderID,
+                    'user_id' => $userID,
+                ];
+                // Check if payment already exists for this request
+                $existingPayment = MpesaPayment::where('plan_id', $orderID)->exists();
+                if (!$existingPayment && MpesaPayment::create($data)) {
+                    $mpesa_stk =  DB::table('mpesa_stks')->where('id', $order_details->id)->first();
+                    DB::table('mpesa_stks')
+                        ->where('id', $order_details->id)
+                        ->update([
+                            'status' => 1,
+                            'resultCode' => $ResultCode,
+                            'ResultDescription' => $ResultDesc,
+                        ]);
+                }
+            } else {
+            }
+        }
     }
 }

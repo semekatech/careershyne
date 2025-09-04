@@ -132,7 +132,7 @@ const makePayment = async () => {
       amount: order.value.data.amount,
       orderID: order.value.data.orderID
     });
-
+    alert(response.reference);
     Swal.fire("Success", "Payment request sent. Please complete on your phone.", "success");
   } catch (error) {
     Swal.fire("Error", "Failed to initiate payment. Please try again.", "error");
