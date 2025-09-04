@@ -32,7 +32,7 @@
           </div>
           <a href="mailto:?subject=Free%20CV%20Review"
              class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition text-center">
-            Get Your Free Review
+            Start with a Free Review
           </a>
         </div>
 
@@ -52,7 +52,7 @@
           </div>
           <router-link to="/order-cv"
                        class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
-            Order Now
+            Upgrade My CV
           </router-link>
         </div>
 
@@ -73,7 +73,7 @@
           </div>
           <router-link to="/order-cv"
                        class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
-            Get Started
+            Build My CV from Scratch
           </router-link>
         </div>
 
@@ -94,7 +94,7 @@
           </div>
           <router-link to="/order-cv"
                        class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
-            Unlock Your Package
+            Unlock My Career Package
           </router-link>
         </div>
 
