@@ -74,13 +74,9 @@ const submitForm = async () => {
   loading.value = true;
   successMessage.value = "";
   errorMessage.value = "";
-
   try {
     const data = await submitCvOrder(form.value);
     successMessage.value = "✅ Your request has been submitted successfully!";
-    console.log("Success:", data);
-
-    // Reset form
     form.value = { fullname: "", email: "", phone: "", cv: null };
   } catch (err) {
     console.error(err);

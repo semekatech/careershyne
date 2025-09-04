@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('fullname');
             $table->string('email');
             $table->string('phone');
+            $table->string('orderID');
+             $table->string('type');
+             $table->string('amount');
             $table->string('status');
             $table->string('cv_path');
             $table->timestamps();
