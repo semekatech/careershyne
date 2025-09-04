@@ -13,7 +13,6 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'phone'   => 'required|string|regex:/^254\d{9}$/',
             'amount'  => 'required|numeric|min:1',
-            'orderID' => 'required|string|exists:cv_orders,orderID',
         ]);
 
         // Call STK Push service here (Daraja API / etc.)
