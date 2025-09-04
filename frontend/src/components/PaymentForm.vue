@@ -41,7 +41,7 @@
             <label class="block text-gray-700 mb-1">Payment Method</label>
             <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200">
               <option value="mpesa">M-Pesa</option>
-              <option value="card">Credit/Debit Card</option>
+              <!-- <option value="card">Credit/Debit Card</option> -->
             </select>
           </div>
 
@@ -78,7 +78,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { getCvOrder } from "@/services/cvOrderService";
+import { getCvOrder, initiatePayment } from "@/services/cvOrderService";
+import Swal from "sweetalert2";
 
 const route = useRoute();
 const orderId = route.params.id;
@@ -93,7 +94,49 @@ onMounted(async () => {
   order.value = await getCvOrder(orderId);
 });
 
-const makePayment = () => {
-  alert(`Processing ${payment.value.method} payment for Order #${orderId}`);
+const isValidPhone = (phone) => /^254\d{9}$/.test(phone);
+
+const makePayment = async () => {
+  if (!isValidPhone(payment.value.phone)) {
+    Swal.fire("Invalid Number", "Please enter a valid M-Pesa number starting with 254 and 12 digits long.", "error");
+    return;
+  }
+
+  const confirmResult = await Swal.fire({
+    title: "Confirm Payment",
+    html: `We are about to initiate an STK push.<br/><br/>
+           <b>Phone:</b> ${payment.value.phone}<br/>
+           <b>Amount:</b> KES ${order.value.data.amount}<br/>
+           <b>Order ID:</b> ${order.value.data.orderID}`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Proceed",
+    cancelButtonText: "Cancel"
+  });
+
+  if (!confirmResult.isConfirmed) {
+    return;
+  }
+
+  Swal.fire({
+    title: "Processing...",
+    text: "Initiating payment, please check your phone...",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  try {
+    const response = await initiatePayment({
+      phone: payment.value.phone,
+      amount: order.value.data.amount,
+      orderID: order.value.data.orderID
+    });
+
+    Swal.fire("Success", "Payment request sent. Please complete on your phone.", "success");
+  } catch (error) {
+    Swal.fire("Error", "Failed to initiate payment. Please try again.", "error");
+  }
 };
 </script>

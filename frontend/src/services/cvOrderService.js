@@ -8,7 +8,7 @@ export const submitCvOrder = async (form) => {
   const formData = new FormData();
   formData.append("fullname", form.fullname);
   formData.append("email", form.email);
-   formData.append("type", form.type);
+  formData.append("type", form.type);
   formData.append("phone", form.phone);
   formData.append("cv", form.cv);
   const { data } = await axios.post(`${API_URL}/cv-orders`, formData, {
@@ -22,3 +22,8 @@ export const getCvOrder = async (id) => {
   const { data } = await axios.get(`${API_URL}/cv-orders/${id}`);
   return data; // backend should return the order object
 };
+
+export async function initiatePayment(payload) {
+  const res = await axios.post(`/api/payments/initiate`, payload);
+  return res.data;
+}

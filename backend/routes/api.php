@@ -8,3 +8,4 @@ use App\Http\Controllers\CampaignController;
 
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
+Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
