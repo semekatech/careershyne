@@ -32,7 +32,7 @@
 
     <!-- Floating WhatsApp Chat Button -->
     <a 
-      href="https://wa.me/254700000000" 
+      href="https://wa.me/+254758393029" 
       target="_blank" 
       rel="noopener noreferrer" style="border-radius:10px"
       class="fixed bottom-5 right-5 bg-[#32e153] hover:bg-green-600 text-white px-5 py-3  shadow-lg flex items-center space-x-2 font-medium transition transform hover:scale-105"
