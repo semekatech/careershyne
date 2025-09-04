@@ -126,12 +126,12 @@
               Industry-specific keywords
             </li>
           </ul>
-          <a
-            href="#"
+          <router-link
+            to="/order-cv"
             class="inline-flex items-center font-semibold transition-colors duration-200 text-blue-400 hover:text-blue-800"
           >
-            Learn more
-          </a>
+            Place Order
+          </router-link>
         </div>
       </div>
 
