@@ -203,6 +203,12 @@ class PaymentController extends Controller
                             'resultCode' => $ResultCode,
                             'ResultDescription' => $ResultDesc,
                         ]);
+
+                         DB::table('cv_orders')
+                        ->where('orderID', $orderID)
+                        ->update([
+                            'status' => 'paid',
+                        ]);
                 }
             } else {
             }

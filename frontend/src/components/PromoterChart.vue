@@ -10,7 +10,6 @@
 
         <div v-if="order">
           <p class="mb-2"><b>Order Date:</b> {{ order.data.created_at }}</p>
-
           <p class="mb-2"><b>Amount:</b> KES {{ order.data.amount }}</p>
           <p class="mb-2"><b>Status:</b> 
             <span class="capitalize" :class="order.data.status === 'pending' ? 'text-yellow-600' : 'text-green-600'">
@@ -28,51 +27,46 @@
             </ul>
           </div>
         </div>
-
         <div v-else class="text-gray-500">Loading order...</div>
       </div>
 
-      <!-- Right Section: Payment Form -->
+      <!-- Right Section: Payment Form / Success -->
       <div class="bg-white p-8 rounded-2xl shadow-lg">
-        <h3 class="text-2xl font-bold mb-6">Complete Your Payment</h3>
-        <form @submit.prevent="makePayment" class="space-y-4">
-          <div>
-            <label class="block text-gray-700 mb-1">Payment Method</label>
-            <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200">
-              <option value="mpesa">M-Pesa</option>
-              <!-- <option value="card">Credit/Debit Card</option> -->
-            </select>
-          </div>
+        <template v-if="!paymentSuccess && order?.data.status !== 'paid'">
+          <h3 class="text-2xl font-bold mb-6">Complete Your Payment</h3>
+          <form @submit.prevent="makePayment" class="space-y-4">
+            <div>
+              <label class="block text-gray-700 mb-1">Payment Method</label>
+              <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200">
+                <option value="mpesa">M-Pesa</option>
+              </select>
+            </div>
 
-          <div v-if="payment.method === 'mpesa'">
-            <label class="block text-gray-700 mb-1">M-Pesa Number</label>
-            <input type="text" v-model="payment.phone" placeholder="Enter M-Pesa number"
-              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
-          </div>
-
-          <div v-if="payment.method === 'card'">
-            <label class="block text-gray-700 mb-1">Card Number</label>
-            <input type="text" placeholder="XXXX XXXX XXXX XXXX"
-              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
-
-            <div class="grid grid-cols-2 gap-4 mt-2">
-              <input type="text" placeholder="MM/YY"
-                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
-              <input type="text" placeholder="CVV"
+            <div v-if="payment.method === 'mpesa'">
+              <label class="block text-gray-700 mb-1">M-Pesa Number</label>
+              <input type="text" v-model="payment.phone" placeholder="Enter M-Pesa number"
                 class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
             </div>
+
+            <button type="submit"
+              class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+              Pay Now
+            </button>
+          </form>
+        </template>
+
+        <!-- ✅ Success Message -->
+        <template v-else>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-green-600 mb-4">🎉 Payment Successful!</h3>
+            <p class="text-gray-700 mb-6">Thank you. Your plan has been renewed successfully.</p>
           </div>
-
-          <button type="submit"
-            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-            Pay Now
-          </button>
-        </form>
+        </template>
       </div>
-
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
@@ -82,6 +76,7 @@ import Swal from "sweetalert2";
 const route = useRoute();
 const orderId = route.params.id;
 const order = ref(null);
+const paymentSuccess = ref(false);
 
 const payment = ref({
   method: "mpesa",
@@ -90,6 +85,11 @@ const payment = ref({
 
 onMounted(async () => {
   order.value = await getCvOrder(orderId);
+
+  // ✅ If already paid, show success immediately
+  if (order.value?.data.status === "paid") {
+    paymentSuccess.value = true;
+  }
 });
 
 const isValidPhone = (phone) => /^254\d{9}$/.test(phone);
@@ -112,9 +112,7 @@ const makePayment = async () => {
     cancelButtonText: "Cancel"
   });
 
-  if (!confirmResult.isConfirmed) {
-    return;
-  }
+  if (!confirmResult.isConfirmed) return;
 
   Swal.fire({
     title: "Processing...",
@@ -132,15 +130,12 @@ const makePayment = async () => {
       orderID: order.value.data.orderID
     });
 
-    // ✅ Now start checking payment status
     confirmPayment(response.reference);
-
   } catch (error) {
     Swal.fire("Error", "Failed to initiate payment. Please try again.", "error");
   }
 };
 
-// Function to poll payment status
 async function confirmPayment(trackID) {
   Swal.fire({
     title: "Confirming Payment...",
@@ -155,17 +150,15 @@ async function confirmPayment(trackID) {
     try {
       const res = await checkPaymentStatus(trackID);
 
-      if (res.status == "1") {
+      if (res.status == 1) {
         Swal.fire("Success!", "Plan Renewed successfully!", "success").then(() => {
-          location.reload();
+          paymentSuccess.value = true;
+          order.value.data.status = "paid";
         });
-      } else if (res.status == "7" || res.status == "0") {
-        // still pending, keep checking
+      } else if (res.status == 7 || res.status == 0) {
         setTimeout(poll, 5000);
-      } else if (res.status == "2") {
-        Swal.fire("Oops!", res.message, "error").then(() => {
-          location.reload();
-        });
+      } else if (res.status == 2) {
+        Swal.fire("Oops!", res.message, "error");
       }
     } catch (err) {
       console.log("Payment status check failed.", err);
