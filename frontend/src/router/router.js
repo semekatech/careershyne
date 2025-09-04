@@ -6,13 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import HomeLayout from "@/components/HomeLayout.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
-import DashboardLayout from "@/layouts/DashboardLayout.vue";
-// Pages
-import LoginPage from "@/pages/LoginPage.vue";
-import RegisterPage from "@/pages/RegisterPage.vue";
-import DashboardHome from "@/pages/DashboardHome.vue";
-import AddCampaign from "@/pages/AddCampaign.vue";
-import ProfileEdit from "@/pages/ProfileEdit.vue";
+
 
 const routes = [
   {
@@ -64,34 +58,8 @@ const routes = [
       },
     ],
   },
-  {
-    path: "/manage-campaigns",
-    component: DashboardLayout,
-    meta: {
-      title: "Manage Campaigns",
-    },
-    children: [
-      {
-        path: "",
-        component: AddCampaign,
-      },
-    ],
-  },
-  
-  {
-    path: "/my-profile",
-    component: DashboardLayout,
-    meta: {
-      title: "Manage Profile",
-    },
-    children: [
-      {
-        path: "",
-        component: ProfileEdit,
-      },
-    ],
-  },
  
+
 
 ];
 
