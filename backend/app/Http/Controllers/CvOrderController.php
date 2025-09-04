@@ -14,7 +14,7 @@ class CvOrderController extends Controller
         $validated = $request->validate([
             'fullname' => 'required|string|max:255',
             'email'    => 'required|email',
-            'type'    => 'required|type',
+            'type'    => 'required|string',
             'phone'    => 'required|string|max:20',
             'cv'       => 'required|file|mimes:pdf,doc,docx|max:2048',
         ]);
