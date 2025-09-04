@@ -22,16 +22,16 @@ const isLoggedIn = computed(() => !!auth.token);
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
           <router-link to="/" class="nav-link" exact>Home</router-link>
-          <router-link to="/" class="nav-link">About Us</router-link>
+          <router-link to="/about-us" class="nav-link">About Us</router-link>
           <!-- <router-link to="/influencers" class="nav-link"
             >Influencers</router-link
           > -->
-          <router-link to="/how-it-works" class="nav-link"
+          <router-link to="#services" class="nav-link"
             >Services</router-link
           >
-          <router-link to="/" class="nav-link">Pricing </router-link>
+          <router-link to="#pricing" class="nav-link">Pricing </router-link>
           <router-link to="/" class="nav-link">Resources</router-link>
-          <router-link to="/" class="nav-link">Contact Us</router-link>
+          <router-link to="/contact-us" class="nav-link">Contact Us</router-link>
         </div>
 
         <!-- Actions -->
