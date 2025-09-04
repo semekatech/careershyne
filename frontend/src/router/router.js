@@ -25,20 +25,7 @@ const routes = [
     name: "Contacts",
     component: () => import("@/pages/ContactUs.vue"),
   },
-  {
-    path: "/dashboard",
-    component: DashboardLayout,
-    meta: {
-      title: "Dashboard",
-    },
-    children: [
-      {
-        path: "",
-        component: DashboardHome,
-      },
-    ],
-  },
- 
+
 
 
 ];
