@@ -45,12 +45,16 @@ class CvOrderController extends Controller
             'data'    => $cvOrder,
         ], 201);
     }
-    public function show($id)
-    {
-        $order = CvOrder::where('orderID', $id)->first();
-       info($order);
-        return response()->json([
-            'data' => $order
-        ], 200);
-    }
+   public function show($id)
+{
+    $order = CvOrder::where('orderID', $id)->firstOrFail();
+
+    return response()->json([
+        'amount'     => $order->amount,
+        'orderID'    => $order->orderID,
+        'status'     => $order->status,
+        'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+    ], 200);
+}
+
 }
