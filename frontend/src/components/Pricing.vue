@@ -11,7 +11,6 @@
         </p>
       </div>
     </div>
-
     <!-- Pricing grid -->
     <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -97,9 +96,6 @@
             Unlock My Career Package
           </router-link>
         </div>
-
-        
-
       </div>
     </div>
   </div>

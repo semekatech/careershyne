@@ -7,7 +7,11 @@
     <FooterSection />
   </main>
 </template>
-
+<script setup>
+import TheWelcome from "@/components/TheWelcome.vue";
+import cvForm from "@/components/CvOrderForm.vue";
+import FooterSection from "@/components/FooterSection.vue";
+</script>
 
 <style scoped>
 .prose {
@@ -21,4 +25,6 @@
 .fade-leave-to {
   opacity: 0;
 }
+
+
 </style>

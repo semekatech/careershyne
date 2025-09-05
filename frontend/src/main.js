@@ -9,7 +9,6 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import 'quill/dist/quill.snow.css'; // Add this
 import 'quill/dist/quill.core.css'; // Optional but can help
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-
 // Font Awesome
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBars,faPhone,faBell,faTimes, faEdit, faTrash,faTimesCircle,faUserCircle,faPlus,faCreditCard, faEnvelope, faBullhorn, faInbox, faCalendarCheck, faUsers, faTachometerAlt, faHeadset, faRightFromBracket, faHourglass, faHourglassHalf, faChevronCircleDown, faCheckCircle, faUserPlus } from '@fortawesome/free-solid-svg-icons'

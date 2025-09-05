@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
-
 // Layouts
 import HomeLayout from "@/components/HomeLayout.vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
 
 
@@ -17,7 +15,7 @@ const routes = [
   {
     path: "/order-cv",
     name: "OrderCV",
-    component: () => import("@/pages/HowItWorks.vue"),
+    component: () => import("@/pages/OrderCV.vue"),
   },
    { path: "/payment/:id", name: "PaymentPage", component: PaymentPage },
   {
@@ -44,8 +42,6 @@ router.beforeEach(async (to, from, next) => {
 
   const publicRoutes = [
     "/",
-    "/login",
-    "/register",
     "/payment/:id",
     "/order-cv",
     "/how-it-works",

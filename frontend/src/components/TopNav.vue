@@ -1,26 +1,20 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
-
 const isMobileMenuOpen = ref(false);
 const auth = useAuthStore();
-
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 const isLoggedIn = computed(() => !!auth.token);
-
-// 🔥 scrollToSection helper
 const scrollToSection = (id) => {
   const el = document.getElementById(id);
   if (el) {
     el.scrollIntoView({ behavior: "smooth" });
-    isMobileMenuOpen.value = false; 
+    isMobileMenuOpen.value = false;
   }
 };
 </script>
-
-
 <template>
   <nav class="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,13 +30,18 @@ const scrollToSection = (id) => {
           <router-link to="/about-us" class="nav-link">About Us</router-link>
 
           <!-- now scrolls to sections -->
-          <button @click="scrollToSection('services')" class="nav-link">Services</button>
-          <button @click="scrollToSection('pricing')" class="nav-link">Pricing</button>
+          <button @click="scrollToSection('services')" class="nav-link">
+            Services
+          </button>
+          <button @click="scrollToSection('pricing')" class="nav-link">
+            Pricing
+          </button>
 
-          <router-link to="/" class="nav-link">Resources</router-link>
-          <router-link to="/contact-us" class="nav-link">Contact Us</router-link>
+          <!-- <router-link to="/" class="nav-link">Resources</router-link> -->
+          <router-link to="/contact-us" class="nav-link"
+            >Contact Us</router-link
+          >
         </div>
-
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
@@ -65,8 +64,12 @@ const scrollToSection = (id) => {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
             <svg
               v-else
@@ -76,8 +79,12 @@ const scrollToSection = (id) => {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -87,10 +94,34 @@ const scrollToSection = (id) => {
       <transition name="fade">
         <div v-if="isMobileMenuOpen" class="lg:hidden pb-4">
           <div class="flex flex-col space-y-3">
-            <router-link @click="toggleMobileMenu" to="/" class="nav-link-mobile">Home</router-link>
-            <button @click="scrollToSection('services')" class="nav-link-mobile">Services</button>
-            <button @click="scrollToSection('pricing')" class="nav-link-mobile">Pricing</button>
-            <router-link @click="toggleMobileMenu" to="/contact-us" class="nav-link-mobile">Contact</router-link>
+            <router-link
+              @click="toggleMobileMenu"
+              to="/"
+              class="nav-link-mobile"
+              >Home</router-link
+            >
+            <button
+              @click="scrollToSection('services')"
+              class="nav-link-mobile"
+            >
+              Services
+            </button>
+            <button @click="scrollToSection('pricing')" class="nav-link-mobile">
+              Pricing
+            </button>
+
+            <router-link
+              @click="toggleMobileMenu"
+              to="/about-us"
+              class="nav-link-mobile"
+              >About Us</router-link
+            >
+            <router-link
+              @click="toggleMobileMenu"
+              to="/contact-us"
+              class="nav-link-mobile"
+              >Contact</router-link
+            >
           </div>
         </div>
       </transition>
