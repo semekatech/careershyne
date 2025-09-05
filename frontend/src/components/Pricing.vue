@@ -3,7 +3,7 @@
     <!-- Section header -->
     <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
       <div class="mx-auto max-w-2xl lg:max-w-4xl">
-        <h2 class="text-4xl font-bold leading-8 text-orange-500 dark:text-orange-400">
+        <h2 class="text-4xl font-bold leading-8 text-black dark:text-orange-400">
           Pricing
         </h2>
         <p class="mt-2 text-1xl  tracking-tight text-gray-900 dark:text-gray-200">
@@ -19,7 +19,7 @@
         <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
           <div>
             <h3 class="text-sm text-orange-500 font-semibold">CV Review (Starter – Free)</h3>
-            <div class="mt-4 text-3xl font-bold">KES 0</div>
+            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 0</div>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Kickstart your job search with a free, detailed review of your CV and personalized tips.
             </p>
@@ -39,7 +39,7 @@
         <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
           <div>
             <h3 class="text-sm text-orange-500 font-semibold">CV Revamp + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold">KES 200</div>
+            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 200</div>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Upgrade your CV and cover letter with a tailored solution for a strong first impression.
             </p>
@@ -59,7 +59,7 @@
         <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
           <div>
             <h3 class="text-sm text-orange-500 font-semibold">CV from Scratch + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold">KES 300</div>
+            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 300</div>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Get a brand-new CV and cover letter built from scratch to position you for success.
             </p>
@@ -80,7 +80,7 @@
         <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
           <div>
             <h3 class="text-sm text-orange-500 font-semibold">Career Success Package</h3>
-            <div class="mt-4 text-3xl font-bold">KES 500</div>
+            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 500</div>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Go all-in with a complete professional upgrade to maximize visibility and opportunities.
             </p>

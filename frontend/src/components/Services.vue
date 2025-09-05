@@ -2,7 +2,7 @@
   <div id="services" class="bg-white dark:bg-gray-800 text-black px-6 py-20">
     <!-- Section Header -->
     <div class="max-w-3xl mx-auto text-center mb-16">
-      <h2 class="text-4xl font-bold mb-4">How We Help You Shine</h2>
+      <h2 class="text-4xl font-bold text-black dark:text-orange-400 mb-4">How We Help You Shine</h2>
       <p class="text-lg text-gray-800 dark:text-gray-300">
         Practical, affordable, and professional career services designed to increase your
         visibility, get you noticed, and help you land more interviews.

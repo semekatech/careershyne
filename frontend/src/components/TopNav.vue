@@ -21,8 +21,12 @@ const scrollToSection = (id) => {
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
-          <img src="/logo.png" alt="Logo" class="h-[80px] w-auto" />
-        </router-link>
+  <!-- Normal mode -->
+  <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
+  <!-- Dark mode -->
+  <img src="/logo-white.png" alt="Logo White" class="hidden dark:block h-[80px] w-auto bg-transparent p-0 m-0" />
+</router-link>
+
 
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
