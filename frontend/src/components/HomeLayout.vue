@@ -3,6 +3,7 @@
     <TheWelcome />
     <HeroSection />
     <Services />
+    <WhyChooseUs />
     <Pricing />
     <Community />
     <FooterSection />
@@ -13,6 +14,7 @@
 import TheWelcome from "@/components/TheWelcome.vue";
 import HeroSection from "@/components/HeroSection.vue";
 import Services from "@/components/Services.vue";
+import WhyChooseUs from "@/components/WhyChooseUs.vue";
 import Community from "@/components/Community.vue";
 import Pricing from "@/components/Pricing.vue";
 import FooterSection from "@/components/FooterSection.vue";
