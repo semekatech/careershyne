@@ -25,7 +25,7 @@
           <a
             href="https://whatsapp.com/channel/0029VbBbuYSDZ4LYzXurHm21" 
             target="_blank"
-            class="text-md relative inline-flex items-center gap-x-2 rounded-lg bg-orange-600 px-6 py-4 font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            class="text-md relative inline-flex items-center gap-x-2 rounded-lg bg-orange-600 px-6 py-4 font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
           >
             <span class="absolute -top-5 left-0 w-full text-left text-xs italic text-orange-500">100% Free · Zero Spam · Practical Insights</span>
             Join WhatsApp Channel
@@ -42,8 +42,8 @@
           <circle cx="512" cy="512" r="512" fill="url(#career-channel-bg)" fill-opacity="0.7"></circle>
           <defs>
             <radialGradient id="career-channel-bg">
-              <stop stop-color="#15b8a6"></stop>
-              <stop offset="1" stop-color="#15b8a6"></stop>
+              <stop stop-color="orange"></stop>
+              <stop offset="1" stop-color="orange"></stop>
             </radialGradient>
           </defs>
         </svg>

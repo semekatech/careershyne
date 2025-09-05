@@ -100,15 +100,15 @@ const scrollToSection = (id) => {
               class="nav-link-mobile"
               >Home</router-link
             >
-            <button
+            <router-link
               @click="scrollToSection('services')"
               class="nav-link-mobile"
             >
               Services
-            </button>
-            <button @click="scrollToSection('pricing')" class="nav-link-mobile">
+            </router-link>
+            <router-link @click="scrollToSection('pricing')" class="nav-link-mobile">
               Pricing
-            </button>
+            </router-link>
 
             <router-link
               @click="toggleMobileMenu"

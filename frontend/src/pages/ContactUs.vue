@@ -7,7 +7,7 @@
           class="mb-6 max-w-3xl text-center sm:text-center md:mx-auto md:mb-12"
         >
           <h2
-            style="color: orangered"
+            style="color: orange"
             class="font-heading mb-4 font-bold tracking-tight text-gray-900 dark:text-white text-3xl sm:text-5xl"
           >
             Get in Touch
@@ -33,7 +33,7 @@
               <li class="flex">
                 <div
                   class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50"
-                  style="background-color: orangered"
+                  style="background-color: orange"
                 >
                   <svg
                     class="h-6 w-6"
@@ -67,7 +67,7 @@
               <li class="flex">
                 <div
                   class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50"
-                  style="background-color: orangered"
+                  style="background-color: orange"
                 >
                   <svg
                     class="h-6 w-6"
@@ -102,7 +102,7 @@
               <li class="flex">
                 <div
                   class="flex h-10 w-10 items-center justify-center rounded bg-blue-900 text-gray-50"
-                  style="background-color: orangered"
+                  style="background-color: orange"
                 >
                   <svg
                     class="h-6 w-6"
@@ -174,7 +174,7 @@
               <div class="text-center">
                 <button
                   type="submit"
-                  style="background-color: #fd624e"
+                  style="background-color: orange"
                   class="w-full bg-blue-800 text-white px-6 py-3 font-semibold rounded-md hover:bg-blue-700 transition"
                 >
                   Send Message

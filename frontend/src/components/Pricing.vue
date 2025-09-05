@@ -6,7 +6,7 @@
         <h2 class="text-4xl font-bold leading-8 text-orange-500 dark:text-orange-400">
           Pricing
         </h2>
-        <p class="mt-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-200">
+        <p class="mt-2 text-1xl  tracking-tight text-gray-900 dark:text-gray-200">
           Invest in your career with the right plan — affordable, transparent, and designed to help you land interviews faster.
         </p>
       </div>
