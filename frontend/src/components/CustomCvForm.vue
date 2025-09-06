@@ -105,6 +105,35 @@
   </div>
 </template>
 
+<script setup>
+import { ref } from "vue";
+import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
+import { submitCvOrder } from "@/services/cvOrderService";
+
+const router = useRouter();
+
+const form = ref({
+  fullname: "",
+  email: "",
+  phone: "",
+  location: "",
+  careerGoal: "",
+  type: "cvscratch",
+  education: [{ institution: "", degree: "", startDate: "", endDate: "" }],
+  experience: [{ title: "", company: "", startDate: "", endDate: "", responsibilities: "" }],
+  skills: "",
+  certifications: [{ name: "", issuer: "", year: "" }],
+  linkedin: "",
+  portfolio: "",
+  coverRole: "",
+  coverWhy: "",
+  coverStrengths: "",
+  cv: null,
+});
+
+
+</script>
 
 <style>
 .input {
