@@ -27,8 +27,9 @@
 
                         <td style="padding: 20px; line-height: 1.6; color: #333333;">
                             <h2 style="color: #1a1a1a; font-size: 24px; margin-bottom: 10px;">Hi,
-                                {{  $details['order']->fullname }}!</h2>
-                            <p style="margin-bottom: 15px;">{{ $details['message'] }}</p>
+                                {{ $details['order']->fullname }}!</h2>
+                            <p style="margin-bottom: 15px;">{!! $details['message'] !!}</p>
+
 
                             <p style="margin-bottom: 15px;">If you have any questions or need support, please don't
                                 hesitate to <a href="mailto:support@yourcompany.com"
