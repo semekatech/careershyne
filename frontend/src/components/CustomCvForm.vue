@@ -132,7 +132,43 @@ const form = ref({
   cv: null,
 });
 
+const loading = ref(false);
 
+const addEducation = () => {
+  form.value.education.push({ institution: "", degree: "", startDate: "", endDate: "" });
+};
+
+const addExperience = () => {
+  form.value.experience.push({ title: "", company: "", startDate: "", endDate: "", responsibilities: "" });
+};
+
+const addCertification = () => {
+  form.value.certifications.push({ name: "", issuer: "", year: "" });
+};
+
+const handleFileUpload = (e) => {
+  form.value.cv = e.target.files[0];
+};
+
+const submitForm = async () => {
+  loading.value = true;
+  try {
+    const data = await submitCvOrder(form.value);
+    await Swal.fire({
+      title: "Order Submitted 🎉",
+      text: "Redirecting to payment...",
+      icon: "success",
+      timer: 3000,
+      showConfirmButton: false,
+    });
+    router.push({ name: "PaymentPage", params: { id: data.id } });
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error ❌", "Something went wrong. Please try again.", "error");
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <style>
