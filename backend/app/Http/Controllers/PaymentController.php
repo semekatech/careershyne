@@ -31,8 +31,8 @@ class PaymentController extends Controller
             $phonenumber = $phone1;
         }
         date_default_timezone_set("Africa/Nairobi");
-        $consumer_key = "lOvMDm6tD3iZ2i28WhdFquTVIeB1bFF2IuVnrW6EEGAUqv0X";
-        $consumer_secret = "vPGzRzO6kncITKjS4aGQ1nVsAM3AlJH1PtecEJvWe3cQC1l6jwFXnClKmuvv3540";
+        $consumer_key = "mqnWvo8e5l3kpmrYWjCqBTs8w44H7zm73PPDTWINAgcQBKtL";
+        $consumer_secret = "3tN8JdOmqH6pzkiHjujcTjQit7t0r2HNNU4F9ry7hWRpfhdGvFeqNb9g2cXaILzt";
         $access_token_url =
             "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
         $curl = curl_init();
@@ -57,7 +57,7 @@ class PaymentController extends Controller
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $initiate_url);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $stkHeader);
-        $BusinessShortCode = "4139507";
+        $BusinessShortCode = "4167323";
         $Timestamp = date("YmdHis");
         // $Timestamp = date('YYYYMMDDHHis');
         $PartyA = $phonenumber;
@@ -65,7 +65,7 @@ class PaymentController extends Controller
         $CallBackURL = "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551";
         $AccountReference = $account_number;
         $TransactionDesc = "Subscription ";
-        $Passkey = "5e4e51854f30adce867080e885dc8c19884b0ea2fe6c54fa02f9227dfe9f69da";
+        $Passkey = "86b62107f93c1a1d013ab36ab83cd12aca4e6b3f9fd3778c8d5422178bde52a8";
         $Password = base64_encode($BusinessShortCode . $Passkey . $Timestamp);
         $curl_post_data = [
             // Fill in the request parameters with valid values
