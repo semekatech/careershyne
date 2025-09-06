@@ -8,14 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CvOrder extends Model
 {
     use HasFactory;
-    protected $fillable = [
-        'fullname',
-        'email',
-        'orderID',
-        'type',
-        'amount',
-        'status',
-        'phone',
-        'cv_path',
+    protected $guarded = [
+
     ];
 }

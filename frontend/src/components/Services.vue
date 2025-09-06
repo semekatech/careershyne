@@ -17,7 +17,7 @@
     <div>
       <h3 class="text-orange-500 font-semibold text-lg mb-2">CV Review & Optimization</h3>
       <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">
-        Spot weaknesses and get actionable feedback to make your CV recruiter-ready.
+        Spot gaps and get detailed, actionable feedback to make your CV recruiter-ready.
       </p>
       <ul class="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
         <li>⭐ Identify problem areas</li>
@@ -33,9 +33,9 @@
   <!-- CV Revamps -->
   <div class="flex flex-col justify-between border rounded-xl shadow-sm p-6 bg-white dark:bg-gray-900">
     <div>
-      <h3 class="text-orange-500 font-semibold text-lg mb-2">CV Revamps</h3>
+      <h3 class="text-orange-500 font-semibold text-lg mb-2">CV Revamps & Polishing</h3>
       <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">
-        Transform your CV into a polished document that showcases your strengths.
+        Transform your CV into a polished document highlighting all your strongest skills.
       </p>
       <ul class="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
         <li>⭐ Sharper presentation</li>
@@ -53,7 +53,7 @@
     <div>
       <h3 class="text-orange-500 font-semibold text-lg mb-2">Cover Letters that Impress</h3>
       <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">
-        Stand out with tailored cover letters that complement your CV.
+        Stand out with highly customized cover letters that perfectly complement your CV.
       </p>
       <ul class="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
         <li>⭐ Role-specific writing</li>
@@ -71,7 +71,7 @@
     <div>
       <h3 class="text-orange-500 font-semibold text-lg mb-2">LinkedIn Optimization</h3>
       <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">
-        Boost your visibility and credibility on the world’s biggest hiring platform.
+        Boost your professional visibility and credibility on the world’s largest hiring platform.
       </p>
       <ul class="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
         <li>⭐ Recruiter-focused keywords</li>

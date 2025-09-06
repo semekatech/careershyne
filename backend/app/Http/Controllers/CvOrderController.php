@@ -8,43 +8,58 @@ use Nette\Utils\Random;
 
 class CvOrderController extends Controller
 {
-    public function store(Request $request)
-    {
-        // Validate
-        $validated = $request->validate([
-            'fullname' => 'required|string|max:255',
-            'email'    => 'required|email',
-            'type'    => 'required|string',
-            'phone'    => 'required|string|max:20',
-            'cv'       => 'required|file|mimes:pdf,doc,docx|max:2048',
-        ]);
+   public function store(Request $request)
+{
+    // basic validation
+    $validated = $request->validate([
+        'fullname' => 'required|string|max:255',
+        'email'    => 'required|email',
+        'type'     => 'required|string',
+        'phone'    => 'required|string|max:20',
+        'cv'       => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+    ]);
 
-        // Store file
+    // store uploaded CV if provided
+    $cvPath = null;
+    if ($request->hasFile('cv')) {
         $cvPath = $request->file('cv')->store('cv_uploads', 'public');
-        if ($validated['type'] == 'cv') {
-            $amount = 200;
-        } else {
-            $amount = 500;
-        }
-        $orderID = Random::generate(7, '0-9');
-        // Save to DB
-        $cvOrder = CvOrder::create([
-            'fullname' => $validated['fullname'],
-            'email'    => $validated['email'],
-            'phone'    => $validated['phone'],
-            'type'    => $validated['type'],
-            'amount' => $amount,
-            'orderID' => $orderID,
-            'status'   => 'pending',
-            'cv_path'  => $cvPath,
-        ]);
-
-        return response()->json([
-            'message' => 'CV Order submitted successfully!',
-            'id'      => $orderID,
-            'data'    => $cvOrder,
-        ], 201);
     }
+
+    // determine amount
+    $amount = $validated['type'] === 'cv' ? 200 : 500;
+    $orderID = \Nette\Utils\Random::generate(7, '0-9');
+
+    // save order
+    $cvOrder = CvOrder::create([
+        'fullname'   => $validated['fullname'],
+        'email'      => $validated['email'],
+        'phone'      => $validated['phone'],
+        'type'       => $validated['type'],
+        'amount'     => $amount,
+        'orderID'    => $orderID,
+        'status'     => 'pending',
+        'cv_path'    => $cvPath,
+        // store extended fields as JSON
+        'location'   => $request->input('location'),
+        'career_goal' => $request->input('careerGoal'),
+        'skills'     => $request->input('skills'),
+        'linkedin'   => $request->input('linkedin'),
+        'portfolio'  => $request->input('portfolio'),
+        'cover_role'  => $request->input('coverRole'),
+        'cover_why'   => $request->input('coverWhy'),
+        'cover_strengths' => $request->input('coverStrengths'),
+        'education'  => $request->input('education'),
+        'experience' => $request->input('experience'),
+        'certifications' => $request->input('certifications'),
+    ]);
+
+    return response()->json([
+        'message' => 'CV Order submitted successfully!',
+        'id'      => $orderID,
+        'data'    => $cvOrder,
+    ], 201);
+}
+
     public function show($id)
     {
         $order = CvOrder::where('orderID', $id)->firstOrFail();
