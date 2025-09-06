@@ -17,7 +17,7 @@
             </span>
           </p>
 
-          <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+          <div class="mt-6 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-lg">
             <h3 class="font-semibold text-lg mb-2">Instructions</h3>
             <ul class="list-disc pl-5 text-gray-700 space-y-1">
               <li>Confirm your details are correct before making payment.</li>
@@ -37,7 +37,7 @@
           <form @submit.prevent="makePayment" class="space-y-4">
             <div>
               <label class="block text-gray-700 mb-1">Payment Method</label>
-              <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200">
+              <select v-model="payment.method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-orange-200">
                 <option value="mpesa">M-Pesa</option>
               </select>
             </div>
@@ -45,11 +45,11 @@
             <div v-if="payment.method === 'mpesa'">
               <label class="block text-gray-700 mb-1">M-Pesa Number</label>
               <input type="text" v-model="payment.phone" placeholder="Enter M-Pesa number"
-                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" />
+                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-orange-200" />
             </div>
 
             <button type="submit"
-              class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+              class="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
               Pay Now
             </button>
           </form>
