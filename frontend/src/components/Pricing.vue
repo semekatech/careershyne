@@ -70,7 +70,7 @@
               <li>✔ Tailored to your career goals</li>
             </ul>
           </div>
-          <router-link to="/custom-cv-order"
+          <router-link to="/customcv-order"
                        class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
             Build My CV from Scratch
           </router-link>
