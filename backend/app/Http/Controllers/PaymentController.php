@@ -311,10 +311,12 @@ class PaymentController extends Controller
 
 
                     $admindetails = [
-                        'subject' => $subject,
-                        'message' => $message,
+                        'subject' => "New Order Alert",
+                        'message' => nl2br($message),
                         'order'   => $order,
                     ];
+                      $this->sendMessage('254108850348', '254705030613',$message);
+                      $this->sendMessage('254108850348', '254758428993',$message);
                     Mail::to($order->email)->send(new OrderMail($details));
                     Mail::to(['georgemuemah@gmail.com', 'nancymunee@gmail.com'])->send(new OrderMail($admindetails));
                 }
@@ -322,6 +324,49 @@ class PaymentController extends Controller
             }
         }
     }
+
+      public function sendMessage($sender, $to,$message)
+    {
+        $apiUrl = 'https://ngumzo.com/v1/send-message';
+        $apiKey = 'qkv0Da9MPwOCeCyPOpnh2JR5QEJkw1';
+
+
+
+        // Prepare the data for the POST request
+        $data = [
+            'sender' => $sender,
+            'number' => $to,
+            'message' => $message // The welcome message
+        ];
+
+        // Initialize cURL session
+        $ch = curl_init($apiUrl);
+
+        // Set the cURL options
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'api-key: ' . $apiKey  // Include your API key here
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+
+        // Check for errors
+        if ($response === false) {
+            // Log the error (you can handle this more gracefully in production)
+            error_log('cURL Error: ' . curl_error($ch));
+        }
+
+        // Optionally log the response for debugging
+        error_log('Response: ' . $response);
+
+        // Close the cURL session
+        curl_close($ch);
+    }
+
     public function checkStatus(Request $request)
     {
         $transactionId = $request->input('track_link');
