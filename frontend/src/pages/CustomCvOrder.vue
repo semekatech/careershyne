@@ -13,6 +13,8 @@ import customCVForm from "@/components/CustomCvForm.vue";
 import FooterSection from "@/components/FooterSection.vue";
 </script>
 
+
+
 <style scoped>
 .prose {
   max-width: 100%;
