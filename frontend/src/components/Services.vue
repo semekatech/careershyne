@@ -25,9 +25,9 @@
         <li>⭐ Practical recommendations</li>
       </ul>
     </div>
-    <a href="mailto:?subject=Free%20CV%20Review" class="mt-6 text-orange-500 font-semibold hover:underline">
+    <!-- <a href="mailto:?subject=Free%20CV%20Review" class="mt-6 text-orange-500 font-semibold hover:underline">
       🔹 Start with a Review
-    </a>
+    </a> -->
   </div>
 
   <!-- CV Revamps -->
@@ -43,9 +43,9 @@
         <li>⭐ Career goal alignment</li>
       </ul>
     </div>
-    <router-link to="/order-cv" class="mt-6 text-orange-500 font-semibold hover:underline">
+    <!-- <router-link to="/order-cv" class="mt-6 text-orange-500 font-semibold hover:underline">
       🔹 Upgrade Your CV
-    </router-link>
+    </router-link> -->
   </div>
 
   <!-- Cover Letters -->
@@ -61,9 +61,9 @@
         <li>⭐ Professional tone</li>
       </ul>
     </div>
-    <router-link to="/order-cv" class="mt-6 text-orange-500 font-semibold hover:underline">
+    <!-- <router-link to="/order-cv" class="mt-6 text-orange-500 font-semibold hover:underline">
       🔹 Get Your Cover Letter
-    </router-link>
+    </router-link> -->
   </div>
 
   <!-- LinkedIn Optimization -->
@@ -79,9 +79,9 @@
         <li>⭐ Branding with your CV</li>
       </ul>
     </div>
-    <a href="#" class="mt-6 text-orange-500 font-semibold hover:underline">
+    <!-- <a href="#" class="mt-6 text-orange-500 font-semibold hover:underline">
       🔹 Shine on LinkedIn
-    </a>
+    </a> -->
   </div>
 
 </div>

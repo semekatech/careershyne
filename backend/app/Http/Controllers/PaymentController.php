@@ -256,7 +256,7 @@ class PaymentController extends Controller
                     if ($order->type === 'cvscratch') {
                         $message .= "\n📝 Order Type: CV From Scratch + Cover Letter\n";
                         $message .= "📍 Location: {$order->location}\n";
-                        $message .= "🎯 Career Goal: {$order->careerGoal}\n";
+                        $message .= "🎯 Career Goal: {$order->career_goal}\n";
 
                         // Education
                         $education = json_decode($order->education, true);
@@ -302,9 +302,9 @@ class PaymentController extends Controller
 
                         // Cover Letter
                         $message .= "\n📄 Cover Letter:\n";
-                        $message .= "🎯 Target Role: {$order->coverRole}\n";
-                        $message .= "💡 Why Interested: {$order->coverWhy}\n";
-                        $message .= "💪 Strengths: {$order->coverStrengths}\n";
+                        $message .= "🎯 Target Role: {$order->cover_role}\n";
+                        $message .= "💡 Why Interested: {$order->cover_why}\n";
+                        $message .= "💪 Strengths: {$order->cover_strengths}\n";
 
                         $message .= "💰 Amount: {$order->amount}\n";
                     }
