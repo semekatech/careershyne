@@ -6,7 +6,7 @@
     <!-- ===== Hero Section ===== -->
  <div class="relative bg-black text-white py-24">
       <img
-        src=""
+        src="@/assets/contact-hero.jpg"
         alt="Careershyne contact hero"
         class="absolute inset-0 w-full h-full object-cover"
       />
