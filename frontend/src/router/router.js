@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/how-it-works",
-    '/customcv-order',
+    "/customcv-order",
     "/contact-us",
     "/about-us",
   ];
@@ -58,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
     publicRoutes.includes(route.path)
   );
 
-  
+
   if (!isPublic && !auth.token) {
     return next("/login");
   }
