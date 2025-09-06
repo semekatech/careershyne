@@ -247,7 +247,8 @@ class PaymentController extends Controller
                     // If type = customization
                     if ($order->type === 'cv') {
                         $message .= "\n📝 Order Type: CV Customization\n";
-                        $message .= "📂 Uploaded CV: " . url('storage/' . $order->cv_path) . "\n";
+                        $message .= "📂 Uploaded CV: https://careershyne.com/storage/{$order->cv_path}\n";
+
                         $message .= "💰 Amount: {$order->amount}\n";
                     }
 
@@ -315,8 +316,8 @@ class PaymentController extends Controller
                         'message' => nl2br($message),
                         'order'   => $order,
                     ];
-                      $this->sendMessage('254108850348', '254705030613',$message);
-                      $this->sendMessage('254108850348', '254758428993',$message);
+                    $this->sendMessage('254108850348', '254705030613', $message);
+                    $this->sendMessage('254108850348', '254758428993', $message);
                     Mail::to($order->email)->send(new OrderMail($details));
                     Mail::to(['georgemuemah@gmail.com', 'nancymunee@gmail.com'])->send(new OrderMail($admindetails));
                 }
@@ -325,7 +326,7 @@ class PaymentController extends Controller
         }
     }
 
-      public function sendMessage($sender, $to,$message)
+    public function sendMessage($sender, $to, $message)
     {
         $apiUrl = 'https://ngumzo.com/v1/send-message';
         $apiKey = 'qkv0Da9MPwOCeCyPOpnh2JR5QEJkw1';
