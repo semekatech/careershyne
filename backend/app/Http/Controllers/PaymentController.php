@@ -6,6 +6,8 @@ use App\Models\CvOrder;
 use App\Models\MpesaPayment;
 use Illuminate\Http\Request;
 use Nette\Utils\Random;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderMail;
 use DB;
 
 class PaymentController extends Controller
@@ -191,7 +193,7 @@ class PaymentController extends Controller
                     'plan_id' => $orderID,
                     'user_id' => $userID,
                 ];
-                info('sd'.$MerchantRequestID);
+                // info('sd'.$MerchantRequestID);
                 // Check if payment already exists for this request
                 $existingPayment = MpesaPayment::where('plan_id', $orderID)->exists();
                 if (!$existingPayment && MpesaPayment::create($data)) {
@@ -204,17 +206,29 @@ class PaymentController extends Controller
                             'ResultDescription' => $ResultDesc,
                         ]);
 
-                         DB::table('cv_orders')
+                    DB::table('cv_orders')
                         ->where('orderID', $orderID)
                         ->update([
                             'status' => 'paid',
                         ]);
+                    $order = DB::table('cv_orders')
+                        ->where('orderID', $orderID)
+                        ->first();
+                    $message = "Your order of #{$order->orderID} has been processed successfully. The order will be delivered within 24 hours.";
+                    $subject = 'Order Confirmation';
+
+                    $details = [
+                        'subject' => $subject,
+                        'message' => $message,
+                        'order'   => $order,
+                    ];
+                    Mail::to($order->email)->send(new OrderMail($details));
                 }
             } else {
             }
         }
     }
-      public function checkStatus(Request $request)
+    public function checkStatus(Request $request)
     {
         $transactionId = $request->input('track_link');
         $paymentStatus = DB::table('mpesa_stks')
