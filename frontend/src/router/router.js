@@ -19,7 +19,7 @@ const routes = [
     path: "/customcv-order",
     name: "CustomOrders",
     component: () => import("@/pages/CustomOrderCV.vue"),
-  },S
+  },
   {
     path: "/payment/:id",
     name: "PaymentPage",
