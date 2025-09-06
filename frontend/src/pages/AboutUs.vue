@@ -3,7 +3,7 @@
   <div class="bg-gray-100 dark:bg-gray-900">
     <div class="relative bg-black text-white py-24">
       <img
-        src="@/assets/about.jpg"
+        src="/img/about.jpg"
         alt="Person typing on a laptop"
         class="absolute inset-0 w-full h-full object-cover opacity-50"
       />
