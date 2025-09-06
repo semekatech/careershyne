@@ -1,11 +1,5 @@
 <template>
-  <main
-    class="bg-gradient-to-br from-rose-50 to-white dark:from-gray-900 dark:to-gray-800"
-  >
-    <TheWelcome />
-  
-    <FooterSection />
-  </main>
+<p>sfsa</p>
 </template>
 <script setup>
 import TheWelcome from "@/components/TheWelcome.vue";
