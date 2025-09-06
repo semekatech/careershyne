@@ -21,11 +21,11 @@ const scrollToSection = (id) => {
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2">
-  <!-- Normal mode -->
-  <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
-  <!-- Dark mode -->
-  <img src="/logo-white.png" alt="Logo White" class="hidden dark:block h-[80px] w-auto bg-transparent p-0 m-0" />
-</router-link>
+          <!-- Normal mode -->
+          <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
+          <!-- Dark mode -->
+          <img src="/logo-white.png" alt="Logo White" class="hidden dark:block h-[80px] w-auto bg-transparent p-0 m-0" />
+        </router-link>
 
 
         <!-- Desktop Navigation -->
@@ -49,8 +49,8 @@ const scrollToSection = (id) => {
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
-            to="/login"
-            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-purple-800 transition"
+            to="/order-cv"
+            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-[#32383f] transition-colors duration-300"
           >
             Get Started
           </router-link>
@@ -134,10 +134,10 @@ const scrollToSection = (id) => {
 </template>
 <style scoped>
 .nav-link {
-  @apply text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-white font-medium transition;
+  @apply text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-white font-medium transition;
 }
 .nav-link-mobile {
-  @apply block w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition;
+  @apply block w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 rounded transition;
 }
 .fade-enter-active,
 .fade-leave-active {

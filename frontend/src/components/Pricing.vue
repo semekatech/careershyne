@@ -30,7 +30,7 @@
             </ul>
           </div>
           <a href="mailto:info@careershyne.com?subject=Free%20CV%20Review"
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition text-center">
+             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
             Start with a Free Review
           </a>
         </div>
@@ -50,7 +50,7 @@
             </ul>
           </div>
           <router-link to="/order-cv"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
+                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
             Upgrade My CV
           </router-link>
         </div>
@@ -71,7 +71,7 @@
             </ul>
           </div>
           <router-link to="/custom-cv-order"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
+                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
             Build My CV from Scratch
           </router-link>
         </div>
@@ -96,7 +96,7 @@
             Unlock My Career Package
           </router-link> -->
            <a href="https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne."
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition text-center">
+             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
            Unlock My Career Package
           </a>
         </div>
