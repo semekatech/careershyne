@@ -4,7 +4,7 @@
     <TheWelcome />
 
     <!-- ===== Hero Section ===== -->
- <div class="relative h-[320px] md:h-[420px] flex items-center justify-center overflow-hidden">
+ <div class="relative bg-black text-white py-24">
       <img
         src="@/assets/contact-hero.jpg"
         alt="Careershyne contact hero"
@@ -16,20 +16,24 @@
 
       <!-- Hero Text -->
       <div class="relative text-center text-white z-10">
-        <h1 class="text-4xl md:text-5xl font-bold">Contact Us</h1>
-        <p class="mt-2 text-lg md:text-xl">Let’s Shape Your Brighter Future Together</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-2">Contact Us</h1>
+        <p class="text-lg md:text-xl text-orange-400 font-semibold">Let’s Shape Your Brighter Future Together</p>
       </div>
     </div>
 
     <!-- ===== Intro Section ===== -->
-    <div class="py-12 md:py-16 lg:py-20">
-      <div class="max-w-4xl mx-auto text-center px-6">
-        <p class="text-lg text-gray-700">
-          Have a question about our services? Need help choosing the right package?  
-          Or just want to talk about your career goals? We’d love to hear from you.
-        </p>
-      </div>
+<!-- ===== Intro Section ===== -->
+<div class="bg-gray-100 dark:bg-gray-900">
+  <div class="py-12 md:py-16 lg:py-20">
+    <div class="max-w-4xl mx-auto text-center px-6">
+      <p class="text-lg text-gray-700 dark:text-gray-300">
+        Have a question about our services? Need help choosing the right package?  
+        Or just want to talk about your career goals? We’d love to hear from you.
+      </p>
     </div>
+  </div>
+
+
 
     <!-- ===== Contact Section ===== -->
     <div class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8 mt-12 md:mt-16">
@@ -104,7 +108,7 @@
         </div>
       </div>
     </div>
-
+</div>
     <!-- ===== Footer ===== -->
     <FooterSection />
   </section>

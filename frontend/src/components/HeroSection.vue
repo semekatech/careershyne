@@ -16,7 +16,7 @@
       >
         <div class="max-w-md mx-auto">
           <!-- Heading -->
-          <h2 class="text-3xl md:text-4xl font-extrabold leading-snug mb-4">
+          <h2 class="text-3xl md:text-4xl font-extrabold leading-snug mb-4 ">
             Land More Interviews,<br />Shine Brighter
           </h2>
 
