@@ -16,9 +16,9 @@ const routes = [
     component: () => import("@/pages/CVOrder.vue"),
   },
    {
-    path: "/customcv-order",
+    path: "/custom-cv-order",
     name: "CustomOrders",
-    component: () => import("@/pages/CVOrder.vue"),
+    component: () => import("@/pages/CustomCV.vue"),
   },
   {
     path: "/payment/:id",
@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/how-it-works",
-    "/customcv-order",
+    "/custom-cv-order",
     "/contact-us",
     "/about-us",
   ];
