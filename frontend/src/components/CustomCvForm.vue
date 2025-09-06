@@ -119,6 +119,7 @@ const form = ref({
   phone: "",
   location: "",
   careerGoal: "",
+  type: "cvscratch",
   education: [{ institution: "", degree: "", startDate: "", endDate: "" }],
   experience: [{ title: "", company: "", startDate: "", endDate: "", responsibilities: "" }],
   skills: "",
