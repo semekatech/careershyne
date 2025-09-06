@@ -138,6 +138,20 @@ class PaymentController extends Controller
                 ->first();
             $mpesa_stk =  DB::table('mpesa_stks')->where('id', $order_detail->id);
             $mpesa_stk->update(['status' => 2, 'resultCode' => $ResultCode, 'ResultDescription' => $ResultDesc]);
+            $orderID = $order_detail->checkout_request_id;
+            $order = DB::table('cv_orders')
+                ->where('orderID', $orderID)
+                ->first();
+            $url = "https://careershyne.com/payment/" . $order->orderID;
+            $message = "Your order of #{$order->orderID} has not been processed. Kindly click <a href='{$url}'>here</a> to finalize the order.";
+            $subject = 'Order Confirmation';
+
+            $details = [
+                'subject' => $subject,
+                'message' => $message,
+                'order'   => $order,
+            ];
+            Mail::to($order->email)->send(new OrderMail($details));
         } else {
             $CallbackMetadata = $stkCallback->CallbackMetadata;
             echo "Two /";
