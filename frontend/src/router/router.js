@@ -19,7 +19,7 @@ const routes = [
     path: "/customcv-order",
     name: "CustomOrders",
     component: () => import("@/pages/CustomOrderCV.vue"),
-  },
+  },S
   {
     path: "/payment/:id",
     name: "PaymentPage",
@@ -50,6 +50,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/how-it-works",
+    '/customcv-order',
     "/contact-us",
     "/about-us",
   ];
@@ -57,6 +58,7 @@ router.beforeEach(async (to, from, next) => {
     publicRoutes.includes(route.path)
   );
 
+  
   if (!isPublic && !auth.token) {
     return next("/login");
   }
