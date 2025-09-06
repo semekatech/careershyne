@@ -143,7 +143,7 @@ class PaymentController extends Controller
                 ->where('orderID', $orderID)
                 ->first();
             $url = "https://careershyne.com/payment/" . $orderID;
-            $message = "Your order of #{$order->orderID} has not been processed. Kindly click <a href='{$url}'>here</a> to finalize the order.";
+            $message = "Your order of #{$order->orderID} has not been processed. Kindly click {$url} to finalize the order.";
             $subject = 'Order Confirmation';
 
             $details = [
@@ -228,15 +228,95 @@ class PaymentController extends Controller
                     $order = DB::table('cv_orders')
                         ->where('orderID', $orderID)
                         ->first();
-                    $message = "Your order of #{$order->orderID} has been processed successfully. The order will be delivered within 24 hours.";
+                    $message2 = "Your order of #{$order->orderID} has been processed successfully. The order will be delivered within 24 hours.";
                     $subject = 'Order Confirmation';
 
                     $details = [
+                        'subject' => $subject,
+                        'message' => $message2,
+                        'order'   => $order,
+                    ];
+                    // Build base message
+                    $message = "📢 New CV Order Alert!\n\n";
+                    $message .= "🆔 Order ID: #{$order->orderID}\n";
+                    $message .= "👤 Full Name: {$order->fullname}\n";
+                    $message .= "📧 Email: {$order->email}\n";
+                    $message .= "📞 Phone: {$order->phone}\n";
+                    $message .= "📌 Status: {$order->status}\n";
+
+                    // If type = customization
+                    if ($order->type === 'cv') {
+                        $message .= "\n📝 Order Type: CV Customization\n";
+                        $message .= "📂 Uploaded CV: " . url('storage/' . $order->cv_path) . "\n";
+                        $message .= "💰 Amount: {$order->amount}\n";
+                    }
+
+                    // If type = cvscratch (from scratch)
+                    if ($order->type === 'cvscratch') {
+                        $message .= "\n📝 Order Type: CV From Scratch + Cover Letter\n";
+                        $message .= "📍 Location: {$order->location}\n";
+                        $message .= "🎯 Career Goal: {$order->careerGoal}\n";
+
+                        // Education
+                        $education = json_decode($order->education, true);
+                        if ($education) {
+                            $message .= "\n🎓 Education:\n";
+                            foreach ($education as $edu) {
+                                $message .= "- {$edu['degree']} at {$edu['institution']} ({$edu['startDate']} – {$edu['endDate']})\n";
+                            }
+                        }
+
+                        // Experience
+                        $experience = json_decode($order->experience, true);
+                        if ($experience) {
+                            $message .= "\n💼 Work Experience:\n";
+                            foreach ($experience as $exp) {
+                                $message .= "- {$exp['title']} at {$exp['company']} ({$exp['startDate']} – {$exp['endDate']})\n  Responsibilities: {$exp['responsibilities']}\n";
+                            }
+                        }
+
+                        // Skills
+                        if (!empty($order->skills)) {
+                            $message .= "\n⚡ Skills: {$order->skills}\n";
+                        }
+
+                        // Certifications
+                        $certs = json_decode($order->certifications, true);
+                        if ($certs) {
+                            $message .= "\n📜 Certifications:\n";
+                            foreach ($certs as $cert) {
+                                if (!empty($cert['name'])) {
+                                    $message .= "- {$cert['name']} ({$cert['issuer']}, {$cert['year']})\n";
+                                }
+                            }
+                        }
+
+                        // Links
+                        if (!empty($order->linkedin)) {
+                            $message .= "\n🔗 LinkedIn: {$order->linkedin}\n";
+                        }
+                        if (!empty($order->portfolio)) {
+                            $message .= "🌐 Portfolio: {$order->portfolio}\n";
+                        }
+
+                        // Cover Letter
+                        $message .= "\n📄 Cover Letter:\n";
+                        $message .= "🎯 Target Role: {$order->coverRole}\n";
+                        $message .= "💡 Why Interested: {$order->coverWhy}\n";
+                        $message .= "💪 Strengths: {$order->coverStrengths}\n";
+
+                        $message .= "💰 Amount: {$order->amount}\n";
+                    }
+
+
+
+                    $admindetails = [
                         'subject' => $subject,
                         'message' => $message,
                         'order'   => $order,
                     ];
                     Mail::to($order->email)->send(new OrderMail($details));
+                    Mail::to(['georgemuemah@gmail.com', 'nancymunee@gmail.com'])->send(new OrderMail($admindetails));
                 }
             } else {
             }
