@@ -21,7 +21,7 @@
       <!-- Image -->
       <div class="flex justify-center">
         <img 
-          src="@/assets/why-choose-us.jpg" 
+          src="/img/why-choose-us.jpg" 
           alt="Why Choose Us" 
           class="rounded-lg shadow-lg max-h-[400px] object-cover"
         />

@@ -5,36 +5,36 @@ import { useAuthStore } from "@/stores/auth";
 import HomeLayout from "@/components/HomeLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
 
-
 const routes = [
   {
     path: "/",
     component: HomeLayout,
   },
- 
   {
     path: "/order-cv",
     name: "OrderCV",
     component: () => import("@/pages/CVOrder.vue"),
   },
-    {
-    path: "/custom-cv-order",
-    name: "CustomCVOrder",
-    component: () => import("@/pages/CustomCvOrder.vue"),
+  {
+    path: "/order-cv-from-scratch",
+    name: "OrderCVFromScratch",
+    component: () => import("@/pages/CVFromScratchOrder.vue"),
   },
-   { path: "/payment/:id", name: "PaymentPage", component: PaymentPage },
+  {
+    path: "/payment/:id",
+    name: "PaymentPage",
+    component: PaymentPage,
+  },
   {
     path: "/contact-us",
     name: "Contacts",
     component: () => import("@/pages/ContactUs.vue"),
   },
-{
+  {
     path: "/about-us",
     name: "AboutUs",
     component: () => import("@/pages/AboutUs.vue"),
   },
-
-
 ];
 
 const router = createRouter({
@@ -49,6 +49,7 @@ router.beforeEach(async (to, from, next) => {
     "/",
     "/payment/:id",
     "/order-cv",
+    "/order-cv-from-scratch",
     "/how-it-works",
     "/contact-us",
     "/about-us",
