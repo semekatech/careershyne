@@ -4,7 +4,7 @@
 
     <!-- Gray background only for the form section -->
     <section class="bg-gray-100 dark:bg-gray-900 py-12 min-h-screen">
-      <cvForm />
+      <CustomCvForm />
     </section>
 
     <!-- Footer stays white -->
@@ -15,7 +15,7 @@
 
 <script setup>
 import TheWelcome from "@/components/TheWelcome.vue";
-import cvForm from "@/components/CvOrderForm.vue";
+import CustomCvForm from "@/components/CustomCvForm.vue";
 import FooterSection from "@/components/FooterSection.vue";
 </script>
 
