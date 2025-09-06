@@ -18,7 +18,7 @@ const routes = [
    {
     path: "/customcv-order",
     name: "CustomOrders",
-    component: () => import("@/pages/CustomOrderCV.vue"),
+    component: () => import("@/pages/CVOrder.vue"),
   },
   {
     path: "/payment/:id",
