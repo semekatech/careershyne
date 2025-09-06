@@ -51,6 +51,7 @@ router.beforeEach(async (to, from, next) => {
     "/order-cv",
     "/how-it-works",
     "/contact-us",
+    "/about-us",
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
