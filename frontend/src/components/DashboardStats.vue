@@ -56,7 +56,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import DashboardService from "@/services/promoterdashboardService";
+import DashboardService from "@/services/dashboardService";
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 const pendingRequests = ref(0);
