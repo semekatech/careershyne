@@ -5,7 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\AuthController;
 
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
 Route::post('/payments/initiate', [PaymentController::class, 'initiate']);

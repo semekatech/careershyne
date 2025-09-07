@@ -14,4 +14,4 @@ import FooterSection from "@/components/FooterSection.vue";
 import { useVisitorLogger } from "@/composables/useVisitorLogger";
 useVisitorLogger("PaymentPage");
 </script>
-
+ 

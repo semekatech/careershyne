@@ -4,7 +4,10 @@ import { useAuthStore } from "@/stores/auth";
 // Layouts
 import HomeLayout from "@/components/HomeLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
-
+import AuthLayout from "@/layouts/AuthLayout.vue";
+import DashboardLayout from "@/layouts/DashboardLayout.vue";
+// Pages
+import LoginPage from "@/pages/LoginPage.vue";
 const routes = [
   {
     path: "/",
@@ -15,7 +18,7 @@ const routes = [
     name: "OrderCV",
     component: () => import("@/pages/CVOrder.vue"),
   },
-   {
+  {
     path: "/custom-cv-order",
     name: "CustomOrders",
     component: () => import("@/pages/CustomCV.vue"),
@@ -35,6 +38,17 @@ const routes = [
     name: "AboutUs",
     component: () => import("@/pages/AboutUs.vue"),
   },
+  //backend
+  {
+    path: "/admin",
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        component: LoginPage,
+      },
+    ],
+  },
 ];
 
 const router = createRouter({
@@ -49,6 +63,7 @@ router.beforeEach(async (to, from, next) => {
     "/",
     "/payment/:id",
     "/order-cv",
+    "/admin",
     "/how-it-works",
     "/custom-cv-order",
     "/contact-us",
@@ -57,7 +72,6 @@ router.beforeEach(async (to, from, next) => {
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
   );
-
 
   if (!isPublic && !auth.token) {
     return next("/login");
