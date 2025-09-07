@@ -6,6 +6,7 @@ import HomeLayout from "@/components/HomeLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
+import DashboardHome from "@/pages/DashboardHome.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
 const routes = [
@@ -46,6 +47,19 @@ const routes = [
       {
         path: "",
         component: LoginPage,
+      },
+    ],
+  },
+   {
+    path: "/dashboard",
+    component: DashboardLayout,
+    meta: {
+      title: "Dashboard",
+    },
+    children: [
+      {
+        path: "",
+        component: DashboardHome,
       },
     ],
   },
