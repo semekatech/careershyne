@@ -17,6 +17,8 @@
 import TheWelcome from "@/components/TheWelcome.vue";
 import CustomCvForm from "@/components/CustomCvForm.vue";
 import FooterSection from "@/components/FooterSection.vue";
+import { useVisitorLogger } from "@/composables/useVisitorLogger";
+useVisitorLogger("CustomCV");
 </script>
 
 <style scoped>
