@@ -1,11 +1,10 @@
 import axios from "axios";
 
-export const logVisitor = async () => {
+export const logVisitor = async (page) => {
   try {
     const res = await axios.post("https://careershyne.com/api/log-visitor", {
-      page,
+      page: page, 
     });
-    F;
     return res.data;
   } catch (error) {
     console.error("Error logging visitor:", error);
