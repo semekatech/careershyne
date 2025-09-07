@@ -61,7 +61,7 @@ class PaymentController extends Controller
         $Timestamp = date("YmdHis");
         // $Timestamp = date('YYYYMMDDHHis');
         $PartyA = $phonenumber;
-        $Amount = 1;
+        $Amount = $amount;
         $CallBackURL = "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551";
         $AccountReference = $account_number;
         $TransactionDesc = "Subscription ";
