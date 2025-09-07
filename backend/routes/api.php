@@ -31,5 +31,10 @@ Route::post('/log-visitor', function (Request $request) {
         'visited_at' => now(),
     ]);
 
+
+
+
     return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
 });
+//Dashboard apis
+Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
