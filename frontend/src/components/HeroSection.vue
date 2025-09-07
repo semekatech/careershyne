@@ -30,7 +30,7 @@
           <div class="flex flex-col sm:flex-row gap-4">
             <!-- Outline Button -->
             <a
-              href="mailto:?subject=Free%20CV%20Review"
+              href="mailto:info@careershyne.com?subject=Free%20CV%20Review"
               class="px-6 py-3 rounded-lg border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition inline-block text-center font-medium"
             >
               Get a Free CV Review

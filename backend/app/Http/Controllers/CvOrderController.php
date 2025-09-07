@@ -58,7 +58,7 @@ class CvOrderController extends Controller
             'experience' => $request->input('experience'),
             'certifications' => $request->input('certifications'),
         ]);
-              info('education'.$request->input('education'));
+            //   info('education'.$request->input('education'));
         return response()->json([
             'message' => 'CV Order submitted successfully!',
             'id'      => $orderID,
@@ -78,4 +78,6 @@ class CvOrderController extends Controller
             ]
         ], 200);
     }
+
+
 }
