@@ -15,7 +15,7 @@ Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
 
 
 Route::post('/log-visitor', function (Request $request) {
-    $ip = $request->ip();
+    $ip = $request->input('ip', $request->ip()); // ✅ use frontend IP if available
     $userAgent = $request->header('User-Agent');
     $page = $request->input('page', 'unknown');
 
@@ -26,5 +26,5 @@ Route::post('/log-visitor', function (Request $request) {
         'visited_at' => now(),
     ]);
 
-    return response()->json(['message' => 'Visitor logged', 'page' => $page]);
+    return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
 });
