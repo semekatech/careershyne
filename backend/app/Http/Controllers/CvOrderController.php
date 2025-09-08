@@ -92,4 +92,45 @@ class CvOrderController extends Controller
         $orders= CvOrder::orderByDesc('id')->get();
         return response()->json(['orders' => $orders], 200);
     }
+
+     public function storeOrder(Request $request)
+    {
+        // basic validation
+        $validated = $request->validate([
+            'fullname' => 'required|string|max:255',
+            'email'    => 'required|email',
+            'type'     => 'required|string',
+            'phone'    => 'required|string|max:20',
+            'cv'       => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        // store uploaded CV if provided
+        $cvPath = null;
+        if ($request->hasFile('cv')) {
+            $cvPath = $request->file('cv')->store('cv_uploads', 'public');
+        }
+
+        // determine amount
+        $amount = $validated['amount'];
+
+        $orderID = \Nette\Utils\Random::generate(7, '0-9');
+
+        // save order
+        $cvOrder = CvOrder::create([
+            'fullname'   => $validated['fullname'],
+            'email'      => $validated['email'],
+            'phone'      => $validated['phone'],
+            'type'       => $validated['type'],
+            'amount'     => $amount,
+            'orderID'    => $orderID,
+            'status'     => 'pending',
+            'cv_path'    => $cvPath,,
+        ]);
+            //   info('education'.$request->input('education'));
+        return response()->json([
+            'message' => 'CV Order submitted successfully!',
+            'id'      => $orderID,
+            'data'    => $cvOrder,
+        ], 201);
+    }
 }

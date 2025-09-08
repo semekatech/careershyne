@@ -212,12 +212,22 @@
             <label class="block text-gray-700 font-medium">Amount</label>
             <input
               v-model="form.amount"
-              type="amount"
+              type="number"
               placeholder="Amount"
               required
               class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
             />
           </div>
+
+          <label class="block text-gray-700 font-medium">Type</label>
+          <select
+            v-model="form.type"
+            class="w-full px-3 py-2 border rounded-lg"
+          >
+            <option value="cv">CV Customization</option>
+            <option value="cvscratch">CV Writing</option>
+            <option value="coverletter">Cover Letter</option>
+          </select>
 
           <!-- CV Upload -->
           <div>
@@ -336,28 +346,31 @@ const isFormValid = computed(() => {
     form.value.fullname &&
     form.value.email &&
     form.value.phone &&
+    form.value.type &&
     form.value.amount
   );
 });
-
+const form = ref({
+  fullname: "",
+  email: "",
+  phone: "",
+  amount: "",
+  type: "",
+  cv: null,
+});
 // Submit form
 async function submitForm() {
   loading.value = true;
   successMessage.value = "";
   errorMessage.value = "";
-  const form = ref({
-    fullname: "",
-    email: "",
-    phone: "",
-    amount: "",
-    cv: null,
-  });
+
   try {
     const fd = new FormData();
     fd.append("fullname", form.value.fullname);
     fd.append("amount", form.value.amount);
     fd.append("email", form.value.email);
     fd.append("phone", form.value.phone);
+    fd.append("type", form.value.type);
 
     if (form.value.cv) {
       fd.append("cv", form.value.cv);

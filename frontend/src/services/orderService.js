@@ -3,8 +3,8 @@ import axios from "axios";
 const API_URL = "https://careershyne.com/api/orders";
 
 export default {
-  post: (formData) => {
-    return axios.post(`${API_URL}/register`, formData, {
+  store: (formData) => {
+    return axios.post(`${API_URL}/save`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },

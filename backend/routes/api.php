@@ -45,5 +45,6 @@ Route::prefix('orders')->group(function () {
     Route::get('/get/{id}', [CvOrderController::class, 'show']);
     Route::get('/all', [CvOrderController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
+     Route::put('/save', [CvOrderController::class, 'storeOrder']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
