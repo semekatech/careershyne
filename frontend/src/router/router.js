@@ -7,6 +7,7 @@ import PaymentPage from "@/pages/PaymentPage.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
 import DashboardHome from "@/pages/DashboardHome.vue";
+import ManageOrders from "@/pages/ManageOrders.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
 const routes = [
@@ -60,6 +61,19 @@ const routes = [
       {
         path: "",
         component: DashboardHome,
+      },
+    ],
+  },
+   {
+    path: "/manage-orders",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Orders",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageOrders,
       },
     ],
   },

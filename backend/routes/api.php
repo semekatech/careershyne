@@ -38,3 +38,11 @@ Route::post('/log-visitor', function (Request $request) {
 });
 //Dashboard apis
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
+Route::prefix('orders')->group(function () {
+    Route::post('/register', [CvOrderController::class, 'store']);
+    Route::post('/update/{id}', [CvOrderController::class, 'update']);
+    Route::get('/get/{id}', [CvOrderController::class, 'show']);
+    Route::get('/all', [CvOrderController::class, 'fetchAll']);
+    Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
+    // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
+});

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CvOrder;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Nette\Utils\Random;
 
@@ -80,4 +81,15 @@ class CvOrderController extends Controller
     }
 
 
+
+ public function fetchAll(Request $request)
+    {
+        $token = $request->bearerToken();
+        $user = User::where('api_token', hash('sha256', $token))->first();
+         if(!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $orders= CvOrder::orderByDesc('id')->get();
+        return response()->json(['orders' => $orders], 200);
+    }
 }

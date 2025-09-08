@@ -6,7 +6,7 @@
       <aside
         v-if="isSidebarOpen || isDesktop"
         class="fixed inset-y-0 left-0 w-64 bg-blue-800 text-white z-30 md:relative md:flex md:flex-shrink-0"
-        style="background: #fd624e"
+        style="background:#2c3137"
       >
         <div class="flex flex-col h-full">
           <div class="flex items-center justify-center h-16 px-4">
@@ -14,7 +14,7 @@
               <span
                 class="self-center text-xl font-semibold whitespace-nowrap text-white bg-clip-text text-transparent"
               >
-                <strong>KOLAB PORTAL</strong>
+                <strong>CAREER PORTAL</strong>
               </span>
             </a>
             <!-- Close button on small screens -->
@@ -42,48 +42,11 @@
             </a>
 
             <a
-              v-if="auth.user?.role === 'brand'"
-              href="/manage-campaigns"
+              href="/manage-orders"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
               <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
-              Campaigns
-            </a>
-
-            <a
-              v-if="auth.user?.role === 'brand'"
-              href="/requests"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-            >
-              <font-awesome-icon :icon="['fas', 'inbox']" class="mr-3" />
-              Campaign Requests
-            </a>
-
-            <a
-              v-if="auth.user?.role === 'brand'"
-              href="#"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-            >
-              <font-awesome-icon :icon="['fas', 'users']" class="mr-3" />
-              Team
-            </a>
-
-            <!-- Show "My Requests" for promoters -->
-            <a
-              v-else-if="auth.user?.role === 'promoter'"
-              href="/my-requests"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-            >
-              <font-awesome-icon :icon="['fas', 'inbox']" class="mr-3" />
-              My Requests
-            </a>
-
-            <a
-              href="/subscription"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-            >
-              <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
-              Subscription
+              Manage Orders
             </a>
             <a
               href="/my-profile"
@@ -142,7 +105,7 @@
             <font-awesome-icon icon="bars" />
           </button>
           <h1
-            style="color: #fd624e"
+            style="color: #2c3137"
             class="text-xl font-semibold text-gray-800 ml-4"
           >
             {{ pageTitle }}
