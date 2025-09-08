@@ -124,7 +124,7 @@ class CvOrderController extends Controller
             'amount'     => $amount,
             'orderID'    => $orderID,
             'status'     => 'pending',
-            'cv_path'    => $cvPath,,
+            'cv_path'    => $cvPath,
         ]);
             //   info('education'.$request->input('education'));
         return response()->json([
