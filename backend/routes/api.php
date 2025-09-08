@@ -38,6 +38,7 @@ Route::post('/log-visitor', function (Request $request) {
 });
 //Dashboard apis
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
+Route::get('/me', [AuthController::class, 'userDetails']);
 Route::prefix('orders')->group(function () {
     Route::post('/register', [CvOrderController::class, 'store']);
     Route::post('/update/{id}', [CvOrderController::class, 'update']);
