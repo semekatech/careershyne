@@ -33,7 +33,6 @@ Route::post('/log-visitor', function (Request $request) {
 
 
 
-
     return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
 });
 //Dashboard apis

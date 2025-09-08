@@ -100,6 +100,7 @@ class CvOrderController extends Controller
             'fullname' => 'required|string|max:255',
             'email'    => 'required|email',
             'type'     => 'required|string',
+            'amount'=>'required|string',
             'phone'    => 'required|string|max:20',
             'cv'       => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
@@ -110,8 +111,6 @@ class CvOrderController extends Controller
             $cvPath = $request->file('cv')->store('cv_uploads', 'public');
         }
 
-        // determine amount
-        $amount = $validated['amount'];
 
         $orderID = \Nette\Utils\Random::generate(7, '0-9');
 
@@ -121,7 +120,7 @@ class CvOrderController extends Controller
             'email'      => $validated['email'],
             'phone'      => $validated['phone'],
             'type'       => $validated['type'],
-            'amount'     => $amount,
+            'amount'     => $validated['amount'],
             'orderID'    => $orderID,
             'status'     => 'pending',
             'cv_path'    => $cvPath,
