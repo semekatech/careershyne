@@ -32,14 +32,16 @@ const scrollToSection = (id) => {
         <div class="hidden lg:flex items-center space-x-8">
           <router-link to="/" class="nav-link" exact>Home</router-link>
           <router-link to="/about-us" class="nav-link">About Us</router-link>
+          <router-link to="/services" class="nav-link">Services</router-link>
+          <router-link to="/pricing" class="nav-link">Pricing</router-link>
 
           <!-- now scrolls to sections -->
-          <button @click="scrollToSection('services')" class="nav-link">
+          <!-- <button @click="scrollToSection('services')" class="nav-link">
             Services
           </button>
           <button @click="scrollToSection('pricing')" class="nav-link">
             Pricing
-          </button>
+          </button> -->
 
           <!-- <router-link to="/" class="nav-link">Resources</router-link> -->
           <router-link to="/contact-us" class="nav-link"
