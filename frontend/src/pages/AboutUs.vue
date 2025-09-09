@@ -48,5 +48,7 @@
 <script setup>
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/FooterSection.vue";
+import { useVisitorLogger } from "@/composables/useVisitorLogger";
+useVisitorLogger("AboutUs");
 </script>
 

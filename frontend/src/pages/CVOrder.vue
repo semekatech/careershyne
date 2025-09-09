@@ -1,22 +1,18 @@
 <template>
-  <main>
+  <main
+    class="bg-gradient-to-br from-rose-50 to-white dark:from-gray-900 dark:to-gray-800"
+  >
     <TheWelcome />
-
-    <!-- Gray background only for the form section -->
-    <section class="bg-gray-100 dark:bg-gray-900 py-12 min-h-screen">
-      <cvForm />
-    </section>
-
-    <!-- Footer stays white -->
+    <cvForm />
     <FooterSection />
   </main>
 </template>
-
-
 <script setup>
 import TheWelcome from "@/components/TheWelcome.vue";
 import cvForm from "@/components/CvOrderForm.vue";
 import FooterSection from "@/components/FooterSection.vue";
+import { useVisitorLogger } from "@/composables/useVisitorLogger";
+useVisitorLogger("CvRevamp");
 </script>
 
 <style scoped>
@@ -31,8 +27,6 @@ import FooterSection from "@/components/FooterSection.vue";
 .fade-leave-to {
   opacity: 0;
 }
-
-
 
 
 </style>

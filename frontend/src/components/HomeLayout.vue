@@ -18,4 +18,7 @@ import WhyChooseUs from "@/components/WhyChooseUs.vue";
 import Community from "@/components/Community.vue";
 import Pricing from "@/components/Pricing.vue";
 import FooterSection from "@/components/FooterSection.vue";
+import { useVisitorLogger } from "@/composables/useVisitorLogger";
+useVisitorLogger("HomePage");
 </script>
+

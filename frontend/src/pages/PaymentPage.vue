@@ -11,5 +11,7 @@
 import TheWelcome from "@/components/TheWelcome.vue";
 import PaymentForm from "@/components/CvOrderConfirmation.vue";
 import FooterSection from "@/components/FooterSection.vue";
+import { useVisitorLogger } from "@/composables/useVisitorLogger";
+useVisitorLogger("PaymentPage");
 </script>
-
+ 
