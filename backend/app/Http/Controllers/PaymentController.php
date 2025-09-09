@@ -388,4 +388,16 @@ class PaymentController extends Controller
             'message' => $message,
         ]);
     }
+
+
+    public function fetchPayment(Request $request)
+    {
+        $token = $request->bearerToken();
+        $user = User::where('api_token', hash('sha256', $token))->first();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $orders =MpesaPayment::orderByDesc('id')->get();
+        return response()->json(['orders' => $orders], 200);
+    }
 }

@@ -7,7 +7,7 @@
     <FooterSection />
   </main>
 </template>
-<script setup>
+<script setup >
 import TheWelcome from "@/components/TheWelcome.vue";
 import cvForm from "@/components/CvOrderForm.vue";
 import FooterSection from "@/components/FooterSection.vue";

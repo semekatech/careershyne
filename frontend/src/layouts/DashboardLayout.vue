@@ -48,6 +48,13 @@
               <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
               Manage Orders
             </a>
+              <a
+              href="/manage-payments"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
+              Manage Payments
+            </a>
             <a
               href="/my-profile"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"

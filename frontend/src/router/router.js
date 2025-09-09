@@ -8,6 +8,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
 import DashboardHome from "@/pages/DashboardHome.vue";
 import ManageOrders from "@/pages/ManageOrders.vue";
+import ManagePayments from "@/pages/ManagePayments.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
 const routes = [
@@ -49,7 +50,7 @@ const routes = [
     path: "/pricing",
     name: "Pricing",
     component: () => import("@/pages/Pricing.vue"),
-=======
+  },
   //backend
   {
     path: "/admin",
@@ -84,6 +85,19 @@ const routes = [
       {
         path: "",
         component: ManageOrders,
+      },
+    ],
+  },
+   {
+    path: "/manage-payments",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Payments",
+    },
+    children: [
+      {
+        path: "",
+        component: ManagePayments,
       },
     ],
   },
