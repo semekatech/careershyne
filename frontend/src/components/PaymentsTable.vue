@@ -38,29 +38,13 @@
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
-                Name
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
-              >
-                Email
-              </th>
-
-              <th
-                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
-              >
-                Phone
-              </th>
-
-              <th
-                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
-              >
                 OrderID
               </th>
+
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
-                Type
+                Amount
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
@@ -70,12 +54,12 @@
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
-                Status
+                Phone Number
               </th>
               <th
                 class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase"
               >
-                Actions
+                Date
               </th>
             </tr>
           </thead>
@@ -92,10 +76,10 @@
                 {{ order.amount }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                {{ order.transaction_date }}
+                {{ order.phonenumber }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                {{ order.phonenumber }}
+                {{ order.transaction_date }}
               </td>
             </tr>
           </tbody>
