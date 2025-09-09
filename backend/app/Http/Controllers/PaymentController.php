@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Nette\Utils\Random;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderMail;
+use App\Models\User;
 use DB;
 
 class PaymentController extends Controller
