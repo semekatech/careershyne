@@ -46,18 +46,18 @@
               >
                 Amount
               </th>
-              <th
+              <!-- <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
                 Amount
-              </th>
+              </th> -->
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
                 Phone Number
               </th>
               <th
-                class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
                 Date
               </th>
