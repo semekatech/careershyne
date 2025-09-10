@@ -6,6 +6,7 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\WhatsapController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -38,6 +39,7 @@ Route::post('/log-visitor', function (Request $request) {
 //Dashboard apis
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
 Route::get('/me', [AuthController::class, 'userDetails']);
+Route::post('/whatsapp-bot', [WhatsapController::class, 'index']);
 Route::prefix('orders')->group(function () {
     Route::post('/register', [CvOrderController::class, 'store']);
     Route::post('/update/{id}', [CvOrderController::class, 'update']);
