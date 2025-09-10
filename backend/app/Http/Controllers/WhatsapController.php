@@ -44,6 +44,7 @@ class WhatsapController extends Controller
 
             $this->sendMessage($phone, $message);
         }
+
     }
 
     public function sendMessage($phone, $message)
