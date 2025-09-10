@@ -27,12 +27,53 @@ class WhatsapController extends Controller
         $participant = $request->input('participant') ?: null;
         $responseMessage = '';
         $timestamp = now()->toDateTimeString();
-        // if (!$participant) {
-        //     $this->storeNumber($request->from, $name);
-        // }
+        if (!$participant) {
+            $this->prepareMessage($request->from, $message, $name);
+        }
     }
 
+    public function prepareMessage($phone, $message, $name)
+    {
+        if (strtolower($message) === 'cv') {
+            $message = "👋 Hello $name,\n";
+            $message .= "Unlock your career potential with our professional CV services. Please choose an option below:\n\n";
+            $message .= "1️⃣ CV Review – Get expert feedback on your CV\n";
+            $message .= "2️⃣ CV Customization – Tailor your CV for specific job roles\n";
+            $message .= "3️⃣ CV Writing – Have a professional CV crafted for you\n\n";
+            $message .= "👉 Reply with the number of your choice (e.g., *1*) to continue.";
 
+            $this->sendMessage($phone, $message);
+        }
+    }
+
+    public function sendMessage($phone, $message)
+    {
+        $apiUrl = 'https://ngumzo.com/v1/send-message';
+        $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
+        $data = [
+            'sender' => "254758428993",
+            'number' => $phone,
+            'message' => $message
+        ];
+        $ch = curl_init($apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'api-key: ' . $apiKey  // Include your API key here
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+        // Check for errors
+        if ($response === false) {
+            // Log the error (you can handle this more gracefully in production)
+            error_log('cURL Error: ' . curl_error($ch));
+        }
+        // Close the cURL session
+        curl_close($ch);
+        error_log('Response: ' . $response);
+    }
 
     public function fetchPayment(Request $request)
     {
