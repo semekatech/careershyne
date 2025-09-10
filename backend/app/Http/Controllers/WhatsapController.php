@@ -34,7 +34,19 @@ class WhatsapController extends Controller
 
     public function prepareMessage($phone, $message, $name)
     {
+        // Whitelist allowed numbers for testing (international format only)
+        $allowedPhones = [
+            '254705030613',   // George
+            '254703644281'    // Nancy
+        ];
+
+        if (!in_array($phone, $allowedPhones)) {
+            return $this->sendMessage($phone, "⚠️ Hi $name, this bot is currently in *testing mode* and not available for public use.");
+        }
+        
+        
         $messageLower = strtolower(trim($message));
+        $messageLower = preg_replace('/[^a-z0-9]/', '', $messageLower); 
 
         // Check if user already has a session
         $session = DB::table('whatsapp_sessions')->where('phone', $phone)->first();
@@ -49,11 +61,23 @@ class WhatsapController extends Controller
                 'updated_at' => now()
             ]);
 
-            $reply  = "👋 Hello $name,\n";
-            $reply .= "Unlock your career potential with our professional CV services. Please choose an option below:\n\n";
-            $reply .= "1️⃣ CV Review – Get expert feedback on your CV\n";
-            $reply .= "2️⃣ CV Customization – Tailor your CV for specific job roles\n";
-            $reply .= "3️⃣ CV Writing – Have a professional CV crafted for you\n\n";
+            $reply  = "👋 Hello $name, welcome to *Career Shyne*!\n\n";
+            $reply .= "We help you unlock your career potential with professional CV and cover letter services. 🚀\n\n";
+            $reply .= "Here are our packages (all include FREE CV review):\n\n";
+            $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
+            $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
+            $reply .= "   ✔ 1 tailored cover letter\n";
+            $reply .= "   ✔ Industry-specific adjustments\n\n";
+            $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
+            $reply .= "   ✔ CV crafted from scratch\n";
+            $reply .= "   ✔ Personalized cover letter\n";
+            $reply .= "   ✔ ATS-optimized formatting\n";
+            $reply .= "   ✔ Tailored to your career goals\n\n";
+            $reply .= "3️⃣ *Career Success Package (KES 500)*\n";
+            $reply .= "   ✔ 2 CV revamps (different roles/industries)\n";
+            $reply .= "   ✔ 2 customized cover letters\n";
+            $reply .= "   ✔ LinkedIn profile optimization\n";
+            $reply .= "   ✔ Recruiter visibility boost\n\n";
             $reply .= "👉 Reply with the number of your choice (e.g., *1*) to continue.";
 
             return $this->sendMessage($phone, $reply);
@@ -69,17 +93,47 @@ class WhatsapController extends Controller
                 ]);
             // Craft response based on chosen step
             switch ($messageLower) {
-                case '1':
-                    $reply = "✅ You chose *CV Review*. Our experts will review your CV and share feedback.";
-                    break;
-                case '2':
-                    $reply = "✅ You chose *CV Customization*. We’ll tailor your CV to match specific job roles.";
-                    break;
-                case '3':
-                    $reply = "✅ You chose *CV Writing*. A professional CV will be crafted for you from scratch.";
-                    break;
-            }
+                    case '1':
+                        $reply  = "✅ You chose *CV Revamp + Cover Letter (KES 200)*. Our experts will review your CV and share feedback.\n\n";
+                        $reply .= "👉 Proceed here: https://careershyne.com/order-cv\n\n";
+                        $reply .= "--------------------------------------\n";
+                        $reply .= "🔁 You can also choose another service:\n";
+                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        $reply .= "Reply with the number of your choice (e.g., *2*).";
+                        break;
 
+                    case '2':
+                        $reply  = "✅ You chose *CV from Scratch + Cover Letter (KES 300)*. We’ll tailor your CV to match specific job roles.\n\n";
+                        $reply .= "👉 Proceed here: https://careershyne.com/custom-cv-order\n\n";
+                        $reply .= "--------------------------------------\n";
+                        $reply .= "🔁 You can also choose another service:\n";
+                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        $reply .= "Reply with the number of your choice (e.g., *3*).";
+                        break;
+
+                    case '3':
+                        $reply  = "✅ You chose *Career Success Package (KES 500)*. Unlock your career potential with this premium option.\n\n";
+                        $reply .= "👉 Proceed here: https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne.\n\n";
+                        $reply .= "--------------------------------------\n";
+                        $reply .= "🔁 You can also choose another service:\n";
+                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        $reply .= "Reply with the number of your choice (e.g., *1*).";
+                        break;
+                }
+
+            return $this->sendMessage($phone, $reply);
+        }
+
+            // Handle invalid input
+        if ($session && !in_array($messageLower, ['1','2','3'])) {
+            $reply =  "❌ Invalid option.\n\n";
+            $reply .= "Please reply with *1*, *2*, or *3* to continue.";
             return $this->sendMessage($phone, $reply);
         }
         // Default fallback
