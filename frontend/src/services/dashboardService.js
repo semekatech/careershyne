@@ -16,7 +16,8 @@ export default {
         all: res.data.all,
         totalAmount: res.data.totalAmount,
         totalPendingAmount: res.data.totalPendingAmount,
-        totalApprovedAmount: res.data.totalApprovedAmount
+        totalApprovedAmount: res.data.totalApprovedAmount,
+        graphData: res.data.graphData,
       };
     } catch (error) {
       console.error("Error loading dashboard stats:", error);

@@ -23,7 +23,11 @@
     >
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-green-100 text-green-600">
-          <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
+         
+           <font-awesome-icon
+            :icon="['fas', 'hourglass-half']"
+            class="text-2xl"
+          />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Pending Orders</p>
@@ -40,7 +44,7 @@
     >
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-red-100 text-red-600">
-          <font-awesome-icon :icon="['fas', 'user-plus']" class="text-2xl" />
+          <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Approved Orders</p>
@@ -72,7 +76,11 @@
     >
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-green-100 text-green-600">
-          <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
+          
+           <font-awesome-icon
+            :icon="['fas', 'hourglass-half']"
+            class="text-2xl"
+          />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Pending</p>
@@ -89,7 +97,7 @@
     >
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-red-100 text-red-600">
-          <font-awesome-icon :icon="['fas', 'user-plus']" class="text-2xl" />
+         <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Received</p>
@@ -99,14 +107,17 @@
         </div>
       </div>
     </div>
+     <!-- Paid Orders Graph -->
+    <OrdersGraph :graphData="graphData" class="h-96" />
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from "vue";
 import DashboardService from "@/services/dashboardService";
 import { useAuthStore } from "@/stores/auth";
+import OrdersGraph from "@/components/OrdersGraph.vue";
+
 const auth = useAuthStore();
 const pendingRequests = ref(0);
 const approvedRequests = ref(0);
@@ -114,6 +125,8 @@ const totalAmount = ref(0);
 const totalPendingAmount = ref(0);
 const totalApprovedAmount = ref(0);
 const allRequests = ref(0);
+const graphData = ref([]);
+
 onMounted(async () => {
   await auth.refreshUser();
   try {
@@ -124,6 +137,7 @@ onMounted(async () => {
     totalAmount.value = stats.totalAmount;
     totalApprovedAmount.value = stats.totalApprovedAmount;
     totalPendingAmount.value = stats.totalPendingAmount;
+    graphData.value = stats.graphData; // ✅ set graph data
   } catch (error) {
     console.error("Failed to load dashboard stats:", error);
   }

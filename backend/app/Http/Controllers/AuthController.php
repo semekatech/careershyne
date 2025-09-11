@@ -72,38 +72,48 @@ class AuthController extends Controller
         ]);
     }
 
-    public function getStats(Request $request)
-    {
-        $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-        if ($user->role == 'radio') {
-            $all = CvOrder::where('ref', 'rd')->count();
-            $pending = CvOrder::where('ref', 'rd')->where('status', 'pending')->count();
-            $approved = CvOrder::where('ref', 'rd')->where('status', 'paid')->count();
-            $totalAmount = CvOrder::where('ref', 'rd')->sum('amount');
-            $totalPendingAmount = CvOrder::where('ref', 'rd')->where('status', 'pending')->sum('amount');
-            $totalApprovedAmount = CvOrder::where('ref', 'rd')->where('status', 'paid')->sum('amount');
-        } else {
 
-            $all = CvOrder::count();
-            $pending = CvOrder::where('status', 'pending')->count();
-            $approved = CvOrder::where('status', 'paid')->count();
-            $totalAmount = CvOrder::sum('amount');
-            $totalPendingAmount = CvOrder::where('status', 'pending')->sum('amount');
-            $totalApprovedAmount = CvOrder::where('status', 'paid')->sum('amount');
-        }
-        return response()->json([
-            'pending' => $pending,
-            'approved' => $approved,
-            'all' => $all,
-            'totalAmount'=>$totalAmount,
-            'totalPendingAmount'=>$totalPendingAmount,
-            'totalApprovedAmount'=>$totalApprovedAmount
-        ]);
+public function getStats(Request $request)
+{
+    $token = $request->bearerToken();
+    $user = User::where('api_token', hash('sha256', $token))->first();
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+
+    // ✅ Base query depends on role
+    $baseQuery = CvOrder::query();
+    if ($user->role === 'radio') {
+        $baseQuery->where('ref', 'rd');
+    }
+
+    // ✅ General stats
+    $all = (clone $baseQuery)->count();
+    $pending = (clone $baseQuery)->where('status', 'pending')->count();
+    $approved = (clone $baseQuery)->where('status', 'paid')->count();
+    $totalAmount = (clone $baseQuery)->sum('amount');
+    $totalPendingAmount = (clone $baseQuery)->where('status', 'pending')->sum('amount');
+    $totalApprovedAmount = (clone $baseQuery)->where('status', 'paid')->sum('amount');
+
+    // ✅ Graph Data: paid orders per day
+    $paidOrdersByDay = (clone $baseQuery)
+        ->where('status', 'paid')
+        ->selectRaw("DATE(created_at) as date, COUNT(*) as total_orders, SUM(amount) as total_amount")
+        ->groupBy('date')
+        ->orderBy('date', 'asc')
+        ->get();
+
+    return response()->json([
+        'pending' => $pending,
+        'approved' => $approved,
+        'all' => $all,
+        'totalAmount' => $totalAmount,
+        'totalPendingAmount' => $totalPendingAmount,
+        'totalApprovedAmount' => $totalApprovedAmount,
+        'graphData' => $paidOrdersByDay
+    ]);
+}
+
 
 
     public function userDetails(Request $request)
