@@ -41,7 +41,7 @@ class WhatsapController extends Controller
         ];
 
         if (!in_array($phone, $allowedPhones)) {
-            return $this->sendMessage($phone, "⚠️ Hi $name, this bot is currently in *testing mode* and not available for public use.");
+            // return $this->sendMessage($phone, "⚠️ Hi $name, this bot is currently in *testing mode* and not available for public use.");
         }
 
 
