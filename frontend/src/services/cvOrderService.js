@@ -9,11 +9,11 @@ export const submitCvOrder = async (form) => {
   formData.append("fullname", form.fullname);
   formData.append("email", form.email);
   formData.append("phone", form.phone);
-  formData.append("type", form.type); 
+  formData.append("type", form.type);
   if (form.cv) {
     formData.append("cv", form.cv);
   }
-
+  formData.append("ref", form.ref);
   // optional extended fields
   formData.append("location", form.location || "");
   formData.append("careerGoal", form.careerGoal || "");
@@ -34,7 +34,6 @@ export const submitCvOrder = async (form) => {
 
   return data;
 };
-
 
 // Get order by ID
 export const getCvOrder = async (id) => {

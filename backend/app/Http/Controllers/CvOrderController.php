@@ -45,7 +45,7 @@ class CvOrderController extends Controller
             'orderID'    => $orderID,
             'status'     => 'pending',
             'cv_path'    => $cvPath,
-
+            'ref'        => $request->input('ref') ?? 'direct',
             // store extended fields as JSON
             'location'   => $request->input('location'),
             'career_goal' => $request->input('careerGoal'),
@@ -59,7 +59,7 @@ class CvOrderController extends Controller
             'experience' => $request->input('experience'),
             'certifications' => $request->input('certifications'),
         ]);
-            //   info('education'.$request->input('education'));
+        //   info('education'.$request->input('education'));
         return response()->json([
             'message' => 'CV Order submitted successfully!',
             'id'      => $orderID,
@@ -82,25 +82,25 @@ class CvOrderController extends Controller
 
 
 
- public function fetchAll(Request $request)
+    public function fetchAll(Request $request)
     {
         $token = $request->bearerToken();
         $user = User::where('api_token', hash('sha256', $token))->first();
-         if(!$user) {
+        if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $orders= CvOrder::orderByDesc('id')->get();
+        $orders = CvOrder::orderByDesc('id')->get();
         return response()->json(['orders' => $orders], 200);
     }
 
-     public function storeOrder(Request $request)
+    public function storeOrder(Request $request)
     {
         // basic validation
         $validated = $request->validate([
             'fullname' => 'required|string|max:255',
             'email'    => 'required|email',
             'type'     => 'required|string',
-            'amount'=>'required|string',
+            'amount' => 'required|string',
             'phone'    => 'required|string|max:20',
             'cv'       => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
@@ -122,10 +122,11 @@ class CvOrderController extends Controller
             'type'       => $validated['type'],
             'amount'     => $validated['amount'],
             'orderID'    => $orderID,
+            'ref'        => $request->input('ref') ?? 'direct',
             'status'     => 'pending',
             'cv_path'    => $cvPath,
         ]);
-            //   info('education'.$request->input('education'));
+        //   info('education'.$request->input('education'));
         return response()->json([
             'message' => 'CV Order submitted successfully!',
             'id'      => $orderID,

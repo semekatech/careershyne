@@ -106,12 +106,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { submitCvOrder } from "@/services/cvOrderService";
 
 const router = useRouter();
+const route = useRoute();
 
 const form = ref({
   fullname: "",
@@ -130,9 +131,15 @@ const form = ref({
   coverWhy: "",
   coverStrengths: "",
   cv: null,
+  ref: "", // <-- added ref field
 });
 
 const loading = ref(false);
+
+// Capture ref query parameter on mount
+onMounted(() => {
+  form.value.ref = route.query.ref || "";
+});
 
 const addEducation = () => {
   form.value.education.push({ institution: "", degree: "", startDate: "", endDate: "" });
@@ -170,6 +177,7 @@ const submitForm = async () => {
   }
 };
 </script>
+
 
 <style>
 .input {

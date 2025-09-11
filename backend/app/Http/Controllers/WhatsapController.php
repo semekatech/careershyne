@@ -119,7 +119,7 @@ class WhatsapController extends Controller
 
                     case '3':
                         $reply  = "✅ You chose *Career Success Package (KES 500)*. Unlock your career potential with this premium option.\n\n";
-                        $reply .= "👉 Proceed here: https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne.\n\n";
+                        $reply .= "👉 Proceed here: https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareerShyne.\n\n";
                         // $reply .= "--------------------------------------\n";
                         // $reply .= "🔁 You can also choose another service:\n";
                         // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";

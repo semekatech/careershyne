@@ -82,12 +82,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import Swal from "sweetalert2";
 import { submitCvOrder } from "@/services/cvOrderService";
 
 const router = useRouter();
+const route = useRoute();
 
 const form = ref({
   fullname: "",
@@ -95,25 +96,32 @@ const form = ref({
   phone: "",
   type: "cv",
   cv: null,
+  ref: "", // <-- added ref here
 });
 
 const loading = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
 
+// Capture file
 const handleFileUpload = (e) => {
   form.value.cv = e.target.files[0];
 };
 
+// Validate form
 const isFormValid = computed(() => {
   return form.value.fullname && form.value.email && form.value.phone && form.value.cv;
 });
 
+onMounted(() => {
+  form.value.ref = route.query.ref || "";
+});
+
+// Submit form
 const submitForm = async () => {
   loading.value = true;
   successMessage.value = "";
   errorMessage.value = "";
-
   try {
     const data = await submitCvOrder(form.value);
     await Swal.fire({
@@ -126,7 +134,7 @@ const submitForm = async () => {
     });
     router.push({ name: "PaymentPage", params: { id: data.id } });
     // Reset form
-    form.value = { fullname: "", email: "", phone: "", type: "cv", cv: null };
+    form.value = { fullname: "", email: "", phone: "", type: "cv", cv: null, ref: "" };
     document.querySelector('input[type="file"]').value = "";
   } catch (err) {
     console.error(err);
@@ -137,6 +145,7 @@ const submitForm = async () => {
   }
 };
 </script>
+
 
 <style>
 .fade-enter-active,
