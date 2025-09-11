@@ -1,14 +1,10 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Total Orders -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-yellow-100 text-yellow-600">
-          <font-awesome-icon
-            :icon="['fas', 'hourglass-half']"
-            class="text-2xl"
-          />
+          <font-awesome-icon :icon="['fas', 'hourglass-half']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Orders</p>
@@ -17,31 +13,21 @@
       </div>
     </div>
 
-    <!-- Approved Requests -->
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Pending Orders -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-green-100 text-green-600">
-         
-           <font-awesome-icon
-            :icon="['fas', 'hourglass-half']"
-            class="text-2xl"
-          />
+          <font-awesome-icon :icon="['fas', 'hourglass-half']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Pending Orders</p>
-          <p class="text-3xl font-bold text-gray-800">
-            {{ pendingRequests }}
-          </p>
+          <p class="text-3xl font-bold text-gray-800">{{ pendingRequests }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Bid Limit -->
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Approved Orders -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-red-100 text-red-600">
           <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
@@ -53,15 +39,11 @@
       </div>
     </div>
 
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Total Expected -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-yellow-100 text-yellow-600">
-          <font-awesome-icon
-            :icon="['fas', 'hourglass-half']"
-            class="text-2xl"
-          />
+          <font-awesome-icon :icon="['fas', 'hourglass-half']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Expected</p>
@@ -70,45 +52,36 @@
       </div>
     </div>
 
-    <!-- Approved Requests -->
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Total Pending -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-green-100 text-green-600">
-          
-           <font-awesome-icon
-            :icon="['fas', 'hourglass-half']"
-            class="text-2xl"
-          />
+          <font-awesome-icon :icon="['fas', 'hourglass-half']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Pending</p>
-          <p class="text-3xl font-bold text-gray-800">
-            {{ totalPendingAmount }}
-          </p>
+          <p class="text-3xl font-bold text-gray-800">{{ totalPendingAmount }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Bid Limit -->
-    <div
-      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
-    >
+    <!-- Total Received -->
+    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
       <div class="flex items-center">
         <div class="p-4 rounded-full bg-red-100 text-red-600">
-         <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
+          <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Received</p>
-          <p class="text-3xl font-bold text-gray-800">
-            {{ totalApprovedAmount }}
-          </p>
+          <p class="text-3xl font-bold text-gray-800">{{ totalApprovedAmount }}</p>
         </div>
       </div>
     </div>
-     <!-- Paid Orders Graph -->
-    <OrdersGraph :graphData="graphData" class="h-96" />
+
+    <!-- Paid Orders Graph (full width) -->
+    <div class="col-span-1 md:col-span-2 lg:col-span-3">
+      <OrdersGraph :graphData="graphData" class="h-96 w-full" />
+    </div>
   </div>
 </template>
 
