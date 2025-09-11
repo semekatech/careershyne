@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white rounded-xl shadow-md p-6 h-96">
+  <div class="w-full bg-white rounded-xl shadow-md p-6 h-96">
     <h2 class="text-lg font-semibold text-gray-700 mb-4">Paid Orders (by Day)</h2>
-    <Line v-if="chartData" :data="chartData" :options="chartOptions" />
+    <Line v-if="chartData" :data="chartData" :options="chartOptions" class="w-full h-full" />
   </div>
 </template>
 
