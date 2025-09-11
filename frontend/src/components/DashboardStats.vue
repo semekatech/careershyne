@@ -51,7 +51,62 @@
         </div>
       </div>
     </div>
+
+      <div
+      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+    >
+      <div class="flex items-center">
+        <div class="p-4 rounded-full bg-yellow-100 text-yellow-600">
+          <font-awesome-icon
+            :icon="['fas', 'hourglass-half']"
+            class="text-2xl"
+          />
+        </div>
+        <div class="ml-5">
+          <p class="text-sm font-semibold text-gray-800">Total Expected</p>
+          <p class="text-3xl font-bold text-gray-800">{{ totalAmount }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approved Requests -->
+    <div
+      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+    >
+      <div class="flex items-center">
+        <div class="p-4 rounded-full bg-green-100 text-green-600">
+          <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
+        </div>
+        <div class="ml-5">
+          <p class="text-sm font-semibold text-gray-800">Total Pending</p>
+          <p class="text-3xl font-bold text-gray-800">
+            {{ totalPendingAmount }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bid Limit -->
+    <div
+      class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+    >
+      <div class="flex items-center">
+        <div class="p-4 rounded-full bg-red-100 text-red-600">
+          <font-awesome-icon :icon="['fas', 'user-plus']" class="text-2xl" />
+        </div>
+        <div class="ml-5">
+          <p class="text-sm font-semibold text-gray-800">Total Received</p>
+          <p class="text-3xl font-bold text-gray-800">{{
+              {{ totalApprovedAmount }}
+          }}</p>
+        </div>
+      </div>
+    </div>
   </div>
+
+
+
+  
 </template>
 
 

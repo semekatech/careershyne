@@ -14,6 +14,9 @@ export default {
         pending: res.data.pending,
         approved: res.data.approved,
         all: res.data.all,
+        totalAmount: res.data.totalAmount,
+        totalPendingAmount: res.data.totalPendingAmount,
+        totalApprovedAmount: res.data.totalApprovedAmount
       };
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
