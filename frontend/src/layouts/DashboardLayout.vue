@@ -182,7 +182,7 @@ const defaultAvatar = auth.user?.photo
 
 const handleLogout = () => {
   auth.clearToken();
-  router.push("/login");
+  router.push("/admin");
 };
 </script>
 
