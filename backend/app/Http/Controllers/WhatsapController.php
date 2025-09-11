@@ -43,10 +43,10 @@ class WhatsapController extends Controller
         if (!in_array($phone, $allowedPhones)) {
             return $this->sendMessage($phone, "⚠️ Hi $name, this bot is currently in *testing mode* and not available for public use.");
         }
-        
-        
+
+
         $messageLower = strtolower(trim($message));
-        $messageLower = preg_replace('/[^a-z0-9]/', '', $messageLower); 
+        $messageLower = preg_replace('/[^a-z0-9]/', '', $messageLower);
 
         // Check if user already has a session
         $session = DB::table('whatsapp_sessions')->where('phone', $phone)->first();
@@ -96,34 +96,36 @@ class WhatsapController extends Controller
                     case '1':
                         $reply  = "✅ You chose *CV Revamp + Cover Letter (KES 200)*. Our experts will review your CV and share feedback.\n\n";
                         $reply .= "👉 Proceed here: https://careershyne.com/order-cv\n\n";
-                        $reply .= "--------------------------------------\n";
-                        $reply .= "🔁 You can also choose another service:\n";
-                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        $reply .= "Reply with the number of your choice (e.g., *2*).";
+                        // $reply .= "--------------------------------------\n";
+                        // $reply .= "🔁 You can also choose another service:\n";
+                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        // $reply .= "Reply with the number of your choice (e.g., *2*).";
                         break;
 
                     case '2':
                         $reply  = "✅ You chose *CV from Scratch + Cover Letter (KES 300)*. We’ll tailor your CV to match specific job roles.\n\n";
                         $reply .= "👉 Proceed here: https://careershyne.com/custom-cv-order\n\n";
-                        $reply .= "--------------------------------------\n";
-                        $reply .= "🔁 You can also choose another service:\n";
-                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        $reply .= "Reply with the number of your choice (e.g., *3*).";
+                        // $reply .= "--------------------------------------\n";
+                        // $reply .= "🔁 You can also choose another service:\n";
+                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        // $reply .= "Reply with the number of your choice (e.g., *3*).";
                         break;
+
+
 
                     case '3':
                         $reply  = "✅ You chose *Career Success Package (KES 500)*. Unlock your career potential with this premium option.\n\n";
                         $reply .= "👉 Proceed here: https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne.\n\n";
-                        $reply .= "--------------------------------------\n";
-                        $reply .= "🔁 You can also choose another service:\n";
-                        $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        $reply .= "Reply with the number of your choice (e.g., *1*).";
+                        // $reply .= "--------------------------------------\n";
+                        // $reply .= "🔁 You can also choose another service:\n";
+                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
+                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
+                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
+                        // $reply .= "Reply with the number of your choice (e.g., *1*).";
                         break;
                 }
 
