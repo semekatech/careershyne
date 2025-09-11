@@ -146,7 +146,7 @@ class PaymentController extends Controller
             $url = "https://careershyne.com/payment/" . $orderID;
             $message = "Your order of #{$order->orderID} has not been processed. Kindly click {$url} to finalize the order.";
             $subject = 'Order Confirmation';
-
+            $this->sendMessage($order_detail->phone_number, $message);
             $details = [
                 'subject' => $subject,
                 'message' => $message,
@@ -327,24 +327,16 @@ class PaymentController extends Controller
         }
     }
 
-    public function sendMessage($sender, $to, $message)
+    public function sendMessage($phone, $message)
     {
         $apiUrl = 'https://ngumzo.com/v1/send-message';
-        $apiKey = 'qkv0Da9MPwOCeCyPOpnh2JR5QEJkw1';
-
-
-
-        // Prepare the data for the POST request
+        $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
         $data = [
-            'sender' => $sender,
-            'number' => $to,
-            'message' => $message // The welcome message
+            'sender' => "254758428993",
+            'number' => $phone,
+            'message' => $message
         ];
-
-        // Initialize cURL session
         $ch = curl_init($apiUrl);
-
-        // Set the cURL options
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
@@ -352,21 +344,16 @@ class PaymentController extends Controller
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
         // Execute the cURL request and get the response
         $response = curl_exec($ch);
-
         // Check for errors
         if ($response === false) {
             // Log the error (you can handle this more gracefully in production)
             error_log('cURL Error: ' . curl_error($ch));
         }
-
-        // Optionally log the response for debugging
-        error_log('Response: ' . $response);
-
         // Close the cURL session
         curl_close($ch);
+        error_log('Response: ' . $response);
     }
 
     public function checkStatus(Request $request)
@@ -398,7 +385,7 @@ class PaymentController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $orders =MpesaPayment::orderByDesc('id')->get();
+        $orders = MpesaPayment::orderByDesc('id')->get();
         return response()->json(['orders' => $orders], 200);
     }
 }
