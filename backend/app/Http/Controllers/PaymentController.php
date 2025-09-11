@@ -122,7 +122,6 @@ class PaymentController extends Controller
             info('Ngumzo token is missing');
             return response()->json(['error' => 'token is missing'], 400);
         }
-
         $failed = 0;
         info('confirmation started');
         $data = file_get_contents("php://input");

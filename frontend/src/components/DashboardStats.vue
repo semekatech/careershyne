@@ -1,4 +1,5 @@
 <template>
+
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
     <div
       class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
@@ -11,8 +12,8 @@
           />
         </div>
         <div class="ml-5">
-          <p class="text-sm font-semibold text-gray-800">Pending Requests</p>
-          <p class="text-3xl font-bold text-gray-800">{{ pendingRequests }}</p>
+          <p class="text-sm font-semibold text-gray-800">Total Orders</p>
+          <p class="text-3xl font-bold text-gray-800">{{ allRequests }}</p>
         </div>
       </div>
     </div>
@@ -26,9 +27,9 @@
           <font-awesome-icon :icon="['fas', 'check-circle']" class="text-2xl" />
         </div>
         <div class="ml-5">
-          <p class="text-sm font-semibold text-gray-800">Approved Requests</p>
+          <p class="text-sm font-semibold text-gray-800">Pending Orders</p>
           <p class="text-3xl font-bold text-gray-800">
-            {{ approvedRequests }}
+            {{ pendingRequests }}
           </p>
         </div>
       </div>
@@ -43,9 +44,9 @@
           <font-awesome-icon :icon="['fas', 'user-plus']" class="text-2xl" />
         </div>
         <div class="ml-5">
-          <p class="text-sm font-semibold text-gray-800">Requests Limit</p>
+          <p class="text-sm font-semibold text-gray-800">Approved Orders</p>
           <p class="text-3xl font-bold text-gray-800">{{
-            auth.user?.limit
+            approvedRequests
           }}</p>
         </div>
       </div>
@@ -61,14 +62,14 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 const pendingRequests = ref(0);
 const approvedRequests = ref(0);
-const teamMembers = ref(0);
+const allRequests = ref(0);
 onMounted(async () => {
    await auth.refreshUser();
   try {
     const stats = await DashboardService.getDashboardStats();
     pendingRequests.value = stats.pending;
     approvedRequests.value = stats.approved;
-    teamMembers.value = stats.team;
+    allRequests.value = stats.all;
   } catch (error) {
     console.error("Failed to load dashboard stats:", error);
   }

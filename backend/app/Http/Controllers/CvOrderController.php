@@ -59,6 +59,7 @@ class CvOrderController extends Controller
             'experience' => $request->input('experience'),
             'certifications' => $request->input('certifications'),
         ]);
+
         //   info('education'.$request->input('education'));
         return response()->json([
             'message' => 'CV Order submitted successfully!',
@@ -110,10 +111,7 @@ class CvOrderController extends Controller
         if ($request->hasFile('cv')) {
             $cvPath = $request->file('cv')->store('cv_uploads', 'public');
         }
-
-
         $orderID = \Nette\Utils\Random::generate(7, '0-9');
-
         // save order
         $cvOrder = CvOrder::create([
             'fullname'   => $validated['fullname'],

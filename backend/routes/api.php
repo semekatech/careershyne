@@ -37,6 +37,7 @@ Route::post('/log-visitor', function (Request $request) {
     return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
 });
 //Dashboard apis
+Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
 Route::get('/me', [AuthController::class, 'userDetails']);
 Route::post('/whatsapp-bot', [WhatsapController::class, 'index']);

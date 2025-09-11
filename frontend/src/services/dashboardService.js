@@ -5,7 +5,7 @@ const API_URL = "https://careershyne.com/api/dashboard";
 export default {
   async getDashboardStats() {
     try {
-      const res = await axios.get(`${API_URL}/promoter/stats`, {
+      const res = await axios.get(`${API_URL}/stats`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -13,7 +13,7 @@ export default {
       return {
         pending: res.data.pending,
         approved: res.data.approved,
-        team: res.data.team,
+        all: res.data.all,
       };
     } catch (error) {
       console.error("Error loading dashboard stats:", error);

@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use App\Mail\WelcomeUserMail;
+use App\Models\CvOrder;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -44,6 +45,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'photo' => $user->photo,
+                'role' => $user->role,
             ],
         ]);
     }
@@ -74,12 +76,22 @@ class AuthController extends Controller
     {
         $token = $request->bearerToken();
         $user = User::where('api_token', hash('sha256', $token))->first();
-        $campaigns = Campaign::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        if ($user->role == 'radio') {
+            $all = CvOrder::where('ref', 'rd')->count();
+            $pending = CvOrder::where('ref', 'rd')->where('status', 'pending')->count();
+            $approved = CvOrder::where('ref', 'rd')->where('status', 'paid')->count();
+        } else {
+            $all = CvOrder::count();
+            $pending = CvOrder::where('status', 'pending')->count();
+            $approved = CvOrder::where('status', 'paid')->count();
+        }
         return response()->json([
-            'campaigns' => Campaign::where('user_id', $user->id)->count(),
-            'pending' => Campaign::where('user_id', $user->id)->where('status', 3)->count(),
-            'approved' => Campaign::where('user_id', $user->id)->whereIn('status', [0, 1])->count(),
-            'team' => Bid::whereIn('campaign_id', $campaigns)->count(),
+            'pending' => $pending,
+            'approved' => $approved,
+            'all' => $all,
         ]);
     }
 
