@@ -6,8 +6,8 @@
         class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
       >
         <h2 class="text-lg font-semibold text-gray-800">Recent orders</h2>
-        <div>
-          <button
+        <div v-if="auth.user?.role != 'radio'">
+          <button  
             class="py-2 px-6 text-white rounded font-medium transition duration-500"
             :style="{ background: '#fd624e' }"
             @click="showModal = true"
@@ -72,7 +72,7 @@
               >
                 Status
               </th>
-              <th
+              <th  v-if="auth.user?.role != 'radio'"
                 class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase"
               >
                 Actions
@@ -126,7 +126,7 @@
                   {{ order.status }}
                 </span>
               </td>
-              <td
+              <td v-if="auth.user?.role != 'radio'"
                 class="px-6 py-4 whitespace-nowrap text-center flex justify-center gap-2"
               >
                 <a

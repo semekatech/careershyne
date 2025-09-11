@@ -90,7 +90,11 @@ class CvOrderController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $orders = CvOrder::orderByDesc('id')->get();
+        if ($user->role == 'radio') {
+            $orders = CvOrder::where('ref', 'rd')->orderByDesc('id')->get();
+        } else {
+            $orders = CvOrder::orderByDesc('id')->get();
+        }
         return response()->json(['orders' => $orders], 200);
     }
 
