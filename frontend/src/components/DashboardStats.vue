@@ -110,6 +110,9 @@ import { useAuthStore } from "@/stores/auth";
 const auth = useAuthStore();
 const pendingRequests = ref(0);
 const approvedRequests = ref(0);
+const totalAmount = ref(0);
+const totalPendingAmount = ref(0);
+const totalApprovedAmount = ref(0);
 const allRequests = ref(0);
 onMounted(async () => {
   await auth.refreshUser();
