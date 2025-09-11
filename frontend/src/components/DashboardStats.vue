@@ -96,9 +96,9 @@
         </div>
         <div class="ml-5">
           <p class="text-sm font-semibold text-gray-800">Total Received</p>
-          <p class="text-3xl font-bold text-gray-800">{{
+          <p class="text-3xl font-bold text-gray-800">
               {{ totalApprovedAmount }}
-          }}</p>
+          </p>
         </div>
       </div>
     </div>
