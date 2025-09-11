@@ -87,6 +87,7 @@ class AuthController extends Controller
             $totalPendingAmount = CvOrder::where('ref', 'rd')->where('status', 'pending')->sum('amount');
             $totalApprovedAmount = CvOrder::where('ref', 'rd')->where('status', 'paid')->sum('amount');
         } else {
+
             $all = CvOrder::count();
             $pending = CvOrder::where('status', 'pending')->count();
             $approved = CvOrder::where('status', 'paid')->count();

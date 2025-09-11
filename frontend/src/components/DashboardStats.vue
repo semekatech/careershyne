@@ -122,7 +122,7 @@ onMounted(async () => {
     approvedRequests.value = stats.approved;
     allRequests.value = stats.all;
     totalAmount.value = stats.totalAmount;
-    totalPendingAmount.value = stats.totalApprovedAmount;
+    totalApprovedAmount.value = stats.totalApprovedAmount;
     totalPendingAmount.value = stats.totalPendingAmount;
   } catch (error) {
     console.error("Failed to load dashboard stats:", error);
