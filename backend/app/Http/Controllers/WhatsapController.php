@@ -35,21 +35,21 @@ class WhatsapController extends Controller
     public function prepareMessage($phone, $message, $name)
     {
         // Whitelist allowed numbers for testing (international format only)
-        $allowedPhones = [
-            '254705030613',   // George
-            '254703644281'    // Nancy
-        ];
+        $allowedPhones = ['254705030613', '254703644281']; 
 
+        // Completely ignore non-campaign users
         if (!in_array($phone, $allowedPhones)) {
-            // return $this->sendMessage($phone, "⚠️ Hi $name, this bot is currently in *testing mode* and not available for public use.");
+            return null; 
         }
 
-
+        // Normalize message: lowercase
         $messageLower = strtolower(trim($message));
-        $messageLower = preg_replace('/[^a-z0-9]/', '', $messageLower);
-
-        // Check if user already has a session
-        $session = DB::table('whatsapp_sessions')->where('phone', $phone)->first();
+    
+        // Check if user already has a campaign session
+        $session = DB::table('whatsapp_sessions')
+            ->where('phone', $phone)
+            ->where('campaign', 'rlv_sept2025')
+            ->first();
 
         // If user types "cv" and has no session, create one
         if ($messageLower === 'cv' && !$session) {
@@ -57,90 +57,63 @@ class WhatsapController extends Controller
                 'name' => $name,
                 'phone' => $phone,
                 'step' => 'initial',
+                'campaign' => 'rlv_sept2025',
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
             $reply  = "👋 Hello $name, welcome to *Career Shyne*!\n\n";
-            $reply .= "We help you unlock your career potential with professional CV and cover letter services. 🚀\n\n";
-            $reply .= "Here are our packages (all include FREE CV review):\n\n";
+            $reply .= "We help you unlock your career potential with professional CV and cover letter services.\n\n";
+            $reply .= "Here are our packages (all include FREE CV review and job application support):\n\n";
+
             $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
             $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
             $reply .= "   ✔ 1 tailored cover letter\n";
             $reply .= "   ✔ Industry-specific adjustments\n\n";
+        
             $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
             $reply .= "   ✔ CV crafted from scratch\n";
             $reply .= "   ✔ Personalized cover letter\n";
             $reply .= "   ✔ ATS-optimized formatting\n";
             $reply .= "   ✔ Tailored to your career goals\n\n";
-            $reply .= "3️⃣ *Career Success Package (KES 500)*\n";
-            $reply .= "   ✔ 2 CV revamps (different roles/industries)\n";
-            $reply .= "   ✔ 2 customized cover letters\n";
-            $reply .= "   ✔ LinkedIn profile optimization\n";
-            $reply .= "   ✔ Recruiter visibility boost\n\n";
-            $reply .= "👉 Reply with the number of your choice (e.g., *1*) to continue.";
+
+            $reply .= "👉 Reply with *1* or *2* to continue.";
 
             return $this->sendMessage($phone, $reply);
         }
 
-        // If user already has a session and replies with 1,2,3 update step
-        if ($session && in_array($messageLower, ['1', '2', '3'])) {
+        // If user already has a session and replies with 1 or 2, update step
+        if ($session && in_array($messageLower, ['1', '2'])) {
             DB::table('whatsapp_sessions')
                 ->where('phone', $phone)
+                ->where('campaign', 'rlv_sept2025')
                 ->update([
                     'step' => $messageLower,
                     'updated_at' => now()
                 ]);
+            
             // Craft response based on chosen step
             switch ($messageLower) {
-                    case '1':
-                        $reply  = "✅ You chose *CV Revamp + Cover Letter (KES 200)*. Our experts will review your CV and share feedback.\n\n";
-                        $reply .= "👉 Proceed here: https://careershyne.com/order-cv\n\n";
-                        // $reply .= "--------------------------------------\n";
-                        // $reply .= "🔁 You can also choose another service:\n";
-                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        // $reply .= "Reply with the number of your choice (e.g., *2*).";
-                        break;
+                case '1':
+                    $reply  = "✅ You chose *CV Revamp + Cover Letter (KES 200)*.\n";
+                    $reply .= "You’ll get ATS-friendly CV writing, a tailored cover letter, and job application guidance.\n\n";
+                    $reply .= "👉 Proceed here: https://careershyne.com/order-cv?ref=rd";
+                    break;
 
-                    case '2':
-                        $reply  = "✅ You chose *CV from Scratch + Cover Letter (KES 300)*. We’ll tailor your CV to match specific job roles.\n\n";
-                        $reply .= "👉 Proceed here: https://careershyne.com/custom-cv-order\n\n";
-                        // $reply .= "--------------------------------------\n";
-                        // $reply .= "🔁 You can also choose another service:\n";
-                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        // $reply .= "Reply with the number of your choice (e.g., *3*).";
-                        break;
-
-
-
-                    case '3':
-                        $reply  = "✅ You chose *Career Success Package (KES 500)*. Unlock your career potential with this premium option.\n\n";
-                        $reply .= "👉 Proceed here: https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareerShyne.\n\n";
-                        // $reply .= "--------------------------------------\n";
-                        // $reply .= "🔁 You can also choose another service:\n";
-                        // $reply .= "1️⃣ CV Revamp + Cover Letter (KES 200)\n";
-                        // $reply .= "2️⃣ CV from Scratch + Cover Letter (KES 300)\n";
-                        // $reply .= "3️⃣ Career Success Package (KES 500)\n\n";
-                        // $reply .= "Reply with the number of your choice (e.g., *1*).";
-                        break;
-                }
+                case '2':
+                    $reply  = "✅ You chose *CV from Scratch + Cover Letter (KES 300)*.\n";
+                    $reply .= "You’ll get a CV crafted from scratch (ATS-optimized), a personalized cover letter, and full job application support.\n\n";
+                    $reply .= "👉 Proceed here: https://careershyne.com/custom-cv-order?ref=rd";
+                    break;
+            }
 
             return $this->sendMessage($phone, $reply);
         }
 
-            // Handle invalid input
-        if ($session && !in_array($messageLower, ['1','2','3'])) {
-            $reply =  "❌ Invalid option.\n\n";
-            $reply .= "Please reply with *1*, *2*, or *3* to continue.";
-            return $this->sendMessage($phone, $reply);
-        }
-        // Default fallback
+        // Default fallback: silently ignore other inputs
         return null;
     }
+
 
     public function sendMessage($phone, $message)
     {
