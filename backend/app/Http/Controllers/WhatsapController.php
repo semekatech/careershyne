@@ -16,7 +16,8 @@ class WhatsapController extends Controller
 
     public function index(Request $request)
     {
-        info('Data received: ' . collect($request->all()));
+
+        // info('Data received: ' . collect($request->all()));
         // Set the response header
         header('Content-Type: application/xml');
         // Retrieve POST data
@@ -35,16 +36,16 @@ class WhatsapController extends Controller
     public function prepareMessage($phone, $message, $name)
     {
         // Whitelist allowed numbers for testing (international format only)
-        $allowedPhones = ['254705030613', '254703644281']; 
+        $allowedPhones = ['254705030613', '254703644281'];
 
         // Completely ignore non-campaign users
         if (!in_array($phone, $allowedPhones)) {
-            return null; 
+            return null;
         }
 
         // Normalize message: lowercase
         $messageLower = strtolower(trim($message));
-    
+
         // Check if user already has a campaign session
         $session = DB::table('whatsapp_sessions')
             ->where('phone', $phone)
@@ -70,7 +71,7 @@ class WhatsapController extends Controller
             $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
             $reply .= "   ✔ 1 tailored cover letter\n";
             $reply .= "   ✔ Industry-specific adjustments\n\n";
-        
+
             $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
             $reply .= "   ✔ CV crafted from scratch\n";
             $reply .= "   ✔ Personalized cover letter\n";
@@ -91,7 +92,7 @@ class WhatsapController extends Controller
                     'step' => $messageLower,
                     'updated_at' => now()
                 ]);
-            
+
             // Craft response based on chosen step
             switch ($messageLower) {
                 case '1':
