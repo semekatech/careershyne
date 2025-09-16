@@ -51,6 +51,11 @@ const routes = [
     name: "Pricing",
     component: () => import("@/pages/Pricing.vue"),
   },
+   {
+    path: "/ai",
+    name: "AI",
+    component: () => import("@/pages/AiReview.vue"),
+  },
   //backend
   {
     path: "/admin",
@@ -122,6 +127,7 @@ router.beforeEach(async (to, from, next) => {
     "/about-us",
     "/services",
     "/pricing",
+    "/ai"
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
