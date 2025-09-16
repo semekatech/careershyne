@@ -50,9 +50,7 @@
             </p>
 
             <!-- Progress Bar -->
-            <div
-              class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2"
-            >
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
               <div
                 class="bg-orange-500 h-2 rounded-full transition-all duration-500"
                 :style="{ width: progress + '%' }"
@@ -73,11 +71,15 @@
           </div>
         </div>
 
-        <!-- RIGHT: Blank Space for Future Details -->
+        <!-- RIGHT: CV Feedback -->
         <div
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-10 min-h-[350px] flex items-center justify-center"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-10 min-h-[350px] flex items-start justify-start overflow-y-auto"
         >
-          <p class="text-gray-400 dark:text-gray-500 italic">
+          <div v-if="review" class="text-gray-800 dark:text-gray-200 space-y-4 w-full">
+            <h4 class="text-xl font-semibold text-orange-500 mb-2">AI Review</h4>
+            <pre class="whitespace-pre-wrap text-sm leading-relaxed">{{ review }}</pre>
+          </div>
+          <p v-else class="text-gray-400 dark:text-gray-500 italic">
             CV details & feedback will appear here...
           </p>
         </div>
@@ -87,16 +89,19 @@
 
   <FooterSection />
 </template>
+
 <script setup>
 import { ref } from "vue";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/FooterSection.vue";
 import UploadService from "@/services/UploadService";
+
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
 const progress = ref(0);
 const uploading = ref(false);
+const review = ref(""); // 🔥 to store AI response
 
 function triggerFileInput() {
   fileInput.value.click();
@@ -125,7 +130,7 @@ async function uploadFile() {
     });
 
     console.log("Upload successful:", response.data);
-    alert("Upload complete!");
+    review.value = response.data.review; // 🔥 show review
   } catch (error) {
     console.error("Upload failed:", error);
     alert("Upload failed!");
