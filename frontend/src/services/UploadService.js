@@ -1,7 +1,7 @@
 // UploadService.js
 import axios from "axios";
 
-const API = "https://careershyne.com/api/ai/upload/";
+const API = "https://careershyne.com/api/ai/upload";
 
 export default {
   uploadFile: (file, onUploadProgress) => {

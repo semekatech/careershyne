@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\CvOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
@@ -49,5 +50,9 @@ Route::prefix('orders')->group(function () {
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [CvOrderController::class, 'storeOrder']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
+    // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
+});
+Route::prefix('ai')->group(function () {
+    Route::post('/upload', [AiController::class, 'uploadCV']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
