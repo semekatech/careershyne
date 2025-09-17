@@ -18,10 +18,9 @@ class WhatsapController extends Controller
     {
         header('Content-Type: application/xml');
 
-        $device      = $request->input('device');
-        $message     = $request->input('message');
-        $phone       = $request->input('from');
-        $name        = $request->input('name');
+        $message = $request->input('message');
+        $phone   = $request->input('from');
+        $name    = $request->input('name');
         $participant = $request->input('participant') ?: null;
 
         if (!$participant) {
@@ -31,7 +30,7 @@ class WhatsapController extends Controller
 
     public function prepareMessage($phone, $message, $name)
     {
-        // ✅ Whitelist allowed numbers for testing
+        // Whitelist allowed numbers for testing
         $allowedPhones = ['254705030613', '254703644281'];
         if (!in_array($phone, $allowedPhones)) {
             return null;
@@ -39,7 +38,7 @@ class WhatsapController extends Controller
 
         $messageLower = strtolower(trim($message));
 
-        // ✅ Check for existing session
+        // Check for existing session
         $session = DB::table('whatsapp_sessions')
             ->where('phone', $phone)
             ->where('campaign', 'rlv_sept2025')
@@ -50,7 +49,7 @@ class WhatsapController extends Controller
          */
         if ($messageLower === 'cv') {
             if (!$session) {
-                // Create a fresh session
+                // Create new session
                 DB::table('whatsapp_sessions')->insert([
                     'name'       => $name,
                     'phone'      => $phone,
@@ -60,7 +59,8 @@ class WhatsapController extends Controller
                     'updated_at' => now()
                 ]);
             }
-            // Reply with package list (whether new or existing session)
+
+            // Reply with package list
             return $this->sendMessage($phone, $this->getPackageList($name));
         }
 
@@ -68,28 +68,34 @@ class WhatsapController extends Controller
          * CASE 2: User sends "1" or "2"
          */
         if (in_array($messageLower, ['1', '2'])) {
-            if ($session) {
-                // Update existing session
-                DB::table('whatsapp_sessions')
-                    ->where('phone', $phone)
-                    ->where('campaign', 'rlv_sept2025')
-                    ->update([
-                        'step'       => $messageLower,
-                        'updated_at' => now()
-                    ]);
-            } else {
-                // No session yet → create one directly
+            if (!$session) {
+                // New user sent 1 or 2 → show initial page first
                 DB::table('whatsapp_sessions')->insert([
                     'name'       => $name,
                     'phone'      => $phone,
-                    'step'       => $messageLower,
+                    'step'       => 'initial',
                     'campaign'   => 'rlv_sept2025',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
+                $reply = "👋 Hello $name!\n\n"
+                    . "It looks like you want a CV service, but let's start with our packages first:\n\n"
+                    . $this->getPackageList($name);
+
+                return $this->sendMessage($phone, $reply);
             }
 
-            // Craft response
+            // Existing session → update step
+            DB::table('whatsapp_sessions')
+                ->where('phone', $phone)
+                ->where('campaign', 'rlv_sept2025')
+                ->update([
+                    'step'       => $messageLower,
+                    'updated_at' => now()
+                ]);
+
+            // Craft response based on choice
             $reply = match ($messageLower) {
                 '1' => "✅ You chose *CV Revamp + Cover Letter (KES 200)*.\n"
                     . "You’ll get ATS-friendly CV writing, a tailored cover letter, and job application guidance.\n\n"
@@ -104,27 +110,25 @@ class WhatsapController extends Controller
         }
 
         /**
-         * CASE 3: Fallback for other inputs
+         * CASE 3: Invalid input
          */
         if (!$session) {
-            // If no session, guide them to start
+            // No session → guide to start with "cv"
             $reply = "👋 Hello $name!\n\n"
                 . "To get started, type *cv* and we’ll show you our CV packages.";
             return $this->sendMessage($phone, $reply);
         }
 
-        // Otherwise, ignore silently or handle additional flow
+        // Session exists but input is invalid → optional fallback
         return null;
     }
 
     /**
-     * Helper: Get package list message
+     * Helper: Get package list
      */
     private function getPackageList($name)
     {
-        $reply  = "👋 Hello $name, welcome to *Career Shyne*!\n\n";
-        $reply .= "We help you unlock your career potential with professional CV and cover letter services.\n\n";
-        $reply .= "Here are our packages (all include FREE CV review and job application support):\n\n";
+        $reply  = "Here are our packages (all include FREE CV review and job application support):\n\n";
 
         $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
         $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
