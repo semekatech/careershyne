@@ -31,10 +31,10 @@ class WhatsapController extends Controller
     public function prepareMessage($phone, $message, $name)
     {
         // Whitelist allowed numbers for testing
-        // $allowedPhones = ['254705030613', '254703644281'];
-        // if (!in_array($phone, $allowedPhones)) {
-        //     return null;
-        // }
+        $allowedPhones = ['254705030613', '254703644281'];
+        if (!in_array($phone, $allowedPhones)) {
+            return null;
+        }
 
         $messageLower = strtolower(trim($message));
 
