@@ -17,7 +17,7 @@ class WhatsapController extends Controller
     public function index(Request $request)
     {
 
-        // info('Data received: ' . collect($request->all()));
+        info('Data received: ' . collect($request->all()));
         // Set the response header
         header('Content-Type: application/xml');
         // Retrieve POST data
@@ -42,7 +42,7 @@ class WhatsapController extends Controller
         if (!in_array($phone, $allowedPhones)) {
             return null;
         }
-
+        info('here');
         // Normalize message: lowercase
         $messageLower = strtolower(trim($message));
 
