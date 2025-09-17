@@ -16,104 +16,132 @@ class WhatsapController extends Controller
 
     public function index(Request $request)
     {
-
-        info('Data received: ' . collect($request->all()));
-        // Set the response header
         header('Content-Type: application/xml');
-        // Retrieve POST data
-        $device = $request->input('device');
-        $message = $request->input('message'); // The message received
-        $from = $request->input('from'); // The sender's phone number
-        $name = $request->input('name'); // The name of the sender
+
+        $device      = $request->input('device');
+        $message     = $request->input('message');
+        $phone       = $request->input('from');
+        $name        = $request->input('name');
         $participant = $request->input('participant') ?: null;
-        $responseMessage = '';
-        $timestamp = now()->toDateTimeString();
+
         if (!$participant) {
-            $this->prepareMessage($request->from, $message, $name);
+            $this->prepareMessage($phone, $message, $name);
         }
     }
 
     public function prepareMessage($phone, $message, $name)
     {
-        // Whitelist allowed numbers for testing (international format only)
+        // ✅ Whitelist allowed numbers for testing
         $allowedPhones = ['254705030613', '254703644281'];
-
-        // Completely ignore non-campaign users
         if (!in_array($phone, $allowedPhones)) {
             return null;
         }
-        info('here');
-        // Normalize message: lowercase
+
         $messageLower = strtolower(trim($message));
 
-        // Check if user already has a campaign session
+        // ✅ Check for existing session
         $session = DB::table('whatsapp_sessions')
             ->where('phone', $phone)
             ->where('campaign', 'rlv_sept2025')
             ->first();
 
-        // If user types "cv" and has no session, create one
-        if ($messageLower === 'cv' && !$session) {
-            DB::table('whatsapp_sessions')->insert([
-                'name' => $name,
-                'phone' => $phone,
-                'step' => 'initial',
-                'campaign' => 'rlv_sept2025',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            $reply  = "👋 Hello $name, welcome to *Career Shyne*!\n\n";
-            $reply .= "We help you unlock your career potential with professional CV and cover letter services.\n\n";
-            $reply .= "Here are our packages (all include FREE CV review and job application support):\n\n";
-
-            $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
-            $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
-            $reply .= "   ✔ 1 tailored cover letter\n";
-            $reply .= "   ✔ Industry-specific adjustments\n\n";
-
-            $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
-            $reply .= "   ✔ CV crafted from scratch\n";
-            $reply .= "   ✔ Personalized cover letter\n";
-            $reply .= "   ✔ ATS-optimized formatting\n";
-            $reply .= "   ✔ Tailored to your career goals\n\n";
-
-            $reply .= "👉 Reply with *1* or *2* to continue.";
-
-            return $this->sendMessage($phone, $reply);
-        }
-
-        // If user already has a session and replies with 1 or 2, update step
-        if ($session && in_array($messageLower, ['1', '2'])) {
-            DB::table('whatsapp_sessions')
-                ->where('phone', $phone)
-                ->where('campaign', 'rlv_sept2025')
-                ->update([
-                    'step' => $messageLower,
+        /**
+         * CASE 1: User sends "cv"
+         */
+        if ($messageLower === 'cv') {
+            if (!$session) {
+                // Create a fresh session
+                DB::table('whatsapp_sessions')->insert([
+                    'name'       => $name,
+                    'phone'      => $phone,
+                    'step'       => 'initial',
+                    'campaign'   => 'rlv_sept2025',
+                    'created_at' => now(),
                     'updated_at' => now()
                 ]);
-
-            // Craft response based on chosen step
-            switch ($messageLower) {
-                case '1':
-                    $reply  = "✅ You chose *CV Revamp + Cover Letter (KES 200)*.\n";
-                    $reply .= "You’ll get ATS-friendly CV writing, a tailored cover letter, and job application guidance.\n\n";
-                    $reply .= "👉 Proceed here: https://careershyne.com/order-cv?ref=rd";
-                    break;
-
-                case '2':
-                    $reply  = "✅ You chose *CV from Scratch + Cover Letter (KES 300)*.\n";
-                    $reply .= "You’ll get a CV crafted from scratch (ATS-optimized), a personalized cover letter, and full job application support.\n\n";
-                    $reply .= "👉 Proceed here: https://careershyne.com/custom-cv-order?ref=rd";
-                    break;
             }
+            // Reply with package list (whether new or existing session)
+            return $this->sendMessage($phone, $this->getPackageList($name));
+        }
+
+        /**
+         * CASE 2: User sends "1" or "2"
+         */
+        if (in_array($messageLower, ['1', '2'])) {
+            if ($session) {
+                // Update existing session
+                DB::table('whatsapp_sessions')
+                    ->where('phone', $phone)
+                    ->where('campaign', 'rlv_sept2025')
+                    ->update([
+                        'step'       => $messageLower,
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // No session yet → create one directly
+                DB::table('whatsapp_sessions')->insert([
+                    'name'       => $name,
+                    'phone'      => $phone,
+                    'step'       => $messageLower,
+                    'campaign'   => 'rlv_sept2025',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // Craft response
+            $reply = match ($messageLower) {
+                '1' => "✅ You chose *CV Revamp + Cover Letter (KES 200)*.\n"
+                    . "You’ll get ATS-friendly CV writing, a tailored cover letter, and job application guidance.\n\n"
+                    . "👉 Proceed here: https://careershyne.com/order-cv?ref=rd",
+
+                '2' => "✅ You chose *CV from Scratch + Cover Letter (KES 300)*.\n"
+                    . "You’ll get a CV crafted from scratch (ATS-optimized), a personalized cover letter, and full job application support.\n\n"
+                    . "👉 Proceed here: https://careershyne.com/custom-cv-order?ref=rd",
+            };
 
             return $this->sendMessage($phone, $reply);
         }
 
-        // Default fallback: silently ignore other inputs
+        /**
+         * CASE 3: Fallback for other inputs
+         */
+        if (!$session) {
+            // If no session, guide them to start
+            $reply = "👋 Hello $name!\n\n"
+                . "To get started, type *cv* and we’ll show you our CV packages.";
+            return $this->sendMessage($phone, $reply);
+        }
+
+        // Otherwise, ignore silently or handle additional flow
         return null;
     }
+
+    /**
+     * Helper: Get package list message
+     */
+    private function getPackageList($name)
+    {
+        $reply  = "👋 Hello $name, welcome to *Career Shyne*!\n\n";
+        $reply .= "We help you unlock your career potential with professional CV and cover letter services.\n\n";
+        $reply .= "Here are our packages (all include FREE CV review and job application support):\n\n";
+
+        $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
+        $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
+        $reply .= "   ✔ 1 tailored cover letter\n";
+        $reply .= "   ✔ Industry-specific adjustments\n\n";
+
+        $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
+        $reply .= "   ✔ CV crafted from scratch\n";
+        $reply .= "   ✔ Personalized cover letter\n";
+        $reply .= "   ✔ ATS-optimized formatting\n";
+        $reply .= "   ✔ Tailored to your career goals\n\n";
+
+        $reply .= "👉 Reply with *1* or *2* to continue.";
+
+        return $reply;
+    }
+
 
 
     public function sendMessage($phone, $message)

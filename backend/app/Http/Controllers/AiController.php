@@ -33,35 +33,35 @@ class AiController extends Controller
         $text = $pdf->getText();
 
         // ✅ 4. Call OpenAI to review CV
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
+    //     $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-        $prompt = "
-    You are a professional career coach. Review the following CV text and provide:
-    - Strengths
-    - Weaknesses
-    - Suggestions for improvement
-    - Overall impression
+    //     $prompt = "
+    // You are a professional career coach. Review the following CV text and provide:
+    // - Strengths
+    // - Weaknesses
+    // - Suggestions for improvement
+    // - Overall impression
 
-    CV Content:
-    " . substr($text, 0, 4000); // truncate to avoid token limits
+    // CV Content:
+    // " . substr($text, 0, 4000); // truncate to avoid token limits
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a professional CV reviewer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+    //     $response = $client->chat()->create([
+    //         'model' => 'gpt-4o-mini',
+    //         'messages' => [
+    //             ['role' => 'system', 'content' => 'You are a professional CV reviewer.'],
+    //             ['role' => 'user', 'content' => $prompt],
+    //         ],
+    //     ]);
 
-        $review = $response->choices[0]->message->content;
-        info($review);
+    //     $review = $response->choices[0]->message->content;
+    //     info($review);
         // ✅ 5. Return response
         return response()->json([
             'success' => true,
             'message' => 'CV uploaded and reviewed successfully.',
             'file_path' => asset('storage/' . $path),
             'file_name' => basename($path),
-            'review'    => $review,
+            // 'review'    => $review,
         ]);
     }
 }
