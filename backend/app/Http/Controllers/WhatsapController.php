@@ -114,9 +114,9 @@ class WhatsapController extends Controller
          */
         if (!$session) {
             // No session → guide to start with "cv"
-            $reply = "👋 Hello $name!\n\n"
-                . "To get started, type *cv* and we’ll show you our CV packages.";
-            return $this->sendMessage($phone, $reply);
+            // $reply = "👋 Hello $name!\n\n"
+            //     . "To get started, type *cv* and we’ll show you our CV packages.";
+            // return $this->sendMessage($phone, $reply);
         }
 
         // Session exists but input is invalid → optional fallback
