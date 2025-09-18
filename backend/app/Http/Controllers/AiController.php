@@ -25,7 +25,7 @@ class AiController extends Controller
         }
 
         // ❗ ⚠️ Replace with your actual SECRET KEY
-        $recaptchaSecretKey = "6LfQzc0rAAAAAIfZscdxvLfxy6wMPctZrtRtdgW1";
+        $recaptchaSecretKey = "6Lc62c0rAAAAAJa1LeyhR6tyabkmAFw3i4qrs4mK";
 
         try {
             // Send a POST request to Google's verification API

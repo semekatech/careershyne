@@ -29,7 +29,7 @@ app.use(router)
 
 // ❗ Add this block to configure and use the reCAPTCHA plugin
 app.use(VueReCaptcha, {
-  siteKey: '6LfQzc0rAAAAABFxyqz1EMqMdt3B8WeD06EBr3rL', // ⚠️ Replace with your actual Site Key
+  siteKey: '6Lc62c0rAAAAAEdv23_172kyl6lR2VRA0BOKewSS', // ⚠️ Replace with your actual Site Key
 })
 
 app.mount('#app')
