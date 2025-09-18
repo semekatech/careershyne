@@ -212,7 +212,7 @@ async function submitForm() {
     const recaptchaToken = await executeRecaptcha("cv_submit");
 
     // Request review (change payload depending on your backend)
-    const res = await axios.post("https://careershyne.com/api/ai/review", {
+    const res = await axios.post("https://careershyne.com/api/ai/upload", {
       fileName: fileName.value, // or use uploadId if backend returns one
       recaptchaToken,
     });
