@@ -139,6 +139,8 @@
 
 <script setup>
 import { ref } from "vue";
+import axios from "axios";
+
 import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
