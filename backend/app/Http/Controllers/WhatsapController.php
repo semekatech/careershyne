@@ -36,8 +36,7 @@ class WhatsapController extends Controller
         //     return null;
         // }
 
-        $messageLower = strtolower(trim($message));
-
+       $messageLower = strtolower(preg_replace('/\s+/', '', trim($message)));
         // Check for existing session
         $session = DB::table('whatsapp_sessions')
             ->where('phone', $phone)

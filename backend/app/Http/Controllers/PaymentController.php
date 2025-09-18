@@ -251,7 +251,6 @@ class PaymentController extends Controller
 
                         $message .= "💰 Amount: {$order->amount}\n";
                     }
-
                     // If type = cvscratch (from scratch)
                     if ($order->type === 'cvscratch') {
                         $message .= "\n📝 Order Type: CV From Scratch + Cover Letter\n";
@@ -316,8 +315,8 @@ class PaymentController extends Controller
                         'message' => nl2br($message),
                         'order'   => $order,
                     ];
-                    $this->sendMessage('254108850348', '254705030613', $message);
-                    $this->sendMessage('254108850348', '254758428993', $message);
+                    $this->sendMessage( '254705030613', $message);
+                    $this->sendMessage( '254703644281', $message);
                     Mail::to($order->email)->send(new OrderMail($details));
                     Mail::to(['georgemuemah@gmail.com', 'nancymunee@gmail.com'])->send(new OrderMail($admindetails));
                 }
