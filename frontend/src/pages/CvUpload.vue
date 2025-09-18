@@ -161,7 +161,7 @@ function triggerFileInput() {
   fileInput.value.click();
 }
 
-function handleFileUpload(event) {
+async function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -170,23 +170,24 @@ function handleFileUpload(event) {
   attachmentProgress.value = 0;
   uploading.value = true;
 
-  // Simulate attachment progress
-  UploadService.uploadFile(file, (e) => {
-    if (e.lengthComputable) {
-      attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
-    }
-  })
-    .then(() => {
-      uploading.value = false;
-      attachmentProgress.value = 100;
-    })
-    .catch((err) => {
-      console.error("Attachment failed:", err);
-      uploading.value = false;
-      alert("Failed to attach file!");
-    });
-}
+  try {
+    await recaptchaLoaded();
+    const recaptchaToken = await executeRecaptcha("cv_upload");
 
+    await UploadService.uploadFile(file, recaptchaToken, (e) => {
+      if (e.lengthComputable) {
+        attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+      }
+    });
+
+    uploading.value = false;
+    attachmentProgress.value = 100;
+  } catch (err) {
+    console.error("Attachment failed:", err);
+    uploading.value = false;
+    alert("Failed to attach file!");
+  }
+}
 async function submitForm() {
   if (!selectedFile.value) return;
 
@@ -195,44 +196,25 @@ async function submitForm() {
 
   Swal.fire({
     title: "Hold on…",
-    html: `
-      <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-        <div class="loader"></div>
-        <div style="font-weight:600; color:#f97316;">Getting your AI review ready...</div>
-      </div>
-    `,
+    html: `<div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+             <div class="loader"></div>
+             <div style="font-weight:600; color:#f97316;">Getting your AI review ready...</div>
+           </div>`,
     showConfirmButton: false,
     allowOutsideClick: false,
-    background: "#fef3c7", // light orange
-    didOpen: () => {
-      const style = document.createElement("style");
-      style.innerHTML = `
-        .loader {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #f97316;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
-        }
-      `;
-      document.head.appendChild(style);
-    },
+    background: "#fef3c7",
   });
 
   try {
-    await recaptchaLoaded(); // Make sure the script is loaded
-    const recaptchaToken = await executeRecaptcha('cv_upload');
+    await recaptchaLoaded();
+    const recaptchaToken = await executeRecaptcha("cv_submit");
 
-    const formData = new FormData();
-    formData.append('cvFile', selectedFile.value);
-    formData.append('recaptchaToken', recaptchaToken);
+    // Request review (change payload depending on your backend)
+    const res = await axios.post("https://careershyne.com/api/ai/review", {
+      fileName: fileName.value, // or use uploadId if backend returns one
+      recaptchaToken,
+    });
 
-    const res = await UploadService.uploadFileWithRecaptcha(formData);
     review.value = res.data.review || "No review received.";
 
     Swal.fire({
@@ -255,4 +237,6 @@ async function submitForm() {
     submitting.value = false;
   }
 }
+
+
 </script>
