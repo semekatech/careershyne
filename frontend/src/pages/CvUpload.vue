@@ -143,6 +143,8 @@ import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
+// ❗ Import the reCAPTCHA composable
+import { useReCaptcha } from "vue-recaptcha-v3";
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
@@ -151,6 +153,9 @@ const attachmentProgress = ref(0);
 const uploading = ref(false);
 const review = ref(""); // stores AI review
 const submitting = ref(false);
+
+// ❗ Get the reCAPTCHA functions
+const { executeRecaptcha, recaptchaLoaded } = useReCaptcha();
 
 function triggerFileInput() {
   fileInput.value.click();
@@ -220,7 +225,14 @@ async function submitForm() {
   });
 
   try {
-    const res = await UploadService.uploadFile(selectedFile.value);
+    await recaptchaLoaded(); // Make sure the script is loaded
+    const recaptchaToken = await executeRecaptcha('cv_upload');
+
+    const formData = new FormData();
+    formData.append('cvFile', selectedFile.value);
+    formData.append('recaptchaToken', recaptchaToken);
+
+    const res = await UploadService.uploadFileWithRecaptcha(formData);
     review.value = res.data.review || "No review received.";
 
     Swal.fire({
