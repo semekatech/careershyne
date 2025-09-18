@@ -13,16 +13,18 @@ use App\Models\User;
 use DB;
 use OpenAI;
 use Illuminate\Support\Facades\Http;
+
 class AiController extends Controller
 {
 
     public function uploadCV(Request $request)
     {
-               // ❗ 1. Validate reCAPTCHA Token
+        // ❗ 1. Validate reCAPTCHA Token
         $recaptchaToken = $request->input('recaptchaToken');
         if (empty($recaptchaToken)) {
             return response()->json(['error' => 'reCAPTCHA token is missing.'], 400);
         }
+        info('recaptchaToken: ' . $request->input('recaptchaToken'));
 
         // ❗ ⚠️ Replace with your actual SECRET KEY
         $recaptchaSecretKey = "6Lc62c0rAAAAAJa1LeyhR6tyabkmAFw3i4qrs4mK";
@@ -62,28 +64,28 @@ class AiController extends Controller
         $text = $pdf->getText();
 
         // ✅ 4. Call OpenAI to review CV
-    //     $client = OpenAI::client(env('OPENAI_API_KEY'));
+        //     $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-    //     $prompt = "
-    // You are a professional career coach. Review the following CV text and provide:
-    // - Strengths
-    // - Weaknesses
-    // - Suggestions for improvement
-    // - Overall impression
+        //     $prompt = "
+        // You are a professional career coach. Review the following CV text and provide:
+        // - Strengths
+        // - Weaknesses
+        // - Suggestions for improvement
+        // - Overall impression
 
-    // CV Content:
-    // " . substr($text, 0, 4000); // truncate to avoid token limits
+        // CV Content:
+        // " . substr($text, 0, 4000); // truncate to avoid token limits
 
-    //     $response = $client->chat()->create([
-    //         'model' => 'gpt-4o-mini',
-    //         'messages' => [
-    //             ['role' => 'system', 'content' => 'You are a professional CV reviewer.'],
-    //             ['role' => 'user', 'content' => $prompt],
-    //         ],
-    //     ]);
+        //     $response = $client->chat()->create([
+        //         'model' => 'gpt-4o-mini',
+        //         'messages' => [
+        //             ['role' => 'system', 'content' => 'You are a professional CV reviewer.'],
+        //             ['role' => 'user', 'content' => $prompt],
+        //         ],
+        //     ]);
 
-    //     $review = $response->choices[0]->message->content;
-    //     info($review);
+        //     $review = $response->choices[0]->message->content;
+        //     info($review);
         // ✅ 5. Return response
         return response()->json([
             'success' => true,
@@ -93,9 +95,4 @@ class AiController extends Controller
             // 'review'    => $review,
         ]);
     }
-
-
-
 }
-
-
