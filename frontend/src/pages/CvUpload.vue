@@ -212,11 +212,18 @@ async function submitForm() {
     await recaptchaLoaded();
     const recaptchaToken = await executeRecaptcha("cv_submit");
 
-    // Request review (change payload depending on your backend)
-    const res = await axios.post("https://careershyne.com/api/ai/upload", {
-      fileName: fileName.value, // or use uploadId if backend returns one
-      recaptchaToken,
-    });
+    // 🔑 Use FormData instead of JSON
+    const formData = new FormData();
+    formData.append("file", selectedFile.value); // match backend field
+    formData.append("recaptchaToken", recaptchaToken);
+
+    const res = await axios.post(
+      "https://careershyne.com/api/ai/upload",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
     review.value = res.data.review || "No review received.";
 
@@ -240,6 +247,7 @@ async function submitForm() {
     submitting.value = false;
   }
 }
+
 
 
 </script>
