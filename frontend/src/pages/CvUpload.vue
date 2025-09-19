@@ -75,11 +75,7 @@
 
           <!-- reCAPTCHA Checkbox -->
           <div class="mt-6 flex justify-center">
-            <VueReCaptcha
-              siteKey="6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f"
-              @verify="onVerify"
-               @expire="onExpired"
-            />
+            <VueRecaptcha @verify="onVerify" @expire="onExpired" />
           </div>
 
           <!-- Submit Button -->
@@ -154,7 +150,6 @@ import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-// import { VueRecaptcha } from 'vue-recaptcha-v2'
 import { VueReCaptcha } from "vue3-recaptcha-v2";
 
 const fileInput = ref(null);
