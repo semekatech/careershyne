@@ -43,7 +43,9 @@ class AiController extends Controller
 
         // 4. Build strict JSON-only prompt
         $prompt = <<<PROMPT
-You are an experienced career coach and CV reviewer. 
+As a highly sophisticated and keen human resource professional, critically review the provided CV with 
+the intention of educating the CV holder by pointing out areas of strengths in their CV and areas of 
+improvements that need to be addressed to help them stand out among recruiters in their field. 
 Read the provided CV content and return a single JSON object (no extra text) with this exact schema:
 
 {
@@ -55,9 +57,7 @@ Read the provided CV content and return a single JSON object (no extra text) wit
 }
 
 Requirements:
-- Each array must contain 0–3 concise strings (max 12 words each).
-- "impression" should be 1–3 sentences (<= 40 words).
-- "score" must be an integer between 0 and 100.
+- Provide a realistic "score" based on the CV's strengths and weaknesses. It must be an integer between 0 and 100.
 - Return ONLY the JSON object. Do not include any Markdown, headings, or additional commentary.
 
 CV Content:
