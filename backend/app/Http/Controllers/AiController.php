@@ -46,14 +46,20 @@ class AiController extends Controller
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
-        You are a professional career coach. Review the following CV text and provide:
-        - Strengths
-        - Weaknesses
-        - Suggestions for improvement
-        - Overall impression
+You are an experienced career coach and CV reviewer. 
+Review the following CV in a **brief, bullet-point style**. 
+Your response must have exactly these sections:
 
-        CV Content:
-        " . substr($text, 0, 4000); // truncate to avoid token limits
+1. **Strengths** – max 3 concise bullet points  
+2. **Weaknesses / Gaps** – max 3 concise bullet points  
+3. **Suggestions for Improvement** – max 3 concise bullet points  
+4. **Overall Impression** – 2–3 short sentences  
+
+Finally, provide a **score out of 100** for overall professionalism and job readiness in the format:  
+`Score: [number]`
+
+CV Content:
+" . substr($text, 0, 4000);
 
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
@@ -64,14 +70,21 @@ class AiController extends Controller
             ]);
 
             $review = $response->choices[0]->message->content ?? 'No review generated.';
+
+            // ✅ Extract score from review (if AI follows format)
+            preg_match('/Score:\s*(\d{1,3})/', $review, $matches);
+            $score = isset($matches[1]) ? (int) $matches[1] : null;
+
             info('Review: ' . $review);
+            info('score: ' . $score);
             // ✅ 5. Return success
             return response()->json([
                 'success'   => true,
                 'message'   => 'CV uploaded and reviewed successfully.',
                 'file_path' => asset('storage/' . $path),
                 'file_name' => basename($path),
-                // 'review'    => $review,
+                'review'    => $review,
+                'score'     => $score, // 🎯 added score
             ]);
         } catch (Exception $e) {
             // ✅ Catch and return any error
