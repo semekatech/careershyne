@@ -2,7 +2,6 @@ import './assets/main.css';
 import 'flowbite';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import { install as VueReCaptcha } from 'vue3-recaptcha-v2';
 import App from './App.vue';
 import router from './router/router.js';
 import { useToast } from 'vue-toast-notification';
@@ -37,7 +36,3 @@ app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(useToast);
 app.use(router);
 
-app.use(VueReCaptcha, {
-  siteKey: '6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f',
-});
-app.mount('#app');
