@@ -71,3 +71,4 @@ class AiController extends Controller
         ]);
     }
 }
+}
