@@ -2,7 +2,8 @@ import './assets/main.css'
 import 'flowbite'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { VueReCaptcha } from "vue3-recaptcha-v2"   // ✅ Correct package
+import VueReCaptcha from "vue3-recaptcha-v2";
+
 
 import App from './App.vue'
 import router from './router/router.js'
