@@ -71,7 +71,7 @@ class AiController extends Controller
             'message'   => 'CV uploaded and reviewed successfully.',
             'file_path' => asset('storage/' . $path),
             'file_name' => basename($path),
-            'review'    => $review,
+            // 'review'    => $review,
         ]);
 
     } catch (Exception $e) {
