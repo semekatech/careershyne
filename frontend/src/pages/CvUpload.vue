@@ -1,9 +1,7 @@
 <template>
   <TheWelcome />
 
-  <section
-    class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20"
-  >
+  <section class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="grid md:grid-cols-2 gap-12 items-start">
         <!-- LEFT: Upload CV Form -->
@@ -73,13 +71,21 @@
             </p>
           </div>
 
-          <!-- Submit Button -->
+          <!-- reCAPTCHA Checkbox -->
+          <div class="mt-6 flex justify-center">
+            <VueRecaptcha
+              sitekey="6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f"  
+              @verify="onVerify"
+              @expired="onExpired"
+            />
+          </div>
+
           <!-- Submit Button -->
           <div class="mt-8">
             <button
               class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:opacity-90 transition transform hover:scale-[1.02] shadow-md"
               @click="submitForm"
-              :disabled="attachmentProgress < 100 || submitting"
+              :disabled="attachmentProgress < 100 || submitting || !recaptchaToken"
             >
               {{ submitting ? "Submitting..." : "🚀 Submit CV for Review" }}
             </button>
@@ -112,8 +118,7 @@
             >
               <pre
                 class="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-200"
-                >{{ review }}</pre
-              >
+              >{{ review }}</pre>
             </div>
           </div>
 
@@ -138,27 +143,22 @@
 </template>
 
 <script setup>
-
 import { ref } from "vue";
 import axios from "axios";
-
 import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-// ❗ Import the reCAPTCHA composable
-import { useReCaptcha } from "vue-recaptcha-v3";
+import { VueRecaptcha } from "vue-recaptcha"; // ✅ checkbox recaptcha
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
 const attachmentProgress = ref(0);
 const uploading = ref(false);
-const review = ref(""); // stores AI review
+const review = ref(""); 
 const submitting = ref(false);
-
-// ❗ Get the reCAPTCHA functions
-const { executeRecaptcha, recaptchaLoaded } = useReCaptcha();
+const recaptchaToken = ref(null);
 
 function triggerFileInput() {
   fileInput.value.click();
@@ -174,10 +174,7 @@ async function handleFileUpload(event) {
   uploading.value = true;
 
   try {
-    await recaptchaLoaded();
-    const recaptchaToken = await executeRecaptcha("cv_upload");
-    console.log("📌 reCAPTCHA Token (Upload):", recaptchaToken);
-    await UploadService.uploadFile(file, recaptchaToken, (e) => {
+    await UploadService.uploadFile(file, null, (e) => {
       if (e.lengthComputable) {
         attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
       }
@@ -191,8 +188,22 @@ async function handleFileUpload(event) {
     alert("Failed to attach file!");
   }
 }
+
+function onVerify(token) {
+  recaptchaToken.value = token;
+  console.log("✅ reCAPTCHA verified:", token);
+}
+
+function onExpired() {
+  recaptchaToken.value = null;
+  console.log("⚠️ reCAPTCHA expired");
+}
+
 async function submitForm() {
-  if (!selectedFile.value) return;
+  if (!selectedFile.value || !recaptchaToken.value) {
+    alert("Please select a file and complete the reCAPTCHA.");
+    return;
+  }
 
   submitting.value = true;
   review.value = "";
@@ -209,20 +220,14 @@ async function submitForm() {
   });
 
   try {
-    await recaptchaLoaded();
-    const recaptchaToken = await executeRecaptcha("cv_submit");
-
-    // 🔑 Use FormData instead of JSON
     const formData = new FormData();
-    formData.append("file", selectedFile.value); // match backend field
-    formData.append("recaptchaToken", recaptchaToken);
+    formData.append("file", selectedFile.value);
+    formData.append("recaptchaToken", recaptchaToken.value);
 
     const res = await axios.post(
       "https://careershyne.com/api/ai/upload",
       formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
 
     review.value = res.data.review || "No review received.";
@@ -247,7 +252,4 @@ async function submitForm() {
     submitting.value = false;
   }
 }
-
-
-
 </script>

@@ -2,6 +2,7 @@ import './assets/main.css'
 import 'flowbite'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { VueRecaptcha } from "vue-recaptcha";
 import App from './App.vue'
 import router from './router/router.js'
 import { useToast } from 'vue-toast-notification'
@@ -15,8 +16,7 @@ import { faBars,faPhone,faBell,faTimes, faEdit, faTrash,faTimesCircle,faUserCirc
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faFacebook, faTwitter, faInstagram, faTiktok, faYoutube } from '@fortawesome/free-brands-svg-icons'
 
-// ❗ Add this line to import the reCAPTCHA plugin
-import { VueReCaptcha } from 'vue-recaptcha-v3'
+
 
 library.add(faFacebook,faPhone,faTimesCircle,faCreditCard,faUserCircle, faTwitter, faInstagram, faTiktok, faYoutube,faBars,faTimes, faEdit,faTrash,faPlus,faUserPlus,faFacebook, faTwitter, faInstagram, faTiktok, faYoutube,faCheckCircle, faBell,faHourglassHalf, faEnvelope, faBullhorn,faHourglass, faInbox, faCalendarCheck, faUsers, faTachometerAlt, faHeadset, faRightFromBracket)
 
@@ -26,10 +26,10 @@ app.use(pinia)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(useToast)
 app.use(router)
-
-// ❗ Add this block to configure and use the reCAPTCHA plugin
-app.use(VueReCaptcha, {
-  siteKey: '6Lc62c0rAAAAAEdv23_172kyl6lR2VRA0BOKewSS', // ⚠️ Replace with your actual Site Key
-})
+app.component("VueRecaptcha", VueRecaptcha);
+// // ❗ Add this block to configure and use the reCAPTCHA plugin
+// app.use(VueReCaptcha, {
+//   siteKey: '6Lc62c0rAAAAAEdv23_172kyl6lR2VRA0BOKewSS', // ⚠️ Replace with your actual Site Key
+// })
 
 app.mount('#app')
