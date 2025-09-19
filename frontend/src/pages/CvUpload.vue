@@ -96,62 +96,49 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
 import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
+
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
 const attachmentProgress = ref(0);
-const uploading = ref(false);
-const review = ref("");
 const submitting = ref(false);
+const review = ref("");
 const hcaptchaToken = ref(null);
 
 function triggerFileInput() {
   fileInput.value.click();
 }
 
-async function handleFileUpload(event) {
+function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   selectedFile.value = file;
   fileName.value = file.name;
-  attachmentProgress.value = 0;
-  uploading.value = true;
-
-  try {
-    await UploadService.uploadFile(file, null, (e) => {
-      if (e.lengthComputable) {
-        attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
-      }
-    });
-    uploading.value = false;
-    attachmentProgress.value = 100;
-  } catch (err) {
-    console.error("Attachment failed:", err);
-    uploading.value = false;
-    alert("Failed to attach file!");
-  }
+  attachmentProgress.value = 0; // reset progress
 }
 
 // hCaptcha callbacks
 window.onHCaptchaSuccess = function(token) {
   hcaptchaToken.value = token;
-  console.log("✅ hCaptcha verified:", token);
 };
 
 window.onHCaptchaExpired = function() {
   hcaptchaToken.value = null;
-  console.log("⚠️ hCaptcha expired");
 };
 
 async function submitForm() {
-  if (!selectedFile.value || !hcaptchaToken.value) {
-    alert("Please select a file and complete the hCaptcha.");
+  if (!selectedFile.value) {
+    alert("Please select a file before submitting.");
+    return;
+  }
+
+  if (!hcaptchaToken.value) {
+    alert("Please complete the hCaptcha verification.");
     return;
   }
 
@@ -170,17 +157,20 @@ async function submitForm() {
   });
 
   try {
-    const formData = new FormData();
-    formData.append("file", selectedFile.value);
-    formData.append("hcaptchaToken", hcaptchaToken.value);
+    await UploadService.uploadFile(selectedFile.value, hcaptchaToken.value, (e) => {
+      if (e.lengthComputable) {
+        attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+      }
+    });
 
-    const res = await axios.post(
-      "https://careershyne.com/api/ai/upload",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    // After upload, call the backend to get the AI review
+    const res = await fetch("https://careershyne.com/api/ai/upload", {
+      method: "POST",
+      body: new FormData().append("file", selectedFile.value),
+    });
 
-    review.value = res.data.review || "No review received.";
+    const data = await res.json();
+    review.value = data.review || "No review received.";
 
     Swal.fire({
       icon: "success",
@@ -191,7 +181,7 @@ async function submitForm() {
       background: "#fef3c7",
     });
   } catch (err) {
-    console.error("Submission failed:", err);
+    console.error(err);
     Swal.fire({
       icon: "error",
       title: "Submission Failed",
@@ -203,21 +193,14 @@ async function submitForm() {
   }
 }
 
-
-
-
 onMounted(() => {
-  // Load hCaptcha script dynamically
   if (!window.hcaptcha) {
     const script = document.createElement("script");
     script.src = "https://js.hcaptcha.com/1/api.js";
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
-
-    script.onload = () => {
-      renderHCaptcha();
-    };
+    script.onload = renderHCaptcha;
   } else {
     renderHCaptcha();
   }
@@ -228,15 +211,8 @@ function renderHCaptcha() {
 
   window.hcaptcha.render("hcaptcha-container", {
     sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
-    callback: (token) => {
-      hcaptchaToken.value = token;
-      console.log("✅ hCaptcha token:", token);
-    },
-    "expired-callback": () => {
-      hcaptchaToken.value = null;
-      console.log("⚠️ hCaptcha expired");
-    },
+    callback: (token) => (hcaptchaToken.value = token),
+    "expired-callback": () => (hcaptchaToken.value = null),
   });
 }
-
 </script>
