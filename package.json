@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "vue3-recaptcha-v2": "^2.1.0"
+  }
+}

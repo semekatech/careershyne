@@ -1,7 +1,9 @@
 <template>
   <TheWelcome />
 
-  <section class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20">
+  <section
+    class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20"
+  >
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="grid md:grid-cols-2 gap-12 items-start">
         <!-- LEFT: Upload CV Form -->
@@ -73,10 +75,10 @@
 
           <!-- reCAPTCHA Checkbox -->
           <div class="mt-6 flex justify-center">
-            <VueRecaptcha
-              sitekey="6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f"  
+            <VueReCaptcha
+              siteKey="6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f"
               @verify="onVerify"
-              @expired="onExpired"
+               @expire="onExpired"
             />
           </div>
 
@@ -85,7 +87,9 @@
             <button
               class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:opacity-90 transition transform hover:scale-[1.02] shadow-md"
               @click="submitForm"
-              :disabled="attachmentProgress < 100 || submitting || !recaptchaToken"
+              :disabled="
+                attachmentProgress < 100 || submitting || !recaptchaToken
+              "
             >
               {{ submitting ? "Submitting..." : "🚀 Submit CV for Review" }}
             </button>
@@ -118,7 +122,8 @@
             >
               <pre
                 class="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-200"
-              >{{ review }}</pre>
+                >{{ review }}</pre
+              >
             </div>
           </div>
 
@@ -149,14 +154,15 @@ import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-import { VueRecaptcha } from 'vue-recaptcha-v2'
+// import { VueRecaptcha } from 'vue-recaptcha-v2'
+import { VueReCaptcha } from "vue3-recaptcha-v2";
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
 const attachmentProgress = ref(0);
 const uploading = ref(false);
-const review = ref(""); 
+const review = ref("");
 const submitting = ref(false);
 const recaptchaToken = ref(null);
 
