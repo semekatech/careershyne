@@ -112,6 +112,8 @@
               AI CV Review <span class="text-sm">({{ review.score }}/100)</span>
             </h3>
 
+
+            
             <section>
               <h4 style="color:dodgerblue;font-weight:bold">Strengths</h4>
               <ul>
@@ -122,6 +124,7 @@
                   No strengths detected.
                 </li>
               </ul>
+
             </section>
 
             <section>
