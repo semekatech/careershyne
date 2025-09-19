@@ -176,7 +176,7 @@ async function handleFileUpload(event) {
   try {
     await recaptchaLoaded();
     const recaptchaToken = await executeRecaptcha("cv_upload");
-
+    console.log("📌 reCAPTCHA Token (Upload):", recaptchaToken);
     await UploadService.uploadFile(file, recaptchaToken, (e) => {
       if (e.lengthComputable) {
         attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
