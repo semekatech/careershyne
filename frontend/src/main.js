@@ -2,8 +2,7 @@ import './assets/main.css';
 import 'flowbite';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import VueRecaptcha from 'vue3-recaptcha-v2'; // default export
-
+import { install as VueReCaptcha } from 'vue3-recaptcha-v2';
 import App from './App.vue';
 import router from './router/router.js';
 import { useToast } from 'vue-toast-notification';
@@ -38,9 +37,7 @@ app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(useToast);
 app.use(router);
 
-// ✅ Correct way to register Vue3 reCAPTCHA globally
-app.use(VueRecaptcha, {
-  siteKey: '6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f', // Replace with your reCAPTCHA site key
+app.use(VueReCaptcha, {
+  siteKey: '6LeVRM4rAAAAACZLcBp_o6lByka2W0R9xPqBgc1f',
 });
-
 app.mount('#app');
