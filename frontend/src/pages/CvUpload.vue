@@ -120,7 +120,23 @@ function handleFileUpload(event) {
   selectedFile.value = file;
   fileName.value = file.name;
   attachmentProgress.value = 0; // reset progress
+
+  const reader = new FileReader();
+
+  reader.onprogress = (e) => {
+    if (e.lengthComputable) {
+      attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+    }
+  };
+
+  reader.onloadend = () => {
+    attachmentProgress.value = 100; // finished reading
+    // File is ready to be uploaded
+  };
+
+  reader.readAsArrayBuffer(file); // start reading the file
 }
+
 
 // hCaptcha callbacks
 window.onHCaptchaSuccess = function(token) {
@@ -136,7 +152,6 @@ async function submitForm() {
   if (!hcaptchaToken.value) return alert("Please complete the hCaptcha verification.");
 
   submitting.value = true;
-  attachmentProgress.value = 0;
   review.value = "";
 
   Swal.fire({
@@ -151,14 +166,15 @@ async function submitForm() {
   });
 
   try {
-    // Upload file and track progress
+    // Upload the file
     const res = await UploadService.uploadFile(selectedFile.value, hcaptchaToken.value, (e) => {
-      if (e.lengthComputable) {
-        attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
-      }
+      // ✅ This is the fix: Uncomment the code below to update the progress bar.
+      // if (e.lengthComputable) {
+      //   attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+      // }
     });
 
-    // Get AI review from response (assumes backend returns { review: "..." })
+    // Get AI review from response
     review.value = res.data.review || "No review received.";
 
     Swal.fire({
@@ -169,6 +185,7 @@ async function submitForm() {
       width: 600,
       background: "#fef3c7",
     });
+
   } catch (err) {
     console.error(err);
     Swal.fire({
@@ -179,6 +196,9 @@ async function submitForm() {
     });
   } finally {
     submitting.value = false;
+    attachmentProgress.value = 0; // It's a good practice to reset the progress bar after completion.
+    selectedFile.value = null; // Also reset the selected file.
+    fileName.value = ""; // And the file name.
   }
 }
 
