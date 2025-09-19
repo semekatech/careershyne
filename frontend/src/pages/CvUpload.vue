@@ -132,24 +132,18 @@ window.onHCaptchaExpired = function() {
 };
 
 async function submitForm() {
-  if (!selectedFile.value) {
-    alert("Please select a file before submitting.");
-    return;
-  }
-
-  if (!hcaptchaToken.value) {
-    alert("Please complete the hCaptcha verification.");
-    return;
-  }
+  if (!selectedFile.value) return alert("Please select a file.");
+  if (!hcaptchaToken.value) return alert("Please complete the hCaptcha verification.");
 
   submitting.value = true;
+  attachmentProgress.value = 0;
   review.value = "";
 
   Swal.fire({
     title: "Hold on…",
     html: `<div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
              <div class="loader"></div>
-             <div style="font-weight:600; color:#f97316;">Getting your AI review ready...</div>
+             <div style="font-weight:600; color:#f97316;">Uploading your CV and getting AI review...</div>
            </div>`,
     showConfirmButton: false,
     allowOutsideClick: false,
@@ -157,20 +151,15 @@ async function submitForm() {
   });
 
   try {
-    await UploadService.uploadFile(selectedFile.value, hcaptchaToken.value, (e) => {
+    // Upload file and track progress
+    const res = await UploadService.uploadFile(selectedFile.value, hcaptchaToken.value, (e) => {
       if (e.lengthComputable) {
         attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
       }
     });
 
-    // After upload, call the backend to get the AI review
-    const res = await fetch("https://careershyne.com/api/ai/upload", {
-      method: "POST",
-      body: new FormData().append("file", selectedFile.value),
-    });
-
-    const data = await res.json();
-    review.value = data.review || "No review received.";
+    // Get AI review from response (assumes backend returns { review: "..." })
+    review.value = res.data.review || "No review received.";
 
     Swal.fire({
       icon: "success",
