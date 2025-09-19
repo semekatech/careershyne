@@ -149,7 +149,7 @@ import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-import { VueRecaptcha } from "vue-recaptcha"; // ✅ checkbox recaptcha
+import { VueRecaptcha } from 'vue-recaptcha-v2'
 
 const fileInput = ref(null);
 const selectedFile = ref(null);

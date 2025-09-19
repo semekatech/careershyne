@@ -2,7 +2,8 @@ import './assets/main.css'
 import 'flowbite'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { VueRecaptcha } from "vue-recaptcha";
+import VueRecaptcha from "vue-recaptcha";
+
 import App from './App.vue'
 import router from './router/router.js'
 import { useToast } from 'vue-toast-notification'
@@ -26,7 +27,8 @@ app.use(pinia)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(useToast)
 app.use(router)
-app.component("VueRecaptcha", VueRecaptcha);
+app.component("VueRecaptcha", VueRecaptcha)
+
 // // ❗ Add this block to configure and use the reCAPTCHA plugin
 // app.use(VueReCaptcha, {
 //   siteKey: '6Lc62c0rAAAAAEdv23_172kyl6lR2VRA0BOKewSS', // ⚠️ Replace with your actual Site Key
