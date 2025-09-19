@@ -2,8 +2,7 @@ import './assets/main.css'
 import 'flowbite'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import VueReCaptcha from "vue3-recaptcha-v2";
-
+import { ReCaptcha } from "vue3-recaptcha-v2"   // ✅ correct import
 
 import App from './App.vue'
 import router from './router/router.js'
@@ -13,7 +12,7 @@ import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.core.css'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
-// Font Awesome
+// Font Awesome setup...
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faBars, faPhone, faBell, faTimes, faEdit, faTrash, faTimesCircle, faUserCircle,
@@ -39,7 +38,7 @@ app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(useToast)
 app.use(router)
 
-// ✅ Register Vue3 reCAPTCHA
-app.component("VueReCaptcha", VueReCaptcha)
+// ✅ Register ReCaptcha
+app.component("VueReCaptcha", ReCaptcha)
 
 app.mount('#app')
