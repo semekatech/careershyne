@@ -27,7 +27,7 @@ class AiController extends Controller
         info('recaptchaToken: ' . $request->input('recaptchaToken'));
 
         // ❗ ⚠️ Replace with your actual SECRET KEY
-        $recaptchaSecretKey = "6Lc62c0rAAAAAJa1LeyhR6tyabkmAFw3i4qrs4mK";
+        $recaptchaSecretKey = "6LeVRM4rAAAAAH1pu_I0Ad9izuN5FU2hsVLZp39O";
 
         try {
             // Send a POST request to Google's verification API
