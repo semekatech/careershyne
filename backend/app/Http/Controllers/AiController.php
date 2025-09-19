@@ -20,34 +20,9 @@ class AiController extends Controller
     public function uploadCV(Request $request)
     {
         // ❗ 1. Validate reCAPTCHA Token
-        $recaptchaToken = $request->input('recaptchaToken');
-        if (empty($recaptchaToken)) {
-            return response()->json(['error' => 'reCAPTCHA token is missing.'], 400);
-        }
-        info('recaptchaToken: ' . $request->input('recaptchaToken'));
-
-        // ❗ ⚠️ Replace with your actual SECRET KEY
-        $recaptchaSecretKey = "6LeVRM4rAAAAAH1pu_I0Ad9izuN5FU2hsVLZp39O";
-
+      
         try {
-            // Send a POST request to Google's verification API
-            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret' => $recaptchaSecretKey,
-                'response' => $recaptchaToken,
-                'remoteip' => $request->ip(),
-            ]);
-
-            $result = $response->json();
-
-            // Check if the verification was successful and the score is acceptable
-            if (!$result['success'] || $result['score'] < 0.5) { // ❗ Adjust the score threshold as needed
-                info('reCAPTCHA failed: ' . json_encode($result));
-                return response()->json(['error' => 'reCAPTCHA verification failed. Please try again.'], 401);
-            }
-        } catch (\Exception $e) {
-            info('reCAPTCHA verification error: ' . $e->getMessage());
-            return response()->json(['error' => 'Server error during reCAPTCHA verification.'], 500);
-        }
+     
 
         // ✅ 1. Validate input
         $request->validate([
