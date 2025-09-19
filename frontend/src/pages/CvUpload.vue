@@ -113,10 +113,10 @@
             </h3>
 
             <section>
-              <h4>Strengths</h4>
+              <h4 style="color:dodgerblue;font-weight:bold">Strengths</h4>
               <ul>
                 <li v-for="(s, i) in review.strengths" :key="'s' + i">
-                  {{ s }}
+                 - {{ s }}
                 </li>
                 <li v-if="!review.strengths.length" class="text-muted">
                   No strengths detected.
@@ -125,10 +125,10 @@
             </section>
 
             <section>
-              <h4>Weaknesses</h4>
+              <h4 style="color:dodgerblue;font-weight:bold">Weaknesses</h4>
               <ul>
                 <li v-for="(w, i) in review.weaknesses" :key="'w' + i">
-                  {{ w }}
+                  - {{ w }}
                 </li>
                 <li v-if="!review.weaknesses.length" class="text-muted">
                   No weaknesses detected.
@@ -137,10 +137,10 @@
             </section>
 
             <section>
-              <h4>Suggestions</h4>
+              <h4 style="color:dodgerblue;font-weight:bold">Suggestions</h4>
               <ul>
                 <li v-for="(t, i) in review.suggestions" :key="'t' + i">
-                  {{ t }}
+                 - {{ t }}
                 </li>
                 <li v-if="!review.suggestions.length" class="text-muted">
                   No suggestions provided.
@@ -149,7 +149,7 @@
             </section>
 
             <section>
-              <h4>Overall Impression</h4>
+              <h4 style="color:dodgerblue;font-weight:bold">Overall Impression</h4>
               <p>{{ review.impression }}</p>
             </section>
           </div>
