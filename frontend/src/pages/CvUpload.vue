@@ -44,12 +44,8 @@
 
           <!-- hCaptcha -->
           <div class="mt-6 flex justify-center">
-            <div
-              class="h-captcha"
-              data-sitekey="4eaee940-28ca-4440-855a-b9eaa88ad3be"
-              data-callback="onHCaptchaSuccess"
-              data-expired-callback="onHCaptchaExpired">
-            </div>
+            <div id="hcaptcha-container" class="mt-6 flex justify-center"></div>
+
           </div>
 
           <!-- Submit Button -->
@@ -105,7 +101,6 @@ import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
@@ -208,14 +203,40 @@ async function submitForm() {
   }
 }
 
-// Ensure hCaptcha script is loaded
+
+
+
 onMounted(() => {
+  // Load hCaptcha script dynamically
   if (!window.hcaptcha) {
     const script = document.createElement("script");
     script.src = "https://js.hcaptcha.com/1/api.js";
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
+
+    script.onload = () => {
+      renderHCaptcha();
+    };
+  } else {
+    renderHCaptcha();
   }
 });
+
+function renderHCaptcha() {
+  if (!window.hcaptcha) return;
+
+  window.hcaptcha.render("hcaptcha-container", {
+    sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
+    callback: (token) => {
+      hcaptchaToken.value = token;
+      console.log("✅ hCaptcha token:", token);
+    },
+    "expired-callback": () => {
+      hcaptchaToken.value = null;
+      console.log("⚠️ hCaptcha expired");
+    },
+  });
+}
+
 </script>
