@@ -54,6 +54,5 @@ Route::prefix('orders')->group(function () {
 });
 Route::prefix('ai')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
-         ->middleware('throttle:ai-upload');
+        ->middleware('throttle:2,1');
 });
-
