@@ -53,6 +53,7 @@ Route::prefix('orders')->group(function () {
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
 Route::prefix('ai')->group(function () {
-    Route::post('/upload', [AiController::class, 'uploadCV']);
-    // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
+    Route::post('/upload', [AiController::class, 'uploadCV'])
+         ->middleware('throttle:ai-upload');
 });
+
