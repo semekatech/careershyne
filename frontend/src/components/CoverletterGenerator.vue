@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
     <section
       class="bg-gradient-to-r from-orange-600 to-yellow-700 text-white py-8 px-6 text-center"
     >
@@ -12,8 +13,10 @@
       </p>
     </section>
 
+    <!-- Steps Section -->
     <section class="py-8 px-6">
       <div class="w-full bg-white shadow-lg rounded-lg p-10 space-y-8">
+        <!-- Step Indicators -->
         <div class="flex justify-center space-x-4 mb-8">
           <div
             :class="{
@@ -46,10 +49,9 @@
           </div>
         </div>
 
+        <!-- Step 1: CV Upload -->
         <div v-if="currentStep === 1" class="space-y-6">
-          <h2 class="text-xl font-bold text-gray-800">
-            Step 1: Upload Your CV
-          </h2>
+          <h2 class="text-xl font-bold text-gray-800">Step 1: Upload Your CV</h2>
           <p class="text-gray-600">
             Upload your CV or resume. Our AI will use it to highlight your
             relevant skills and experience in the cover letter.
@@ -80,6 +82,7 @@
           </div>
         </div>
 
+        <!-- Step 2: Job Details -->
         <div v-if="currentStep === 2" class="space-y-6">
           <h2 class="text-xl font-bold text-gray-800">
             Step 2: Provide Job Details
@@ -159,6 +162,7 @@
           </div>
         </div>
 
+        <!-- Step 3: Generated Cover Letter -->
         <div v-if="currentStep === 3" class="space-y-6">
           <h2 class="text-xl font-bold text-gray-800">
             Step 3: Your Cover Letter is Ready!
@@ -178,8 +182,6 @@
             <div
               class="bg-white p-8 rounded-lg shadow-md border border-gray-200"
             >
-         
-
               <!-- Cover Letter Content -->
               <div
                 class="bg-gray-50 border border-gray-200 rounded-md p-6 max-h-[500px] overflow-y-auto"
@@ -195,12 +197,19 @@
               </div>
             </div>
 
-            <div class="flex justify-end mt-4">
+            <!-- Action Buttons -->
+            <div class="flex space-x-4 mt-4 justify-end">
               <button
                 @click="copyToClipboard"
                 class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
               >
                 Copy to Clipboard
+              </button>
+              <button
+                @click="downloadWord"
+                class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
+              >
+                Download Word
               </button>
             </div>
           </div>
@@ -235,13 +244,6 @@ const jobFile = ref(null);
 const jobFileName = ref("");
 
 const generatedCoverLetter = ref("");
-const extractedUserInfo = ref({
-  name: "SHABAN YASSIN",
-  title: "Accountant",
-  location: "Nairobi, Kenya",
-  phone: "+254796754706",
-  email: "yassinshaban62@gmail.com",
-});
 
 const isFormValid = computed(() => {
   if (inputType.value === "text" && jobText.value.length > 0) return true;
@@ -255,7 +257,6 @@ function handleCvUpload(event) {
   if (file) {
     cvFile.value = file;
     cvFileName.value = file.name;
-    // In a real application, you would parse the CV here to extract the user's info
   }
 }
 
@@ -313,6 +314,29 @@ function copyToClipboard() {
     .catch((err) => {
       console.error("Failed to copy:", err);
     });
+}
+
+function downloadWord() {
+  if (!generatedCoverLetter.value) {
+    alert("No cover letter to download!");
+    return;
+  }
+
+  const blob = new Blob(
+    [
+      `Cover Letter\n\n${generatedCoverLetter.value}`
+    ],
+    { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "cover_letter.docx";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function resetForm() {
