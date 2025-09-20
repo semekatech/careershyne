@@ -16,7 +16,7 @@
           </h3>
           <p class="text-gray-600 dark:text-gray-300 mb-6">
             Drag & drop your CV here, or click to select a file. PDF only, max
-            2MB.
+            5MB.
           </p>
 
           <div
@@ -217,13 +217,33 @@
               </div>
             </div>
 
-            <section class="mt-8">
-              <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Overall Impression
-              </h4>
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {{ review.impression }}
-              </p>
+            <section class="mt-10 text-center">
+              <div
+                class="bg-gradient-to-r from-orange-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 border border-orange-200 dark:border-gray-600 shadow-sm"
+              >
+                <h4
+                  class="text-xl font-bold text-gray-900 dark:text-white mb-3"
+                >
+                  🚀 Don’t Miss Out on Job Opportunities
+                </h4>
+                <p
+                  class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6"
+                >
+                  Based on your score and review, your CV might be holding you
+                  back.
+                  <span
+                    class="font-semibold text-orange-600 dark:text-orange-400"
+                    >CareerShyne</span
+                  >
+                  can help you **revamp your CV** and stand out to employers.
+                </p>
+                <button
+                  class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold shadow-md transform transition hover:scale-[1.05]"
+                  @click="openRevampModal"
+                >
+                  ✨ Yes, Help Me Revamp My CV
+                </button>
+              </div>
             </section>
           </div>
           <div v-else>
@@ -330,13 +350,39 @@ async function submitForm() {
 
   submitting.value = true;
   review.value = "";
-
   Swal.fire({
     title: "Hold on…",
-    html: `<div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-              <div class="loader"></div>
-              <div style="font-weight:600; color:#f97316;">Uploading your CV and getting AI review...</div>
-            </div>`,
+    html: `
+    <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+      <div class="loader"></div>
+      <div style="font-weight:600; color:#f97316; font-size:16px;">
+        Uploading your CV and getting AI review<span class="dots"></span>
+      </div>
+    </div>
+    <style>
+      .loader {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f97316;
+        border-top: 4px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .dots::after {
+        content: "";
+        animation: dots 1.5s steps(3, end) infinite;
+      }
+      @keyframes dots {
+        0% { content: ""; }
+        33% { content: "."; }
+        66% { content: ".."; }
+        100% { content: "..."; }
+      }
+    </style>
+  `,
     showConfirmButton: false,
     allowOutsideClick: false,
     background: "#fef3c7",
@@ -425,6 +471,33 @@ function renderHCaptcha() {
     sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
     callback: (token) => (hcaptchaToken.value = token),
     "expired-callback": () => (hcaptchaToken.value = null),
+  });
+}
+
+
+function openRevampModal() {
+  Swal.fire({
+    title: "CV Revamp Service",
+    html: `
+      <p style="margin-bottom:15px;">
+        Our team will professionally revamp your CV to boost your chances of landing interviews.
+      </p>
+      <p style="margin-bottom:15px;">
+        ✅ Professional Design<br>
+        ✅ Keyword Optimization<br>
+        ✅ Tailored for Your Industry
+      </p>
+      <strong>Interested in getting started?</strong>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Yes, Revamp My CV",
+    cancelButtonText: "Maybe Later",
+    background: "#fef3c7",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // redirect to booking page or show contact form
+      window.location.href = "/services/cv-revamp"; // adjust your link
+    }
   });
 }
 </script>
