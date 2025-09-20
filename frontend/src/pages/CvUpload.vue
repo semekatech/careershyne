@@ -258,6 +258,11 @@ const { handleError } = useApiError();
 
 const fileName = ref("");
 const selectedFile = ref(null);
+const review = ref(null);
+const showForm = ref(true); // 🔑 controls whether form or review shows
+const submitting = ref(false);
+const attachmentProgress = ref(0);
+const submitProgress = ref(0);
 
 async function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -267,6 +272,7 @@ async function handleFileUpload(event) {
     await validatePDF(file);
     selectedFile.value = file;
     fileName.value = file.name;
+    attachmentProgress.value = 100; // ✅ instantly mark as uploaded
   } catch (e) {
     Swal.fire({ icon: "error", title: "Invalid File", text: e.message });
   }
@@ -275,15 +281,40 @@ async function handleFileUpload(event) {
 async function submitForm() {
   if (!selectedFile.value || !hcaptchaToken.value) return;
 
+  submitting.value = true;
+  submitProgress.value = 10;
+
   try {
     const res = await UploadService.uploadFile(
       selectedFile.value,
-      hcaptchaToken.value
+      hcaptchaToken.value,
+      (progressEvent) => {
+        if (progressEvent.total) {
+          submitProgress.value = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+        }
+      }
     );
+
+    // ✅ Expecting API to return { review: { score, strengths, weaknesses, suggestions } }
+    review.value = res.data.review || null;
+
+    if (review.value) {
+      showForm.value = false; // switch to review section
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "No Review",
+        text: "Upload successful but no review data returned.",
+      });
+    }
   } catch (err) {
     handleError(err);
   } finally {
-    reset();
+    submitting.value = false;
+    submitProgress.value = 100;
+    reset(); // reset captcha
   }
 }
 
