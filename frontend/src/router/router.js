@@ -11,6 +11,7 @@ import ManageOrders from "@/pages/ManageOrders.vue";
 import ManagePayments from "@/pages/ManagePayments.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
+import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
 const routes = [
   {
     path: "/",
@@ -109,6 +110,19 @@ const routes = [
       {
         path: "",
         component: ManagePayments,
+      },
+    ],
+  },
+  {
+    path: "/cover-letter-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Generate Cover Letters",
+    },
+    children: [
+      {
+        path: "",
+        component: CoverLetter,
       },
     ],
   },

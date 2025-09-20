@@ -6,7 +6,7 @@
       <aside
         v-if="isSidebarOpen || isDesktop"
         class="fixed inset-y-0 left-0 w-64 bg-blue-800 text-white z-30 md:relative md:flex md:flex-shrink-0"
-        style="background:#2c3137"
+        style="background: #2c3137"
       >
         <div class="flex flex-col h-full">
           <div class="flex items-center justify-center h-16 px-4">
@@ -48,12 +48,21 @@
               <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
               Manage Orders
             </a>
-              <a  v-if="auth.user?.role != 'radio'"
+            <a
+              v-if="auth.user?.role != 'radio'"
               href="/manage-payments"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
               <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
               Manage Payments
+            </a>
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
+              Cover Letters
             </a>
             <!-- <a
               href="/my-profile"
@@ -78,7 +87,8 @@
             <div class="flex items-center">
               <img
                 class="w-10 h-10 rounded-full"
-                :src="preview || defaultAvatar" alt="User"
+                :src="preview || defaultAvatar"
+                alt="User"
               />
               <div class="ml-3">
                 <p class="text-sm font-medium">{{ auth.user?.name }}</p>
@@ -129,8 +139,8 @@
             <a href="/my-profile" class="flex items-center focus:outline-none">
               <img
                 class="w-8 h-8 rounded-full"
-                 :src="preview || defaultAvatar"
-                 alt="User"
+                :src="preview || defaultAvatar"
+                alt="User"
               />
             </a>
           </div>
