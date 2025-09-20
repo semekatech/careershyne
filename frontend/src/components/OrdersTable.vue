@@ -7,7 +7,7 @@
       >
         <h2 class="text-lg font-semibold text-gray-800">Recent orders</h2>
         <div v-if="auth.user?.role != 'radio'">
-          <button  
+          <button
             class="py-2 px-6 text-white rounded font-medium transition duration-500"
             :style="{ background: '#fd624e' }"
             @click="showModal = true"
@@ -72,7 +72,8 @@
               >
                 Status
               </th>
-              <th  v-if="auth.user?.role != 'radio'"
+              <th
+                v-if="auth.user?.role != 'radio'"
                 class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase"
               >
                 Actions
@@ -126,7 +127,8 @@
                   {{ order.status }}
                 </span>
               </td>
-              <td v-if="auth.user?.role != 'radio'"
+              <td
+                v-if="auth.user?.role != 'radio'"
                 class="px-6 py-4 whitespace-nowrap text-center flex justify-center gap-2"
               >
                 <a
@@ -311,6 +313,18 @@ function closeEditModal() {
   modal.classList.remove("flex");
   modal.classList.add("hidden");
 }
+function openModal() {
+  form.value = {
+    fullname: `Client${String(clientCounter).padStart(3, "0")}`,
+    email: "info@careershyne.com",
+    phone: "254705030613",
+    amount: "",
+    type: "",
+    cv: null,
+  };
+  clientCounter++; // increment for the next order
+  showModal.value = true;
+}
 
 const filteredorders = computed(() => {
   if (!search.value) return orders.value;
@@ -350,14 +364,17 @@ const isFormValid = computed(() => {
     form.value.amount
   );
 });
+let clientCounter = 1;
+
 const form = ref({
-  fullname: "Walkin",
-  email: "walkin@gmail.com",
+  fullname: `Client${String(clientCounter).padStart(3, "0")}`,
+  email: "info@careershyne.com",
   phone: "254705030613",
   amount: "",
   type: "",
   cv: null,
 });
+
 // Submit form
 async function submitForm() {
   loading.value = true;
@@ -387,6 +404,10 @@ async function submitForm() {
     loading.value = false;
   }
 }
+function closeModal() {
+  showModal.value = false;
+}
+
 </script>
 
 

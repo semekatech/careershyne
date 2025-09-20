@@ -1,20 +1,21 @@
 <template>
   <TheWelcome />
 
-  <section class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20">
+  <section
+    class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20"
+  >
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
-      <transition name="fade" mode="out-in">
-        <!-- ================= FORM SECTION ================= -->
+      <div class="grid md:grid-cols-2 gap-12 items-start">
+        <!-- LEFT: Upload CV Form -->
         <div
-          v-if="showForm"
-          key="form"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-orange-100 dark:border-gray-700 max-w-2xl mx-auto"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-orange-100 dark:border-gray-700"
         >
           <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Upload Your CV
           </h3>
           <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Drag & drop your CV here, or click to select a file. PDF only, max 2MB.
+            Drag & drop your CV here, or click to select a file. PDF only, max
+            2MB.
           </p>
 
           <!-- Drag & Drop Zone -->
@@ -37,7 +38,9 @@
             </svg>
             <p class="text-gray-800 dark:text-gray-200 font-medium">
               Drop your file here or
-              <span class="text-orange-600 dark:text-orange-400 font-semibold">browse</span>
+              <span class="text-orange-600 dark:text-orange-400 font-semibold"
+                >browse</span
+              >
             </p>
             <input
               type="file"
@@ -56,7 +59,10 @@
             <p class="text-sm text-gray-700 dark:text-gray-300">
               📂 Selected File: <strong>{{ fileName }}</strong>
             </p>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3 overflow-hidden">
+
+            <div
+              class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3 overflow-hidden"
+            >
               <div
                 class="bg-gradient-to-r from-orange-400 to-pink-500 h-2 rounded-full transition-all duration-700 ease-out"
                 :style="{ width: attachmentProgress + '%' }"
@@ -69,7 +75,7 @@
 
           <!-- hCaptcha -->
           <div class="mt-6 flex justify-center">
-            <div id="hcaptcha-container"></div>
+            <div id="hcaptcha-container" class="mt-6 flex justify-center"></div>
           </div>
 
           <!-- Submit Button -->
@@ -77,11 +83,14 @@
             <button
               class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:opacity-90 transition transform hover:scale-[1.02] shadow-md"
               @click="submitForm"
-              :disabled="attachmentProgress < 100 || submitting || !hcaptchaToken"
+              :disabled="
+                attachmentProgress < 100 || submitting || !hcaptchaToken
+              "
             >
               {{ submitting ? "Submitting..." : "🚀 Submit CV for Review" }}
             </button>
 
+            <!-- Optional submit progress bar -->
             <div
               v-if="submitting"
               class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3 overflow-hidden"
@@ -94,64 +103,77 @@
           </div>
         </div>
 
-        <!-- ================= REVIEW SECTION ================= -->
+        <!-- RIGHT: CV Feedback -->
         <div
-          v-else
-          key="review"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-gray-100 dark:border-gray-700 max-w-4xl mx-auto"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-gray-100 dark:border-gray-700 min-h-[380px] flex flex-col overflow-y-auto"
         >
           <div v-if="review">
-            <h3 class="text-2xl font-bold mb-6">
-              AI CV Review <span class="text-sm text-gray-500">({{ review.score }}/100)</span>
+            <h3>
+              AI CV Review <span class="text-sm">({{ review.score }}/100)</span>
             </h3>
 
-            <section class="mb-4">
-              <h4 class="text-blue-500 font-bold">Strengths</h4>
-              <ul class="list-disc list-inside">
-                <li v-for="(s, i) in review.strengths" :key="'s' + i">{{ s }}</li>
-                <li v-if="!review.strengths.length" class="text-gray-500">No strengths detected.</li>
+
+            
+            <section>
+              <h4 style="color:dodgerblue;font-weight:bold">Strengths</h4>
+              <ul>
+                <li v-for="(s, i) in review.strengths" :key="'s' + i">
+                 - {{ s }}
+                </li>
+                <li v-if="!review.strengths.length" class="text-muted">
+                  No strengths detected.
+                </li>
               </ul>
+
             </section>
 
-            <section class="mb-4">
-              <h4 class="text-blue-500 font-bold">Weaknesses</h4>
-              <ul class="list-disc list-inside">
-                <li v-for="(w, i) in review.weaknesses" :key="'w' + i">{{ w }}</li>
-                <li v-if="!review.weaknesses.length" class="text-gray-500">No weaknesses detected.</li>
-              </ul>
-            </section>
-
-            <section class="mb-4">
-              <h4 class="text-blue-500 font-bold">Suggestions</h4>
-              <ul class="list-disc list-inside">
-                <li v-for="(t, i) in review.suggestions" :key="'t' + i">{{ t }}</li>
-                <li v-if="!review.suggestions.length" class="text-gray-500">No suggestions provided.</li>
+            <section>
+              <h4 style="color:dodgerblue;font-weight:bold">Weaknesses</h4>
+              <ul>
+                <li v-for="(w, i) in review.weaknesses" :key="'w' + i">
+                  - {{ w }}
+                </li>
+                <li v-if="!review.weaknesses.length" class="text-muted">
+                  No weaknesses detected.
+                </li>
               </ul>
             </section>
 
             <section>
-              <h4 class="text-blue-500 font-bold">Overall Impression</h4>
-              <p>{{ review.impression }}</p>
+              <h4 style="color:dodgerblue;font-weight:bold">Suggestions</h4>
+              <ul>
+                <li v-for="(t, i) in review.suggestions" :key="'t' + i">
+                 - {{ t }}
+                </li>
+                <li v-if="!review.suggestions.length" class="text-muted">
+                  No suggestions provided.
+                </li>
+              </ul>
             </section>
 
-            <!-- Reset Button -->
-            <div class="mt-8 text-center">
-              <button
-                class="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-xl hover:opacity-90 transition"
-                @click="resetForm"
-              >
-                🔄 Upload Another CV
-              </button>
-            </div>
+            <section>
+              <h4 style="color:dodgerblue;font-weight:bold">Overall Impression</h4>
+              <p>{{ review.impression }}</p>
+            </section>
           </div>
-          <div v-else>
-            <p class="text-gray-600 dark:text-gray-300">No review available. Please upload a CV.</p>
+
+          <div v-else class="w-full">
+            <h4 class="font-semibold text-orange-500 mb-4">
+              📊 What you’ll get:
+            </h4>
+            <ul
+              class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 text-sm"
+            >
+              <li>✅ Instant resume scoring (0-100)</li>
+              <li>⚡ Tailored tips to improve impact</li>
+              <li>🎯 ATS optimization check</li>
+              <li>💡 Highlighted strengths & weaknesses</li>
+            </ul>
           </div>
         </div>
-      </transition>
+      </div>
     </div>
   </section>
-
   <FooterSection />
 </template>
 
@@ -167,10 +189,8 @@ const selectedFile = ref(null);
 const fileName = ref("");
 const attachmentProgress = ref(0);
 const submitting = ref(false);
-const submitProgress = ref(0);
 const review = ref("");
 const hcaptchaToken = ref(null);
-const showForm = ref(true);
 
 function triggerFileInput() {
   fileInput.value.click();
@@ -182,27 +202,37 @@ function handleFileUpload(event) {
 
   selectedFile.value = file;
   fileName.value = file.name;
-  attachmentProgress.value = 0;
+  attachmentProgress.value = 0; // reset progress
 
   const reader = new FileReader();
+
   reader.onprogress = (e) => {
     if (e.lengthComputable) {
       attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
     }
   };
+
   reader.onloadend = () => {
-    attachmentProgress.value = 100;
+    attachmentProgress.value = 100; // finished reading
+    // File is ready to be uploaded
   };
-  reader.readAsArrayBuffer(file);
+
+  reader.readAsArrayBuffer(file); // start reading the file
 }
 
-// hCaptcha
-window.onHCaptchaSuccess = (token) => (hcaptchaToken.value = token);
-window.onHCaptchaExpired = () => (hcaptchaToken.value = null);
+// hCaptcha callbacks
+window.onHCaptchaSuccess = function (token) {
+  hcaptchaToken.value = token;
+};
+
+window.onHCaptchaExpired = function () {
+  hcaptchaToken.value = null;
+};
 
 async function submitForm() {
   if (!selectedFile.value) return alert("Please select a file.");
-  if (!hcaptchaToken.value) return alert("Please complete the hCaptcha verification.");
+  if (!hcaptchaToken.value)
+    return alert("Please complete the hCaptcha verification.");
 
   submitting.value = true;
   review.value = "";
@@ -219,12 +249,20 @@ async function submitForm() {
   });
 
   try {
+    // Upload the file
     const res = await UploadService.uploadFile(
       selectedFile.value,
-      hcaptchaToken.value
+      hcaptchaToken.value,
+      (e) => {
+        // ✅ This is the fix: Uncomment the code below to update the progress bar.
+        // if (e.lengthComputable) {
+        //   attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+        // }
+      }
     );
+
+    // Get AI review from response
     review.value = res.data.review || "No review received.";
-    showForm.value = false; // hide form, show review
 
     Swal.fire({
       icon: "success",
@@ -243,18 +281,12 @@ async function submitForm() {
     });
   } finally {
     submitting.value = false;
-    attachmentProgress.value = 0;
-    selectedFile.value = null;
-    fileName.value = "";
+    attachmentProgress.value = 0; // It's a good practice to reset the progress bar after completion.
+    selectedFile.value = null; // Also reset the selected file.
+    fileName.value = ""; // And the file name.
   }
 }
 
-function resetForm() {
-  review.value = "";
-  showForm.value = true;
-}
-
-// hCaptcha script load
 onMounted(() => {
   if (!window.hcaptcha) {
     const script = document.createElement("script");
@@ -270,6 +302,7 @@ onMounted(() => {
 
 function renderHCaptcha() {
   if (!window.hcaptcha) return;
+
   window.hcaptcha.render("hcaptcha-container", {
     sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
     callback: (token) => (hcaptchaToken.value = token),
@@ -277,14 +310,3 @@ function renderHCaptcha() {
   });
 }
 </script>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.4s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
