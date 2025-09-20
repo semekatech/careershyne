@@ -18,11 +18,20 @@ class AiController extends Controller
     public function uploadCV(Request $request)
     {
         try {
+            $count = \DB::table('ai_reviews')
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+
+            if ($count >= 100) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Daily limit reached for Careershyne AI. Please try again tomorrow.',
+                ], 422);
+            }
             // 1. Validate
             $request->validate([
                 'file' => 'required|mimetypes:application/pdf|max:5120',
             ]);
-
             $file = $request->file('file');
             $handle = fopen($file->getPathname(), 'rb');
             $magic = fread($handle, 4);
