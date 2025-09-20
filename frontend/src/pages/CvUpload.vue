@@ -193,6 +193,7 @@
                 </ul>
               </div>
 
+              
               <div
                 class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
               >
