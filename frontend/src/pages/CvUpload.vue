@@ -332,8 +332,10 @@ async function submitForm() {
   if (!selectedFile.value) return alert("Please select a file.");
   if (!hcaptchaToken.value)
     return alert("Please complete the hCaptcha verification.");
+
   submitting.value = true;
   review.value = "";
+
   Swal.fire({
     title: "Hold on…",
     html: `
@@ -352,9 +354,7 @@ async function submitForm() {
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
+      @keyframes spin { to { transform: rotate(360deg); } }
       .dots::after {
         content: "";
         animation: dots 1.5s steps(3, end) infinite;
@@ -377,10 +377,16 @@ async function submitForm() {
       selectedFile.value,
       hcaptchaToken.value
     );
+
+    // ✅ close Swal loader before updating UI
+    Swal.close();
+
     review.value = res.data.review || "No review received.";
     showForm.value = false;
   } catch (err) {
+    Swal.close(); // ✅ also close loader if error happens
     console.error(err);
+
     if (err.response) {
       const status = err.response.status;
       const data = err.response.data;
@@ -424,6 +430,7 @@ async function submitForm() {
     fileName.value = "";
   }
 }
+
 watch(showForm, (newVal) => {
   if (newVal) {
     setTimeout(() => renderHCaptcha(), 100);
