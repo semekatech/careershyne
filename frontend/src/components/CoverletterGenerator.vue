@@ -122,12 +122,18 @@
             <p class="mt-4 text-gray-600">Generating your professional cover letter...</p>
           </div>
           <div v-else>
-            <textarea
-              v-model="generatedCoverLetter"
-              rows="20"
-              class="w-full border rounded-lg p-4 font-mono text-sm resize-none"
-              readonly
-            ></textarea>
+            <div class="bg-gray-100 p-8 rounded-lg shadow-inner">
+                <div class="mb-6">
+                    <p class="font-bold text-lg text-gray-900">{{ extractedUserInfo.name }}</p>
+                    <p class="text-sm text-gray-700">{{ extractedUserInfo.title }}</p>
+                    <p class="text-sm text-gray-700">{{ extractedUserInfo.location }}</p>
+                    <p class="text-sm text-gray-700">{{ extractedUserInfo.phone }}</p>
+                    <p class="text-sm text-gray-700">{{ extractedUserInfo.email }}</p>
+                </div>
+                <div class="prose max-w-none">
+                    <pre class="whitespace-pre-wrap font-sans text-gray-800">{{ generatedCoverLetter }}</pre>
+                </div>
+            </div>
             <div class="flex justify-end mt-4">
               <button
                 @click="copyToClipboard"
@@ -165,6 +171,13 @@ const jobFile = ref(null);
 const jobFileName = ref("");
 
 const generatedCoverLetter = ref("");
+const extractedUserInfo = ref({
+  name: "SHABAN YASSIN",
+  title: "Accountant",
+  location: "Nairobi, Kenya",
+  phone: "+254796754706",
+  email: "yassinshaban62@gmail.com"
+});
 
 const isFormValid = computed(() => {
   if (inputType.value === 'text' && jobText.value.length > 0) return true;
@@ -178,6 +191,7 @@ function handleCvUpload(event) {
   if (file) {
     cvFile.value = file;
     cvFileName.value = file.name;
+    // In a real application, you would parse the CV here to extract the user's info
   }
 }
 
