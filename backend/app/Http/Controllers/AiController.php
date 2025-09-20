@@ -86,6 +86,8 @@ class AiController extends Controller
     public function coveletterGenerator(Request $request)
     {
         try {
+            info('All request input:', $request->all());
+
             // 1. Validate the CV file
             $request->validate([
                 'cv_file' => 'required|mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document|max:5120',
@@ -120,8 +122,7 @@ class AiController extends Controller
             info('CV File Path: ' . $cvFilePath);
 
             // 2. Capture and log job details
-            if ($request->has('job_text') && !empty(trim($request->input('job_text')))) {
-                // Case: Job description is pasted as text
+            if ($request->filled('job_text')) {
                 $jobDescription = $request->input('job_text');
                 info('Job Description (Pasted Text): ' . $jobDescription);
             } elseif ($request->has('job_url') && !empty(trim($request->input('job_url')))) {
