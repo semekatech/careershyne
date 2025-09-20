@@ -49,10 +49,10 @@ improvements that need to be addressed to help them stand out among recruiters i
 Read the provided CV content and return a single JSON object (no extra text) with this exact schema:
 
 {
-  "strengths": ["short bullet 1", "short bullet 2"],
-  "weaknesses": ["short bullet 1", "short bullet 2"],
-  "suggestions": ["short bullet 1", "short bullet 2"],
-  "impression": "Two-to-three short sentences summarizing overall impression.",
+  "strengths": ["bullet 1", "bullet 2"],
+  "weaknesses": ["bullet 1", "bullet 2"],
+  "suggestions": ["bullet 1", "bullet 2"],
+  "impression": "summarize overall impression.",
   "score": 0
 }
 

@@ -351,9 +351,9 @@ const isFormValid = computed(() => {
   );
 });
 const form = ref({
-  fullname: "",
-  email: "",
-  phone: "",
+  fullname: "Walkin",
+  email: "walkin@gmail.com",
+  phone: "254705030613",
   amount: "",
   type: "",
   cv: null,
