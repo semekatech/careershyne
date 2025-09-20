@@ -245,93 +245,215 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+// Script section is unchanged as requested
+// ... (The entire script block from the original prompt) ...
+import { ref, onMounted, watch } from "vue";
 import Swal from "sweetalert2";
+import TheWelcome from "@/components/TheWelcome.vue";
+import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
-import { useFileValidation } from "@/composables/useFileValidation";
-import { useHCaptcha } from "@/composables/useHCaptcha";
-import { useApiError } from "@/composables/useApiError";
+import * as pdfjsLib from "pdfjs-dist";
 
-const { validatePDF } = useFileValidation();
-const { hcaptchaToken, render, reset } = useHCaptcha("your-site-key");
-const { handleError } = useApiError();
+// Tell pdfjs where to find the worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
-const fileName = ref("");
+const fileInput = ref(null);
 const selectedFile = ref(null);
-const review = ref(null);
-const showForm = ref(true); // 🔑 controls whether form or review shows
-const submitting = ref(false);
+const fileName = ref("");
 const attachmentProgress = ref(0);
+const submitting = ref(false);
 const submitProgress = ref(0);
+const review = ref("");
+const hcaptchaToken = ref(null);
+const showForm = ref(true);
+
+let hcaptchaWidgetId = null;
+
+function triggerFileInput() {
+  fileInput.value.click();
+}
 
 async function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  try {
-    await validatePDF(file);
-    selectedFile.value = file;
-    fileName.value = file.name;
-    attachmentProgress.value = 100; // ✅ instantly mark as uploaded
-  } catch (e) {
-    Swal.fire({ icon: "error", title: "Invalid File", text: e.message });
+  // ✅ 1. Size check (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    Swal.fire({
+      icon: "error",
+      title: "File too large",
+      text: "Your CV must be under 5 MB.",
+    });
+    return;
   }
+
+  // ✅ 2. Page count check (max 5 pages)
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    if (pdf.numPages > 5) {
+      Swal.fire({
+        icon: "error",
+        title: "Too many pages",
+        text: "Your CV must not exceed 5 pages.",
+      });
+      return;
+    }
+  } catch (err) {
+    console.error("Error reading PDF:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Invalid file",
+      text: "Could not read the PDF. Please upload a valid file.",
+    });
+    return;
+  }
+
+  selectedFile.value = file;
+  fileName.value = file.name;
+  attachmentProgress.value = 0;
+
+  const reader = new FileReader();
+  reader.onprogress = (e) => {
+    if (e.lengthComputable) {
+      attachmentProgress.value = Math.round((e.loaded * 100) / e.total);
+    }
+  };
+  reader.onloadend = () => {
+    attachmentProgress.value = 100;
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 async function submitForm() {
-  if (!selectedFile.value || !hcaptchaToken.value) return;
-
+  if (!selectedFile.value) return alert("Please select a file.");
+  if (!hcaptchaToken.value)
+    return alert("Please complete the hCaptcha verification.");
   submitting.value = true;
-  submitProgress.value = 10;
+  review.value = "";
+  Swal.fire({
+    title: "Hold on…",
+    html: `
+    <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+      <div class="loader"></div>
+      <div style="font-weight:600; color:#2563eb; font-size:16px;">
+        Uploading your CV and getting AI review<span class="dots"></span>
+      </div>
+    </div>
+    <style>
+      .loader {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #2563eb;
+        border-top: 4px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .dots::after {
+        content: "";
+        animation: dots 1.5s steps(3, end) infinite;
+      }
+      @keyframes dots {
+        0% { content: ""; }
+        33% { content: "."; }
+        66% { content: ".."; }
+        100% { content: "..."; }
+      }
+    </style>
+  `,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    background: "#f3f4f6",
+  });
 
   try {
     const res = await UploadService.uploadFile(
       selectedFile.value,
-      hcaptchaToken.value,
-      (progressEvent) => {
-        if (progressEvent.total) {
-          submitProgress.value = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-        }
-      }
+      hcaptchaToken.value
     );
+    review.value = res.data.review || "No review received.";
+    showForm.value = false;
+  } catch (err) {
+    console.error(err);
+    if (err.response) {
+      const status = err.response.status;
+      const data = err.response.data;
 
-    // ✅ Expecting API to return { review: { score, strengths, weaknesses, suggestions } }
-    review.value = res.data.review || null;
-
-    if (review.value) {
-      showForm.value = false; // switch to review section
+      if (status === 422) {
+        Swal.fire({
+          icon: "warning",
+          title: "Invalid CV",
+          text: data.message || "The uploaded file is not a valid CV.",
+          background: "#fef3c7",
+        });
+      } else if (status === 429) {
+        Swal.fire({
+          icon: "info",
+          title: "Slow Down ⏳",
+          text:
+            data.message ||
+            "Too many uploads. Please wait a minute before trying again.",
+          background: "#dbeafe",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Submission Failed",
+          text: data.message || "Please try again!",
+          background: "#fee2e2",
+        });
+      }
     } else {
       Swal.fire({
-        icon: "warning",
-        title: "No Review",
-        text: "Upload successful but no review data returned.",
+        icon: "error",
+        title: "Network Error",
+        text: "Could not reach the server. Please check your connection.",
+        background: "#fee2e2",
       });
     }
-  } catch (err) {
-    handleError(err);
   } finally {
     submitting.value = false;
-    submitProgress.value = 100;
-    reset(); // reset captcha
+    attachmentProgress.value = 0;
+    selectedFile.value = null;
+    fileName.value = "";
   }
 }
-
+watch(showForm, (newVal) => {
+  if (newVal) {
+    setTimeout(() => renderHCaptcha(), 100);
+  }
+});
 onMounted(() => {
   if (!window.hcaptcha) {
     const script = document.createElement("script");
     script.src = "https://js.hcaptcha.com/1/api.js";
     script.async = true;
     script.defer = true;
-    script.onload = render;
     document.head.appendChild(script);
+    script.onload = renderHCaptcha;
   } else {
-    render();
+    renderHCaptcha();
   }
 });
-</script>
+function renderHCaptcha() {
+  if (!window.hcaptcha) return;
 
+  const container = document.getElementById("hcaptcha-container");
+  if (container) container.innerHTML = "";
+
+  hcaptchaWidgetId = window.hcaptcha.render("hcaptcha-container", {
+    sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
+    callback: (token) => (hcaptchaToken.value = token),
+    "expired-callback": () => (hcaptchaToken.value = null),
+  });
+}
+</script>
 
 <style scoped>
 .fade-enter-active,
@@ -342,8 +464,6 @@ onMounted(() => {
 .fade-leave-to {
   opacity: 0;
 }
-
-/* Styles for the circular progress bar */
 .score-circle {
   width: 120px;
   height: 120px;
