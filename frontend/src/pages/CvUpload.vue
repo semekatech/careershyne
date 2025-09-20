@@ -1,15 +1,13 @@
 <template>
   <TheWelcome />
 
-  <section
-    class="bg-gradient-to-br from-green-50 via-white to-purple-100 py-20"
-  >
+  <section class="bg-gray-50 dark:bg-gray-900 py-20">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <transition name="fade" mode="out-in">
         <div
           v-if="showForm"
           key="form"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-orange-100 dark:border-gray-700 max-w-2xl mx-auto"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-10 border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto"
         >
           <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Upload Your CV 📄
@@ -20,11 +18,11 @@
           </p>
 
           <div
-            class="border-2 border-dashed border-orange-400 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:bg-orange-50/50 dark:hover:bg-gray-700"
+            class="border-2 border-dashed border-blue-400 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:shadow-md hover:bg-blue-50/50 dark:hover:bg-gray-700"
             @click="triggerFileInput"
           >
             <svg
-              class="w-14 h-14 text-orange-500 mb-3"
+              class="w-14 h-14 text-blue-500 mb-3"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
@@ -38,7 +36,7 @@
             </svg>
             <p class="text-gray-800 dark:text-gray-200 font-medium">
               Drop your file here or
-              <span class="text-orange-600 dark:text-orange-400 font-semibold"
+              <span class="text-blue-600 dark:text-blue-400 font-semibold"
                 >browse</span
               >
             </p>
@@ -62,7 +60,7 @@
               class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3 overflow-hidden"
             >
               <div
-                class="bg-gradient-to-r from-orange-400 to-pink-500 h-2 rounded-full transition-all duration-700 ease-out"
+                class="bg-blue-500 h-2 rounded-full transition-all duration-700 ease-out"
                 :style="{ width: attachmentProgress + '%' }"
               ></div>
             </div>
@@ -77,7 +75,7 @@
 
           <div class="mt-8">
             <button
-              class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold transition transform hover:scale-[1.02] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold transition transform hover:scale-[1.02] shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
               @click="submitForm"
               :disabled="
                 attachmentProgress < 100 || submitting || !hcaptchaToken
@@ -91,7 +89,7 @@
               class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3 overflow-hidden"
             >
               <div
-                class="bg-gradient-to-r from-orange-400 to-pink-500 h-2 rounded-full transition-all duration-700 ease-out"
+                class="bg-blue-500 h-2 rounded-full transition-all duration-700 ease-out"
                 :style="{ width: submitProgress + '%' }"
               ></div>
             </div>
@@ -101,7 +99,7 @@
         <div
           v-else
           key="review"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-gray-100 dark:border-gray-700 max-w-4xl mx-auto"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-gray-200 dark:border-gray-700 max-w-4xl mx-auto"
         >
           <div v-if="review">
             <div
@@ -112,25 +110,13 @@
               </h3>
               <div class="score-circle mt-6 md:mt-0">
                 <svg viewBox="0 0 36 36" class="circular-chart">
-                  <defs>
-                    <linearGradient
-                      id="score-green-gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="0%"
-                    >
-                      <stop offset="0%" stop-color="#22c55e" />
-                      <stop offset="100%" stop-color="#16a34a" />
-                    </linearGradient>
-                  </defs>
                   <path
                     class="circle-bg"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                   <path
                     class="circle"
-                    stroke="url(#score-green-gradient)"
+                    stroke="#2563eb"
                     :stroke-dasharray="`${review.score}, 100`"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
@@ -151,7 +137,7 @@
                 class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
               >
                 <h4
-                  class="text-xl font-bold text-green-600 dark:text-green-400 flex items-center mb-2"
+                  class="text-xl font-bold text-green-700 dark:text-green-400 flex items-center mb-2"
                 >
                   <span class="mr-2">💪</span> Strengths
                 </h4>
@@ -174,7 +160,7 @@
                 class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
               >
                 <h4
-                  class="text-xl font-bold text-red-600 dark:text-red-400 flex items-center mb-2"
+                  class="text-xl font-bold text-red-700 dark:text-red-400 flex items-center mb-2"
                 >
                   <span class="mr-2">🚧</span> Weaknesses
                 </h4>
@@ -193,12 +179,11 @@
                 </ul>
               </div>
 
-              
               <div
                 class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
               >
                 <h4
-                  class="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center mb-2"
+                  class="text-xl font-bold text-blue-700 dark:text-blue-400 flex items-center mb-2"
                 >
                   <span class="mr-2">💡</span> Suggestions
                 </h4>
@@ -220,7 +205,7 @@
 
             <section class="mt-10 text-center">
               <div
-                class="bg-gradient-to-r from-orange-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 border border-orange-200 dark:border-gray-600 shadow-sm"
+                class="bg-gray-100 dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm"
               >
                 <h4
                   class="text-xl font-bold text-gray-900 dark:text-white mb-3"
@@ -233,14 +218,14 @@
                   Based on your score and review, your CV might be holding you
                   back.
                   <span
-                    class="font-semibold text-orange-600 dark:text-orange-400"
+                    class="font-semibold text-blue-600 dark:text-blue-400"
                     >CareerShyne</span
                   >
                   can help you Revamp your CV and stand out to employers.
                 </p>
                 <router-link
                   to="/order-cv?ref=ai"
-                  class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold shadow-md transform transition hover:scale-[1.05]"
+                  class="px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md transform transition hover:scale-[1.05] hover:bg-blue-700"
                 >
                   ✨ Yes, Help Me Revamp My CV
                 </router-link>
@@ -261,6 +246,8 @@
 </template>
 
 <script setup>
+// Script section is unchanged as requested
+// ... (The entire script block from the original prompt) ...
 import { ref, onMounted, watch } from "vue";
 import Swal from "sweetalert2";
 import TheWelcome from "@/components/TheWelcome.vue";
@@ -356,7 +343,7 @@ async function submitForm() {
     html: `
     <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
       <div class="loader"></div>
-      <div style="font-weight:600; color:#f97316; font-size:16px;">
+      <div style="font-weight:600; color:#2563eb; font-size:16px;">
         Uploading your CV and getting AI review<span class="dots"></span>
       </div>
     </div>
@@ -364,7 +351,7 @@ async function submitForm() {
       .loader {
         width: 40px;
         height: 40px;
-        border: 4px solid #f97316;
+        border: 4px solid #2563eb;
         border-top: 4px solid transparent;
         border-radius: 50%;
         animation: spin 1s linear infinite;
@@ -386,7 +373,7 @@ async function submitForm() {
   `,
     showConfirmButton: false,
     allowOutsideClick: false,
-    background: "#fef3c7",
+    background: "#f3f4f6", // Muted background
   });
 
   try {
@@ -402,7 +389,7 @@ async function submitForm() {
       title: "AI Review Ready!",
       confirmButtonText: "Close",
       width: 600,
-      background: "#fef3c7",
+      background: "#dcfce7", // Muted success background
     });
   } catch (err) {
     console.error(err);
@@ -416,7 +403,7 @@ async function submitForm() {
           icon: "warning",
           title: "Invalid CV",
           text: data.message || "The uploaded file is not a valid CV.",
-          background: "#fef9c3",
+          background: "#fef3c7",
         });
       } else {
         Swal.fire({
@@ -504,13 +491,12 @@ function renderHCaptcha() {
 
 .circle-bg {
   fill: none;
-  stroke: #eee;
+  stroke: #e5e7eb; /* Changed to a neutral gray */
   stroke-width: 3.8;
 }
 
 .circle {
   fill: none;
-  /* Now uses the green gradient defined in SVG defs */
   stroke-width: 2.8;
   stroke-linecap: round;
   transform: rotate(-90deg);
@@ -519,7 +505,7 @@ function renderHCaptcha() {
 }
 
 .percentage {
-  fill: #16a34a; /* Changed to green to match the score bar */
+  fill: #2563eb; /* Changed to blue to match the new palette */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.5em;
   text-anchor: middle;
