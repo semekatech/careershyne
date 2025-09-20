@@ -2,37 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CvOrder;
-use App\Models\MpesaPayment;
-use Illuminate\Http\Request;
-use Nette\Utils\Random;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderMail;
-use Smalot\PdfParser\Parser;
-use App\Models\User;
-use DB;
+use App\Services\AIReviewService;
 use Exception;
-use OpenAI;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 class AiController extends Controller
 {
+    protected $aiReview;
+
+    public function __construct(AIReviewService $aiReview)
+    {
+        $this->aiReview = $aiReview;
+    }
 
     public function uploadCV(Request $request)
     {
         try {
-            // 1. Validate input
+            // 1. Validate
             $request->validate([
-                'file' => 'required|mimes:pdf|max:5120',
+                'file' => 'required|mimetypes:application/pdf|max:5120',
             ]);
 
-            // 2. Store file
-            $path = $request->file('file')->store('cvs', 'public');
+            $file = $request->file('file');
+            $handle = fopen($file->getPathname(), 'rb');
+            $magic = fread($handle, 4);
+            fclose($handle);
 
-            // 3. Extract text from PDF
-            $parser = new Parser();
-            $pdf = $parser->parseFile($request->file('file')->getPathname());
-            $text = $pdf->getText() ?? '';
+            if ($magic !== '%PDF') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid file format, only genuine PDFs allowed.'
+                ], 422);
+            }
+
+            // 2. Extract text
+            [$path, $text] = $this->aiReview->extractText($request->file('file'));
 
             if (empty(trim($text))) {
                 return response()->json([
@@ -41,67 +45,8 @@ class AiController extends Controller
                 ], 422);
             }
 
-            // 4. Build AI prompt
-            $prompt = <<<PROMPT
-You are an expert HR professional.
-
-Step 1: Determine if the provided text is a CV/resume.
-- A CV/resume usually includes personal details, work experience, education, skills, etc.
-- If it is NOT a CV/resume, return ONLY this JSON:
-
-{
-  "is_cv": false,
-  "message": "Looks like you uploaded a wrong file. Please upload a valid CV in PDF format."
-}
-
-Step 2: If it IS a CV/resume, extract key details and review it. Return ONLY this JSON:
-
-{
-  "is_cv": true,
-  "name": "Full Name if available",
-  "email": "Email if available",
-  "phone": "Phone if available",
-  "strengths": ["bullet 1", "bullet 2"],
-  "weaknesses": ["bullet 1", "bullet 2"],
-  "suggestions": ["bullet 1", "bullet 2"],
-  "impression": "overall impression",
-  "score": 0
-}
-
-Requirements:
-- Each bullet point must be 1–2 sentences long.
-- Do not exceed 5 bullet points per section.
-- Return ONLY JSON, no markdown, no extra commentary.
-
-CV Content:
-{CV}
-PROMPT;
-
-            $cvSnippet = trim(substr($text, 0, 4000));
-            $requestPrompt = str_replace('{CV}', $cvSnippet, $prompt);
-
-            // 5. Call OpenAI
-            $client = OpenAI::client(env('OPENAI_API_KEY'));
-            $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are a strict CV validator and reviewer.'],
-                    ['role' => 'user', 'content' => $requestPrompt],
-                ],
-                'temperature' => 0.0,
-                'max_tokens' => 800,
-            ]);
-
-            $raw = $response->choices[0]->message->content ?? '';
-            $json = json_decode($raw, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE || !is_array($json)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'AI returned an invalid response.',
-                ], 500);
-            }
-
+            // 3. Analyze with AI
+            $json = $this->aiReview->analyzeCV($text);
             if (isset($json['is_cv']) && $json['is_cv'] === false) {
                 return response()->json([
                     'success' => false,
@@ -109,26 +54,11 @@ PROMPT;
                 ], 422);
             }
 
-            // 6. Normalize review result
-            $result = [
-                'strengths'   => array_values(array_slice($json['strengths'] ?? [], 0, 3)),
-                'weaknesses'  => array_values(array_slice($json['weaknesses'] ?? [], 0, 3)),
-                'suggestions' => array_values(array_slice($json['suggestions'] ?? [], 0, 3)),
-                'impression'  => $json['impression'] ?? '',
-                'score'       => $json['score'] ?? null,
-            ];
+            // 4. Normalize
+            $result = $this->aiReview->normalizeResult($json);
 
-            // 7. Save to DB
-            DB::table('ai_reviews')->insert([
-                'name'      => $json['name'] ?? null,
-                'email'     => $json['email'] ?? null,
-                'phone'     => $json['phone'] ?? null,
-                'file_path' => asset('storage/' . $path),
-                'score'     => $json['score'] ?? null,
-                'review'    => json_encode($result),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // 5. Save
+            $this->aiReview->saveReview($json, $path, $result);
 
             return response()->json([
                 'success'   => true,
