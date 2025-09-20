@@ -224,7 +224,7 @@
                 <h4
                   class="text-xl font-bold text-gray-900 dark:text-white mb-3"
                 >
-                  🚀 Don’t Miss Out on Job Opportunities
+                  Don’t Miss Out on Job Opportunities
                 </h4>
                 <p
                   class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6"
@@ -235,14 +235,14 @@
                     class="font-semibold text-orange-600 dark:text-orange-400"
                     >CareerShyne</span
                   >
-                  can help you **revamp your CV** and stand out to employers.
+                  can help you Revamp your CV and stand out to employers.
                 </p>
-                <button
+                <router-link
+                  to="/order-cv?ref=ai"
                   class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold shadow-md transform transition hover:scale-[1.05]"
-                  @click="openRevampModal"
                 >
                   ✨ Yes, Help Me Revamp My CV
-                </button>
+                </router-link>
               </div>
             </section>
           </div>
@@ -471,33 +471,6 @@ function renderHCaptcha() {
     sitekey: "4eaee940-28ca-4440-855a-b9eaa88ad3be",
     callback: (token) => (hcaptchaToken.value = token),
     "expired-callback": () => (hcaptchaToken.value = null),
-  });
-}
-
-
-function openRevampModal() {
-  Swal.fire({
-    title: "CV Revamp Service",
-    html: `
-      <p style="margin-bottom:15px;">
-        Our team will professionally revamp your CV to boost your chances of landing interviews.
-      </p>
-      <p style="margin-bottom:15px;">
-        ✅ Professional Design<br>
-        ✅ Keyword Optimization<br>
-        ✅ Tailored for Your Industry
-      </p>
-      <strong>Interested in getting started?</strong>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "Yes, Revamp My CV",
-    cancelButtonText: "Maybe Later",
-    background: "#fef3c7",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // redirect to booking page or show contact form
-      window.location.href = "/services/cv-revamp"; // adjust your link
-    }
   });
 }
 </script>
