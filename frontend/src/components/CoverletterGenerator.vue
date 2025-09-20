@@ -150,7 +150,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { generateCoverLetter } from "./services/coverletter.js";
+import { generateCoverLetter } from "@/services/coverLetterService.js";
 
 const currentStep = ref(1);
 const loading = ref(false);
