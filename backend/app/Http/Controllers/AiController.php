@@ -93,9 +93,6 @@ class AiController extends Controller
     //     $text = preg_replace('/\s+/', ' ', $text);
     //     return trim($text);
     // }
-
-
-
     public function coveletterGenerator(Request $request)
     {
         try {
@@ -201,7 +198,7 @@ $jobText
     }
 
     /**
-     * Extract text from PDF or image file (CV or Job)
+     * Extract text from PDF or image file (CV or Job) — **without preprocessing**
      */
     private function extractTextFromFile($file, $type = 'File')
     {
@@ -211,23 +208,8 @@ $jobText
                 info("$type: Processing PDF.");
                 [$filePath, $text] = $this->aiReview->extractText($file);
             } else {
-                info("$type: Processing image.");
-                $cleanedPath = storage_path('app/tmp/' . strtolower($type) . '_cleaned.png');
-                if (!file_exists(dirname($cleanedPath))) {
-                    mkdir(dirname($cleanedPath), 0777, true);
-                }
-
-                Image::make($file->getPathname())
-                    ->resize(2000, null, fn($constraint) => $constraint->aspectRatio())
-                    ->greyscale()
-                    ->contrast(20)
-                    ->brightness(10)
-                    ->sharpen(15)
-                    ->save($cleanedPath);
-
-                info("$type: Image preprocessing completed.");
-
-                $ocr = new TesseractOCR($cleanedPath);
+                info("$type: Processing image with OCR directly.");
+                $ocr = new TesseractOCR($file->getPathname());
                 $ocr->lang('eng')->psm(1)->oem(3);
                 $text = $ocr->run();
                 info("$type: OCR completed.");
