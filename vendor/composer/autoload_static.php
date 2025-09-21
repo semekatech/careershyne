@@ -8,6 +8,8 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '61ba3e92ef91a7a0f1cc260ebd9290e4' => __DIR__ . '/..' . '/openai-php/client/src/OpenAI.php',
     );
@@ -19,6 +21,7 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Component\\HttpClient\\' => 29,
+            'Stichoza\\GoogleTranslate\\' => 25,
         ),
         'P' => 
         array (
@@ -45,6 +48,12 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
             'Http\\Message\\MultipartStream\\' => 29,
             'Http\\Discovery\\' => 15,
         ),
+        'G' => 
+        array (
+            'GuzzleHttp\\Psr7\\' => 16,
+            'GuzzleHttp\\Promise\\' => 19,
+            'GuzzleHttp\\' => 11,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -63,6 +72,10 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
         'Symfony\\Component\\HttpClient\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/http-client',
+        ),
+        'Stichoza\\GoogleTranslate\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/stichoza/google-translate-php/src',
         ),
         'Psr\\Log\\' => 
         array (
@@ -104,6 +117,18 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
         'Http\\Discovery\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-http/discovery/src',
+        ),
+        'GuzzleHttp\\Psr7\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
+        ),
+        'GuzzleHttp\\Promise\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
+        ),
+        'GuzzleHttp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
     );
 

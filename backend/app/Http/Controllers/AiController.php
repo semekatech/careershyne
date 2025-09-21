@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use OpenAI;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Intervention\Image\Facades\Image;
+use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class AiController extends Controller
 {
@@ -213,9 +214,13 @@ $jobText
                 $ocr->lang('eng')->psm(1)->oem(3);
                 $text = $ocr->run();
                 info("$type: OCR completed.");
+                $tr = new GoogleTranslate('en'); // target language
+                $jobText = $tr->translate($text);
+
+                info("Translated Job text: " . substr($jobText, 0, 200) . "...");
             }
 
-            $text = $this->aiReview->cleanText($text);
+            $text = $this->aiReview->cleanText($jobText);
         } catch (\Exception $e) {
             info("$type: Text extraction failed - " . $e->getMessage());
             throw new \Exception("$type text extraction failed: " . $e->getMessage());
