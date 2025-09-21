@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use OpenAI;
 use thiagoalessio\TesseractOCR\TesseractOCR;
-
+use Intervention\Image\Facades\Image;
 class AiController extends Controller
 {
     protected $aiReview;
@@ -111,6 +111,7 @@ class AiController extends Controller
                 $handle = fopen($cvFile->getPathname(), 'rb');
                 $magic = fread($handle, 4);
                 fclose($handle);
+
                 if ($magic !== '%PDF') {
                     return response()->json([
                         'success' => false,
@@ -121,14 +122,32 @@ class AiController extends Controller
                 // Extract text from PDF
                 [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
             } else {
-                // ✅ OCR for Images (jpg/jpeg/png)
-                $cvText = (new TesseractOCR($cvFile->getPathname()))
-                    ->lang('eng') // you can add multiple langs if needed
+                // ✅ Preprocess Image with Intervention
+                $cleanedPath = storage_path('app/tmp/cleaned.png');
+                if (!file_exists(dirname($cleanedPath))) {
+                    mkdir(dirname($cleanedPath), 0777, true);
+                }
+
+                Image::make($cvFile->getPathname())
+                    ->resize(2000, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })
+                    ->greyscale()
+                    ->contrast(15)
+                    ->sharpen(10)
+                    ->save($cleanedPath);
+
+                // OCR on cleaned image
+                $cvText = (new TesseractOCR($cleanedPath))
+                    ->lang('eng')
+                    ->psm(6)
+                    ->oem(3)
                     ->run();
             }
 
             $cvText = $this->aiReview->cleanText($cvText);
             info($cvText);
+
             if (empty(trim($cvText))) {
                 return response()->json([
                     'success' => false,
@@ -144,16 +163,19 @@ class AiController extends Controller
                 $request->validate([
                     'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
                 ]);
+
                 $jobPdfFile = $request->file('job_pdf');
                 $handle = fopen($jobPdfFile->getPathname(), 'rb');
                 $magic = fread($handle, 4);
                 fclose($handle);
+
                 if ($magic !== '%PDF') {
                     return response()->json([
                         'success' => false,
                         'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
                     ], 422);
                 }
+
                 [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
                 $jobText = $this->aiReview->cleanText($jobText);
                 info($jobText);
@@ -165,7 +187,7 @@ class AiController extends Controller
             }
 
             // 3. Generate Cover Letter with AI
-            $client = OpenAI::client(env('OPENAI_API_KEY'));
+            $client = \OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
 You are a professional career assistant.

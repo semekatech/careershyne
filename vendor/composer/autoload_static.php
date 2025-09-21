@@ -35,6 +35,11 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
         array (
             'Nyholm\\Psr7\\' => 12,
         ),
+        'I' => 
+        array (
+            'Intervention\\Image\\' => 19,
+            'Intervention\\Gif\\' => 17,
+        ),
         'H' => 
         array (
             'Http\\Message\\MultipartStream\\' => 29,
@@ -65,8 +70,8 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -83,6 +88,14 @@ class ComposerStaticInit9477d6241162d638173b5af05400fbae
         'Nyholm\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/nyholm/psr7/src',
+        ),
+        'Intervention\\Image\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/intervention/image/src',
+        ),
+        'Intervention\\Gif\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/intervention/gif/src',
         ),
         'Http\\Message\\MultipartStream\\' => 
         array (
