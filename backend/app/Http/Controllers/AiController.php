@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use OpenAI;
 use thiagoalessio\TesseractOCR\TesseractOCR;
-use Intervention\Image\Facades\Image;
+
 class AiController extends Controller
 {
     protected $aiReview;
@@ -95,99 +95,81 @@ class AiController extends Controller
 
 
 
-public function coveletterGenerator(Request $request)
-{
-    try {
-        // =========================
-        // 1️⃣ Validate CV input
-        // =========================
-        $request->validate([
-            'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
-        ]);
+    public function coveletterGenerator(Request $request)
+    {
+        try {
+            // 1. Validate CV (PDF or Image)
+            $request->validate([
+                'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+            ]);
 
-        $cvFile = $request->file('cv_file');
-        $cvText = "";
+            $cvFile = $request->file('cv_file');
+            $cvText = "";
 
-        if ($cvFile->getMimeType() === 'application/pdf') {
-            // PDF integrity check
-            $handle = fopen($cvFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
+            if ($cvFile->getMimeType() === 'application/pdf') {
+                // Extra PDF check
+                $handle = fopen($cvFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
+                if ($magic !== '%PDF') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid CV file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
 
-            if ($magic !== '%PDF') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid CV file format. Please upload a genuine PDF.'
-                ], 422);
+                // Extract text from PDF
+                [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
+            } else {
+                // ✅ OCR for Images (jpg/jpeg/png)
+                $cvText = (new TesseractOCR($cvFile->getPathname()))
+                    ->lang('eng')
+                    ->psm(6)
+                    ->oem(3)
+                    ->run();
             }
 
-            // Extract text from PDF
-            [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
-
-        } else {
-            // =========================
-            // Image OCR (no preprocessing)
-            // =========================
-            $ocr = new TesseractOCR($cvFile->getPathname());
-            $ocr->lang('eng');
-            $ocr->psm(6);  // multi-block text (good for CVs)
-            $ocr->oem(3);  // default OCR engine
-
-            $cvText = $ocr->run();
-            info("OCR Result from image CV: ".$cvText);
-
+            $cvText = $this->aiReview->cleanText($cvText);
+            info($cvText);
             if (empty(trim($cvText))) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to extract text from the CV image. Please ensure the image is clear and readable.',
+                    'message' => 'Unable to extract text from the CV. Please upload a text-based file.',
                 ], 422);
             }
-        }
 
-        $cvText = $this->aiReview->cleanText($cvText);
-
-        // =========================
-        // 2️⃣ Capture Job Description
-        // =========================
-        $jobText = null;
-
-        if ($request->filled('job_text')) {
-            $jobText = $this->aiReview->cleanText($request->input('job_text'));
-
-        } elseif ($request->hasFile('job_pdf')) {
-            $request->validate([
-                'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
-            ]);
-
-            $jobPdfFile = $request->file('job_pdf');
-            $handle = fopen($jobPdfFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
-
-            if ($magic !== '%PDF') {
+            // 2. Capture Job Description
+            $jobText = null;
+            if ($request->filled('job_text')) {
+                $jobText = $this->aiReview->cleanText($request->input('job_text'));
+            } elseif ($request->hasFile('job_pdf')) {
+                $request->validate([
+                    'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
+                ]);
+                $jobPdfFile = $request->file('job_pdf');
+                $handle = fopen($jobPdfFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
+                if ($magic !== '%PDF') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
+                [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
+                $jobText = $this->aiReview->cleanText($jobText);
+                info($jobText);
+            } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
                 ], 422);
             }
 
-            [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
-            $jobText = $this->aiReview->cleanText($jobText);
-            info("Extracted Job Text: ".$jobText);
+            // 3. Generate Cover Letter with AI
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
-            ], 422);
-        }
-
-        // =========================
-        // 3️⃣ Generate Cover Letter with OpenAI
-        // =========================
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-
-        $prompt = "
+            $prompt = "
 You are a professional career assistant.
 Generate a personalized, professional cover letter using the applicant’s CV and the provided job description.
 
@@ -204,30 +186,27 @@ $jobText
 - Do not repeat the CV; instead, highlight relevant points.
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
 
-        $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
+            $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
 
-        // =========================
-        // 4️⃣ Return JSON response
-        // =========================
-        return response()->json([
-            'success' => true,
-            'message' => 'Cover letter generated successfully.',
-            'cover_letter' => $coverLetter,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-        ], 500);
+            // 4. Return JSON response
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover letter generated successfully.',
+                'cover_letter' => $coverLetter,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
-}
 }
