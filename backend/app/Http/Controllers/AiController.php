@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use OpenAI;
 use thiagoalessio\TesseractOCR\TesseractOCR;
+use Intervention\Image\Facades\Image;
 
 class AiController extends Controller
 {
