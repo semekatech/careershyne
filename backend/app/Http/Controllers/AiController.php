@@ -6,6 +6,7 @@ use App\Services\AIReviewService;
 use Exception;
 use Illuminate\Http\Request;
 use OpenAI;
+use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class AiController extends Controller
 {
@@ -92,16 +93,21 @@ class AiController extends Controller
         return trim($text);
     }
 
-    public function coveletterGenerator(Request $request)
+
+
+    public function coverletterGenerator(Request $request)
     {
         try {
-            // 1. Validate CV
+            // 1. Validate CV (PDF or Image)
             $request->validate([
-                'cv_file' => 'required|mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document|max:5120',
+                'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
             ]);
 
             $cvFile = $request->file('cv_file');
+            $cvText = "";
+
             if ($cvFile->getMimeType() === 'application/pdf') {
+                // Extra PDF check
                 $handle = fopen($cvFile->getPathname(), 'rb');
                 $magic = fread($handle, 4);
                 fclose($handle);
@@ -111,9 +117,16 @@ class AiController extends Controller
                         'message' => 'Invalid CV file format. Please upload a genuine PDF.'
                     ], 422);
                 }
+
+                // Extract text from PDF
+                [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
+            } else {
+                // ✅ OCR for Images (jpg/jpeg/png)
+                $cvText = (new TesseractOCR($cvFile->getPathname()))
+                    ->lang('eng') // you can add multiple langs if needed
+                    ->run();
             }
 
-            [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
             $cvText = $this->aiReview->cleanText($cvText);
 
             if (empty(trim($cvText))) {
@@ -151,7 +164,7 @@ class AiController extends Controller
                 ], 422);
             }
 
-            // 3. Pass to AI
+            // 3. Generate Cover Letter with AI
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
