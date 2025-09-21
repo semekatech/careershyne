@@ -238,10 +238,12 @@ $jobText
             'cover_letter' => $coverLetter,
         ]);
 
+
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
             'message' => 'Error: ' . $e->getMessage(),
         ], 500);
     }
+}
 }
