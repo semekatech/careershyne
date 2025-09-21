@@ -85,17 +85,17 @@ class AiController extends Controller
             ], 500);
         }
     }
-    private function cleanText($text)
-    {
-        $text = strip_tags($text);
-        $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
-        $text = preg_replace('/\s+/', ' ', $text);
-        return trim($text);
-    }
+    // private function cleanText($text)
+    // {
+    //     $text = strip_tags($text);
+    //     $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
+    //     $text = preg_replace('/\s+/', ' ', $text);
+    //     return trim($text);
+    // }
 
 
 
-    public function coverletterGenerator(Request $request)
+    public function coveletterGenerator(Request $request)
     {
         try {
             // 1. Validate CV (PDF or Image)
@@ -139,7 +139,7 @@ class AiController extends Controller
             // 2. Capture Job Description
             $jobText = null;
             if ($request->filled('job_text')) {
-                $jobText = $this->cleanText($request->input('job_text'));
+                $jobText = $this->aiReview->cleanText($request->input('job_text'));
             } elseif ($request->hasFile('job_pdf')) {
                 $request->validate([
                     'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
@@ -155,7 +155,7 @@ class AiController extends Controller
                     ], 422);
                 }
                 [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
-                $jobText = $this->cleanText($jobText);
+                $jobText = $this->aiReview->cleanText($jobText);
                 info($jobText);
             } else {
                 return response()->json([
