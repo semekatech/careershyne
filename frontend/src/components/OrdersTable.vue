@@ -380,7 +380,6 @@ async function submitForm() {
   loading.value = true;
   successMessage.value = "";
   errorMessage.value = "";
-
   try {
     const fd = new FormData();
     fd.append("fullname", form.value.fullname);
@@ -388,12 +387,10 @@ async function submitForm() {
     fd.append("email", form.value.email);
     fd.append("phone", form.value.phone);
     fd.append("type", form.value.type);
-
     if (form.value.cv) {
       fd.append("cv", form.value.cv);
     }
     await orderService.store(fd);
-
     successMessage.value = "Order submitted successfully!";
     await fetchOrders();
     setTimeout(() => closeModal(), 1000);
