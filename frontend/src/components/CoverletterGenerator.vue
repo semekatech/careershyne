@@ -51,9 +51,7 @@
 
         <!-- Step 1: CV Upload -->
         <div v-if="currentStep === 1" class="space-y-6">
-          <h2 class="text-xl font-bold text-gray-800">
-            Step 1: Upload Your CV
-          </h2>
+          <h2 class="text-xl font-bold text-gray-800">Step 1: Upload Your CV</h2>
           <p class="text-gray-600">
             Upload your CV or resume. Our AI will use it to highlight your
             relevant skills and experience in the cover letter.
@@ -65,10 +63,9 @@
             <input
               type="file"
               @change="handleCvUpload"
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept=".pdf,.doc,.docx"
               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
             />
-
             <p v-if="cvFileName" class="mt-2 text-sm text-gray-600">
               📂 {{ cvFileName }}
             </p>
@@ -139,7 +136,7 @@
             <input
               type="file"
               @change="handleJobFileUpload"
-              accept="application/pdf"
+              accept=".pdf,.jpg,.jpeg,.png"
               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
             />
             <p v-if="jobFileName" class="mt-2 text-sm text-gray-600">
@@ -325,9 +322,12 @@ function downloadWord() {
     return;
   }
 
-  const blob = new Blob([`Cover Letter\n\n${generatedCoverLetter.value}`], {
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  });
+  const blob = new Blob(
+    [
+      `Cover Letter\n\n${generatedCoverLetter.value}`
+    ],
+    { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+  );
 
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
