@@ -95,114 +95,136 @@ class AiController extends Controller
 
 
 
-public function coveletterGenerator(Request $request)
-{
-    try {
-        // =========================
-        // 1️⃣ Validate CV input
-        // =========================
-        $request->validate([
-            'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
-        ]);
-
-        $cvFile = $request->file('cv_file');
-        $cvText = "";
-
-        if ($cvFile->getMimeType() === 'application/pdf') {
-            // PDF integrity check
-            $handle = fopen($cvFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
-
-            if ($magic !== '%PDF') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid CV file format. Please upload a genuine PDF.'
-                ], 422);
-            }
-
-            // Extract text from PDF
-            [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
-
-        } else {
-            // =========================
-            // Image preprocessing
-            // =========================
-            $cleanedPath = storage_path('app/tmp/cleaned.png');
-            if (!file_exists(dirname($cleanedPath))) {
-                mkdir(dirname($cleanedPath), 0777, true);
-            }
-
-            Image::make($cvFile->getPathname())
-                ->resize(2000, null, fn($constraint) => $constraint->aspectRatio())
-                ->greyscale()
-                ->contrast(20)
-                ->brightness(10)
-                ->sharpen(15)
-                ->save($cleanedPath);
+    public function coveletterGenerator(Request $request)
+    {
+        try {
+            info("Cover letter generation started.");
 
             // =========================
-            // OCR with Tesseract
+            // 1️⃣ Validate CV input
             // =========================
-            $ocr = new TesseractOCR($cleanedPath);
-            $ocr->lang('eng');
-            $ocr->psm(1);  // Automatic page segmentation with OSD
-            $ocr->oem(3);  // Default OCR engine
-            $cvText = $ocr->run();
-        }
-
-        $cvText = $this->aiReview->cleanText($cvText);
-        info("Extracted CV Text: ".$cvText);
-
-        if (empty(trim($cvText))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to extract text from the CV. Please upload a clear PDF or image.',
-            ], 422);
-        }
-
-        // =========================
-        // 2️⃣ Capture Job Description
-        // =========================
-        $jobText = null;
-
-        if ($request->filled('job_text')) {
-            $jobText = $this->aiReview->cleanText($request->input('job_text'));
-
-        } elseif ($request->hasFile('job_pdf')) {
+            info("Validating CV file.");
             $request->validate([
-                'job_pdf' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+                'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
             ]);
 
-            $jobPdfFile = $request->file('job_pdf');
-            $handle = fopen($jobPdfFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
+            $cvFile = $request->file('cv_file');
+            $cvText = "";
+            info("CV file received: " . $cvFile->getClientOriginalName());
 
-            if ($magic !== '%PDF') {
+            if ($cvFile->getMimeType() === 'application/pdf') {
+                info("Processing PDF CV.");
+                // PDF integrity check
+                $handle = fopen($cvFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
+
+                if ($magic !== '%PDF') {
+                    info("Invalid PDF CV detected.");
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid CV file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
+
+                [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
+                info("Extracted text from PDF CV successfully.");
+            } else {
+                info("Processing image CV.");
+                // Image preprocessing
+                $cleanedPath = storage_path('app/tmp/cleaned.png');
+                if (!file_exists(dirname($cleanedPath))) {
+                    mkdir(dirname($cleanedPath), 0777, true);
+                }
+
+                try {
+                    Image::make($cvFile->getPathname())
+                        ->resize(2000, null, fn($constraint) => $constraint->aspectRatio())
+                        ->greyscale()
+                        ->contrast(20)
+                        ->brightness(10)
+                        ->sharpen(15)
+                        ->save($cleanedPath);
+                    info("Image preprocessing completed: $cleanedPath");
+                } catch (\Exception $e) {
+                    \Log::error("Image preprocessing failed: " . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error processing CV image.',
+                    ], 500);
+                }
+
+                // OCR with Tesseract
+                try {
+                    $ocr = new TesseractOCR($cleanedPath);
+                    $ocr->lang('eng')->psm(1)->oem(3);
+                    $cvText = $ocr->run();
+                    info("OCR completed successfully.");
+                } catch (\Exception $e) {
+                    \Log::error("OCR failed: " . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error extracting text from CV image.',
+                    ], 500);
+                }
+            }
+
+            $cvText = $this->aiReview->cleanText($cvText);
+            info("Cleaned CV text: " . substr($cvText, 0, 200) . "..."); // Log first 200 chars
+
+            if (empty(trim($cvText))) {
+                info("No text extracted from CV.");
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    'message' => 'Unable to extract text from the CV. Please upload a clear PDF or image.',
                 ], 422);
             }
 
-            [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
-            $jobText = $this->aiReview->cleanText($jobText);
-            info("Extracted Job Text: ".$jobText);
+            // =========================
+            // 2️⃣ Capture Job Description
+            // =========================
+            $jobText = null;
 
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
-            ], 422);
-        }
+            if ($request->filled('job_text')) {
+                info("Job text provided in request.");
+                $jobText = $this->aiReview->cleanText($request->input('job_text'));
+            } elseif ($request->hasFile('job_pdf')) {
+                info("Job PDF uploaded.");
+                $request->validate([
+                    'job_pdf' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+                ]);
 
-        // =========================
-        // 3️⃣ Generate Cover Letter with OpenAI
-        // =========================
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
+                $jobPdfFile = $request->file('job_pdf');
+                $handle = fopen($jobPdfFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
 
-        $prompt = "
+                if ($magic !== '%PDF') {
+                    info("Invalid job PDF detected.");
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
+
+                [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
+                $jobText = $this->aiReview->cleanText($jobText);
+                info("Extracted Job text: " . substr($jobText, 0, 200) . "...");
+            } else {
+                info("No job details provided.");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
+                ], 422);
+            }
+
+            // =========================
+            // 3️⃣ Generate Cover Letter with OpenAI
+            // =========================
+            info("Calling OpenAI to generate cover letter.");
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
+
+            $prompt = "
 You are a professional career assistant.
 Generate a personalized, professional cover letter using the applicant’s CV and the provided job description.
 
@@ -219,30 +241,39 @@ $jobText
 - Do not repeat the CV; instead, highlight relevant points.
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+            try {
+                $response = $client->chat()->create([
+                    'model' => 'gpt-4o-mini',
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                ]);
+                $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
+                info("Cover letter generated successfully.");
+            } catch (\Exception $e) {
+                \Log::error("OpenAI request failed: " . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error generating cover letter: ' . $e->getMessage(),
+                ], 500);
+            }
 
-        $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
-
-        // =========================
-        // 4️⃣ Return JSON response
-        // =========================
-        return response()->json([
-            'success' => true,
-            'message' => 'Cover letter generated successfully.',
-            'cover_letter' => $coverLetter,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-        ], 500);
+            // =========================
+            // 4️⃣ Return JSON response
+            // =========================
+            info("Returning cover letter response.");
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover letter generated successfully.',
+                'cover_letter' => $coverLetter,
+            ]);
+        } catch (\Exception $e) {
+            info("Unhandled exception in cover letter generation: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
-}
 }
