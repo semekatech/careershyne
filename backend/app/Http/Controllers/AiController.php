@@ -126,40 +126,25 @@ public function coveletterGenerator(Request $request)
 
         } else {
             // =========================
-            // Image preprocessing
+            // Image OCR (no preprocessing)
             // =========================
-            $cleanedPath = storage_path('app/tmp/cleaned.png');
-            if (!file_exists(dirname($cleanedPath))) {
-                mkdir(dirname($cleanedPath), 0777, true);
-            }
-
-            Image::make($cvFile->getPathname())
-                ->resize(2000, null, fn($constraint) => $constraint->aspectRatio())
-                ->greyscale()
-                ->contrast(20)
-                ->brightness(10)
-                ->sharpen(15)
-                ->save($cleanedPath);
-
-            // =========================
-            // OCR with Tesseract
-            // =========================
-            $ocr = new TesseractOCR($cleanedPath);
+            $ocr = new TesseractOCR($cvFile->getPathname());
             $ocr->lang('eng');
-            $ocr->psm(1);  // Automatic page segmentation with OSD
-            $ocr->oem(3);  // Default OCR engine
+            $ocr->psm(6);  // multi-block text (good for CVs)
+            $ocr->oem(3);  // default OCR engine
+
             $cvText = $ocr->run();
+            info("OCR Result from image CV: ".$cvText);
+
+            if (empty(trim($cvText))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to extract text from the CV image. Please ensure the image is clear and readable.',
+                ], 422);
+            }
         }
 
         $cvText = $this->aiReview->cleanText($cvText);
-        info("Extracted CV Text: ".$cvText);
-
-        if (empty(trim($cvText))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to extract text from the CV. Please upload a clear PDF or image.',
-            ], 422);
-        }
 
         // =========================
         // 2️⃣ Capture Job Description
@@ -237,7 +222,6 @@ $jobText
             'message' => 'Cover letter generated successfully.',
             'cover_letter' => $coverLetter,
         ]);
-
 
     } catch (\Exception $e) {
         return response()->json([
