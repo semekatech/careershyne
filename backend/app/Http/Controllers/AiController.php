@@ -128,7 +128,7 @@ class AiController extends Controller
             }
 
             $cvText = $this->aiReview->cleanText($cvText);
-
+            info($cvText);
             if (empty(trim($cvText))) {
                 return response()->json([
                     'success' => false,
