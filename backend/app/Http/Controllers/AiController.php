@@ -47,7 +47,7 @@ class AiController extends Controller
 
             // 2. Extract text
             [$path, $text] = $this->aiReview->extractText($request->file('file'));
-
+            $text = $this->aiReview->cleanText($text);
             if (empty(trim($text))) {
                 return response()->json([
                     'success' => false,
@@ -84,81 +84,77 @@ class AiController extends Controller
             ], 500);
         }
     }
-   private function cleanText($text)
-{
-    $text = strip_tags($text);
-    $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
-    $text = preg_replace('/\s+/', ' ', $text);
-    return trim($text);
-}
+    private function cleanText($text)
+    {
+        $text = strip_tags($text);
+        $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return trim($text);
+    }
 
-public function coveletterGenerator(Request $request)
-{
-    try {
-        // 1. Validate CV
-        $request->validate([
-            'cv_file' => 'required|mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document|max:5120',
-        ]);
-
-        $cvFile = $request->file('cv_file');
-        if ($cvFile->getMimeType() === 'application/pdf') {
-            $handle = fopen($cvFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
-            if ($magic !== '%PDF') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid CV file format. Please upload a genuine PDF.'
-                ], 422);
-            }
-        }
-
-        [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
-        $cvText = $this->cleanText($cvText);
-
-        if (empty(trim($cvText))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to extract text from the CV. Please upload a text-based file.',
-            ], 422);
-        }
-
-        // 2. Capture Job Description
-        $jobText = null;
-        if ($request->filled('job_text')) {
-            $jobText = $this->cleanText($request->input('job_text'));
-        } elseif ($request->has('job_url') && !empty(trim($request->input('job_url')))) {
-            $jobUrl = $request->input('job_url');
-            // Scraper placeholder
-            $jobText = "Scraped job description from URL: " . $jobUrl;
-            $jobText = $this->cleanText($jobText);
-        } elseif ($request->hasFile('job_pdf')) {
+    public function coveletterGenerator(Request $request)
+    {
+        try {
+            // 1. Validate CV
             $request->validate([
-                'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
+                'cv_file' => 'required|mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document|max:5120',
             ]);
-            $jobPdfFile = $request->file('job_pdf');
-            $handle = fopen($jobPdfFile->getPathname(), 'rb');
-            $magic = fread($handle, 4);
-            fclose($handle);
-            if ($magic !== '%PDF') {
+
+            $cvFile = $request->file('cv_file');
+            if ($cvFile->getMimeType() === 'application/pdf') {
+                $handle = fopen($cvFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
+                if ($magic !== '%PDF') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid CV file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
+            }
+
+            [$cvFilePath, $cvText] = $this->aiReview->extractText($cvFile);
+            $cvText = $this->aiReview->cleanText($cvText);
+
+            if (empty(trim($cvText))) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    'message' => 'Unable to extract text from the CV. Please upload a text-based file.',
                 ], 422);
             }
-            [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
-            $jobText = $this->cleanText($jobText);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
-            ], 422);
-        }
 
-        // 3. Pass to AI
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
+            // 2. Capture Job Description
+            $jobText = null;
+            if ($request->filled('job_text')) {
+                $jobText = $this->cleanText($request->input('job_text'));
+            } elseif ($request->hasFile('job_pdf')) {
+                $request->validate([
+                    'job_pdf' => 'required|mimetypes:application/pdf|max:5120',
+                ]);
+                $jobPdfFile = $request->file('job_pdf');
+                $handle = fopen($jobPdfFile->getPathname(), 'rb');
+                $magic = fread($handle, 4);
+                fclose($handle);
+                if ($magic !== '%PDF') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid job PDF file format. Please upload a genuine PDF.'
+                    ], 422);
+                }
+                [$jobFilePath, $jobText] = $this->aiReview->extractText($jobPdfFile);
+                $jobText = $this->cleanText($jobText);
+                info($jobText);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF.',
+                ], 422);
+            }
 
-        $prompt = "
+            // 3. Pass to AI
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
+
+            $prompt = "
 You are a professional career assistant.
 Generate a personalized, professional cover letter using the applicant’s CV and the provided job description.
 
@@ -175,29 +171,27 @@ $jobText
 - Do not repeat the CV; instead, highlight relevant points.
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
 
-        $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
+            $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
 
-        // 4. Return JSON response
-        return response()->json([
-            'success' => true,
-            'message' => 'Cover letter generated successfully.',
-            'cover_letter' => $coverLetter,
-        ]);
-
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-        ], 500);
+            // 4. Return JSON response
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover letter generated successfully.',
+                'cover_letter' => $coverLetter,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
-}
-
 }

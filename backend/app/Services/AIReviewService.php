@@ -30,7 +30,13 @@ class AIReviewService
 
         return [$path, $text];
     }
-
+    public function cleanText($text)
+    {
+        $text = strip_tags($text);
+        $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return trim($text);
+    }
     /**
      * Build prompt with CV snippet
      */
