@@ -57,4 +57,8 @@ Route::prefix('ai')->group(function () {
         ->middleware('throttle:2,1');
           Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
         ->middleware('throttle:2,1');
+         Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
+        ->middleware('throttle:2,1');
+
+
 });

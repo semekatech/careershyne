@@ -197,6 +197,90 @@ $jobText
             ], 500);
         }
     }
+public function emailTemplateGenerator(Request $request)
+{
+    try {
+        info("=== Job Application Email Template Generation Started ===");
+
+        // =========================
+        // 1️⃣ Capture Job Description
+        // =========================
+        $jobText = null;
+
+        if ($request->filled('job_text')) {
+            info("Job text provided in request.");
+            $jobText = $this->aiReview->cleanText($request->input('job_text'));
+
+        } elseif ($request->hasFile('job_pdf')) {
+            info("Job PDF uploaded: " . $request->file('job_pdf')->getClientOriginalName());
+            $request->validate([
+                'job_pdf' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+            ]);
+            $jobFile = $request->file('job_pdf');
+            $jobText = $this->extractTextFromFile($jobFile, 'Job');
+
+        } elseif ($request->filled('job_url')) {
+            info("Job URL provided: " . $request->job_url);
+            $jobText = "Job details can be found here: " . $request->job_url;
+
+        } else {
+            info("No job details provided.");
+            return response()->json([
+                'success' => false,
+                'message' => 'Please provide job details (paste text, upload a PDF/image, or provide a link).',
+            ], 422);
+        }
+
+        info("Cleaned Job text: " . substr($jobText, 0, 200) . "...");
+
+        // =========================
+        // 2️⃣ Generate Email Template with OpenAI
+        // =========================
+        info("Calling OpenAI to generate job application email template.");
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+
+        $prompt = "
+You are a professional career assistant.
+Generate a job application email template tailored to the provided job description.
+
+### Job Description:
+$jobText
+
+### Instructions:
+- Write a formal job application email (max 300 words).
+- Structure it with: greeting, short introduction, why the applicant is a good fit, polite closing.
+- Use a professional but engaging tone.
+- Do not include placeholders like [Name] or [Company] unless necessary.
+- The email should sound natural and ready to send.
+";
+
+        $response = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are an expert career coach and email writer.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+        ]);
+
+        $emailTemplate = trim($response->choices[0]->message->content ?? 'Error generating email template.');
+        info("Email template generated successfully.");
+
+        // =========================
+        // 3️⃣ Return JSON response
+        // =========================
+        return response()->json([
+            'success' => true,
+            'message' => 'Job application email template generated successfully.',
+            'email_template' => $emailTemplate,
+        ]);
+    } catch (\Exception $e) {
+        \Log::error("Unhandled exception in email template generation: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage(),
+        ], 500);
+    }
+}
 
     /**
      * Extract text from PDF or image file (CV or Job) — **without preprocessing**

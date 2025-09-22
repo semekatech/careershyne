@@ -64,6 +64,14 @@
               <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
               Cover Letters
             </a>
+             <a
+              v-if="auth.user?.role != 'radio'"
+              href="/email-template-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
+              Email Templates
+            </a>
             <!-- <a
               href="/my-profile"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"

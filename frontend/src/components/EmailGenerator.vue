@@ -2,14 +2,14 @@
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <section
-      class="bg-gradient-to-r from-orange-600 to-yellow-700 text-white py-8 px-6 text-center"
+      class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-8 px-6 text-center"
     >
       <h1 class="text-3xl font-bold mb-2">
-        AI-Powered Cover Letter Generator ✍️
+        AI-Powered Job Application Email Generator 📧
       </h1>
       <p class="max-w-3xl mx-auto text-base opacity-90">
-        Create tailored cover letters instantly. Follow the steps below to craft
-        a professional cover letter just for you.
+        Instantly create professional job application emails tailored to the role. 
+        Just provide the job details and let our AI draft the email for you.
       </p>
     </section>
 
@@ -25,7 +25,7 @@
             }"
             class="font-bold text-lg"
           >
-            1. Upload CV
+            1. Job Details
           </div>
           <span class="text-gray-400">/</span>
           <div
@@ -35,67 +35,19 @@
             }"
             class="font-bold text-lg"
           >
-            2. Job Details
-          </div>
-          <span class="text-gray-400">/</span>
-          <div
-            :class="{
-              'text-blue-600': currentStep === 3,
-              'text-gray-400': currentStep !== 3,
-            }"
-            class="font-bold text-lg"
-          >
-            3. Generate
+            2. Generate Email
           </div>
         </div>
 
-        <!-- Step 1: CV Upload -->
+        <!-- Step 1: Job Details -->
         <div v-if="currentStep === 1" class="space-y-6">
-          <h2 class="text-xl font-bold text-gray-800">Step 1: Upload Your CV</h2>
+          <h2 class="text-xl font-bold text-gray-800">Step 1: Provide Job Details</h2>
           <p class="text-gray-600">
-            Upload your CV or resume. Our AI will use it to highlight your
-            relevant skills and experience in the cover letter.
-          </p>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2"
-              >Upload CV (PDF, DOCX)</label
-            >
-            <input
-              type="file"
-              @change="handleCvUpload"
-              accept=".pdf,.doc,.docx"
-              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
-            />
-            <p v-if="cvFileName" class="mt-2 text-sm text-gray-600">
-              📂 {{ cvFileName }}
-            </p>
-          </div>
-          <div class="flex justify-end">
-            <button
-              @click="nextStep"
-              :disabled="!cvFile"
-              :class="{ 'bg-gray-400 cursor-not-allowed': !cvFile }"
-              class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 2: Job Details -->
-        <div v-if="currentStep === 2" class="space-y-6">
-          <h2 class="text-xl font-bold text-gray-800">
-            Step 2: Provide Job Details
-          </h2>
-          <p class="text-gray-600">
-            Choose one of the available input methods below to provide the job
-            description.
+            Choose one of the available input methods below to provide the job description.
           </p>
 
           <div>
-            <label class="block text-gray-700 font-medium mb-2"
-              >Input Type</label
-            >
+            <label class="block text-gray-700 font-medium mb-2">Input Type</label>
             <select
               v-model="inputType"
               class="w-full border rounded-lg p-3 focus:ring focus:ring-blue-300"
@@ -108,9 +60,7 @@
           </div>
 
           <div v-if="inputType === 'text'">
-            <label class="block text-gray-700 font-medium mb-2"
-              >Job Description</label
-            >
+            <label class="block text-gray-700 font-medium mb-2">Job Description</label>
             <textarea
               v-model="jobText"
               rows="8"
@@ -130,69 +80,55 @@
           </div>
 
           <div v-if="inputType === 'pdf'">
-            <label class="block text-gray-700 font-medium mb-2"
-              >Upload Job PDF</label
-            >
+            <label class="block text-gray-700 font-medium mb-2">Upload Job PDF</label>
             <input
               type="file"
               @change="handleJobFileUpload"
-              accept=".pdf,.jpg,.jpeg,.png"
-              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+              accept=".pdf"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full 
+                     file:border-0 file:text-sm file:font-semibold file:bg-blue-50 
+                     file:text-blue-700 hover:file:bg-blue-100"
             />
             <p v-if="jobFileName" class="mt-2 text-sm text-gray-600">
               📂 {{ jobFileName }}
             </p>
           </div>
 
-          <div class="flex justify-between mt-6">
-            <button
-              @click="prevStep"
-              class="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
-            >
-              Back
-            </button>
+          <div class="flex justify-end mt-6">
             <button
               @click="submitJobDetails"
               :disabled="!isFormValid"
               :class="{ 'bg-gray-400 cursor-not-allowed': !isFormValid }"
               class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
             >
-              Generate Cover Letter
+              Generate Email
             </button>
           </div>
         </div>
 
-        <!-- Step 3: Generated Cover Letter -->
-        <div v-if="currentStep === 3" class="space-y-6">
+        <!-- Step 2: Generated Email -->
+        <div v-if="currentStep === 2" class="space-y-6">
           <h2 class="text-xl font-bold text-gray-800">
-            Step 3: Your Cover Letter is Ready!
+            Step 2: Your Job Application Email is Ready!
           </h2>
-          <div
-            v-if="loading"
-            class="flex flex-col items-center justify-center p-10"
-          >
+
+          <div v-if="loading" class="flex flex-col items-center justify-center p-10">
             <div
               class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"
             ></div>
-            <p class="mt-4 text-gray-600">
-              Generating your professional cover letter...
-            </p>
+            <p class="mt-4 text-gray-600">Generating your email...</p>
           </div>
+
           <div v-else>
-            <div
-              class="bg-white p-8 rounded-lg shadow-md border border-gray-200"
-            >
-              <!-- Cover Letter Content -->
+            <div class="bg-white p-8 rounded-lg shadow-md border border-gray-200">
               <div
                 class="bg-gray-50 border border-gray-200 rounded-md p-6 max-h-[500px] overflow-y-auto"
               >
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                  Generated Cover Letter
+                  Generated Email
                 </h3>
-                <p
-                  class="whitespace-pre-wrap font-serif text-gray-900 leading-relaxed"
-                >
-                  {{ generatedCoverLetter }}
+                <p class="whitespace-pre-wrap font-serif text-gray-900 leading-relaxed">
+                  {{ generatedEmail }}
                 </p>
               </div>
             </div>
@@ -213,6 +149,7 @@
               </button>
             </div>
           </div>
+
           <div class="flex justify-start mt-6">
             <button
               @click="resetForm"
@@ -229,13 +166,10 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { generateCoverLetter } from "@/services/coverLetterService.js";
+import { generateJobEmail } from "@/services/jobEmailService.js";
 
 const currentStep = ref(1);
 const loading = ref(false);
-
-const cvFile = ref(null);
-const cvFileName = ref("");
 
 const inputType = ref("");
 const jobText = ref("");
@@ -243,7 +177,7 @@ const jobUrl = ref("");
 const jobFile = ref(null);
 const jobFileName = ref("");
 
-const generatedCoverLetter = ref("");
+const generatedEmail = ref("");
 
 const isFormValid = computed(() => {
   if (inputType.value === "text" && jobText.value.length > 0) return true;
@@ -251,14 +185,6 @@ const isFormValid = computed(() => {
   if (inputType.value === "pdf" && jobFile.value) return true;
   return false;
 });
-
-function handleCvUpload(event) {
-  const file = event.target.files[0];
-  if (file) {
-    cvFile.value = file;
-    cvFileName.value = file.name;
-  }
-}
 
 function handleJobFileUpload(event) {
   const file = event.target.files[0];
@@ -268,22 +194,11 @@ function handleJobFileUpload(event) {
   }
 }
 
-function nextStep() {
-  currentStep.value++;
-}
-
-function prevStep() {
-  currentStep.value--;
-  if (currentStep.value < 1) currentStep.value = 1;
-}
-
 async function submitJobDetails() {
   loading.value = true;
-  currentStep.value = 3;
+  currentStep.value = 2;
 
   const formData = new FormData();
-  formData.append("cv_file", cvFile.value);
-
   if (inputType.value === "text" && jobText.value) {
     formData.append("job_text", jobText.value);
   }
@@ -293,13 +208,14 @@ async function submitJobDetails() {
   if (inputType.value === "pdf" && jobFile.value) {
     formData.append("job_pdf", jobFile.value);
   }
+
   try {
-    const data = await generateCoverLetter(formData);
-    generatedCoverLetter.value = data.cover_letter;
+    const data = await generateJobEmail(formData);
+    generatedEmail.value = data.email_template;
   } catch (err) {
-    console.error("Error generating cover letter:", err);
-    generatedCoverLetter.value =
-      "An error occurred while generating your cover letter. Please try again.";
+    console.error("Error generating email:", err);
+    generatedEmail.value =
+      "An error occurred while generating your job application email. Please try again.";
   } finally {
     loading.value = false;
   }
@@ -307,9 +223,9 @@ async function submitJobDetails() {
 
 function copyToClipboard() {
   navigator.clipboard
-    .writeText(generatedCoverLetter.value)
+    .writeText(generatedEmail.value)
     .then(() => {
-      alert("Cover letter copied to clipboard!");
+      alert("Email copied to clipboard!");
     })
     .catch((err) => {
       console.error("Failed to copy:", err);
@@ -317,22 +233,19 @@ function copyToClipboard() {
 }
 
 function downloadWord() {
-  if (!generatedCoverLetter.value) {
-    alert("No cover letter to download!");
+  if (!generatedEmail.value) {
+    alert("No email to download!");
     return;
   }
 
-  const blob = new Blob(
-    [
-      `Cover Letter\n\n${generatedCoverLetter.value}`
-    ],
-    { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
-  );
+  const blob = new Blob([`Job Application Email\n\n${generatedEmail.value}`], {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
 
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "cover_letter.docx";
+  link.download = "job_application_email.docx";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -342,13 +255,11 @@ function downloadWord() {
 function resetForm() {
   currentStep.value = 1;
   loading.value = false;
-  cvFile.value = null;
-  cvFileName.value = "";
   inputType.value = "";
   jobText.value = "";
   jobUrl.value = "";
   jobFile.value = null;
   jobFileName.value = "";
-  generatedCoverLetter.value = "";
+  generatedEmail.value = "";
 }
 </script>
