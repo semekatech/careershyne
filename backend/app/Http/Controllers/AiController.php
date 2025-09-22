@@ -201,7 +201,6 @@ public function emailTemplateGenerator(Request $request)
 {
     try {
         info("=== Job Application Email Template Generation Started ===");
-
         // =========================
         // 1️⃣ Capture Job Description
         // =========================

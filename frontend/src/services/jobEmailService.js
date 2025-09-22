@@ -5,11 +5,14 @@ const API_URL = "https://careershyne.com/api/ai/email-template";
 
 export async function generateJobEmail(payload) {
   try {
-    const response = await axios.post(API_URL, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const headers = {};
+
+    // If payload is FormData (PDF, file uploads), let browser set content-type
+    if (!(payload instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const response = await axios.post(API_URL, payload, { headers });
     return response.data;
   } catch (error) {
     console.error("API call failed:", error.response?.data || error.message);
