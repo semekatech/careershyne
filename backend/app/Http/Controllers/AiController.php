@@ -328,7 +328,12 @@ Revamp the following CV to make it professional, clear, and impactful.
 ### CV:
 $cvText
 
+### Instructions:
+- ONLY return the improved CV.
+- Do NOT include a cover letter, greeting, or application email.
+- Keep the structure of the CV clean and professional.
 ";
+
 
             if ($jobText) {
                 $prompt .= "
