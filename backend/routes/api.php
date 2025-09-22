@@ -59,6 +59,8 @@ Route::prefix('ai')->group(function () {
         ->middleware('throttle:2,1');
          Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
         ->middleware('throttle:2,1');
+   Route::post('/cv-revamp', [AiController::class, 'cvRevampGenerator'])
+        ->middleware('throttle:2,1');
 
 
 });

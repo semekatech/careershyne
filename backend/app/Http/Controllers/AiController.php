@@ -283,9 +283,97 @@ $jobText
         }
     }
 
-    /**
-     * Extract text from PDF or image file (CV or Job) — **without preprocessing**
-     */
+    public function cvRevamp(Request $request)
+    {
+        try {
+            info("=== CV Revamp Started ===");
+
+            // 1️⃣ Validate CV file
+            $request->validate([
+                'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+            ]);
+
+            $cvFile = $request->file('cv_file');
+            $cvText = $this->extractTextFromFile($cvFile, 'CV');
+
+            if (empty(trim($cvText))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to extract text from the CV.',
+                ], 422);
+            }
+
+            // 2️⃣ Capture optional Job Details
+            $jobText = null;
+
+            if ($request->filled('job_text')) {
+                $jobText = $this->aiReview->cleanText($request->input('job_text'));
+            } elseif ($request->hasFile('job_pdf')) {
+                $request->validate([
+                    'job_pdf' => 'mimes:pdf,jpg,jpeg,png|max:5120',
+                ]);
+                $jobFile = $request->file('job_pdf');
+                $jobText = $this->extractTextFromFile($jobFile, 'Job');
+            } elseif ($request->filled('job_url')) {
+                $jobText = "Job details can be found here: " . $request->job_url;
+            }
+
+            // 3️⃣ Generate Revamped CV with OpenAI
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
+
+            $prompt = "
+You are a professional career consultant.
+Revamp the following CV to make it professional, clear, and impactful.
+
+### CV:
+$cvText
+
+";
+
+            if ($jobText) {
+                $prompt .= "
+
+### Job Description:
+$jobText
+
+### Instructions:
+- Tailor the CV to highlight the applicant’s skills and experiences that match this job.
+- Use keywords from the job description naturally.
+";
+            } else {
+                $prompt .= "
+
+### Instructions:
+- Improve clarity, grammar, and formatting.
+- Make the CV stand out for general job applications.
+";
+            }
+
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert career coach and CV writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
+
+            $revampedCV = trim($response->choices[0]->message->content ?? 'Error revamping CV.');
+
+            // 4️⃣ Return response
+            return response()->json([
+                'success' => true,
+                'message' => 'CV revamped successfully.',
+                'revamped_cv' => $revampedCV,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("Unhandled exception in CV revamp: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     private function extractTextFromFile($file, $type = 'File')
     {
         $jobText = '';
