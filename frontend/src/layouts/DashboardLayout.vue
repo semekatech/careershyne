@@ -27,75 +27,83 @@
               &times;
             </button>
           </div>
-        <nav class="flex flex-col flex-grow px-4 py-4 overflow-y-auto space-y-2">
-  <!-- Dashboard -->
-  <a
-    href="/dashboard"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white text-black"
-  >
-    <font-awesome-icon :icon="['fas', 'tachometer-alt']" class="mr-3" />
-    Dashboard
-  </a>
+          <nav
+            class="flex flex-col flex-grow px-4 py-4 overflow-y-auto space-y-2"
+          >
+            <!-- Dashboard -->
+            <a
+              href="/dashboard"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white text-black"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'tachometer-alt']"
+                class="mr-3"
+              />
+              Dashboard
+            </a>
 
-  <!-- Manage Orders -->
-  <a
-    href="/manage-orders"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'shopping-cart']" class="mr-3" />
-    Manage Orders
-  </a>
+            <!-- Manage Orders -->
+            <a
+              href="/manage-orders" v-if="auth.user?.role !== 'user'"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'shopping-cart']"
+                class="mr-3"
+              />
+              Manage Orders
+            </a>
 
-  <!-- Manage Payments -->
-  <a
-    v-if="auth.user?.role != 'radio'"
-    href="/manage-payments"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
-    Manage Payments
-  </a>
+            <!-- Manage Payments -->
+            <a
+              v-if="auth.user?.role !== 'radio' && auth.user?.role !== 'user'"
+              href="/manage-payments"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
+              Manage Payments
+            </a>
 
-  <!-- Cover Letters -->
-  <a
-    v-if="auth.user?.role != 'radio'"
-    href="/cover-letter-generator"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'file-alt']" class="mr-3" />
-    Cover Letters
-  </a>
+            <!-- Cover Letters -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'file-alt']" class="mr-3" />
+              Cover Letters
+            </a>
 
-  <!-- Email Templates -->
-  <a
-    v-if="auth.user?.role != 'radio'"
-    href="/email-template-generator"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'envelope']" class="mr-3" />
-    Email Templates
-  </a>
+            <!-- Email Templates -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/email-template-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'envelope']" class="mr-3" />
+              Email Templates
+            </a>
 
-  <!-- CV Revamp -->
-  <a
-    v-if="auth.user?.role != 'radio'"
-    href="/cv-revamp-generator"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'user-edit']" class="mr-3" />
-    CV Revamp
-  </a>
+            <!-- CV Revamp -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cv-revamp-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'user-edit']" class="mr-3" />
+              CV Revamp
+            </a>
 
-  <!-- Logout -->
-  <a
-    href="#"
-    @click.prevent="handleLogout"
-    class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
-  >
-    <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-3" />
-    Logout
-  </a>
-</nav>
+            <!-- Logout -->
+            <a
+              href="#"
+              @click.prevent="handleLogout"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-3" />
+              Logout
+            </a>
+          </nav>
 
           <div class="p-4 border-t border-white-700">
             <div class="flex items-center">

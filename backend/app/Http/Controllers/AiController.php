@@ -178,7 +178,7 @@ $jobText
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
-
+            info($response);
             $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
             info("Cover letter generated successfully.");
 
@@ -262,7 +262,7 @@ $jobText
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
-
+            info($response);
             $emailTemplate = trim($response->choices[0]->message->content ?? 'Error generating email template.');
             info("Email template generated successfully.");
 
@@ -361,7 +361,7 @@ $jobText
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
-
+            info($response);
             $revampedCV = trim($response->choices[0]->message->content ?? 'Error revamping CV.');
 
             // 4️⃣ Return response
