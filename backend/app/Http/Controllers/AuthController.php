@@ -123,22 +123,36 @@ class AuthController extends Controller
         info($request->all());
     }
     public function industries()
+
     {
-        $industries = DB::table('industries')->orderBy('name')->pluck('name');
+        $industries = DB::table('industries')
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return response()->json($industries);
     }
 
     public function educationLevels()
     {
-        $educationLevels = DB::table('education_levels')->orderBy('id')->pluck('name');
+        $educationLevels = DB::table('education_levels')
+            ->select('id', 'name')
+            ->orderBy('id')
+            ->get();
+
         return response()->json($educationLevels);
     }
 
     public function counties()
     {
-        $counties = DB::table('counties')->orderBy('name')->pluck('name');
+        $counties = DB::table('counties')
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return response()->json($counties);
     }
+
     public function verifyToken(Request $request)
     {
         $authHeader = $request->header('Authorization');
