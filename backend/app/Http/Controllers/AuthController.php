@@ -117,7 +117,23 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    public function industries()
+    {
+        $industries = DB::table('industries')->orderBy('name')->pluck('name');
+        return response()->json($industries);
+    }
 
+    public function educationLevels()
+    {
+        $educationLevels = DB::table('education_levels')->orderBy('id')->pluck('name');
+        return response()->json($educationLevels);
+    }
+
+    public function counties()
+    {
+        $counties = DB::table('counties')->orderBy('name')->pluck('name');
+        return response()->json($counties);
+    }
     public function verifyToken(Request $request)
     {
         $authHeader = $request->header('Authorization');

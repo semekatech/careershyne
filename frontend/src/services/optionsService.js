@@ -7,12 +7,12 @@ const api = axios.create({
 
 export default {
   getIndustries() {
-    return api.get("/options/industries");
+    return api.get("/industries");
   },
   getEducationLevels() {
-    return api.get("/options/education-levels");
+    return api.get("/education-levels");
   },
   getCounties() {
-    return api.get("/options/counties");
+    return api.get("/counties");
   },
 };

@@ -20,7 +20,9 @@ Route::post('/callback-confirm', [PaymentController::class, 'confirm']);
 Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
     ->name('check.stk.status');
 
-
+Route::get('industries', [AuthController::class, 'industries']);
+Route::get('education-levels', [AuthController::class, 'educationLevels']);
+Route::get('counties', [AuthController::class, 'counties']);
 Route::post('/log-visitor', function (Request $request) {
     $ip = $request->input('ip', $request->ip()); // ✅ use frontend IP if available
     $userAgent = $request->header('User-Agent');
@@ -55,12 +57,10 @@ Route::prefix('orders')->group(function () {
 Route::prefix('ai')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
-          Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
+    Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
         ->middleware('throttle:2,1');
-         Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
+    Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
         ->middleware('throttle:2,1');
-   Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
+    Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1');
-
-
 });
