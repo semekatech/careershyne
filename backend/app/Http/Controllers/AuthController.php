@@ -34,10 +34,20 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
         // Generate token
         $token = Str::random(60);
         $user->api_token = hash('sha256', $token);
         $user->save();
+
+        // Determine redirect route
+        $redirectRoute = 'dashboard'; // default
+
+        if ($user->role == 1098) {
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -46,9 +56,12 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'photo' => $user->photo,
                 'role' => $user->role,
+                'redirect' => $redirectRoute,
             ],
+
         ]);
     }
+
 
     public function register(Request $request)
     {

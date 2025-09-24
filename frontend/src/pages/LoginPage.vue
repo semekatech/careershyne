@@ -17,7 +17,9 @@
           WELCOME BACK
         </div>
         <p class="text-sm px-8 leading-relaxed">
-          Log in to continue exploring the full suite of Careershyne AI tools. Your personalized dashboard is ready to provide the insights you need to take the next step in your career.
+          Log in to continue exploring the full suite of Careershyne AI tools.
+          Your personalized dashboard is ready to provide the insights you need
+          to take the next step in your career.
         </p>
       </div>
     </div>
@@ -163,7 +165,10 @@
         </form>
         <div class="mt-6 text-center text-sm">
           Don't have an account?
-          <a href="/register" class="font-medium text-red-600 hover:text-red-500">
+          <a
+            href="/register"
+            class="font-medium text-red-600 hover:text-red-500"
+          >
             Register here
           </a>
         </div>
@@ -183,7 +188,7 @@ const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const errorMessage = ref("");
-const passwordVisible = ref(false); 
+const passwordVisible = ref(false);
 const route = useRoute();
 const router = useRouter();
 const $toast = useToast();
@@ -215,8 +220,8 @@ const handleLogin = async () => {
     const user = data.user;
     auth.setToken(token);
     auth.setUser(user);
-    const redirectPath = route.query.redirect || "/dashboard";
-    router.push(redirectPath);
+    const redirectPath = user.redirect || "/dashboard";
+    router.push({ name: redirectPath });
   } catch (error) {
     if (error.response) {
       errorMessage.value = "Invalid login credentials! Please try again";
