@@ -102,7 +102,6 @@ import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import ProfileService from "@/services/profileService";
 import OptionsService from "@/services/optionsService";
-import { useAuthStore } from "@/stores/auth";
 const auth = useAuthStore();
 const userName = ref(auth.user?.name || "User");
 const industry = ref("");
