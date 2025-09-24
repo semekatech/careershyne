@@ -15,6 +15,7 @@ import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
 import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
+import SetupPage from "@/pages/SetupPage.vue";
 const routes = [
   {
     path: "/",
@@ -84,6 +85,16 @@ const routes = [
       {
         path: "",
         component: RegisterPage,
+      },
+    ],
+  },
+   {
+    path: "/profile-setup",
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        component: SetupPage,
       },
     ],
   },
@@ -188,14 +199,15 @@ router.beforeEach(async (to, from, next) => {
     "/services",
     "/pricing",
      "/free-review",
-    "/ai"
+    "/ai",
+     "/profile-setup"
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
   );
 
   if (!isPublic && !auth.token) {
-    return next("/login");
+    return next("/admin");
   }
 
   if (!isPublic && auth.token) {
@@ -206,7 +218,7 @@ router.beforeEach(async (to, from, next) => {
       return next();
     } catch (err) {
       auth.clearToken();
-      return next("/login");
+      return next("/admin");
     }
   }
 
