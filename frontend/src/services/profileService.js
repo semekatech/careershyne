@@ -1,9 +1,15 @@
-// LoginService.js
-import axios from 'axios';
-const API = 'https://careershyne.com/api/auth/';
+// ProfileService.js
+import axios from "axios";
+
+const API = "https://careershyne.com/api/auth/";
+
 export default {
-  post: (data) => {
-    return axios.post(API + 'login', data); 
-  }
-  
+
+  updateProfile(formData) {
+    return axios.post(API + "profile-setup", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };

@@ -12,6 +12,7 @@ use App\Http\Controllers\WhatsapController;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/profile-setup', [AuthController::class, 'profileSetup']);
 });
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);

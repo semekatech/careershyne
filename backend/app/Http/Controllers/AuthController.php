@@ -117,6 +117,11 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    public function profileSetup(Request $request)
+    {
+        info('here');
+        info($request->all());
+    }
     public function industries()
     {
         $industries = DB::table('industries')->orderBy('name')->pluck('name');

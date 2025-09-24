@@ -4,16 +4,18 @@
     style="width: 100%"
   >
     <div class="w-full max-w-2xl">
+      <!-- Header -->
       <div class="flex flex-col items-center text-center">
         <img src="/logo.png" alt="Careershyne Logo" class="h-20 w-auto mb-4" />
         <h2 class="text-3xl font-bold text-gray-800">
-          Hello, <span class="text-orange-500">{{ userName }}</span
-          >!
+          Hello, <span class="text-orange-500">{{ userName }}</span>!
         </h2>
         <p class="mt-2 text-xl text-gray-600">Almost there...</p>
         <p class="mt-1 text-sm text-gray-500">
           Help us tailor your experience by completing your profile.
         </p>
+
+        <!-- Global messages -->
         <p v-if="successMessage" class="mt-4 text-sm text-green-600">
           {{ successMessage }}
         </p>
@@ -22,17 +24,18 @@
         </p>
       </div>
 
+      <!-- Form -->
       <form @submit.prevent="handleProfileUpdate" class="mt-8 space-y-6">
+        <!-- Industry -->
         <div>
           <label for="industry" class="block text-sm font-medium text-gray-700">
-            Industry
+            Industry <span class="text-red-500">*</span>
           </label>
           <select
             id="industry"
-            name="industry"
             v-model="industry"
-            required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm"
+            :class="errors.industry ? 'border-red-500' : 'border-gray-300'"
           >
             <option value="" disabled>Select your industry</option>
             <option
@@ -43,21 +46,21 @@
               {{ option }}
             </option>
           </select>
+          <p v-if="errors.industry" class="text-red-500 text-xs mt-1">
+            {{ errors.industry }}
+          </p>
         </div>
 
+        <!-- Education -->
         <div>
-          <label
-            for="education"
-            class="block text-sm font-medium text-gray-700"
-          >
-            Education Level
+          <label for="education" class="block text-sm font-medium text-gray-700">
+            Education Level <span class="text-red-500">*</span>
           </label>
           <select
             id="education"
-            name="education"
             v-model="educationLevel"
-            required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm"
+            :class="errors.educationLevel ? 'border-red-500' : 'border-gray-300'"
           >
             <option value="" disabled>
               Select your highest education level
@@ -70,18 +73,21 @@
               {{ option }}
             </option>
           </select>
+          <p v-if="errors.educationLevel" class="text-red-500 text-xs mt-1">
+            {{ errors.educationLevel }}
+          </p>
         </div>
 
+        <!-- County -->
         <div>
           <label for="county" class="block text-sm font-medium text-gray-700">
-            County
+            County <span class="text-red-500">*</span>
           </label>
           <select
             id="county"
-            name="county"
             v-model="county"
-            required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm"
+            :class="errors.county ? 'border-red-500' : 'border-gray-300'"
           >
             <option value="" disabled>Select your county</option>
             <option
@@ -92,14 +98,20 @@
               {{ option }}
             </option>
           </select>
+          <p v-if="errors.county" class="text-red-500 text-xs mt-1">
+            {{ errors.county }}
+          </p>
         </div>
 
+        <!-- CV Upload -->
         <div>
-          <label for="cv" class="block text-sm font-medium text-gray-700">
+          <label for="cv-upload" class="block text-sm font-medium text-gray-700">
             Attach CV <span class="text-red-500">*</span>
           </label>
           <div
-            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
+            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer"
+            :class="errors.cvFile ? 'border-red-500' : 'border-gray-300'"
+            @click="triggerCvSelect"
           >
             <div class="space-y-1 text-center">
               <svg
@@ -107,47 +119,48 @@
                 stroke="currentColor"
                 fill="none"
                 viewBox="0 0 48 48"
-                aria-hidden="true"
               >
                 <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8m12 4h.01M12 24h.01M16 24h.01M20 24h.01M24 24h.01M28 24h.01M32 24h.01M36 24h.01"
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 
+                  0v8a4 4 0 01-4 4H12a4 4 0 
+                  01-4-4v-8m12 4h.01M12 
+                  24h.01M16 24h.01M20 24h.01M24 
+                  24h.01M28 24h.01M32 24h.01M36 24h.01"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 />
               </svg>
-              <div class="flex text-sm text-gray-600">
-                <label
-                  for="cv-upload"
-                  class="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
-                >
-                  <span>Upload your CV</span>
-                  <input
-                    id="cv-upload"
-                    name="cv-upload"
-                    type="file"
-                    class="sr-only"
-                    required
-                    @change="handleCvUpload"
-                    accept=".pdf,.doc,.docx"
-                  />
-                </label>
-                <p class="pl-1">or drag and drop</p>
-              </div>
-              <p class="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+              <p class="text-sm text-gray-600">Upload your CV</p>
+              <p class="text-xs text-gray-500">PDF only, up to 5MB</p>
             </div>
+            <input
+              ref="cvInput"
+              type="file"
+              class="hidden"
+              @change="handleCvUpload"
+              accept=".pdf"
+            />
           </div>
+          <p v-if="cvFile" class="text-xs text-green-600 mt-1">
+            {{ cvFile.name }}
+          </p>
+          <p v-if="errors.cvFile" class="text-red-500 text-xs mt-1">
+            {{ errors.cvFile }}
+          </p>
         </div>
 
+        <!-- Cover Letter Upload (optional) -->
         <div>
           <label
-            for="coverLetter"
+            for="cover-letter-upload"
             class="block text-sm font-medium text-gray-700"
           >
             Attach Cover Letter <span class="text-gray-400">(Optional)</span>
           </label>
           <div
-            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
+            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer"
+            @click="triggerCoverLetterSelect"
           >
             <div class="space-y-1 text-center">
               <svg
@@ -155,42 +168,40 @@
                 stroke="currentColor"
                 fill="none"
                 viewBox="0 0 48 48"
-                aria-hidden="true"
               >
                 <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8m12 4h.01M12 24h.01M16 24h.01M20 24h.01M24 24h.01M28 24h.01M32 24h.01M36 24h.01"
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 
+                  0v8a4 4 0 01-4 4H12a4 4 0 
+                  01-4-4v-8m12 4h.01M12 
+                  24h.01M16 24h.01M20 24h.01M24 
+                  24h.01M28 24h.01M32 24h.01M36 24h.01"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 />
               </svg>
-              <div class="flex text-sm text-gray-600">
-                <label
-                  for="cover-letter-upload"
-                  class="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
-                >
-                  <span>Upload your cover letter</span>
-                  <input
-                    id="cover-letter-upload"
-                    name="cover-letter-upload"
-                    type="file"
-                    class="sr-only"
-                    @change="handleCoverLetterUpload"
-                    accept=".pdf,.doc,.docx"
-                  />
-                </label>
-                <p class="pl-1">or drag and drop</p>
-              </div>
-              <p class="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+              <p class="text-sm text-gray-600">Upload your cover letter</p>
+              <p class="text-xs text-gray-500">PDF, DOC, DOCX up to 5MB</p>
             </div>
+            <input
+              ref="coverLetterInput"
+              type="file"
+              class="hidden"
+              @change="handleCoverLetterUpload"
+              accept=".pdf,.doc,.docx"
+            />
           </div>
+          <p v-if="coverLetterFile" class="text-xs text-green-600 mt-1">
+            {{ coverLetterFile.name }}
+          </p>
         </div>
 
+        <!-- Submit -->
         <div>
           <button
             :disabled="loading"
             type="submit"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white"
+            class="w-full flex justify-center py-3 px-4 border rounded-md shadow-sm text-base font-medium text-white disabled:opacity-50"
             style="background-color: #f97316"
           >
             <span v-if="loading">Saving...</span>
@@ -201,17 +212,16 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import ProfileService from "@/services/profileService";
 import OptionsService from "@/services/optionsService";
 
 const auth = useAuthStore();
-const router = useRouter();
-
 const userName = ref(auth.user?.fullName || "User");
+
 const industry = ref("");
 const educationLevel = ref("");
 const county = ref("");
@@ -221,8 +231,9 @@ const coverLetterFile = ref(null);
 const loading = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
+const errors = ref({});
 
-// Dropdown data
+// Dropdown options
 const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
@@ -238,9 +249,79 @@ onMounted(async () => {
     industryOptions.value = industriesRes.data;
     educationOptions.value = educationRes.data;
     countyOptions.value = countiesRes.data;
-  } catch (error) {
-    console.error("Failed to fetch options:", error);
+  } catch (err) {
+    console.error("Failed to fetch options:", err);
     errorMessage.value = "Failed to load options. Please refresh.";
   }
 });
+
+// File handlers
+const cvInput = ref(null);
+const coverLetterInput = ref(null);
+
+const triggerCvSelect = () => cvInput.value.click();
+const triggerCoverLetterSelect = () => coverLetterInput.value.click();
+
+const handleCvUpload = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type === "application/pdf" && file.size <= 5 * 1024 * 1024) {
+    cvFile.value = file;
+    errors.value.cvFile = "";
+  } else {
+    errors.value.cvFile = "CV must be a PDF file under 5MB.";
+    cvFile.value = null;
+  }
+};
+
+const handleCoverLetterUpload = (e) => {
+  const file = e.target.files[0];
+  if (file && file.size <= 5 * 1024 * 1024) {
+    coverLetterFile.value = file;
+  } else {
+    coverLetterFile.value = null;
+    errorMessage.value = "Cover letter must be under 5MB.";
+  }
+};
+
+// Validation
+const validateForm = () => {
+  errors.value = {};
+
+  if (!industry.value) errors.value.industry = "Industry is required.";
+  if (!educationLevel.value)
+    errors.value.educationLevel = "Education level is required.";
+  if (!county.value) errors.value.county = "County is required.";
+  if (!cvFile.value) errors.value.cvFile = "CV is required.";
+
+  return Object.keys(errors.value).length === 0;
+};
+
+// Submit
+const handleProfileUpdate = async () => {
+  if (!validateForm()) return;
+
+  loading.value = true;
+  errorMessage.value = "";
+  successMessage.value = "";
+
+  try {
+    const formData = new FormData();
+    formData.append("industry", industry.value);
+    formData.append("educationLevel", educationLevel.value);
+    formData.append("county", county.value);
+    formData.append("cv", cvFile.value);
+    if (coverLetterFile.value) {
+      formData.append("coverLetter", coverLetterFile.value);
+    }
+
+    await ProfileService.updateProfile(formData);
+
+    successMessage.value = "Profile completed successfully!";
+  } catch (err) {
+    console.error("Profile update failed:", err);
+    errorMessage.value = "Failed to update profile. Try again.";
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
