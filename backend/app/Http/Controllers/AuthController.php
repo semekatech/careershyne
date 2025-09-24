@@ -107,6 +107,10 @@ class AuthController extends Controller
                 'user' => $user
             ], 201);
         } catch (\Exception $e) {
+           info('User registration failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'status' => 'error',
                 'message' => 'Registration failed: ' . $e->getMessage()
