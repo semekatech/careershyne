@@ -244,6 +244,14 @@ const handleRegister = async () => {
     return;
   }
 
+  // ✅ Phone validation
+  const phonePattern = /^(?:254\d{9}|0[17]\d{8})$/;
+  if (!phonePattern.test(phone.value)) {
+    errorMessage.value =
+      "Invalid phone number. Use format 254XXXXXXXXX (12 digits) or 07XXXXXXXX / 01XXXXXXXX (10 digits).";
+    return;
+  }
+
   if (password.value !== confirmPassword.value) {
     errorMessage.value = "Passwords do not match.";
     return;
@@ -262,7 +270,7 @@ const handleRegister = async () => {
 
     if (response.status === 201) {
       successMessage.value = "Registration successful! Redirecting to login...";
-    } 
+    }
 
     setTimeout(() => {
       router.push("/login");
@@ -280,7 +288,7 @@ const handleRegister = async () => {
           const errors = error.response.data.errors;
           errorMessage.value = Object.values(errors).flat().join(" ");
           break;
-        case 500: 
+        case 500:
           errorMessage.value = "Something went wrong on our side. Please try again later.";
           break;
         default:
@@ -293,5 +301,6 @@ const handleRegister = async () => {
     loading.value = false;
   }
 };
+
 
 </script>
