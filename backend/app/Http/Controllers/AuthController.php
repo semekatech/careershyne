@@ -58,7 +58,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'fullName' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:users,phone',
             'password' => 'required|string|confirmed|min:6',
         ]);
 
@@ -107,7 +107,7 @@ class AuthController extends Controller
                 'user' => $user
             ], 201);
         } catch (\Exception $e) {
-           info('User registration failed', [
+            info('User registration failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
