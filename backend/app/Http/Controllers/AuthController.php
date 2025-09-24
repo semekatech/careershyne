@@ -22,45 +22,45 @@ class AuthController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function login(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    // Generate token
-    $token = Str::random(60);
-    $user->api_token = hash('sha256', $token);
-    $user->save();
-
-    // Determine redirect route
-    $redirectRoute = 'dashboard'; // default
-
-    if ($user->role == 1098) {
-        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
-            $redirectRoute = 'profile-setup';
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-    }
 
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'photo' => $user->photo,
-            'role' => $user->role,
-        ],
-        'redirect' => $redirectRoute,
-    ]);
-}
+        // Generate token
+        $token = Str::random(60);
+        $user->api_token = hash('sha256', $token);
+        $user->save();
+
+        // Determine redirect route
+        $redirectRoute = 'dashboard'; // default
+
+        if ($user->role == 1098) {
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
+        info($redirectRoute);
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'photo' => $user->photo,
+                'role' => $user->role,
+            ],
+            'redirect' => $redirectRoute,
+        ]);
+    }
 
 
     public function register(Request $request)
