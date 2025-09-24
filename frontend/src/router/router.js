@@ -14,6 +14,7 @@ import LoginPage from "@/pages/LoginPage.vue";
 import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
 import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
+import RegisterPage from "@/pages/RegisterPage.vue";
 const routes = [
   {
     path: "/",
@@ -73,6 +74,16 @@ const routes = [
       {
         path: "",
         component: LoginPage,
+      },
+    ],
+  },
+    {
+    path: "/register",
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        component: RegisterPage,
       },
     ],
   },
@@ -169,6 +180,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/admin",
+    '/register',
     "/how-it-works",
     "/custom-cv-order",
     "/contact-us",

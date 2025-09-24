@@ -28,19 +28,23 @@
                         <td style="padding: 20px; line-height: 1.6; color: #333333;">
                             <h2 style="color: #1a1a1a; font-size: 24px; margin-bottom: 10px;">Welcome,
                                 {{ $user->name }}!</h2>
-                            <p style="margin-bottom: 15px;">Thank you for joining Kolab. We're thrilled to have
-                                you as a <span
-                                    style="font-weight: bold; color: #007bff;">{{ ucfirst($user->role) }}</span> on our
-                                platform.</p>
-                            <p style="margin-bottom: 15px;">Your journey with us starts now. Discover our tools, connect
-                                with others, and start making an impact. We can't wait to see what you achieve!</p>
+                            <p style="margin-bottom: 15px;">
+                                Thank you for joining <strong>CareerShyne</strong> — we’re excited to have you on board!
+                            </p>
+                            <p style="margin-bottom: 15px;">
+                                Your journey starts here. Explore our powerful suite of AI-driven tools designed to help
+                                job seekers
+                                craft standout applications, sharpen their skills, and land their dream roles with
+                                confidence.
+                            </p>
+
                             <p style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
-                                <a href="https:kollab.co"
-                                    style="display: inline-block; background-color: #fe634e; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; font-weight: bold;">Get
+                                <a href="https://careershyne.com"
+                                    style="display: inline-block; background-color: #f97316; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; font-weight: bold;">Get
                                     Started</a>
                             </p>
                             <p style="margin-bottom: 15px;">If you have any questions or need support, please don't
-                                hesitate to <a href="mailto:support@yourcompany.com"
+                                hesitate to <a href="mailto:info@careershyne.com"
                                     style="color: #007bff; text-decoration: none;">contact us</a>. We're here to help.
                             </p>
                         </td>
@@ -60,7 +64,7 @@
                                         src="{{ $message->embed(public_path('tiktok.png')) }}" alt="Tiktok"
                                         width="24" height="24"></a>
                             </div>
-                            <p style="margin: 10px 0 5px 0;">&copy; {{ date('Y') }} Brandmax Media Solutions. All
+                            <p style="margin: 10px 0 5px 0;">&copy; {{ date('Y') }} Careershyne Solutions. All
                                 rights reserved.</p>
                             <p style="margin: 0;"><a href="#"
                                     style="color: #888888; text-decoration: underline;">Unsubscribe</a></p>
