@@ -220,7 +220,7 @@ const handleLogin = async () => {
     const user = data.user;
     auth.setToken(token);
     auth.setUser(user);
-    const redirectPath = user.redirect || "/dashboard";
+    const redirectPath = data.redirect || "/dashboard";
     router.push({ name: redirectPath });
   } catch (error) {
     if (error.response) {
