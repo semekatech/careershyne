@@ -211,25 +211,23 @@
 </template>
 <script setup>
 import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { useToast } from "vue-toast-notification";
-import { useAuthStore } from "@/stores/auth";
 import RegisterService from "@/services/registerService";
 
-const fullName = ref(""); 
+const fullName = ref("");
 const email = ref("");
 const phone = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+
 const loading = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
 const passwordVisible = ref(false);
 
-const route = useRoute();
 const router = useRouter();
 const $toast = useToast();
-const auth = useAuthStore();
 
 const togglePasswordVisibility = () => {
   passwordVisible.value = !passwordVisible.value;
@@ -239,6 +237,7 @@ const handleRegister = async () => {
   errorMessage.value = "";
   successMessage.value = "";
 
+  // ✅ Validation
   if (!fullName.value || !email.value || !phone.value || !password.value || !confirmPassword.value) {
     errorMessage.value = "Please fill in all fields.";
     return;
@@ -268,20 +267,30 @@ const handleRegister = async () => {
       password_confirmation: confirmPassword.value,
     });
 
-    if (response.status === 201) {
+    console.log("Registration response:", response);
+
+    // ✅ Accept either Laravel's 201 or success flag
+    if (response.status === 201 || response.data?.status === "success") {
       successMessage.value = "Registration successful! Redirecting to login...";
+
+      // Clear form
+      fullName.value = "";
+      email.value = "";
+      phone.value = "";
+      password.value = "";
+      confirmPassword.value = "";
+
+      // Redirect after 3s
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
+    } else {
+      errorMessage.value =
+        response.data?.message || "Registration failed. Please try again.";
     }
-
-    setTimeout(() => {
-      router.push("/login");
-    }, 4000);
-
-    fullName.value = "";
-    email.value = "";
-    phone.value = "";
-    password.value = "";
-    confirmPassword.value = "";
   } catch (error) {
+    console.error("Registration error:", error);
+
     if (error.response) {
       switch (error.response.status) {
         case 422:
@@ -289,10 +298,12 @@ const handleRegister = async () => {
           errorMessage.value = Object.values(errors).flat().join(" ");
           break;
         case 500:
-          errorMessage.value = "Something went wrong on our side. Please try again later.";
+          errorMessage.value =
+            "Something went wrong on our side. Please try again later.";
           break;
         default:
-          errorMessage.value = error.response.data.message || "Registration failed. Please try again.";
+          errorMessage.value =
+            error.response.data.message || "Registration failed. Please try again.";
       }
     } else {
       errorMessage.value = "Network error. Please check your connection.";
@@ -301,6 +312,4 @@ const handleRegister = async () => {
     loading.value = false;
   }
 };
-
-
 </script>
