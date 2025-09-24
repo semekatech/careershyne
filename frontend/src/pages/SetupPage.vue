@@ -243,3 +243,4 @@ onMounted(async () => {
     errorMessage.value = "Failed to load options. Please refresh.";
   }
 });
+</script>
