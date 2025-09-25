@@ -62,7 +62,7 @@ Route::prefix('users')->group(function () {
     Route::get('/get/{id}', [CvOrderController::class, 'show']);
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
-    Route::post('/save', [CvOrderController::class, 'storeOrder']);
+    Route::post('/save', [UserController::class, 'store']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
