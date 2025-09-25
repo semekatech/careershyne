@@ -531,12 +531,9 @@ async function impersonateUser(user) {
 
   try {
     const { data } = await usersService.impersonate(user.id);
-
     auth.setToken(data.access_token);
     auth.setUser(data.user);
-
-    localStorage.setItem("impersonator_id", data.impersonator_id);
-
+    // localStorage.setItem("impersonator_id", data.impersonator_id)
     // Redirect
     router.push(
       data.redirect === "profile-setup" ? "/profile-setup" : "/dashboard"
