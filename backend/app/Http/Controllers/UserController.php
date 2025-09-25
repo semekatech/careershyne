@@ -74,6 +74,7 @@ class UserController extends Controller
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Send validation errors as an array
+            info($e->errors());
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors(),
