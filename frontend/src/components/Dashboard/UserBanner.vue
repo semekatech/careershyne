@@ -1,23 +1,21 @@
 <template>
   <div
-    class="bg-[#2c3137] text-white p-6 md:p-10 flex flex-col md:flex-row items-center justify-between rounded-lg shadow-lg"
+    class="bg-[#e8e8f8] dark:bg-primary/20 p-8 rounded-lg mb-8 flex items-center justify-between"
   >
-    <div class="flex-grow mb-4 md:mb-0 md:mr-6">
-      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+    <div>
+      <h3 class="text-2xl font-bold text-black dark:text-text-dark">
         Your AI-Powered Job Search Toolkit
-      </h2>
-      <p class="text-base md:text-lg">
+      </h3>
+      <p class="text-muted-light dark:text-muted-dark mt-2 max-w-2xl" style="color:rgb(107 114 128)">
         Revamp your CV, craft perfect cover letters, and generate professional
         email templates to make a lasting impression.
       </p>
     </div>
-    <div class="flex items-center space-x-4">
-      <button
-        class="bg-[#4c6ef5] hover:bg-[#3b5bdb] text-white font-semibold py-3 px-6 rounded-full flex items-center space-x-2 transition-colors duration-300"
-      >
-        <span class="text-xl font-bold">+</span>
-        <span>Try Now</span>
-      </button>
-    </div>
+    <button
+      class="bg-primary text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg hover:bg-primary/90 transition-colors"
+    >
+      <span class="material-icons-sharp mr-2">try</span>
+      Try Now
+    </button>
   </div>
 </template>
