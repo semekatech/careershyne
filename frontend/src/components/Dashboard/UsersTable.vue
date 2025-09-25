@@ -152,16 +152,13 @@
             <div>
               <label class="block text-gray-700 font-medium">Full Name</label>
               <input
-                v-model="form.fullname"
+                v-model="form.name"
                 type="text"
                 placeholder="John Doe"
                 class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
               />
-              <p
-                v-if="validationErrors.fullname"
-                class="text-red-600 text-sm mt-1"
-              >
-                {{ validationErrors.fullname[0] }}
+              <p v-if="validationErrors.name" class="text-red-600 text-sm mt-1">
+                {{ validationErrors.name[0] }}
               </p>
             </div>
 
@@ -206,10 +203,11 @@
                 v-model="form.role"
                 class="w-full px-3 py-2 border rounded-lg"
               >
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
+                <option :value="1109">Admin</option>
+                <option :value="1098" selected>User</option>
                 <option value="radio">Radio</option>
               </select>
+
               <p v-if="validationErrors.role" class="text-red-600 text-sm mt-1">
                 {{ validationErrors.role[0] }}
               </p>
@@ -383,7 +381,7 @@ const currentPage = ref(1);
 const perPage = ref(10);
 
 const form = ref({
-  fullname: "",
+  name: "",
   email: "",
   phone: "",
   role: "user",
@@ -444,10 +442,10 @@ function prevPage() {
 // Modal
 function openModal() {
   form.value = {
-    fullname: "",
+    name: "",
     email: "",
     phone: "",
-    role: "user",
+  role: 1098,
     status: "active",
     industry_id: "",
     education_level_id: "",
@@ -480,7 +478,7 @@ function handleCoverLetterUpload(e) {
 // Form Validation
 const isFormValid = computed(
   () =>
-    form.value.fullname &&
+    form.value.name &&
     form.value.email &&
     form.value.phone &&
     form.value.role &&

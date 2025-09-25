@@ -58,7 +58,7 @@ Route::prefix('orders')->group(function () {
 });
 Route::prefix('users')->group(function () {
     Route::post('/register', [CvOrderController::class, 'store']);
-    Route::post('/update/{id}', [CvOrderController::class, 'update']);
+    Route::post('/update/{id}', [UserController::class, 'update']);
     Route::get('/get/{id}', [CvOrderController::class, 'show']);
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
