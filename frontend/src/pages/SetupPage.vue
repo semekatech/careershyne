@@ -292,26 +292,32 @@ const handleProfileUpdate = async () => {
   successMessage.value = "";
 
   try {
-    const formData = new FormData();
-    formData.append("industry_id", industry.value);
-    formData.append("education_level_id", educationLevel.value);
-    formData.append("county_id", county.value);
-    formData.append("cv", cvFile.value);
-    if (coverLetterFile.value)
-      formData.append("cover_letter", coverLetterFile.value);
-    response=await ProfileService.updateProfile(formData);
-   
-    if (response.status === 201 || response.data?.status === "success") {
-      successMessage.value = "Profile completed successfully!";
-      // Redirect after 3s
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 3000);
-    } else {
-      errorMessage.value =
-        response.data?.message || "Registration failed. Please try again.";
-    }
-  } catch (err) {
+  const formData = new FormData();
+  formData.append("industry_id", industry.value);
+  formData.append("education_level_id", educationLevel.value);
+  formData.append("county_id", county.value);
+  formData.append("cv", cvFile.value);
+  if (coverLetterFile.value)
+    formData.append("coverLetterFile", coverLetterFile.value); // match backend field
+
+  const response = await ProfileService.updateProfile(formData);
+
+  if (response.status >= 200 && response.status < 300) {
+    successMessage.value = "Profile completed successfully!";
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 3000);
+  } else {
+    errorMessage.value =
+      response.data?.message || "Profile update failed. Please try again.";
+  }
+} catch (err) {
+  console.error(err);
+  errorMessage.value = "Failed to update profile. Try again.";
+} finally {
+  loading.value = false;
+}
+ catch (err) {
     console.error(err);
     errorMessage.value = "Failed to update profile. Try again.";
   } finally {
