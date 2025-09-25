@@ -221,7 +221,8 @@ const handleLogin = async () => {
     auth.setToken(token);
     auth.setUser(user);
     const redirectPath = data.redirect || "/dashboard";
-    router.push({ name: redirectPath });
+    //router.push({ name: redirectPath });
+    alert(data.redirect);
   } catch (error) {
     if (error.response) {
       errorMessage.value = "Invalid login credentials! Please try again";
