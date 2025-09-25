@@ -34,7 +34,7 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'fullname' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'phone' => 'required|string|max:20',
                 'role' => 'required',
@@ -47,7 +47,7 @@ class UserController extends Controller
             ]);
 
             $user = User::create([
-                'name' => $request->fullname,
+                'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'role' => $request->role,
@@ -92,7 +92,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
 
             $request->validate([
-                'fullname' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'phone' => 'required|string|max:20',
                 'role' => 'required',
@@ -104,7 +104,7 @@ class UserController extends Controller
                 'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             ]);
 
-            $user->name = $request->fullname;
+            $user->name = $request->name;
             $user->email = $request->email;
             $user->phone = $request->phone;
             $user->role = $request->role;
