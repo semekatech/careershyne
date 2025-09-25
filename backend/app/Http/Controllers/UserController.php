@@ -149,4 +149,39 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function impersonateLogin(Request $request, User $user)
+{
+    $admin = $request->user();
+
+    if (!$admin || $admin->role != 1109) { // admin role
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Generate new token for the impersonated user
+    $token = Str::random(60);
+    $user->api_token = hash('sha256', $token);
+    $user->save();
+
+    // Determine redirect route
+    $redirectRoute = 'dashboard';
+    if ($user->role == 1098) { // normal user
+        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            $redirectRoute = 'profile-setup';
+        }
+    }
+
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'photo' => $user->photo,
+            'role' => $user->role,
+        ],
+        'redirect' => $redirectRoute,
+        'impersonator_id' => $admin->id,
+    ]);
+}
+
 }
