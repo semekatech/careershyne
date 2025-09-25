@@ -142,7 +142,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import usersService from '@/services/UsersService';
+import usersService from '@/services/usersService';
 import { useToast } from 'vue-toast-notification';
 
 const auth = useAuthStore();
