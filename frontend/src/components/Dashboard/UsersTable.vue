@@ -364,10 +364,11 @@ import { useAuthStore } from "@/stores/auth";
 import usersService from "@/services/usersService";
 import OptionsService from "@/services/optionsService";
 import { useToast } from "vue-toast-notification";
-
+import { useRoute, useRouter } from "vue-router";
 const auth = useAuthStore();
 const $toast = useToast();
-
+const route = useRoute();
+const router = useRouter();
 const showModal = ref(false);
 const editMode = ref(false);
 const loading = ref(false);
