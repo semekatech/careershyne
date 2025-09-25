@@ -223,7 +223,9 @@ const handleLogin = async () => {
     const redirectPath = data.redirect; // make sure this exists
     if (redirectPath) {
       alert("sasa");
-      window.location.href = "/" + redirectPath;
+       const path = "/" + redirectPath;
+       router.push(path);
+      // window.location.href = "/" + redirectPath;
     } else {
       alert("no");
     }
