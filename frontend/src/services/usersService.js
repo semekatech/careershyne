@@ -28,4 +28,7 @@ export default {
   toggleStatus: (id, newStatus) => {
     return axios.put(`${API_URL}/${id}/toggle-status`, { status: newStatus });
   },
+  impersonate(userId) {
+    return axios.post(`${API_URL}/${userId}/impersonate`);
+  }
 };

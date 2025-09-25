@@ -106,10 +106,10 @@
                   Edit
                 </button>
                 <button
-                  @click="deleteUser(user.id)"
-                  class="px-2 py-1 bg-red-600 text-white rounded text-xs"
+                  @click="impersonateUser(user)"
+                  class="px-2 py-1 bg-purple-600 text-white rounded text-xs"
                 >
-                  Disable
+                  Login as User
                 </button>
               </td>
             </tr>
@@ -445,7 +445,7 @@ function openModal() {
     name: "",
     email: "",
     phone: "",
-  role: 1098,
+    role: 1098,
     status: "active",
     industry_id: "",
     education_level_id: "",
@@ -524,6 +524,32 @@ async function submitForm() {
     }
   } finally {
     loading.value = false;
+  }
+}
+async function impersonateUser(user) {
+  if (!confirm(`Login as ${user.name}?`)) return;
+
+  try {
+    const { data } = await usersService.impersonate(user.id);
+
+    // Save the new token and user info in your auth store
+    auth.setToken(data.access_token); // or however you handle tokens
+    auth.setUser(data.user);
+
+    // Optional: store impersonator_id
+    localStorage.setItem("impersonator_id", data.impersonator_id);
+
+    // Redirect
+    if (data.redirect === "profile-setup") {
+      router.push("/profile-setup");
+    } else {
+      router.push("/dashboard");
+    }
+
+    $toast.success(`You are now logged in as ${data.user.name}`);
+  } catch (err) {
+    console.error(err);
+    $toast.error("Failed to impersonate user");
   }
 }
 

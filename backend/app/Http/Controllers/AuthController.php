@@ -169,11 +169,11 @@ class AuthController extends Controller
         }
 
         $user->save();
-         return response()->json([
-                'status' => 'success',
-                'message' => 'User registered successfully',
-                'user' => $user
-            ], 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User registered successfully',
+            'user' => $user
+        ], 201);
     }
 
     public function industries()
@@ -405,4 +405,35 @@ class AuthController extends Controller
 
         return response()->json(['notifications' => $notifications]);
     }
+
+    public function impersonateLogin(Request $request, User $user)
+{
+    $admin = $request->user(); // token-based auth
+    if (!$admin || $admin->role != 1109) { // assuming 1109 = admin
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    $token = Str::random(60);
+    $user->api_token = hash('sha256', $token);
+    $user->save();
+
+    // Determine redirect route (same logic as normal login)
+    $redirectRoute = 'dashboard'; // default
+    if ($user->role == 1098) { // normal user
+        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            $redirectRoute = 'profile-setup';
+        }
+    }
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'photo' => $user->photo,
+            'role' => $user->role,
+        ],
+        'redirect' => $redirectRoute,
+        'impersonator_id' => $admin->id,
+    ]);
+}
 }

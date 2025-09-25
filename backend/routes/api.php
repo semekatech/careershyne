@@ -64,6 +64,7 @@ Route::prefix('users')->group(function () {
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [UserController::class, 'store']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
+    Route::post('/{user}/impersonate', [AuthController::class, 'impersonateLogin']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
 Route::prefix('ai')->group(function () {
