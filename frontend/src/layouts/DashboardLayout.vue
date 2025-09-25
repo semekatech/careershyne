@@ -5,14 +5,14 @@
     <transition name="slide">
       <aside
         v-if="isSidebarOpen || isDesktop"
-        class="fixed inset-y-0 left-0 w-64 bg-blue-800 text-white z-30 md:relative md:flex md:flex-shrink-0"
-        style="background: #2c3137"
+        class="fixed inset-y-0 left-0 w-64 bg-surface-light dark:bg-surface-darkflex flex-col border-r border-gray-200 dark:border-gray-700 z-30 md:relative md:flex md:flex-shrink-0"
+    
       >
         <div class="flex flex-col h-full">
           <div class="flex items-center justify-center h-16 px-4">
             <a href="/dashboard" class="flex items-center">
               <span
-                class="self-center text-xl font-semibold whitespace-nowrap text-white bg-clip-text text-transparent"
+                class="self-center text-xl font-semibold whitespace-nowrap text-black bg-clip-text text-black"
               >
                 <strong>CAREER PORTAL</strong>
               </span>
@@ -28,17 +28,15 @@
             </button>
           </div>
           <nav
-            class="flex flex-col flex-grow px-4 py-4 overflow-y-auto space-y-2"
+            class="flex-1 px-4 py-6 space-y-2"
           >
             <!-- Dashboard -->
             <a
               href="/dashboard"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white text-black"
+              class="flex items-center px-4 py-2 text-white bg-primary rounded-lg"
             >
-              <font-awesome-icon
-                :icon="['fas', 'tachometer-alt']"
-                class="mr-3"
-              />
+             <span class="material-icons-sharp mr-3">dashboard</span>
+
               Dashboard
             </a>
 
@@ -46,7 +44,7 @@
             <a
               href="/manage-orders"
               v-if="auth.user?.role !== '1098'"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <font-awesome-icon
                 :icon="['fas', 'shopping-cart']"
@@ -59,7 +57,7 @@
             <a
               v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
               href="/manage-payments"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
               Manage Payments
@@ -68,7 +66,7 @@
             <a
               v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
               href="/manage-users"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <font-awesome-icon :icon="['fas', 'users']" class="mr-3" />
               Manage Users
@@ -79,9 +77,9 @@
             <a
               v-if="auth.user?.role != 'radio'"
               href="/cover-letter-generator"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-              <font-awesome-icon :icon="['fas', 'file-alt']" class="mr-3" />
+             <span class="material-icons-sharp mr-3">attach_file</span>
               Cover Letters
             </a>
 
@@ -89,9 +87,10 @@
             <a
               v-if="auth.user?.role != 'radio'"
               href="/email-template-generator"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-              <font-awesome-icon :icon="['fas', 'envelope']" class="mr-3" />
+            <span class="material-icons-sharp mr-3">email</span>
+
               Email Templates
             </a>
 
@@ -99,9 +98,10 @@
             <a
               v-if="auth.user?.role != 'radio'"
               href="/cv-revamp-generator"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-              <font-awesome-icon :icon="['fas', 'user-edit']" class="mr-3" />
+             <span class="material-icons-sharp mr-3">mail_outline</span>
+
               CV Revamp
             </a>
 
@@ -109,7 +109,7 @@
             <a
               href="#"
               @click.prevent="handleLogout"
-              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-3" />
               Logout
@@ -244,6 +244,11 @@ const handleLogout = () => {
 .slide-leave-from {
   transform: translateX(0);
 }
+
+    .material-icons-sharp {
+      font-size: 1.25rem;
+    }
+
 </style>
 
 
