@@ -157,7 +157,7 @@ class AuthController extends Controller
         // Handle CV upload
         if ($request->hasFile('cv')) {
             $cvFile = $request->file('cv');
-            $cvPath = $cvFile->store('cvs', 'public'); // stores in storage/app/public/cvs
+            $cvPath = $cvFile->store('cvs', 'public');
             $user->cv_path = $cvPath;
         }
 
