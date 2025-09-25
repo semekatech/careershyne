@@ -16,6 +16,7 @@ import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import SetupPage from "@/pages/SetupPage.vue";
+import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 const routes = [
   {
     path: "/",
@@ -121,6 +122,19 @@ const routes = [
       {
         path: "",
         component: ManageOrders,
+      },
+    ],
+  },
+  {
+    path: "/manage-users",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Users",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageUsers,
       },
     ],
   },

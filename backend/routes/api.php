@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 
 Route::prefix('auth')->group(function () {
@@ -50,6 +51,16 @@ Route::prefix('orders')->group(function () {
     Route::post('/update/{id}', [CvOrderController::class, 'update']);
     Route::get('/get/{id}', [CvOrderController::class, 'show']);
     Route::get('/all', [CvOrderController::class, 'fetchAll']);
+    Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
+    Route::post('/save', [CvOrderController::class, 'storeOrder']);
+    Route::get('/payments', [PaymentController::class, 'fetchPayment']);
+    // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
+});
+Route::prefix('users')->group(function () {
+    Route::post('/register', [CvOrderController::class, 'store']);
+    Route::post('/update/{id}', [CvOrderController::class, 'update']);
+    Route::get('/get/{id}', [CvOrderController::class, 'show']);
+    Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [CvOrderController::class, 'storeOrder']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);

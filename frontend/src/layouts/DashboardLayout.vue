@@ -44,7 +44,8 @@
 
             <!-- Manage Orders -->
             <a
-              href="/manage-orders" v-if="auth.user?.role !== 'user'"
+              href="/manage-orders"
+              v-if="auth.user?.role !== '1098'"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
               <font-awesome-icon
@@ -56,7 +57,7 @@
 
             <!-- Manage Payments -->
             <a
-              v-if="auth.user?.role !== 'radio' && auth.user?.role !== 'user'"
+              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
               href="/manage-payments"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
@@ -64,6 +65,16 @@
               Manage Payments
             </a>
 
+            <a
+              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
+              href="/manage-users"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'users']" class="mr-3" />
+              Manage Users
+            </a>
+
+            
             <!-- Cover Letters -->
             <a
               v-if="auth.user?.role != 'radio'"
