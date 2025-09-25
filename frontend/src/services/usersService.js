@@ -27,15 +27,16 @@ export default {
   toggleStatus: (id, newStatus) => {
     return axios.put(`${API_URL}/${id}/toggle-status`, { status: newStatus });
   },
-  impersonate(userId) {
-    return axios.post(
-      `${API_URL}/${userId}/impersonate`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-  },
+ impersonate(userId) {
+  return axios.post(
+    `${API_URL}/users/${userId}/impersonate`, // user ID in URL
+    {}, // empty body
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+}
+
 };

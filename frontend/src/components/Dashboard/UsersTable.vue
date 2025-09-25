@@ -532,19 +532,15 @@ async function impersonateUser(user) {
   try {
     const { data } = await usersService.impersonate(user.id);
 
-    // Save the new token and user info in your auth store
-    auth.setToken(data.access_token); // or however you handle tokens
+    auth.setToken(data.access_token);
     auth.setUser(data.user);
 
-    // Optional: store impersonator_id
     localStorage.setItem("impersonator_id", data.impersonator_id);
 
     // Redirect
-    if (data.redirect === "profile-setup") {
-      router.push("/profile-setup");
-    } else {
-      router.push("/dashboard");
-    }
+    router.push(
+      data.redirect === "profile-setup" ? "/profile-setup" : "/dashboard"
+    );
 
     $toast.success(`You are now logged in as ${data.user.name}`);
   } catch (err) {

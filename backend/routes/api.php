@@ -65,6 +65,9 @@ Route::prefix('users')->group(function () {
     Route::post('/save', [UserController::class, 'store']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
     Route::post('/{user}/impersonate', [AuthController::class, 'impersonateLogin']);
+    // routes/api.php
+Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
+
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
 Route::prefix('ai')->group(function () {

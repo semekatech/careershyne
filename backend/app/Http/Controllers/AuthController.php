@@ -406,24 +406,27 @@ class AuthController extends Controller
         return response()->json(['notifications' => $notifications]);
     }
 
-    public function impersonateLogin(Request $request, User $user)
+public function impersonateLogin(Request $request, User $user)
 {
     $admin = $request->user();
-    info($request->all());
-    if (!$admin || $admin->role != 1109) {
+
+    if (!$admin || $admin->role != 1109) { // admin role
         return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    // Generate new token for the impersonated user
     $token = Str::random(60);
     $user->api_token = hash('sha256', $token);
     $user->save();
 
-    // Determine redirect route (same logic as normal login)
-    $redirectRoute = 'dashboard'; // default
+    // Determine redirect route
+    $redirectRoute = 'dashboard';
     if ($user->role == 1098) { // normal user
         if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
             $redirectRoute = 'profile-setup';
         }
     }
+
     return response()->json([
         'access_token' => $token,
         'token_type' => 'Bearer',
@@ -437,4 +440,5 @@ class AuthController extends Controller
         'impersonator_id' => $admin->id,
     ]);
 }
+
 }
