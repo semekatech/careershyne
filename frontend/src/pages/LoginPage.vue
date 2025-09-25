@@ -220,13 +220,12 @@ const handleLogin = async () => {
     const user = data.user;
     auth.setToken(token);
     auth.setUser(user);
-    const redirectPath = data.redirect;
+    const redirectPath = data.redirect; // make sure this exists
     if (redirectPath) {
-      alert('sasa');
-      // window.location.href = "/" + data.redirect;
+      alert("sasa");
+      window.location.href = "/" + redirectPath;
     } else {
-      alert('no');
-      // window.location.href = "/dashboard";
+      alert("no");
     }
   } catch (error) {
     if (error.response) {
