@@ -317,11 +317,5 @@ const handleProfileUpdate = async () => {
 } finally {
   loading.value = false;
 }
- catch (err) {
-    console.error(err);
-    errorMessage.value = "Failed to update profile. Try again.";
-  } finally {
-    loading.value = false;
-  }
 };
 </script>
