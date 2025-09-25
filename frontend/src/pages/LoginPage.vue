@@ -221,11 +221,12 @@ const handleLogin = async () => {
     auth.setToken(token);
     auth.setUser(user);
     const redirectPath = data.redirect;
-    if (data.redirect) {
+    if (redirectPath) {
       alert('sasa');
-      window.location.href = "/" + data.redirect;
+      // window.location.href = "/" + data.redirect;
     } else {
-      window.location.href = "/dashboard";
+      alert('no');
+      // window.location.href = "/dashboard";
     }
   } catch (error) {
     if (error.response) {
