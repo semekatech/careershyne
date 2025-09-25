@@ -228,6 +228,7 @@ const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
 
+
 // Load options
 onMounted(async () => {
   try {

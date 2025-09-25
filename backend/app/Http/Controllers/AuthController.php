@@ -48,7 +48,7 @@ class AuthController extends Controller
                 $redirectRoute = 'profile-setup';
             }
         }
-        info($redirectRoute);
+        // info($redirectRoute);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -132,9 +132,50 @@ class AuthController extends Controller
     }
     public function profileSetup(Request $request)
     {
-        info('here');
-        info($request->all());
+        // Authenticate user
+        $token = $request->bearerToken();
+        $user = User::where('api_token', hash('sha256', $token))->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Validate incoming request
+        $validated = $request->validate([
+            'industry_id' => 'required|integer|exists:industries,id',
+            'education_level_id' => 'required|integer|exists:education_levels,id',
+            'county_id' => 'required|integer|exists:counties,id',
+            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+            'coverLetterFile' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+        ]);
+
+        // Update user profile fields
+        $user->industry_id = $validated['industry_id'];
+        $user->education_level_id = $validated['education_level_id'];
+        $user->county_id = $validated['county_id'];
+
+        // Handle CV upload
+        if ($request->hasFile('cv')) {
+            $cvFile = $request->file('cv');
+            $cvPath = $cvFile->store('cvs', 'public'); // stores in storage/app/public/cvs
+            $user->cv_path = $cvPath;
+        }
+
+        // Handle Cover Letter upload
+        if ($request->hasFile('coverLetterFile')) {
+            $coverLetterFile = $request->file('coverLetterFile');
+            $coverLetterPath = $coverLetterFile->store('cover_letters', 'public'); // storage/app/public/cover_letters
+            $user->cover_letter_path = $coverLetterPath;
+        }
+
+        $user->save();
+         return response()->json([
+                'status' => 'success',
+                'message' => 'User registered successfully',
+                'user' => $user
+            ], 201);
     }
+
     public function industries()
 
     {
