@@ -16,11 +16,10 @@ export default {
 
   get: () => {
     return axios.get(`${API_URL}/all`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-;
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
   },
   fetch: (id) => {
     return axios.get(`${API_URL}/get/${id}`);
@@ -29,6 +28,14 @@ export default {
     return axios.put(`${API_URL}/${id}/toggle-status`, { status: newStatus });
   },
   impersonate(userId) {
-    return axios.post(`${API_URL}/${userId}/impersonate`);
-  }
+    return axios.post(
+      `${API_URL}/${userId}/impersonate`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+  },
 };

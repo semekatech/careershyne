@@ -409,7 +409,7 @@ class AuthController extends Controller
     public function impersonateLogin(Request $request, User $user)
 {
     $admin = $request->user();
-    info($admin);
+    info($request->all());
     if (!$admin || $admin->role != 1109) {
         return response()->json(['message' => 'Unauthorized'], 403);
     }
