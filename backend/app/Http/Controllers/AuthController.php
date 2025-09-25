@@ -408,8 +408,9 @@ class AuthController extends Controller
 
     public function impersonateLogin(Request $request, User $user)
 {
-    $admin = $request->user(); // token-based auth
-    if (!$admin || $admin->role != 1109) { // assuming 1109 = admin
+    $admin = $request->user();
+    info($admin);
+    if (!$admin || $admin->role != 1109) {
         return response()->json(['message' => 'Unauthorized'], 403);
     }
     $token = Str::random(60);
