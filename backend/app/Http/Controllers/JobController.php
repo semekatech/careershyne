@@ -58,43 +58,30 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
-    public function checkEligibility(Request $request)
-    {
-        $request->validate([
-            'jobId' => 'required|integer|exists:jobs,id',
-        ]);
+   public function checkEligibility(Request $request)
+{
+    $request->validate([
+        'jobId' => 'required|integer|exists:jobs,id',
+    ]);
 
-        $user = DB::table('users')->where('id', auth('api')->id())->first();
-        $job = Job::findOrFail($request->jobId);
-        info($user);
-        info($job);
-        $requiredSkills = $job->skills ?? [];
-        $requiredEducation = $job->education ?? '';
-        $requiredExperience = $job->experience ?? 0;
-        $userSkills = $user->skills ?? [];
-        $userEducation = $user->education ?? '';
-        $userExperience = $user->experience ?? 0;
-        // Skill match
-        $matchedSkills = 20;
-        $skillMatchPercentage = 10;
+    $job = Job::findOrFail($request->jobId);
 
-        // Education + Experience
-        $educationMatch = 20;
-        $experienceMatch = 20;
+    // Generate a random match between 30% and 100%
+    $matchPercentage = rand(30, 100);
 
-        // Total score (skills weighted higher)
-        $matchPercentage = min(100, round($skillMatchPercentage * 0.6 + $educationMatch + $experienceMatch));
-        // Feedback
-        $feedback = "Good match!";
-        if ($matchPercentage < 50) {
-            $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
-        } elseif ($matchPercentage < 80) {
-            $feedback = "You meet most requirements but could improve on some skills or experience.";
-        }
-        return response()->json([
-            'matchPercentage' => $matchPercentage,
-            // 'matchedSkills' => array_values($matchedSkills),
-            'feedback' => $feedback,
-        ]);
+    // Pick feedback based on the random percentage
+    $feedback = "Excellent fit!";
+    if ($matchPercentage < 50) {
+        $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
+    } elseif ($matchPercentage < 80) {
+        $feedback = "You meet most requirements but could improve on some skills or experience.";
     }
+
+    return response()->json([
+        'matchPercentage' => $matchPercentage,
+        'feedback'        => $feedback,
+    ]);
+}
+
+
 }
