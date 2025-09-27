@@ -72,8 +72,8 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::get('/all', [JobController::class, 'fetchAll']);
     Route::post('/check-eligibility', [JobController::class, 'checkEligibility']);
     Route::post('/cv-revamp', [JobController::class, 'revampCv']);
-Route::post('/cover-letter', [JobController::class, 'coverLetter']);
-
+    Route::post('/cover-letter', [JobController::class, 'coverLetter']);
+    Route::post('/email-template', [JobController::class, 'emailTemplate']);
 
     Route::put('/update/{id}', [JobController::class, 'update']);
 });

@@ -101,7 +101,7 @@
                 </button>
 
                 <button
-                  @click="$emit('generate-email', job)"
+                  @click="openEmailTemplate(job)"
                   class="flex items-center justify-center py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-center"
                 >
                   <span class="material-icons text-lg mr-1">drafts</span>
@@ -375,8 +375,6 @@
               v-html="cvRevampResult.revampedCv"
             ></div>
 
-           
-
             <!-- Error fallback -->
             <div
               v-else-if="cvRevampResult.error"
@@ -389,89 +387,159 @@
       </div>
     </div>
 
-
-
     <!-- cover letter -->
-     <!-- COVER LETTER MODAL -->
-<div
-  v-if="showCoverLetterModal"
-  class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
->
-  <div
-    class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
-    @click.stop
-  >
-    <!-- Header -->
+    <!-- COVER LETTER MODAL -->
     <div
-      class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
+      v-if="showCoverLetterModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
     >
-      <h2 class="text-2xl font-bold text-gray-800">Cover Letter</h2>
-      <div class="flex items-center gap-3">
-        <!-- Download Word -->
-        <button
-          v-if="coverLetterResult?.coverLetter"
-          @click="downloadCoverLetter"
-          class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
-        >
-          Download Word
-        </button>
-
-        <!-- Close -->
-        <button
-          @click="closeCoverLetter"
-          class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div class="flex-1 p-6 overflow-y-auto">
-      <!-- Loading -->
       <div
-        v-if="!coverLetterResult || coverLetterProgress < 100"
-        class="flex flex-col items-center justify-center h-full text-center"
+        class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
+        @click.stop
       >
-        <p class="mb-4 text-gray-600">
-          Generating cover letter for <strong>{{ selectedJob?.title }}</strong>...
-        </p>
-
-        <!-- Progress -->
-        <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-          <div
-            class="bg-yellow-500 h-4 rounded-full transition-all duration-500"
-            :style="{ width: coverLetterProgress + '%' }"
-          ></div>
-        </div>
-        <p class="mt-3 text-gray-700 font-medium">{{ coverLetterProgress }}%</p>
-      </div>
-
-      <!-- Result -->
-      <div v-else class="space-y-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Generated Cover Letter</h3>
-
+        <!-- Header -->
         <div
-          v-if="coverLetterResult.coverLetter
-"
-          class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
-          v-html="coverLetterResult.coverLetter
-"
-        ></div>
-
-        
-        <!-- Error -->
-        <div
-          v-else-if="coverLetterResult.error"
-          class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
+          class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
         >
-          {{ coverLetterResult.error }}
+          <h2 class="text-2xl font-bold text-gray-800">Cover Letter</h2>
+          <div class="flex items-center gap-3">
+            <!-- Download Word -->
+            <button
+              v-if="coverLetterResult?.coverLetter"
+              @click="downloadCoverLetter"
+              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
+            >
+              Download Word
+            </button>
+
+            <!-- Close -->
+            <button
+              @click="closeCoverLetter"
+              class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+          <!-- Loading -->
+          <div
+            v-if="!coverLetterResult || coverLetterProgress < 100"
+            class="flex flex-col items-center justify-center h-full text-center"
+          >
+            <p class="mb-4 text-gray-600">
+              Generating cover letter for
+              <strong>{{ selectedJob?.title }}</strong
+              >...
+            </p>
+
+            <!-- Progress -->
+            <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+              <div
+                class="bg-yellow-500 h-4 rounded-full transition-all duration-500"
+                :style="{ width: coverLetterProgress + '%' }"
+              ></div>
+            </div>
+            <p class="mt-3 text-gray-700 font-medium">
+              {{ coverLetterProgress }}%
+            </p>
+          </div>
+
+          <!-- Result -->
+          <div v-else class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+              Generated Cover Letter
+            </h3>
+
+            <div
+              v-if="coverLetterResult.coverLetter"
+              class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
+              v-html="coverLetterResult.coverLetter"
+            ></div>
+
+            <!-- Error -->
+            <div
+              v-else-if="coverLetterResult.error"
+              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
+            >
+              {{ coverLetterResult.error }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
+    <!-- Email Templates -->
+    <div
+      v-if="showEmailTemplateModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+    >
+      <div
+        class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
+        @click.stop
+      >
+        <!-- Header -->
+        <div
+          class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
+        >
+          <h2 class="text-2xl font-bold text-gray-800">Email Template</h2>
+          <button
+            @click="closeEmailTemplate"
+            class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
+          >
+            ✕
+          </button>
+        </div>
 
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+          <!-- Loading -->
+          <div
+            v-if="!emailTemplateResult || emailTemplateProgress < 100"
+            class="flex flex-col items-center justify-center h-full text-center"
+          >
+            <p class="mb-4 text-gray-600">
+              Generating email template for
+              <strong>{{ selectedJob?.title }}</strong
+              >...
+            </p>
+
+            <!-- Progress -->
+            <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+              <div
+                class="bg-purple-500 h-4 rounded-full transition-all duration-500"
+                :style="{ width: emailTemplateProgress + '%' }"
+              ></div>
+            </div>
+            <p class="mt-3 text-gray-700 font-medium">
+              {{ emailTemplateProgress }}%
+            </p>
+          </div>
+
+          <!-- Result -->
+          <div v-else class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+              Generated Email Template
+            </h3>
+
+            <div
+              v-if="emailTemplateResult.template"
+              class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
+              v-html="emailTemplateResult.template"
+            ></div>
+
+            <!-- Error -->
+            <div
+              v-else-if="emailTemplateResult.error"
+              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
+            >
+              {{ emailTemplateResult.error }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -481,6 +549,8 @@ import JobService from "@/services/jobService";
 import eligibilityService from "@/services/eligibilityService";
 import coverLetterService from "@/services/coverLetter";
 import cvRevampService from "@/services/cvRevamp";
+import emailTemplateService from "@/services/emailTemplate";
+
 const showCoverLetterModal = ref(false);
 const coverLetterProgress = ref(0);
 const coverLetterResult = ref(null);
@@ -496,6 +566,9 @@ const showEligibilityModal = ref(false);
 const eligibilityProgress = ref(0);
 const eligibilityResult = ref(null);
 const auth = useAuthStore();
+const showEmailTemplateModal = ref(false);
+const emailTemplateProgress = ref(0);
+const emailTemplateResult = ref(null);
 
 async function fetchJobs() {
   loading.value = true;
@@ -630,7 +703,6 @@ async function openCoverLetter(job) {
   }
 }
 
-
 function closeCoverLetter() {
   showCoverLetterModal.value = false;
   coverLetterProgress.value = 0;
@@ -658,5 +730,36 @@ function downloadCoverLetter() {
   link.click();
   document.body.removeChild(link);
 }
+
+async function openEmailTemplate(job) {
+  selectedJob.value = job;
+  showEmailTemplateModal.value = true;
+  emailTemplateProgress.value = 0;
+  emailTemplateResult.value = null;
+
+  try {
+    // Fake progress animation
+    const interval = setInterval(() => {
+      if (emailTemplateProgress.value < 90) emailTemplateProgress.value += 10;
+    }, 400);
+
+    // Call your email service
+    const result = await emailTemplateService.generate(job.id);
+
+    clearInterval(interval);
+    emailTemplateProgress.value = 100;
+    emailTemplateResult.value = result;
+  } catch (err) {
+    emailTemplateProgress.value = 100;
+    emailTemplateResult.value = { error: "Failed to generate email template." };
+  }
+}
+
+function closeEmailTemplate() {
+  showEmailTemplateModal.value = false;
+  emailTemplateProgress.value = 0;
+  emailTemplateResult.value = null;
+}
+
 onMounted(fetchJobs);
 </script>

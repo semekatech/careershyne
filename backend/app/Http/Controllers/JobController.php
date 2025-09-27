@@ -362,4 +362,57 @@ PROMPT;
     ]);
 }
 
+public function emailTemplate(Request $request)
+{
+    $job = Job::findOrFail($request->jobId);
+
+    // Build AI prompt for email template
+    $prompt = <<<PROMPT
+You are a professional career coach and recruiter assistant.
+Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job:
+
+--- JOB DESCRIPTION ---
+{$job->description}
+
+Return ONLY valid JSON with fields:
+  - emailTemplate (HTML formatted)
+PROMPT;
+
+    // Call OpenAI
+    $client = OpenAI::client(env('OPENAI_API_KEY'));
+    $response = $client->chat()->create([
+        'model' => 'gpt-4o-mini',
+        'messages' => [
+            ['role' => 'system', 'content' => 'You are an expert email template assistant. Always respond with valid JSON only.'],
+            ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.3,
+    ]);
+
+    $aiOutput = $response->choices[0]->message->content ?? '';
+
+    // Cleanup JSON formatting
+    $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+    $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+    $cleanOutput = trim($cleanOutput);
+
+    $analysis = json_decode($cleanOutput, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+        return response()->json([
+            'success' => false,
+            'message' => 'AI response could not be parsed',
+            'raw'     => $aiOutput,
+        ], 500);
+    }
+
+    // Return structured response
+    return response()->json([
+        'success'       => true,
+        'template' => $analysis['emailTemplate'] ?? '',
+        'job_id'        => $job->id,
+    ]);
+}
+
+
 }
