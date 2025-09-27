@@ -130,7 +130,7 @@
   @click="closeEligibility"
 >
   <div
-  class="bg-white w-full max-w-[60%] md:max-w-[95%] h-[80vh] relative mx-auto rounded-2xl shadow-xl flex flex-col"
+  class="bg-white w-full max-w-[60%] md:max-w-[60%] h-[80vh] relative mx-auto rounded-2xl shadow-xl flex flex-col"
   @click.stop
 >
 
