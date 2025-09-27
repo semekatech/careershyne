@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use DB;
 use OpenAI;
 use App\Services\AIReviewService;
+use Smalot\PdfParser\Parser;
 class JobController extends Controller
 {
   protected $aiReview;
@@ -64,76 +65,65 @@ class JobController extends Controller
         return response()->json($jobs);
     }
     public function checkEligibility(Request $request)
-    {
-        $user = auth('api')->user();
-        $job  = Job::findOrFail($request->jobId);
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
 
-        if (!$user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
-            ], 400);
-        }
-
-        $cvPath = storage_path('app/public/' . $user->cv_path);
-
-        if (!file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.'
-            ], 404);
-        }
-
-        try {
-            // ✅ Wrap file in Symfony UploadedFile for consistency
-            $file = new \Illuminate\Http\UploadedFile(
-                $cvPath,
-                basename($cvPath),
-                mime_content_type($cvPath),
-                null,
-                true // mark as test (skip move checks)
-            );
-
-            // ✅ Extract CV text
-            $cvText = $this->extractTextFromFile($file, 'CV');
-            info("CV text extracted: " . substr($cvText, 0, 2000000) . "...");
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
-
-        // For now just simulate a match %
-        $matchPercentage = rand(30, 100);
-        $feedback = "Excellent fit!";
-        if ($matchPercentage < 50) {
-            $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
-        } elseif ($matchPercentage < 80) {
-            $feedback = "You meet most requirements but could improve on some skills or experience.";
-        }
-
+    if (!$user->cv_path) {
         return response()->json([
-            'success'         => true,
-            'matchPercentage' => $matchPercentage,
-            'feedback'        => $feedback,
-            'cv_path'         => asset('storage/' . $user->cv_path),
-            'cv_excerpt'      => substr($cvText, 0, 300) . '...' // show snippet
-        ]);
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.'
+        ], 400);
     }
 
-    private function extractTextFromFile($file, $type = 'File')
-    {
-        $jobText = '';
-        try {
-              info("$type: Processing PDF.");
-                [$filePath, $jobText] = $this->aiReview->extractText($file);
-            $text = $this->aiReview->cleanText($jobText);
-        } catch (\Exception $e) {
-            info("$type: Text extraction failed - " . $e->getMessage());
-            throw new \Exception("$type text extraction failed: " . $e->getMessage());
+    $cvPath = storage_path('app/public/' . $user->cv_path);
+
+    if (!file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.'
+        ], 404);
+    }
+
+    try {
+        // ✅ Parse directly using Smalot\PdfParser
+        $parser = new Parser();
+        $pdf    = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+
+        if (strlen(trim($cvText)) === 0) {
+            info("CV parsing returned empty text. File: $cvPath");
+        } else {
+            info("Extracted CV text length: " . strlen($cvText));
         }
 
-        return $text;
+        // ✅ Clean text (basic)
+        $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+        $cvText = preg_replace('/\s+/', ' ', $cvText);
+        $cvText = trim($cvText);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV: ' . $e->getMessage(),
+        ], 500);
     }
+
+    // For now just simulate a match %
+    $matchPercentage = rand(30, 100);
+    $feedback = "Excellent fit!";
+    if ($matchPercentage < 50) {
+        $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
+    } elseif ($matchPercentage < 80) {
+        $feedback = "You meet most requirements but could improve on some skills or experience.";
+    }
+
+    return response()->json([
+        'success'         => true,
+        'matchPercentage' => $matchPercentage,
+        'feedback'        => $feedback,
+        'cv_path'         => asset('storage/' . $user->cv_path),
+        'cv_excerpt'      => substr($cvText, 0, 300) . '...' // show snippet
+    ]);
+}
 }
