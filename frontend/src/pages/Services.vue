@@ -1,10 +1,12 @@
 <template>
-   <TheWelcome />
+  <TheWelcome />
   <section class="bg-white dark:bg-gray-900 py-16">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <!-- Heading -->
       <div class="text-center mb-16">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+        <h2
+          class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white"
+        >
           Our Services
         </h2>
         <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
@@ -13,7 +15,9 @@
       </div>
 
       <!-- CV Review & Optimization (featured block) -->
-      <div class="bg-orange-50 dark:bg-gray-800 rounded-2xl shadow-lg p-10 mb-20">
+      <div
+        class="bg-orange-50 dark:bg-gray-800 rounded-2xl shadow-lg p-10 mb-20"
+      >
         <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
           🔍 CV Review & Optimization
         </h3>
@@ -23,8 +27,14 @@
         <div class="grid md:grid-cols-2 gap-8">
           <!-- Left: The Challenge -->
           <div>
-            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">The Challenge</h4>
-            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+            <h4
+              class="font-semibold text-lg text-gray-900 dark:text-white mb-2"
+            >
+              The Challenge
+            </h4>
+            <ul
+              class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"
+            >
               <li>Endless applications but no interviews</li>
               <li>CVs blocked by ATS filters</li>
               <li>Skills reduced to generic job duties</li>
@@ -33,8 +43,14 @@
           </div>
           <!-- Right: The Solution -->
           <div>
-            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">The Solution</h4>
-            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+            <h4
+              class="font-semibold text-lg text-gray-900 dark:text-white mb-2"
+            >
+              The Solution
+            </h4>
+            <ul
+              class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"
+            >
               <li>Grab attention in <strong>6 seconds</strong></li>
               <li>Beat ATS with keyword optimization</li>
               <li>Highlight <strong>results, not just tasks</strong></li>
@@ -44,37 +60,61 @@
           </div>
         </div>
         <p class="mt-6 text-gray-800 dark:text-gray-200 font-medium">
-          ✅ Result: From invisible to irresistible — more recruiter callbacks, more interviews, more opportunities.
+          ✅ Result: From invisible to irresistible — more recruiter callbacks,
+          more interviews, more opportunities.
         </p>
       </div>
 
       <!-- Other Services (3-card grid) -->
       <div class="grid md:grid-cols-3 gap-8">
         <!-- CV Revamp -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">📄 CV Revamps & Polishing</h3>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            📄 CV Revamps & Polishing
+          </h3>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
-            Your CV is your career passport. We transform it into a modern, achievement-driven profile that sells your value.
+            Your CV is your career passport. We transform it into a modern,
+            achievement-driven profile that sells your value.
           </p>
-          <p class="font-medium text-gray-800 dark:text-gray-200">Outcome: A professional CV that turns job applications into interview calls.</p>
+          <p class="font-medium text-gray-800 dark:text-gray-200">
+            Outcome: A professional CV that turns job applications into
+            interview calls.
+          </p>
         </div>
 
         <!-- Cover Letters -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">📝 Cover Letters That Impress</h3>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            📝 Cover Letters That Impress
+          </h3>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
-            We craft personalized cover letters that connect with recruiters, highlight your fit, and show genuine motivation.
+            We craft personalized cover letters that connect with recruiters,
+            highlight your fit, and show genuine motivation.
           </p>
-          <p class="font-medium text-gray-800 dark:text-gray-200">Outcome: A cover letter that feels authentic, builds connection, and wins attention.</p>
+          <p class="font-medium text-gray-800 dark:text-gray-200">
+            Outcome: A cover letter that feels authentic, builds connection, and
+            wins attention.
+          </p>
         </div>
 
         <!-- LinkedIn -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">🌐 LinkedIn Optimization</h3>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 hover:shadow-xl transition"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            🌐 LinkedIn Optimization
+          </h3>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
-            We optimize your LinkedIn profile with the right keywords, headline, and achievements so it attracts recruiters 24/7.
+            We optimize your LinkedIn profile with the right keywords, headline,
+            and achievements so it attracts recruiters 24/7.
           </p>
-          <p class="font-medium text-gray-800 dark:text-gray-200">Outcome: A LinkedIn profile that builds credibility and opens doors.</p>
+          <p class="font-medium text-gray-800 dark:text-gray-200">
+            Outcome: A LinkedIn profile that builds credibility and opens doors.
+          </p>
         </div>
       </div>
 

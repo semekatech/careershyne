@@ -2,16 +2,19 @@
 
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\CvOrderController;
+use App\Http\Controllers\JobController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/profile-setup', [AuthController::class, 'profileSetup']);
 });
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
@@ -20,7 +23,9 @@ Route::post('/callback-confirm', [PaymentController::class, 'confirm']);
 Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
     ->name('check.stk.status');
 
-
+Route::get('industries', [AuthController::class, 'industries']);
+Route::get('education-levels', [AuthController::class, 'educationLevels']);
+Route::get('counties', [AuthController::class, 'counties']);
 Route::post('/log-visitor', function (Request $request) {
     $ip = $request->input('ip', $request->ip()); // ✅ use frontend IP if available
     $userAgent = $request->header('User-Agent');
@@ -52,15 +57,32 @@ Route::prefix('orders')->group(function () {
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
+Route::prefix('users')->group(function () {
+    Route::post('/register', [CvOrderController::class, 'store']);
+    Route::post('/update/{id}', [UserController::class, 'update']);
+    Route::get('/get/{id}', [CvOrderController::class, 'show']);
+    Route::get('/all', [UserController::class, 'fetchAll']);
+    Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
+    Route::post('/save', [UserController::class, 'store']);
+    Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
+});
+
+Route::prefix('jobs')->middleware('auth:api')->group(function () {
+    Route::post('/add', [JobController::class, 'store']);
+    Route::get('/all', [JobController::class, 'fetchAll']);
+    Route::post('/check-eligibility', [JobController::class, 'checkEligibility']);
+    Route::post('/cv-revamp', [JobController::class, 'revampCv']);
+
+    Route::put('/update/{id}', [JobController::class, 'update']);
+});
+
 Route::prefix('ai')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
-          Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
+    Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
         ->middleware('throttle:2,1');
-         Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
+    Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
         ->middleware('throttle:2,1');
-   Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
+    Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1');
-
-
 });

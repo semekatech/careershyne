@@ -1,5 +1,5 @@
 <template>
-  <DashboardStats v-if="auth.user?.role !== 'user'" />
+  <DashboardStats v-if="auth.user?.role !== '1098'" />
   <UserDashboard v-else />
 </template>
 

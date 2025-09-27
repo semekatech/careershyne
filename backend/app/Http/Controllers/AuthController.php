@@ -34,10 +34,21 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
         // Generate token
         $token = Str::random(60);
         $user->api_token = hash('sha256', $token);
         $user->save();
+
+        // Determine redirect route
+        $redirectRoute = 'dashboard'; // default
+
+        if ($user->role == 1098) {
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
+        // info($redirectRoute);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -47,9 +58,154 @@ class AuthController extends Controller
                 'photo' => $user->photo,
                 'role' => $user->role,
             ],
+            'redirect' => $redirectRoute,
         ]);
     }
 
+
+    public function register(Request $request)
+    {
+        info($request->all());
+
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'fullName' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20|unique:users,phone',
+            'password' => 'required|string|confirmed|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Create user
+            $user = User::create([
+                'name' => $request->fullName,
+                'email' => $request->email,
+                'role' => '1098',
+                'phone' => $request->phone,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Create subscription
+            DB::table('subscriptions')->insert([
+                'user_id' => $user->id,
+                'plan' => 'Free',
+                'limit' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Send welcome email
+            try {
+                Mail::to($user->email)->send(new WelcomeUserMail($user));
+            } catch (\Exception $e) {
+                info('Failed to send welcome email: ' . $e->getMessage());
+                return response()->json([
+                    'status' => 'warning',
+                    'message' => 'User registered, but welcome email failed to send',
+                    'user' => $user
+                ], 201);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User registered successfully',
+                'user' => $user
+            ], 201);
+        } catch (\Exception $e) {
+            info('User registration failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Registration failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function profileSetup(Request $request)
+    {
+        // Authenticate user
+        $token = $request->bearerToken();
+        $user = User::where('api_token', hash('sha256', $token))->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Validate incoming request
+        $validated = $request->validate([
+            'industry_id' => 'required|integer|exists:industries,id',
+            'education_level_id' => 'required|integer|exists:education_levels,id',
+            'county_id' => 'required|integer|exists:counties,id',
+            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+            'coverLetterFile' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+        ]);
+
+        // Update user profile fields
+        $user->industry_id = $validated['industry_id'];
+        $user->education_level_id = $validated['education_level_id'];
+        $user->county_id = $validated['county_id'];
+
+        // Handle CV upload
+        if ($request->hasFile('cv')) {
+            $cvFile = $request->file('cv');
+            $cvPath = $cvFile->store('cvs', 'public');
+            $user->cv_path = $cvPath;
+        }
+
+        // Handle Cover Letter upload
+        if ($request->hasFile('coverLetterFile')) {
+            $coverLetterFile = $request->file('coverLetterFile');
+            $coverLetterPath = $coverLetterFile->store('cover_letters', 'public'); // storage/app/public/cover_letters
+            $user->cover_letter_path = $coverLetterPath;
+        }
+
+        $user->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User registered successfully',
+            'user' => $user
+        ], 201);
+    }
+
+    public function industries()
+
+    {
+        $industries = DB::table('industries')
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($industries);
+    }
+
+    public function educationLevels()
+    {
+        $educationLevels = DB::table('education_levels')
+            ->select('id', 'name')
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($educationLevels);
+    }
+
+    public function counties()
+    {
+        $counties = DB::table('counties')
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($counties);
+    }
 
     public function verifyToken(Request $request)
     {
@@ -249,4 +405,40 @@ class AuthController extends Controller
 
         return response()->json(['notifications' => $notifications]);
     }
+
+public function impersonateLogin(Request $request, User $user)
+{
+    $admin = $request->user();
+
+    if (!$admin || $admin->role != 1109) { // admin role
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Generate new token for the impersonated user
+    $token = Str::random(60);
+    $user->api_token = hash('sha256', $token);
+    $user->save();
+
+    // Determine redirect route
+    $redirectRoute = 'dashboard';
+    if ($user->role == 1098) { // normal user
+        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            $redirectRoute = 'profile-setup';
+        }
+    }
+
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'photo' => $user->photo,
+            'role' => $user->role,
+        ],
+        'redirect' => $redirectRoute,
+        'impersonator_id' => $admin->id,
+    ]);
+}
+
 }

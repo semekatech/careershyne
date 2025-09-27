@@ -14,6 +14,11 @@ import LoginPage from "@/pages/LoginPage.vue";
 import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
 import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
+import RegisterPage from "@/pages/RegisterPage.vue";
+import SetupPage from "@/pages/SetupPage.vue";
+import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
+import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
+import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 const routes = [
   {
     path: "/",
@@ -76,6 +81,26 @@ const routes = [
       },
     ],
   },
+    {
+    path: "/register",
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        component: RegisterPage,
+      },
+    ],
+  },
+   {
+    path: "/profile-setup",
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        component: SetupPage,
+      },
+    ],
+  },
    {
     path: "/dashboard",
     component: DashboardLayout,
@@ -102,6 +127,47 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/manage-users",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Users",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageUsers,
+      },
+    ],
+  },
+  {
+    path: "/manage-jobs",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Jobs",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageJobs,
+      },
+    ],
+  },
+  {
+    path: "/add-job",
+    component: DashboardLayout,
+    meta: {
+      title: "Add Jobs",
+    },
+    children: [
+      {
+        path: "",
+        component: AddJobs,
+      },
+    ],
+  },
+
+  
    {
     path: "/manage-payments",
     component: DashboardLayout,
@@ -169,6 +235,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/admin",
+    '/register',
     "/how-it-works",
     "/custom-cv-order",
     "/contact-us",
@@ -176,14 +243,15 @@ router.beforeEach(async (to, from, next) => {
     "/services",
     "/pricing",
      "/free-review",
-    "/ai"
+    "/ai",
+     "/profile-setup"
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
   );
 
   if (!isPublic && !auth.token) {
-    return next("/login");
+    return next("/admin");
   }
 
   if (!isPublic && auth.token) {
@@ -194,7 +262,7 @@ router.beforeEach(async (to, from, next) => {
       return next();
     } catch (err) {
       auth.clearToken();
-      return next("/login");
+      return next("/admin");
     }
   }
 
