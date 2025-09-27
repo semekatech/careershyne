@@ -1,3 +1,4 @@
+// services/cvRevampService.js
 import axios from "axios";
 
 const api = axios.create({
@@ -7,16 +8,16 @@ const api = axios.create({
   },
 });
 
-const eligibilityService = {
+const cvRevamp = {
   async revamp(jobId) {
     try {
       const response = await api.post("/cv-revamp", { jobId });
-      return response.data;
+      return response.data; // ✅ unwrap data
     } catch (err) {
-      console.error("Error checking eligibility:", err);
+      console.error("Error revamping CV:", err.response?.data || err.message);
       throw err;
     }
   },
 };
 
-export default eligibilityService;
+export default cvRevamp;
