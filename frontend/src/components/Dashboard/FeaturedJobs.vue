@@ -11,19 +11,8 @@
           fill="none"
           viewBox="0 0 24 24"
         >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          ></path>
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
       </div>
 
@@ -42,9 +31,7 @@
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
                 {{ job.company }} - {{ job.type }}
               </p>
-              <div
-                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
-              >
+              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -56,7 +43,7 @@
               </div>
             </div>
 
-            <!-- OPEN MODAL ON CLICK -->
+            <!-- OPEN DETAILS MODAL -->
             <button
               class="mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center whitespace-nowrap"
               @click="openModal(job)"
@@ -70,7 +57,7 @@
           <div class="border-t border-border-light dark:border-border-dark pt-3">
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
-                @click="$emit('check-eligibility', job)"
+                @click="openEligibility(job)"
                 class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
               >
                 <span class="material-icons text-lg mr-1">check_circle</span>
@@ -104,7 +91,7 @@
     </section>
   </div>
 
-  <!-- MODAL -->
+  <!-- DETAILS MODAL -->
   <div
     v-if="showModal"
     class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
@@ -114,54 +101,60 @@
       class="bg-white w-full md:max-w-3xl h-[95vh] md:h-[90vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
       @click.stop
     >
-      <!-- Header (Sticky) -->
-      <div
-        class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10"
-      >
+      <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
         <h2 class="text-2xl font-semibold">{{ selectedJob?.title }}</h2>
-        <button
-          @click="closeModal"
-          class="text-gray-700 hover:text-gray-900 text-2xl font-bold"
-        >
-          ✕
-        </button>
+        <button @click="closeModal" class="text-gray-700 hover:text-gray-900 text-2xl font-bold">✕</button>
       </div>
 
-      <!-- Content -->
-      <div
-        class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full"
-        v-if="selectedJob"
-      >
-        <p class="text-gray-600 mb-2">
-          {{ selectedJob.company }} - {{ selectedJob.type }}
-        </p>
-        <p class="text-gray-500 mb-2">
-          Location: {{ selectedJob.county }}, {{ selectedJob.country }}
-        </p>
-        <p class="text-gray-500 mb-2">
-          Deadline: {{ formatDate(selectedJob.deadline) }}
-        </p>
-        <p class="text-gray-700 mb-2">
-          <strong>Experience:</strong> {{ selectedJob.experience }} years
-        </p>
-        <p class="text-gray-700 mb-2">
-          <strong>Education:</strong> {{ selectedJob.education }}
-        </p>
-        <p class="text-gray-700 mb-2">
-          <strong>Salary:</strong> {{ selectedJob.salary }}
-        </p>
-        <p class="text-gray-700 mb-2">
-          <strong>Field:</strong> {{ selectedJob.field }}
-        </p>
+      <div class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full" v-if="selectedJob">
+        <p class="text-gray-600 mb-2">{{ selectedJob.company }} - {{ selectedJob.type }}</p>
+        <p class="text-gray-500 mb-2">Location: {{ selectedJob.county }}, {{ selectedJob.country }}</p>
+        <p class="text-gray-500 mb-2">Deadline: {{ formatDate(selectedJob.deadline) }}</p>
+        <p class="text-gray-700 mb-2"><strong>Experience:</strong> {{ selectedJob.experience }} years</p>
+        <p class="text-gray-700 mb-2"><strong>Education:</strong> {{ selectedJob.education }}</p>
+        <p class="text-gray-700 mb-2"><strong>Salary:</strong> {{ selectedJob.salary }}</p>
+        <p class="text-gray-700 mb-2"><strong>Field:</strong> {{ selectedJob.field }}</p>
         <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
         <div v-html="selectedJob.description" class="prose mb-4 max-w-full"></div>
-        <p class="text-gray-700 mb-2">
-          <strong>Application Instructions:</strong>
-        </p>
-        <div
-          v-html="selectedJob.applicationInstructions"
-          class="prose max-w-full"
-        ></div>
+        <p class="text-gray-700 mb-2"><strong>Application Instructions:</strong></p>
+        <div v-html="selectedJob.applicationInstructions" class="prose max-w-full"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELIGIBILITY MODAL -->
+  <div
+    v-if="showEligibilityModal"
+    class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+    @click="closeEligibility"
+  >
+    <div
+      class="bg-white w-full md:max-w-xl h-[60vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
+      @click.stop
+    >
+      <!-- Header -->
+      <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+        <h2 class="text-xl font-semibold">Eligibility Check</h2>
+        <button @click="closeEligibility" class="text-gray-700 hover:text-gray-900 text-2xl font-bold">✕</button>
+      </div>
+
+      <!-- Progress & Result Section -->
+      <div class="flex-1 p-6 flex flex-col justify-center items-center">
+        <p class="mb-4 text-gray-600">Comparing your CV with <strong>{{ selectedJob?.title }}</strong>...</p>
+
+        <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+          <div class="bg-green-500 h-4 rounded-full transition-all duration-500" :style="{ width: eligibilityProgress + '%' }"></div>
+        </div>
+        <p class="mt-2 text-gray-700 font-medium">{{ eligibilityProgress }}%</p>
+
+        <!-- Show backend results -->
+        <div v-if="eligibilityResult && eligibilityProgress === 100" class="mt-6 text-center">
+          <p v-if="eligibilityResult.error" class="text-red-600">{{ eligibilityResult.error }}</p>
+          <div v-else>
+            <p class="text-lg font-semibold text-green-600">{{ eligibilityResult.matchPercentage }}% Match</p>
+            <p class="text-gray-600 mt-2">{{ eligibilityResult.feedback }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -170,12 +163,17 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import JobService from "@/services/jobService";
+import eligibilityService from "@/services/eligibilityService";
 
 const jobs = ref([]);
 const loading = ref(true);
 
 const showModal = ref(false);
 const selectedJob = ref(null);
+
+const showEligibilityModal = ref(false);
+const eligibilityProgress = ref(0);
+const eligibilityResult = ref(null);
 
 async function fetchJobs() {
   loading.value = true;
@@ -202,6 +200,37 @@ function openModal(job) {
 function closeModal() {
   selectedJob.value = null;
   showModal.value = false;
+}
+
+async function openEligibility(job) {
+  selectedJob.value = job;
+  showEligibilityModal.value = true;
+  eligibilityProgress.value = 0;
+  eligibilityResult.value = null;
+
+  try {
+    // Fake progress while waiting for backend
+    const interval = setInterval(() => {
+      if (eligibilityProgress.value < 90) {
+        eligibilityProgress.value += 10;
+      }
+    }, 400);
+
+    const result = await eligibilityService.checkEligibility(job.id);
+
+    clearInterval(interval);
+    eligibilityProgress.value = 100;
+    eligibilityResult.value = result;
+  } catch (error) {
+    eligibilityProgress.value = 100;
+    eligibilityResult.value = { error: "Failed to check eligibility." };
+  }
+}
+
+function closeEligibility() {
+  showEligibilityModal.value = false;
+  eligibilityProgress.value = 0;
+  eligibilityResult.value = null;
 }
 
 onMounted(fetchJobs);

@@ -6,6 +6,7 @@ use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use DB;
 class JobController extends Controller
 {
     /**
@@ -29,8 +30,8 @@ class JobController extends Controller
             'county' => 'required|string|max:255',
             'office' => 'required|string|max:255',
         ]);
-        $validated['posted_by'] =auth('api')->id();
-         $validated['slug'] = Str::slug($validated['title'] . '-' . time());
+        $validated['posted_by'] = auth('api')->id();
+        $validated['slug'] = Str::slug($validated['title'] . '-' . time());
         $job = Job::create($validated);
         return response()->json([
             'success' => true,
@@ -39,23 +40,61 @@ class JobController extends Controller
         ], 201);
     }
     public function fetchAll(Request $request)
-{
-    // Optional: implement search
-    $query = Job::query();
+    {
+        // Optional: implement search
+        $query = Job::query();
 
-    if ($request->has('search') && !empty($request->search)) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-              ->orWhere('company', 'like', "%{$search}%")
-              ->orWhere('county', 'like', "%{$search}%")
-              ->orWhere('country', 'like', "%{$search}%");
-        });
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('company', 'like', "%{$search}%")
+                    ->orWhere('county', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%");
+            });
+        }
+        $perPage = $request->get('per_page', 10);
+        $jobs = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json($jobs);
     }
-    $perPage = $request->get('per_page', 10);
-    $jobs = $query->orderBy('created_at', 'desc')->paginate($perPage);
+    public function checkEligibility(Request $request)
+    {
+        $request->validate([
+            'jobId' => 'required|integer|exists:jobs,id',
+        ]);
 
-    return response()->json($jobs);
-}
+        $user = DB::table('users')->where('id', auth('api')->id())->first();
+        $job = Job::findOrFail($request->jobId);
+        info($user);
+        info($job);
+        $requiredSkills = $job->skills ?? [];
+        $requiredEducation = $job->education ?? '';
+        $requiredExperience = $job->experience ?? 0;
+        $userSkills = $user->skills ?? [];
+        $userEducation = $user->education ?? '';
+        $userExperience = $user->experience ?? 0;
+        // Skill match
+        $matchedSkills = 20;
+        $skillMatchPercentage = 10;
 
+        // Education + Experience
+        $educationMatch = 20;
+        $experienceMatch = 20;
+
+        // Total score (skills weighted higher)
+        $matchPercentage = min(100, round($skillMatchPercentage * 0.6 + $educationMatch + $experienceMatch));
+        // Feedback
+        $feedback = "Good match!";
+        if ($matchPercentage < 50) {
+            $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
+        } elseif ($matchPercentage < 80) {
+            $feedback = "You meet most requirements but could improve on some skills or experience.";
+        }
+        return response()->json([
+            'matchPercentage' => $matchPercentage,
+            // 'matchedSkills' => array_values($matchedSkills),
+            'feedback' => $feedback,
+        ]);
+    }
 }

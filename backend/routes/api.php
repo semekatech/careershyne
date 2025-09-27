@@ -64,12 +64,14 @@ Route::prefix('users')->group(function () {
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [UserController::class, 'store']);
-Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
+    Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
 });
 
 Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::post('/add', [JobController::class, 'store']);
     Route::get('/all', [JobController::class, 'fetchAll']);
+    Route::post('/check-eligibility', [JobController::class, 'checkEligibility']);
+
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
 
