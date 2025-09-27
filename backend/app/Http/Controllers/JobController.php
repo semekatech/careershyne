@@ -112,21 +112,33 @@ class JobController extends Controller
         // ✅ Build AI prompt
         $prompt = <<<PROMPT
 Compare the following CV and Job Description.
-Return ONLY valid JSON with the following fields:
+Return ONLY valid JSON (no markdown, no code fences). The response MUST be a single JSON object with these fields:
 
-- matchPercentage (0-100)
-- matchedSkills (list of objects: { skill, relevance (high/medium/low), description })
-- missingSkills (list of objects: { skill, importance (high/medium/low), description })
-- recommendations (list of short, actionable suggestions)
-- overallAssessment (short paragraph summary of the candidate fit)
-- jobSummary (object: keyResponsibilities[], requiredSkills[])
-- cvSummary (object: yearsOfExperience, highlightedSkills[], notableAchievements[])
+- matchPercentage: integer 0-100
+- matchedSkills: array of objects { "skill": string, "relevance": "high"|"medium"|"low", "description": string }
+- missingSkills: array of objects { "skill": string, "importance": "high"|"medium"|"low", "description": string }
+- recommendations: array of short strings
+- overallAssessment: string
+
+Example:
+{
+  "matchPercentage": 72,
+  "matchedSkills": [
+    { "skill": "Project Management", "relevance": "high", "description": "Led multiple projects..." }
+  ],
+  "missingSkills": [
+    { "skill": "Cloud Computing", "importance": "high", "description": "No mention of AWS/GCP/Azure" }
+  ],
+  "recommendations": ["Add cloud experience", "Get AWS cert"],
+  "overallAssessment": "Short paragraph..."
+}
 
 --- JOB DESCRIPTION ---
 {$job->description}
 
 --- CV TEXT ---
 {$cvText}
+
 PROMPT;
 
 
@@ -150,21 +162,78 @@ PROMPT;
 
         $analysis = json_decode($cleanOutput, true);
 
+        // $analysis = json_decode($cleanOutput, true); // already present
+
         if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
             return response()->json([
                 'success' => false,
                 'message' => 'AI response could not be parsed',
+                'code'    => 'AI_PARSE_ERROR',
                 'raw'     => $aiOutput,
             ], 500);
         }
 
-        // ✅ Return structured response
+        // Ensure matchedSkills and missingSkills are arrays of associative arrays
+        $ensureList = function ($list, $type = 'matched') {
+            if (empty($list)) return [];
+
+            // If already an array of arrays, return as-is
+            if (is_array($list) && isset($list[0]) && is_array($list[0])) {
+                return $list;
+            }
+
+            // If it's a string with several JSON objects on separate lines, try to extract JSON objects
+            if (is_string($list)) {
+                // find {...} blocks
+                preg_match_all('/\{.*?\}/s', $list, $matches);
+                $out = [];
+                foreach ($matches[0] as $m) {
+                    $decoded = json_decode($m, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $out[] = $decoded;
+                    } else {
+                        // fallback: parse simple "key": "value" pairs
+                        // crude parser to extract skill, relevance/importance, description
+                        preg_match('/"skill"\s*:\s*"([^"]+)"/i', $m, $s);
+                        preg_match('/"(relevance|importance)"\s*:\s*"([^"]+)"/i', $m, $r);
+                        preg_match('/"description"\s*:\s*"([^"]+)"/i', $m, $d);
+                        $out[] = [
+                            'skill' => $s[1] ?? trim(strip_tags($m)),
+                            ($r[1] ?? ($type === 'matched' ? 'relevance' : 'importance')) => $r[2] ?? null,
+                            'description' => $d[1] ?? null,
+                        ];
+                    }
+                }
+                return $out;
+            }
+
+            // If it's an array of strings like ['{ "skill":... }', '{ "skill":... }']
+            if (is_array($list)) {
+                $out = [];
+                foreach ($list as $item) {
+                    if (is_array($item)) {
+                        $out[] = $item;
+                        continue;
+                    }
+                    $decoded = json_decode($item, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $out[] = $decoded;
+                    } else {
+                        $out[] = ['skill' => $item, 'relevance' => null, 'description' => null];
+                    }
+                }
+                return $out;
+            }
+
+            return [];
+        };
+
+        $analysis['matchedSkills'] = $ensureList($analysis['matchedSkills'] ?? [], 'matched');
+        $analysis['missingSkills'] = $ensureList($analysis['missingSkills'] ?? [], 'missing');
+
         return response()->json([
             'success'         => true,
-            'matchPercentage' => $analysis['matchPercentage'] ?? null,
-            'matchedSkills'   => $analysis['matchedSkills'] ?? [],
-            'missingSkills'   => $analysis['missingSkills'] ?? [],
-            'recommendations' => $analysis['recommendations'] ?? '',
+            'analysis'        => $analysis,
             'cv_path'         => asset('storage/' . $user->cv_path),
             'cv_excerpt'      => substr($cvText, 0, 300) . '...',
         ]);
