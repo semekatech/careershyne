@@ -74,11 +74,15 @@ const perPage = ref(10);
 async function fetchJobs() {
   try {
     const data = await JobService.getJobs();
-    jobs.value = data;
+    jobs.value = Array.isArray(data.data) ? data.data : [];
+    totalPages.value = data.last_page || 1;
+    currentPage.value = data.current_page || 1;
   } catch (err) {
     console.error("Error fetching jobs:", err);
+    jobs.value = [];
   }
 }
+
 
 // Filtered & Paginated
 const filteredJobs = computed(() => {

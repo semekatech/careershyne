@@ -27,6 +27,7 @@ const JobService = {
       throw err;
     }
   },
+  
 };
 
 export default JobService;
