@@ -468,9 +468,11 @@
         <h3 class="text-xl font-semibold text-gray-800 mb-2">Generated Cover Letter</h3>
 
         <div
-          v-if="coverLetterResult.content"
+          v-if="coverLetterResult.coverLetter
+"
           class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
-          v-html="coverLetterResult.content"
+          v-html="coverLetterResult.coverLetter
+"
         ></div>
 
         <!-- Recommendations -->

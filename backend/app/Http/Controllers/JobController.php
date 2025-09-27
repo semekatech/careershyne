@@ -268,107 +268,101 @@ PROMPT;
         ]);
     }
 
-    public function coveLetter(Request $request)
-    {
+   public function coverLetter(Request $request)
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
 
-
-        $user = auth('api')->user();
-        $job  = Job::findOrFail($request->jobId);
-        info($user);
-        info('asasas');
-        // ✅ Ensure CV exists
-//         if (!$user->cv_path) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'No CV uploaded. Please upload your CV first.'
-//             ], 400);
-//         }
-
-//         $cvPath = storage_path('app/public/' . $user->cv_path);
-
-//         if (!file_exists($cvPath)) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'CV file not found on server.'
-//             ], 404);
-//         }
-
-//         // ✅ Extract text from CV
-//         try {
-//             $parser = new \Smalot\PdfParser\Parser();
-//             $pdf    = $parser->parseFile($cvPath);
-//             $cvText = $pdf->getText() ?? '';
-
-//             if (strlen(trim($cvText)) === 0) {
-//                 info("CV parsing returned empty text. File: $cvPath");
-//             }
-
-//             // Basic cleaning
-//             $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-//             $cvText = preg_replace('/\s+/', ' ', $cvText);
-//             $cvText = trim($cvText);
-//         } catch (\Exception $e) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'Failed to read CV: ' . $e->getMessage(),
-//             ], 500);
-//         }
-
-//         // ✅ Build AI prompt
-//         $prompt = <<<PROMPT
-// You are a professional CV writer. Rewrite and enhance the following CV text so that it is tailored for the given job description.
-// Keep formatting structured into clear sections:
-// - Summary
-// - Key Skills
-// - Experience
-// - Education
-// - Additional Recommendations
-
-// Return ONLY valid JSON with the following fields:
-// - revampedCv (HTML formatted CV content, well-structured)
-// - recommendations (short bullet points of extra advice)
-
-// --- JOB DESCRIPTION ---
-// {$job->description}
-
-// --- ORIGINAL CV TEXT ---
-// {$cvText}
-// PROMPT;
-
-//         // ✅ Call OpenAI
-//         $client = OpenAI::client(env('OPENAI_API_KEY'));
-//         $response = $client->chat()->create([
-//             'model' => 'gpt-4o-mini',
-//             'messages' => [
-//                 ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
-//                 ['role' => 'user', 'content' => $prompt],
-//             ],
-//             'temperature' => 0.3,
-//         ]);
-
-//         $aiOutput = $response->choices[0]->message->content ?? '';
-
-//         // ✅ Cleanup (remove code fences if present)
-//         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-//         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-//         $cleanOutput = trim($cleanOutput);
-
-//         $analysis = json_decode($cleanOutput, true);
-
-//         if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'AI response could not be parsed',
-//                 'raw'     => $aiOutput,
-//             ], 500);
-//         }
-
-//         // ✅ Return structured response
-//         return response()->json([
-//             'success'       => true,
-//             'revampedCv'    => $analysis['revampedCv'] ?? '',
-//             'recommendations' => $analysis['recommendations'] ?? [],
-//             'cv_path'       => asset('storage/' . $user->cv_path),
-//         ]);
+    if (!$user->cv_path) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.'
+        ], 400);
     }
+
+    $cvPath = storage_path('app/public/' . $user->cv_path);
+
+    if (!file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.'
+        ], 404);
+    }
+
+    // Extract text from CV
+    try {
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf    = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+
+        if (strlen(trim($cvText)) === 0) {
+            info("CV parsing returned empty text. File: $cvPath");
+        }
+
+        // Clean text
+        $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+        $cvText = preg_replace('/\s+/', ' ', $cvText);
+        $cvText = trim($cvText);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV: ' . $e->getMessage(),
+        ], 500);
+    }
+
+    // Build AI prompt for cover letter
+    $prompt = <<<PROMPT
+You are a professional career coach and cover letter writer. Using the following CV text, generate a personalized cover letter tailored for the job description.
+- Keep it concise, professional, and engaging.
+- Highlight relevant experience, skills, and achievements from the CV.
+- Address the letter to the hiring manager if possible.
+- End with a strong call to action.
+- Return ONLY valid JSON with fields:
+  - coverLetter (HTML formatted)
+  - recommendations (short bullet points of extra advice)
+
+--- JOB DESCRIPTION ---
+{$job->description}
+
+--- CV TEXT ---
+{$cvText}
+PROMPT;
+
+    // Call OpenAI
+    $client = OpenAI::client(env('OPENAI_API_KEY'));
+    $response = $client->chat()->create([
+        'model' => 'gpt-4o-mini',
+        'messages' => [
+            ['role' => 'system', 'content' => 'You are an expert cover letter assistant. Always respond with valid JSON only.'],
+            ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.3,
+    ]);
+
+    $aiOutput = $response->choices[0]->message->content ?? '';
+
+    // Cleanup JSON formatting
+    $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+    $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+    $cleanOutput = trim($cleanOutput);
+
+    $analysis = json_decode($cleanOutput, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+        return response()->json([
+            'success' => false,
+            'message' => 'AI response could not be parsed',
+            'raw'     => $aiOutput,
+        ], 500);
+    }
+
+    // Return structured response
+    return response()->json([
+        'success'       => true,
+        'coverLetter'   => $analysis['coverLetter'] ?? '',
+        'recommendations'=> $analysis['recommendations'] ?? [],
+        'cv_path'       => asset('storage/' . $user->cv_path),
+    ]);
+}
+
 }
