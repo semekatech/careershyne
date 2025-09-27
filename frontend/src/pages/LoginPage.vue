@@ -8,18 +8,17 @@
         <img
           src="/img/login-bg.png"
           alt="Merchandise background"
-          class="w-full h-full object-cover opacity-75"
+          class="w-full h-full object-cover"
         />
       </div>
       <div class="relative z-10 text-center">
-        <p class="text-xl font-semibold mb-2">Your AI tools are waiting.</p>
-        <div class="text-3xl font-bold tracking-tight mb-4 text-white">
+        <p class="text-l font-semibold mb-2">Great to see you again!</p>
+        <div class="text-5xl font-semibold tracking-tight mb-4 text-orange-500">
           WELCOME BACK
         </div>
         <p class="text-sm px-8 leading-relaxed">
-          Log in to continue exploring the full suite of Careershyne AI tools.
-          Your personalized dashboard is ready to provide the insights you need
-          to take the next step in your career.
+          Log in to explore opportunities and let our AI tools help you
+          <br>apply with speed and confidence.
         </p>
       </div>
     </div>
