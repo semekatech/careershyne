@@ -64,18 +64,33 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
-    public function checkEligibility(Request $request)
+Extracts the job description from the Job model.
+
+Sends both CV text and job description to OpenAI.
+
+Gets back a JSON response with:
+
+matchPercentage
+
+matchedSkills
+
+missingSkills
+
+recommendations
+
+use OpenAI;
+
+public function checkEligibility(Request $request)
 {
     $user = auth('api')->user();
     $job  = Job::findOrFail($request->jobId);
-      info($user);
+
     if (!$user->cv_path) {
         return response()->json([
             'success' => false,
             'message' => 'No CV uploaded. Please upload your CV first.'
         ], 400);
     }
-
 
     $cvPath = storage_path('app/public/' . $user->cv_path);
 
@@ -87,18 +102,14 @@ class JobController extends Controller
     }
 
     try {
-        // ✅ Parse directly using Smalot\PdfParser
-        $parser = new Parser();
+        $parser = new \Smalot\PdfParser\Parser();
         $pdf    = $parser->parseFile($cvPath);
         $cvText = $pdf->getText() ?? '';
 
         if (strlen(trim($cvText)) === 0) {
             info("CV parsing returned empty text. File: $cvPath");
-        } else {
-            info("Extracted CV text length: " . strlen($cvText));
         }
 
-        // ✅ Clean text (basic)
         $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
         $cvText = preg_replace('/\s+/', ' ', $cvText);
         $cvText = trim($cvText);
@@ -110,21 +121,53 @@ class JobController extends Controller
         ], 500);
     }
 
-    // For now just simulate a match %
-    $matchPercentage = rand(30, 100);
-    $feedback = "Excellent fit!";
-    if ($matchPercentage < 50) {
-        $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
-    } elseif ($matchPercentage < 80) {
-        $feedback = "You meet most requirements but could improve on some skills or experience.";
-    }
+    // ✅ Send CV and Job description to OpenAI
+    $client = OpenAI::client(env('OPENAI_API_KEY'));
 
+    $prompt = "
+    Compare the following CV and Job Description.
+    Return a JSON response with the following fields:
+    - matchPercentage (0-100)
+    - matchedSkills (list of skills/requirements from job that are present in CV)
+    - missingSkills (list of skills/requirements from job missing in CV)
+    - recommendations (short advice on how candidate can improve CV to fit job better)
+
+    --- JOB DESCRIPTION ---
+    {$job->description}
+
+    --- CV TEXT ---
+    {$cvText}
+    ";
+
+    $response = $client->chat()->create([
+        'model' => 'gpt-4o-mini',
+        'messages' => [
+            ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
+            ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.2,
+    ]);
+
+    $aiOutput = $response->choices[0]->message->content;
+
+    // Try parsing JSON
+    $analysis = json_decode($aiOutput, true);
+    if (!$analysis) {
+        return response()->json([
+            'success' => false,
+            'message' => 'AI response could not be parsed',
+            'raw'     => $aiOutput
+        ], 500);
+    }
+  info($analysis);
     return response()->json([
         'success'         => true,
-        'matchPercentage' => $matchPercentage,
-        'feedback'        => $feedback,
+        'matchPercentage' => $analysis['matchPercentage'] ?? null,
+        'matchedSkills'   => $analysis['matchedSkills'] ?? [],
+        'missingSkills'   => $analysis['missingSkills'] ?? [],
+        'recommendations' => $analysis['recommendations'] ?? '',
         'cv_path'         => asset('storage/' . $user->cv_path),
-        'cv_excerpt'      => substr($cvText, 0, 300) . '...' // show snippet
+        'cv_excerpt'      => substr($cvText, 0, 300) . '...'
     ]);
 }
 }
