@@ -1,294 +1,250 @@
 <template>
   <div>
-    <div>
-      <section>
-        <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
-          Featured Jobs
-        </h2>
+  <div>
+    <section>
+      <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">Featured Jobs</h2>
 
-        <!-- Loader -->
-        <div v-if="loading" class="flex justify-center items-center py-20">
-          <svg
-            class="animate-spin h-8 w-8 text-primary"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
-        </div>
+      <!-- Loader -->
+      <div v-if="loading" class="flex justify-center items-center py-20">
+        <svg
+          class="animate-spin h-8 w-8 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+      </div>
 
-        <!-- Jobs List -->
-        <div v-else class="space-y-4">
-          <div
-            v-for="job in jobs.slice(0, 5)"
-            :key="job.id"
-            class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
-          >
-            <div
-              class="flex flex-col sm:flex-row justify-between items-start mb-3"
-            >
-              <div>
-                <h3 class="text-lg font-semibold text-primary mb-1">
-                  {{ job.title }} - {{ job.county }}, {{ job.country }}
-                </h3>
-                <p class="text-subtext-light dark:text-subtext-dark mb-1">
-                  {{ job.company }} - {{ job.type }}
-                </p>
-                <div
-                  class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
-                >
-                  <div class="flex items-center">
-                    <span class="material-icons text-base mr-1"
-                      >location_on</span
-                    >
-                    <span>{{ job.county }}, {{ job.country }}</span>
-                  </div>
-                  <div class="flex items-center">
-                    <span class="material-icons text-base mr-1">event</span>
-                    <span>Deadline: {{ formatDate(job.deadline) }}</span>
-                  </div>
+      <!-- Jobs List -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="job in jobs.slice(0, 5)"
+          :key="job.id"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
+        >
+          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+            <div>
+              <h3 class="text-lg font-semibold text-primary mb-1">
+                {{ job.title }} - {{ job.county }}, {{ job.country }}
+              </h3>
+              <p class="text-subtext-light dark:text-subtext-dark mb-1">
+                {{ job.company }} - {{ job.type }}
+              </p>
+              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
+                <div class="flex items-center">
+                  <span class="material-icons text-base mr-1">location_on</span>
+                  <span>{{ job.county }}, {{ job.country }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="material-icons text-base mr-1">event</span>
+                  <span>Deadline: {{ formatDate(job.deadline) }}</span>
                 </div>
               </div>
+            </div>
 
-              <!-- OPEN DETAILS MODAL -->
+            <!-- OPEN DETAILS MODAL -->
+            <button
+              class="mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center whitespace-nowrap"
+              @click="openModal(job)"
+            >
+              View Details
+              <span class="material-icons text-base ml-2">arrow_forward</span>
+            </button>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="border-t border-border-light dark:border-border-dark pt-3">
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
-                class="mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center whitespace-nowrap"
-                @click="openModal(job)"
+                @click="openEligibility(job)"
+                class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
               >
-                View Details
-                <span class="material-icons text-base ml-2">arrow_forward</span>
+                <span class="material-icons text-lg mr-1">check_circle</span>
+                Check Eligibility
+              </button>
+              <button
+                @click="$emit('revamp-cv', job)"
+                class="flex items-center justify-center py-2 px-3 border border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors text-center"
+              >
+                <span class="material-icons text-lg mr-1">description</span>
+                CV Revamp
+              </button>
+              <button
+                @click="$emit('generate-cover', job)"
+                class="flex items-center justify-center py-2 px-3 border border-yellow-500 text-yellow-500 font-semibold rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900 transition-colors text-center"
+              >
+                <span class="material-icons text-lg mr-1">mail</span>
+                Cover Letter
+              </button>
+              <button
+                @click="$emit('generate-email', job)"
+                class="flex items-center justify-center py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-center"
+              >
+                <span class="material-icons text-lg mr-1">drafts</span>
+                Email Template
               </button>
             </div>
-
-            <!-- Action Buttons -->
-            <div
-              class="border-t border-border-light dark:border-border-dark pt-3"
-            >
-              <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
-                <button
-                  @click="openEligibility(job)"
-                  class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
-                >
-                  <span class="material-icons text-lg mr-1">check_circle</span>
-                  Check Eligibility
-                </button>
-                <button
-                  @click="$emit('revamp-cv', job)"
-                  class="flex items-center justify-center py-2 px-3 border border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors text-center"
-                >
-                  <span class="material-icons text-lg mr-1">description</span>
-                  CV Revamp
-                </button>
-                <button
-                  @click="$emit('generate-cover', job)"
-                  class="flex items-center justify-center py-2 px-3 border border-yellow-500 text-yellow-500 font-semibold rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900 transition-colors text-center"
-                >
-                  <span class="material-icons text-lg mr-1">mail</span>
-                  Cover Letter
-                </button>
-                <button
-                  @click="$emit('generate-email', job)"
-                  class="flex items-center justify-center py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-center"
-                >
-                  <span class="material-icons text-lg mr-1">drafts</span>
-                  Email Template
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- DETAILS MODAL -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
-      @click="closeModal"
-    >
-      <div
-        class="bg-white w-full md:max-w-3xl h-[95vh] md:h-[90vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
-        @click.stop
-      >
-        <div
-          class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10"
-        >
-          <h2 class="text-2xl font-semibold">{{ selectedJob?.title }}</h2>
-          <button
-            @click="closeModal"
-            class="text-gray-700 hover:text-gray-900 text-2xl font-bold"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div
-          class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full"
-          v-if="selectedJob"
-        >
-          <p class="text-gray-600 mb-2">
-            {{ selectedJob.company }} - {{ selectedJob.type }}
-          </p>
-          <p class="text-gray-500 mb-2">
-            Location: {{ selectedJob.county }}, {{ selectedJob.country }}
-          </p>
-          <p class="text-gray-500 mb-2">
-            Deadline: {{ formatDate(selectedJob.deadline) }}
-          </p>
-          <p class="text-gray-700 mb-2">
-            <strong>Experience:</strong> {{ selectedJob.experience }} years
-          </p>
-          <p class="text-gray-700 mb-2">
-            <strong>Education:</strong> {{ selectedJob.education }}
-          </p>
-          <p class="text-gray-700 mb-2">
-            <strong>Salary:</strong> {{ selectedJob.salary }}
-          </p>
-          <p class="text-gray-700 mb-2">
-            <strong>Field:</strong> {{ selectedJob.field }}
-          </p>
-          <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
-          <div
-            v-html="selectedJob.description"
-            class="prose mb-4 max-w-full"
-          ></div>
-          <p class="text-gray-700 mb-2">
-            <strong>Application Instructions:</strong>
-          </p>
-          <div
-            v-html="selectedJob.applicationInstructions"
-            class="prose max-w-full"
-          ></div>
         </div>
       </div>
+    </section>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div
+    v-if="showModal"
+    class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+    @click="closeModal"
+  >
+    <div
+      class="bg-white w-full md:max-w-3xl h-[95vh] md:h-[90vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
+      @click.stop
+    >
+      <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+        <h2 class="text-2xl font-semibold">{{ selectedJob?.title }}</h2>
+        <button @click="closeModal" class="text-gray-700 hover:text-gray-900 text-2xl font-bold">✕</button>
+      </div>
+
+      <div class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full" v-if="selectedJob">
+        <p class="text-gray-600 mb-2">{{ selectedJob.company }} - {{ selectedJob.type }}</p>
+        <p class="text-gray-500 mb-2">Location: {{ selectedJob.county }}, {{ selectedJob.country }}</p>
+        <p class="text-gray-500 mb-2">Deadline: {{ formatDate(selectedJob.deadline) }}</p>
+        <p class="text-gray-700 mb-2"><strong>Experience:</strong> {{ selectedJob.experience }} years</p>
+        <p class="text-gray-700 mb-2"><strong>Education:</strong> {{ selectedJob.education }}</p>
+        <p class="text-gray-700 mb-2"><strong>Salary:</strong> {{ selectedJob.salary }}</p>
+        <p class="text-gray-700 mb-2"><strong>Field:</strong> {{ selectedJob.field }}</p>
+        <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
+        <div v-html="selectedJob.description" class="prose mb-4 max-w-full"></div>
+        <p class="text-gray-700 mb-2"><strong>Application Instructions:</strong></p>
+        <div v-html="selectedJob.applicationInstructions" class="prose max-w-full"></div>
+      </div>
+    </div>
+  </div>
+
+<!-- ELIGIBILITY MODAL -->
+<!-- ELIGIBILITY MODAL -->
+<div
+  v-if="showEligibilityModal"
+  class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+  @click="closeEligibility"
+>
+  <div
+    class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
+    @click.stop
+  >
+    <!-- Header -->
+    <div
+      class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
+    >
+      <h2 class="text-2xl font-bold text-gray-800">Eligibility Check</h2>
+      <button
+        @click="closeEligibility"
+        class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
+      >
+        ✕
+      </button>
     </div>
 
-    <!-- ELIGIBILITY MODAL -->
-    <div
-      v-if="showEligibilityModal"
-      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
-      @click="closeEligibility"
-    >
+    <!-- Progress & Results -->
+    <div class="flex-1 p-6 overflow-y-auto">
+      <!-- Loading state -->
       <div
-        class="bg-white w-full md:max-w-xl h-[70vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
-        @click.stop
+        v-if="!eligibilityResult || eligibilityProgress < 100"
+        class="flex flex-col items-center justify-center h-full text-center"
       >
-        <!-- Header -->
-        <div
-          class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10"
-        >
-          <h2 class="text-xl font-semibold">Eligibility Check</h2>
-          <button
-            @click="closeEligibility"
-            class="text-gray-700 hover:text-gray-900 text-2xl font-bold"
+        <p class="mb-4 text-gray-600">
+          Comparing your CV with <strong>{{ selectedJob?.title }}</strong>...
+        </p>
+
+        <!-- Linear Progress -->
+        <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+          <div
+            class="bg-green-500 h-4 rounded-full transition-all duration-500"
+            :style="{ width: eligibilityProgress + '%' }"
+          ></div>
+        </div>
+        <p class="mt-3 text-gray-700 font-medium">
+          {{ eligibilityProgress }}%
+        </p>
+      </div>
+
+      <!-- Results -->
+      <div v-else class="space-y-8">
+        <!-- Circular Match Percentage -->
+        <div class="flex flex-col items-center">
+          <div
+            class="relative flex items-center justify-center w-32 h-32 rounded-full border-8 shadow-md"
+            :class="
+              eligibilityResult.matchPercentage >= 70
+                ? 'border-green-500'
+                : eligibilityResult.matchPercentage >= 40
+                ? 'border-yellow-500'
+                : 'border-red-500'
+            "
           >
-            ✕
-          </button>
+            <span class="text-3xl font-bold text-gray-800">
+              {{ eligibilityResult.matchPercentage }}%
+            </span>
+          </div>
+          <p class="mt-2 text-gray-600 font-medium">Match Score</p>
         </div>
 
-        <!-- Progress & Result Section -->
-        <div class="flex-1 p-6 overflow-y-auto">
-          <!-- Show loading progress -->
-          <div
-            v-if="!eligibilityResult || eligibilityProgress < 100"
-            class="text-center"
-          >
-            <p class="mb-4 text-gray-600">
-              Comparing your CV with <strong>{{ selectedJob?.title }}</strong
-              >...
-            </p>
-
-            <!-- Linear Progress Bar -->
-            <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-              <div
-                class="bg-green-500 h-4 rounded-full transition-all duration-500"
-                :style="{ width: eligibilityProgress + '%' }"
-              ></div>
-            </div>
-            <p class="mt-2 text-gray-700 font-medium">
-              {{ eligibilityProgress }}%
-            </p>
-          </div>
-
-          <!-- Show results -->
-          <div v-else class="mt-6 space-y-6">
-            <!-- Circular match percentage -->
-            <div class="flex flex-col items-center">
-              <div
-                class="relative flex items-center justify-center w-28 h-28 rounded-full border-8"
-                :class="
-                  eligibilityResult.matchPercentage >= 70
-                    ? 'border-green-500'
-                    : 'border-yellow-500'
-                "
-              >
-                <span class="text-2xl font-bold text-gray-800">
-                  {{ eligibilityResult.matchPercentage }}%
-                </span>
-              </div>
-              <p class="mt-2 text-gray-600 font-medium">Match</p>
-            </div>
-
-            <!-- Matched Skills -->
-            <div
-              v-if="eligibilityResult.matchedSkills?.length"
-              class="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm"
+        <!-- Matched Skills -->
+        <div
+          v-if="eligibilityResult.matchedSkills?.length"
+          class="bg-green-50 border border-green-200 rounded-lg p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-green-700 mb-3 text-lg">
+            ✅ Matched Skills
+          </h3>
+          <ul class="list-disc list-inside text-sm text-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <li
+              v-for="(skill, index) in eligibilityResult.matchedSkills"
+              :key="index"
             >
-              <h3 class="font-semibold text-green-700 mb-2">Matched Skills</h3>
-              <ul class="list-disc list-inside text-sm text-gray-700">
-                <li
-                  v-for="(skill, index) in eligibilityResult.matchedSkills"
-                  :key="index"
-                >
-                  {{ skill }}
-                </li>
-              </ul>
-            </div>
+              {{ skill }}
+            </li>
+          </ul>
+        </div>
 
-            <!-- Missing Skills -->
-            <div
-              v-if="eligibilityResult.missingSkills?.length"
-              class="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm"
+        <!-- Missing Skills -->
+        <div
+          v-if="eligibilityResult.missingSkills?.length"
+          class="bg-red-50 border border-red-200 rounded-lg p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-red-700 mb-3 text-lg">
+            ❌ Missing Skills
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-600 grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <li
+              v-for="(skill, index) in eligibilityResult.missingSkills"
+              :key="index"
             >
-              <h3 class="font-semibold text-red-700 mb-2">Missing Skills</h3>
-              <ul class="list-disc list-inside text-sm text-red-600">
-                <li
-                  v-for="(skill, index) in eligibilityResult.missingSkills"
-                  :key="index"
-                >
-                  {{ skill }}
-                </li>
-              </ul>
-            </div>
+              {{ skill }}
+            </li>
+          </ul>
+        </div>
 
-            <!-- Recommendations -->
-            <div
-              v-if="eligibilityResult.recommendations"
-              class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm"
-            >
-              <h3 class="font-semibold text-blue-700 mb-2">Recommendations</h3>
-              <p class="text-sm text-gray-700">
-                {{ eligibilityResult.recommendations }}
-              </p>
-            </div>
-          </div>
+        <!-- Recommendations -->
+        <div
+          v-if="eligibilityResult.recommendations"
+          class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-blue-700 mb-3 text-lg">
+            💡 Recommendations
+          </h3>
+          <p class="text-sm text-gray-700 leading-relaxed">
+            {{ eligibilityResult.recommendations }}
+          </p>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+</div>
 </template>
 
 <script setup>
