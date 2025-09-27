@@ -532,6 +532,6 @@ function downloadWord() {
   link.click();
   document.body.removeChild(link);
 }
-alert(auth.user);
+alert(auth.user.id);
 onMounted(fetchJobs);
 </script>
