@@ -93,12 +93,13 @@
                   CV Revamp
                 </button>
                 <button
-                  @click="$emit('generate-cover', job)"
+                  @click="openCoverLetter(job)"
                   class="flex items-center justify-center py-2 px-3 border border-yellow-500 text-yellow-500 font-semibold rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900 transition-colors text-center"
                 >
                   <span class="material-icons text-lg mr-1">mail</span>
                   Cover Letter
                 </button>
+
                 <button
                   @click="$emit('generate-email', job)"
                   class="flex items-center justify-center py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-center"
@@ -303,9 +304,113 @@
     </div>
     <!-- CV REVAMP -->
     <!-- CV REVAMP MODAL -->
-   <!-- CV REVAMP MODAL -->
+    <!-- CV REVAMP MODAL -->
+    <div
+      v-if="showCvRevampModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+    >
+      <div
+        class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
+        @click.stop
+      >
+        <!-- Header -->
+        <div
+          class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
+        >
+          <h2 class="text-2xl font-bold text-gray-800">CV Revamp</h2>
+          <div class="flex items-center gap-3">
+            <!-- Download Word -->
+            <button
+              v-if="cvRevampResult?.revampedCv"
+              @click="downloadWord"
+              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
+            >
+              Download Word
+            </button>
+
+            <!-- Close -->
+            <button
+              @click="closeCvRevamp"
+              class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+          <!-- Loading -->
+          <div
+            v-if="!cvRevampResult || cvRevampProgress < 100"
+            class="flex flex-col items-center justify-center h-full text-center"
+          >
+            <p class="mb-4 text-gray-600">
+              Revamping your CV for <strong>{{ selectedJob?.title }}</strong
+              >...
+            </p>
+
+            <!-- Progress -->
+            <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+              <div
+                class="bg-blue-500 h-4 rounded-full transition-all duration-500"
+                :style="{ width: cvRevampProgress + '%' }"
+              ></div>
+            </div>
+            <p class="mt-3 text-gray-700 font-medium">
+              {{ cvRevampProgress }}%
+            </p>
+          </div>
+
+          <!-- Results -->
+          <div v-else class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+              Revamped CV
+            </h3>
+
+            <!-- Show revamped CV -->
+            <div
+              v-if="cvRevampResult.revampedCv"
+              class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
+              v-html="cvRevampResult.revampedCv"
+            ></div>
+
+            <!-- Recommendations -->
+            <div
+              v-if="cvRevampResult.recommendations?.length"
+              class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
+            >
+              <h3 class="font-semibold text-blue-700 mb-3 text-lg">
+                💡 Recommendations
+              </h3>
+              <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li
+                  v-for="(rec, idx) in cvRevampResult.recommendations"
+                  :key="idx"
+                >
+                  {{ rec }}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Error fallback -->
+            <div
+              v-else-if="cvRevampResult.error"
+              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
+            >
+              {{ cvRevampResult.error }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- cover letter -->
+     <!-- COVER LETTER MODAL -->
 <div
-  v-if="showCvRevampModal"
+  v-if="showCoverLetterModal"
   class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
 >
   <div
@@ -316,12 +421,12 @@
     <div
       class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
     >
-      <h2 class="text-2xl font-bold text-gray-800">CV Revamp</h2>
+      <h2 class="text-2xl font-bold text-gray-800">Cover Letter</h2>
       <div class="flex items-center gap-3">
         <!-- Download Word -->
         <button
-          v-if="cvRevampResult?.revampedCv"
-          @click="downloadWord"
+          v-if="coverLetterResult?.content"
+          @click="downloadCoverLetter"
           class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
         >
           Download Word
@@ -329,7 +434,7 @@
 
         <!-- Close -->
         <button
-          @click="closeCvRevamp"
+          @click="closeCoverLetter"
           class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
         >
           ✕
@@ -341,59 +446,50 @@
     <div class="flex-1 p-6 overflow-y-auto">
       <!-- Loading -->
       <div
-        v-if="!cvRevampResult || cvRevampProgress < 100"
+        v-if="!coverLetterResult || coverLetterProgress < 100"
         class="flex flex-col items-center justify-center h-full text-center"
       >
         <p class="mb-4 text-gray-600">
-          Revamping your CV for <strong>{{ selectedJob?.title }}</strong>...
+          Generating cover letter for <strong>{{ selectedJob?.title }}</strong>...
         </p>
 
         <!-- Progress -->
         <div class="w-3/4 bg-gray-200 rounded-full h-4 dark:bg-gray-700">
           <div
-            class="bg-blue-500 h-4 rounded-full transition-all duration-500"
-            :style="{ width: cvRevampProgress + '%' }"
+            class="bg-yellow-500 h-4 rounded-full transition-all duration-500"
+            :style="{ width: coverLetterProgress + '%' }"
           ></div>
         </div>
-        <p class="mt-3 text-gray-700 font-medium">
-          {{ cvRevampProgress }}%
-        </p>
+        <p class="mt-3 text-gray-700 font-medium">{{ coverLetterProgress }}%</p>
       </div>
 
-      <!-- Results -->
+      <!-- Result -->
       <div v-else class="space-y-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">
-          Revamped CV
-        </h3>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Generated Cover Letter</h3>
 
-        <!-- Show revamped CV -->
         <div
-          v-if="cvRevampResult.revampedCv"
+          v-if="coverLetterResult.content"
           class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
-          v-html="cvRevampResult.revampedCv"
+          v-html="coverLetterResult.content"
         ></div>
 
         <!-- Recommendations -->
         <div
-          v-if="cvRevampResult.recommendations?.length"
+          v-if="coverLetterResult.recommendations?.length"
           class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
         >
-          <h3 class="font-semibold text-blue-700 mb-3 text-lg">
-            💡 Recommendations
-          </h3>
+          <h3 class="font-semibold text-blue-700 mb-3 text-lg">💡 Recommendations</h3>
           <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li v-for="(rec, idx) in cvRevampResult.recommendations" :key="idx">
-              {{ rec }}
-            </li>
+            <li v-for="(rec, idx) in coverLetterResult.recommendations" :key="idx">{{ rec }}</li>
           </ul>
         </div>
 
-        <!-- Error fallback -->
+        <!-- Error -->
         <div
-          v-else-if="cvRevampResult.error"
+          v-else-if="coverLetterResult.error"
           class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
         >
-          {{ cvRevampResult.error }}
+          {{ coverLetterResult.error }}
         </div>
       </div>
     </div>
@@ -408,6 +504,9 @@ import { ref, onMounted } from "vue";
 import JobService from "@/services/jobService";
 import eligibilityService from "@/services/eligibilityService";
 import cvRevampService from "@/services/cvRevamp";
+const showCoverLetterModal = ref(false);
+const coverLetterProgress = ref(0);
+const coverLetterResult = ref(null);
 const jobs = ref([]);
 const loading = ref(true);
 import { useAuthStore } from "@/stores/auth";
@@ -520,7 +619,6 @@ function downloadWord() {
     </html>
   `;
 
-
   const blob = new Blob(["\ufeff", content], {
     type: "application/msword",
   });
@@ -533,6 +631,55 @@ function downloadWord() {
   link.click();
   document.body.removeChild(link);
 }
+async function openCoverLetter(job) {
+  selectedJob.value = job;
+  showCoverLetterModal.value = true;
+  coverLetterProgress.value = 0;
+  coverLetterResult.value = null;
 
+  try {
+    // Fake progress animation
+    const interval = setInterval(() => {
+      if (coverLetterProgress.value < 90) coverLetterProgress.value += 10;
+    }, 400);
+
+    const result = await import("@/services/coverLetterService").then(m => m.default.generate(job.id));
+
+    clearInterval(interval);
+    coverLetterProgress.value = 100;
+    coverLetterResult.value = result;
+  } catch (err) {
+    coverLetterProgress.value = 100;
+    coverLetterResult.value = { error: "Failed to generate cover letter." };
+  }
+}
+
+function closeCoverLetter() {
+  showCoverLetterModal.value = false;
+  coverLetterProgress.value = 0;
+  coverLetterResult.value = null;
+}
+
+function downloadCoverLetter() {
+  if (!coverLetterResult.value?.content) return;
+
+  const content = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+          xmlns:w="urn:schemas-microsoft-com:office:word" 
+          xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>Cover Letter</title></head>
+      <body>${coverLetterResult.value.content}</body>
+    </html>
+  `;
+
+  const blob = new Blob(["\ufeff", content], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "cover-letter.doc";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 onMounted(fetchJobs);
 </script>
