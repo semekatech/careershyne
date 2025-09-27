@@ -410,7 +410,7 @@ import eligibilityService from "@/services/eligibilityService";
 import cvRevampService from "@/services/cvRevamp";
 const jobs = ref([]);
 const loading = ref(true);
-
+import { useAuthStore } from "@/stores/auth";
 const showModal = ref(false);
 const selectedJob = ref(null);
 const showCvRevampModal = ref(false);
@@ -419,7 +419,7 @@ const cvRevampResult = ref(null);
 const showEligibilityModal = ref(false);
 const eligibilityProgress = ref(0);
 const eligibilityResult = ref(null);
-
+const auth = useAuthStore();
 async function fetchJobs() {
   loading.value = true;
   try {
@@ -519,7 +519,7 @@ function downloadWord() {
     </html>
   `;
 
-  
+
   const blob = new Blob(["\ufeff", content], {
     type: "application/msword",
   });
@@ -532,6 +532,6 @@ function downloadWord() {
   link.click();
   document.body.removeChild(link);
 }
-
+alert(auth);
 onMounted(fetchJobs);
 </script>
