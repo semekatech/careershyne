@@ -350,23 +350,43 @@
           </div>
 
           <!-- Results -->
-          <div v-else class="space-y-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">
-              Revamped CV
-            </h3>
-            <div
-              v-if="cvRevampResult.text"
-              class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
-              v-html="cvRevampResult.text"
-            ></div>
+        <!-- Results -->
+<div v-else class="space-y-6">
+  <h3 class="text-xl font-semibold text-gray-800 mb-2">
+    Revamped CV
+  </h3>
 
-            <div
-              v-else
-              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
-            >
-              Failed to revamp CV.
-            </div>
-          </div>
+  <!-- Show revamped CV -->
+  <div
+    v-if="cvRevampResult.revampedCv"
+    class="prose max-w-full text-gray-700 bg-gray-50 p-4 rounded-lg shadow-sm"
+    v-html="cvRevampResult.revampedCv"
+  ></div>
+
+  <!-- Recommendations -->
+  <div
+    v-if="cvRevampResult.recommendations?.length"
+    class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
+  >
+    <h3 class="font-semibold text-blue-700 mb-3 text-lg">
+      💡 Recommendations
+    </h3>
+    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+      <li v-for="(rec, idx) in cvRevampResult.recommendations" :key="idx">
+        {{ rec }}
+      </li>
+    </ul>
+  </div>
+
+  <!-- Error fallback -->
+  <div
+    v-else-if="cvRevampResult.error"
+    class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg"
+  >
+    {{ cvRevampResult.error }}
+  </div>
+</div>
+
         </div>
       </div>
     </div>
