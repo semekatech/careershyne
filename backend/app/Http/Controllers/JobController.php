@@ -155,12 +155,22 @@ PROMPT;
 
         $aiOutput = $response->choices[0]->message->content ?? '';
 
+        // ✅ Log raw AI output
+        info('AI raw output:', [$aiOutput]);
+
         // ✅ Cleanup (remove ```json fences if present)
         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
         $cleanOutput = trim($cleanOutput);
 
+        // ✅ Log cleaned JSON string
+       info('AI cleaned output:', [$cleanOutput]);
+
         $analysis = json_decode($cleanOutput, true);
+
+        // ✅ Log decoded array
+        info('AI decoded analysis:', $analysis ?? []);
+
 
         // $analysis = json_decode($cleanOutput, true); // already present
 
