@@ -218,11 +218,9 @@ Keep formatting structured into clear sections:
 - Key Skills
 - Experience
 - Education
-- Additional Recommendations
 
 Return ONLY valid JSON with the following fields:
 - revampedCv (HTML formatted CV content, well-structured)
-- recommendations (short bullet points of extra advice)
 
 --- JOB DESCRIPTION ---
 {$job->description}
@@ -263,7 +261,7 @@ PROMPT;
         return response()->json([
             'success'       => true,
             'revampedCv'    => $analysis['revampedCv'] ?? '',
-            'recommendations' => $analysis['recommendations'] ?? [],
+            // 'recommendations' => $analysis['recommendations'] ?? [],
             'cv_path'       => asset('storage/' . $user->cv_path),
         ]);
     }
@@ -319,7 +317,6 @@ You are a professional career coach and cover letter writer. Using the following
 - End with a strong call to action.
 - Return ONLY valid JSON with fields:
   - coverLetter (HTML formatted)
-  - recommendations (short bullet points of extra advice)
 
 --- JOB DESCRIPTION ---
 {$job->description}
@@ -360,7 +357,7 @@ PROMPT;
     return response()->json([
         'success'       => true,
         'coverLetter'   => $analysis['coverLetter'] ?? '',
-        'recommendations'=> $analysis['recommendations'] ?? [],
+        // 'recommendations'=> $analysis['recommendations'] ?? [],
         'cv_path'       => asset('storage/' . $user->cv_path),
     ]);
 }

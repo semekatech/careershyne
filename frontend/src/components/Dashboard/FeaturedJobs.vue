@@ -375,23 +375,7 @@
               v-html="cvRevampResult.revampedCv"
             ></div>
 
-            <!-- Recommendations -->
-            <div
-              v-if="cvRevampResult.recommendations?.length"
-              class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
-            >
-              <h3 class="font-semibold text-blue-700 mb-3 text-lg">
-                💡 Recommendations
-              </h3>
-              <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-                <li
-                  v-for="(rec, idx) in cvRevampResult.recommendations"
-                  :key="idx"
-                >
-                  {{ rec }}
-                </li>
-              </ul>
-            </div>
+           
 
             <!-- Error fallback -->
             <div
@@ -425,7 +409,7 @@
       <div class="flex items-center gap-3">
         <!-- Download Word -->
         <button
-          v-if="coverLetterResult?.content"
+          v-if="coverLetterResult?.coverLetter"
           @click="downloadCoverLetter"
           class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
         >
@@ -475,17 +459,7 @@
 "
         ></div>
 
-        <!-- Recommendations -->
-        <div
-          v-if="coverLetterResult.recommendations?.length"
-          class="bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm"
-        >
-          <h3 class="font-semibold text-blue-700 mb-3 text-lg">💡 Recommendations</h3>
-          <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li v-for="(rec, idx) in coverLetterResult.recommendations" :key="idx">{{ rec }}</li>
-          </ul>
-        </div>
-
+        
         <!-- Error -->
         <div
           v-else-if="coverLetterResult.error"
@@ -664,14 +638,14 @@ function closeCoverLetter() {
 }
 
 function downloadCoverLetter() {
-  if (!coverLetterResult.value?.content) return;
+  if (!coverLetterResult.value?.coverLetter) return;
 
   const content = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" 
           xmlns:w="urn:schemas-microsoft-com:office:word" 
           xmlns="http://www.w3.org/TR/REC-html40">
       <head><meta charset="utf-8"><title>Cover Letter</title></head>
-      <body>${coverLetterResult.value.content}</body>
+      <body>${coverLetterResult.value.coverLetter}</body>
     </html>
   `;
 
