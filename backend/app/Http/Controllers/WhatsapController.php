@@ -129,16 +129,16 @@ class WhatsapController extends Controller
     {
         $reply  = "Here are our packages (all include FREE CV review and job application support):\n\n";
 
-        $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
-        $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
-        $reply .= "   ✔ 1 tailored cover letter\n";
-        $reply .= "   ✔ Industry-specific adjustments\n\n";
-
-        $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
-        $reply .= "   ✔ CV crafted from scratch\n";
-        $reply .= "   ✔ Personalized cover letter\n";
-        $reply .= "   ✔ ATS-optimized formatting\n";
-        $reply .= "   ✔ Tailored to your career goals\n\n";
+            $reply .= "1️⃣ *CV Revamp + Cover Letter (KES 200)*\n";
+            $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
+            $reply .= "   ✔ 1 tailored cover letter\n";
+            $reply .= "   ✔ Industry-specific adjustments\n\n";
+        
+            $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
+            $reply .= "   ✔ CV crafted from scratch\n";
+            $reply .= "   ✔ Personalized cover letter\n";
+            $reply .= "   ✔ ATS-optimized formatting\n";
+            $reply .= "   ✔ Tailored to your career goals\n\n";
 
         $reply .= "👉 Reply with *1* or *2* to continue.";
 

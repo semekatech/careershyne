@@ -8,16 +8,17 @@
         <img
           src="/img/login-bg.png"
           alt="Careershyne background"
-          class="w-full h-full object-cover opacity-75"
+          class="w-full h-full object-cover"
         />
       </div>
       <div class="relative z-10 text-center">
-        <p class="text-xl font-semibold mb-2">Welcome to Careershyne!</p>
-        <div class="text-3xl font-bold tracking-tight mb-4 text-white">
+        <p class="text-l font-semibold mb-2">Start your journey with us!</p>
+        <div class="text-5xl font-semibold tracking-tight mb-4 text-orange-500">
           CREATE ACCOUNT
         </div>
         <p class="text-sm px-8 leading-relaxed">
-          Sign up today to explore our full suite of AI tools. Your personalized dashboard will provide the insights you need to take the next step in your career.
+          Create your account today and unlock AI tools designed to make your
+          <br>applications smarter, faster, and more confident.
         </p>
       </div>
     </div>
