@@ -70,6 +70,7 @@ public function checkEligibility(Request $request)
     $user = auth('api')->user();
     $job  = Job::findOrFail($request->jobId);
 
+    // ✅ Ensure CV exists
     if (!$user->cv_path) {
         return response()->json([
             'success' => false,
@@ -86,6 +87,7 @@ public function checkEligibility(Request $request)
         ], 404);
     }
 
+    // ✅ Extract text from CV
     try {
         $parser = new \Smalot\PdfParser\Parser();
         $pdf    = $parser->parseFile($cvPath);
@@ -95,6 +97,7 @@ public function checkEligibility(Request $request)
             info("CV parsing returned empty text. File: $cvPath");
         }
 
+        // Basic cleaning
         $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
         $cvText = preg_replace('/\s+/', ' ', $cvText);
         $cvText = trim($cvText);
@@ -106,24 +109,24 @@ public function checkEligibility(Request $request)
         ], 500);
     }
 
-    // ✅ Send CV and Job description to OpenAI
+    // ✅ Build AI prompt
+    $prompt = <<<PROMPT
+Compare the following CV and Job Description.
+Return ONLY valid JSON with the following fields:
+- matchPercentage (0-100)
+- matchedSkills (list of matched skills/requirements)
+- missingSkills (list of missing skills/requirements)
+- recommendations (short advice for improvement)
+
+--- JOB DESCRIPTION ---
+{$job->description}
+
+--- CV TEXT ---
+{$cvText}
+PROMPT;
+
+    // ✅ Call OpenAI
     $client = OpenAI::client(env('OPENAI_API_KEY'));
-
-    $prompt = "
-    Compare the following CV and Job Description.
-    Return a JSON response with the following fields:
-    - matchPercentage (0-100)
-    - matchedSkills (list of skills/requirements from job that are present in CV)
-    - missingSkills (list of skills/requirements from job missing in CV)
-    - recommendations (short advice on how candidate can improve CV to fit job better)
-
-    --- JOB DESCRIPTION ---
-    {$job->description}
-
-    --- CV TEXT ---
-    {$cvText}
-    ";
-
     $response = $client->chat()->create([
         'model' => 'gpt-4o-mini',
         'messages' => [
@@ -133,18 +136,24 @@ public function checkEligibility(Request $request)
         'temperature' => 0.2,
     ]);
 
-    $aiOutput = $response->choices[0]->message->content;
+    $aiOutput = $response->choices[0]->message->content ?? '';
 
-    // Try parsing JSON
-    $analysis = json_decode($aiOutput, true);
-    if (!$analysis) {
+    // ✅ Cleanup (remove ```json fences if present)
+    $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+    $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+    $cleanOutput = trim($cleanOutput);
+
+    $analysis = json_decode($cleanOutput, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
         return response()->json([
             'success' => false,
             'message' => 'AI response could not be parsed',
-            'raw'     => $aiOutput
+            'raw'     => $aiOutput,
         ], 500);
     }
-  info($analysis);
+
+    // ✅ Return structured response
     return response()->json([
         'success'         => true,
         'matchPercentage' => $analysis['matchPercentage'] ?? null,
@@ -152,7 +161,8 @@ public function checkEligibility(Request $request)
         'missingSkills'   => $analysis['missingSkills'] ?? [],
         'recommendations' => $analysis['recommendations'] ?? '',
         'cv_path'         => asset('storage/' . $user->cv_path),
-        'cv_excerpt'      => substr($cvText, 0, 300) . '...'
+        'cv_excerpt'      => substr($cvText, 0, 300) . '...',
     ]);
 }
+
 }
