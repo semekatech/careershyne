@@ -18,7 +18,7 @@ const JobService = {
     }
   },
 
-  async getJobs() {
+  async fetchJobs() {
     try {
       const response = await api.get("/all");
       return response.data;

@@ -38,4 +38,24 @@ class JobController extends Controller
             'data' => $job
         ], 201);
     }
+    public function fetchAll(Request $request)
+{
+    // Optional: implement search
+    $query = Job::query();
+
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('company', 'like', "%{$search}%")
+              ->orWhere('county', 'like', "%{$search}%")
+              ->orWhere('country', 'like', "%{$search}%");
+        });
+    }
+    $perPage = $request->get('per_page', 10);
+    $jobs = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+    return response()->json($jobs);
+}
+
 }

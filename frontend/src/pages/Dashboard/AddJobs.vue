@@ -188,10 +188,15 @@
       <div class="pt-4">
         <button
           type="submit"
-          class="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+          class="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 flex items-center justify-center"
+          :disabled="loading"
         >
-          Post Job
+          <span v-if="loading" class="mr-2 animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+          {{ loading ? "Posting..." : "Post Job" }}
         </button>
+      </div>
+       <div v-if="successMessage" class="mt-4 text-green-600 font-medium">
+        {{ successMessage }}
       </div>
     </form>
   </div>
@@ -201,7 +206,7 @@
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import OptionsService from "@/services/optionsService";
-import JobService from "@/services/jobService"; // ✅ import service
+import JobService from "@/services/jobService"; 
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
@@ -227,6 +232,9 @@ const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
 
+const loading = ref(false);
+const successMessage = ref("");
+
 onMounted(async () => {
   await auth.refreshUser();
 
@@ -246,17 +254,17 @@ onMounted(async () => {
 });
 
 async function submitJob() {
+  loading.value = true;
+  successMessage.value = "";
+
   const payload = {
     ...job.value,
     postedBy: auth.user?.id || null,
   };
-
   try {
     const res = await JobService.createJob(payload); 
     console.log("Job created:", res);
-    alert("Job posted successfully!");
-
-    // Reset form
+    successMessage.value = "Job posted successfully!";
     job.value = {
       company: "",
       title: "",
@@ -275,6 +283,8 @@ async function submitJob() {
   } catch (err) {
     console.error("Error submitting job:", err);
     alert("Failed to post job. Please try again.");
+  } finally {
+    loading.value = false;
   }
 }
 </script>
