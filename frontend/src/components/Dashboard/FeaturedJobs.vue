@@ -152,8 +152,8 @@ import emailTemplateService from "@/services/emailTemplate";
 
 import JobModal from "@/components/Dashboard/modals/JobModal.vue";
 import EligibilityModal from "@/components/Dashboard/modals/EligibilityModal.vue";
+import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
 import CvRevampModal from "@/components/Dashboard/modals/CvRevampModal.vue";
-import CoverLetterModal from "@/components/Dashboard/modals/CoverLetterModal.vue";
 import EmailTemplateModal from "@/components/Dashboard/modals/EmailTemplateModal.vue";
 import Swal from "sweetalert2";
 
