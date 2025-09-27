@@ -7,12 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use DB;
-
+use OpenAI;
+use App\Services\AIReviewService;
 class JobController extends Controller
 {
-    /**
-     * Store a new job
-     */
+  protected $aiReview;
+
+    public function __construct(AIReviewService $aiReview)
+    {
+        $this->aiReview = $aiReview;
+    }
     public function store(Request $request)
     {
         // ✅ Validate incoming request
@@ -122,21 +126,8 @@ class JobController extends Controller
     {
         $jobText = '';
         try {
-            if ($file->getMimeType() === 'application/pdf') {
-                info("$type: Processing PDF.");
+              info("$type: Processing PDF.");
                 [$filePath, $jobText] = $this->aiReview->extractText($file);
-            } else {
-                info("$type: Processing image with OCR directly.");
-                $ocr = new TesseractOCR($file->getPathname());
-                $ocr->lang('eng')->psm(1)->oem(3);
-                $jobText = $ocr->run();
-                info("$type: OCR completed.");
-                $tr = new GoogleTranslate('en'); // target language
-                $jobText = $tr->translate($jobText);
-
-                info("Translated Job text: " . substr($jobText, 0, 200) . "...");
-            }
-
             $text = $this->aiReview->cleanText($jobText);
         } catch (\Exception $e) {
             info("$type: Text extraction failed - " . $e->getMessage());
