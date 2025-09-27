@@ -124,16 +124,16 @@
   </div>
 
 <!-- ELIGIBILITY MODAL -->
+<!-- ELIGIBILITY MODAL -->
 <div
   v-if="showEligibilityModal"
   class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
   @click="closeEligibility"
 >
   <div
-  class="bg-white w-full max-w-[60%] md:max-w-[60%] h-[80vh] relative mx-auto rounded-2xl shadow-xl flex flex-col"
-  @click.stop
->
-
+    class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
+    @click.stop
+  >
     <!-- Header -->
     <div
       class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl"
