@@ -1,5 +1,6 @@
 <template>
   <div>
+  <div>
     <section>
       <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">Featured Jobs</h2>
 
@@ -139,66 +140,76 @@
     </div>
 
     <!-- Progress & Result Section -->
-    <div class="flex-1 p-6 overflow-y-auto">
-      <p class="mb-4 text-gray-600">
-        Comparing your CV with <strong>{{ selectedJob?.title }}</strong>...
-      </p>
+<div class="flex-1 p-6 overflow-y-auto">
+  <!-- Show loading progress -->
+  <div v-if="!eligibilityResult || eligibilityProgress < 100" class="text-center">
+    <p class="mb-4 text-gray-600">
+      Comparing your CV with <strong>{{ selectedJob?.title }}</strong>...
+    </p>
 
-      <!-- Progress Bar -->
-      <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-        <div
-          class="bg-green-500 h-4 rounded-full transition-all duration-500"
-          :style="{ width: eligibilityProgress + '%' }"
-        ></div>
+    <!-- Linear Progress Bar -->
+    <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+      <div
+        class="bg-green-500 h-4 rounded-full transition-all duration-500"
+        :style="{ width: eligibilityProgress + '%' }"
+      ></div>
+    </div>
+    <p class="mt-2 text-gray-700 font-medium">{{ eligibilityProgress }}%</p>
+  </div>
+
+  <!-- Show results -->
+  <div
+    v-else
+    class="mt-6 space-y-6"
+  >
+    <!-- Circular match percentage -->
+    <div class="flex flex-col items-center">
+      <div
+        class="relative flex items-center justify-center w-28 h-28 rounded-full border-8"
+        :class="eligibilityResult.matchPercentage >= 70 ? 'border-green-500' : 'border-yellow-500'"
+      >
+        <span class="text-2xl font-bold text-gray-800">
+          {{ eligibilityResult.matchPercentage }}%
+        </span>
       </div>
-      <p class="mt-2 text-gray-700 font-medium">{{ eligibilityProgress }}%</p>
+      <p class="mt-2 text-gray-600 font-medium">Match</p>
+    </div>
 
-      <!-- Results -->
-      <div v-if="eligibilityResult && eligibilityProgress === 100" class="mt-6 space-y-4">
-        <p v-if="eligibilityResult.error" class="text-red-600">{{ eligibilityResult.error }}</p>
+    <!-- Matched Skills -->
+    <div v-if="eligibilityResult.matchedSkills?.length"
+      class="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm"
+    >
+      <h3 class="font-semibold text-green-700 mb-2">Matched Skills</h3>
+      <ul class="list-disc list-inside text-sm text-gray-700">
+        <li v-for="(skill, index) in eligibilityResult.matchedSkills" :key="index">
+          {{ skill }}
+        </li>
+      </ul>
+    </div>
 
-        <div v-else>
-          <p class="text-lg font-semibold text-green-600">
-            {{ eligibilityResult.matchPercentage }}% Match
-          </p>
+    <!-- Missing Skills -->
+    <div v-if="eligibilityResult.missingSkills?.length"
+      class="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm"
+    >
+      <h3 class="font-semibold text-red-700 mb-2">Missing Skills</h3>
+      <ul class="list-disc list-inside text-sm text-red-600">
+        <li v-for="(skill, index) in eligibilityResult.missingSkills" :key="index">
+          {{ skill }}
+        </li>
+      </ul>
+    </div>
 
-          <!-- Matched Skills -->
-          <div v-if="eligibilityResult.matchedSkills?.length">
-            <h3 class="font-semibold text-gray-800">Matched Skills:</h3>
-            <ul class="list-disc list-inside text-sm text-gray-600">
-              <li v-for="(skill, index) in eligibilityResult.matchedSkills" :key="index">
-                {{ skill }}
-              </li>
-            </ul>
-          </div>
-
-          <!-- Missing Skills -->
-          <div v-if="eligibilityResult.missingSkills?.length" class="mt-4">
-            <h3 class="font-semibold text-gray-800">Missing Skills:</h3>
-            <ul class="list-disc list-inside text-sm text-red-600">
-              <li v-for="(skill, index) in eligibilityResult.missingSkills" :key="index">
-                {{ skill }}
-              </li>
-            </ul>
-          </div>
-
-          <!-- Recommendations -->
-          <div v-if="eligibilityResult.recommendations" class="mt-4">
-            <h3 class="font-semibold text-gray-800">Recommendations:</h3>
-            <p class="text-sm text-gray-700">{{ eligibilityResult.recommendations }}</p>
-          </div>
-
-          <!-- CV Excerpt -->
-          <div v-if="eligibilityResult.cv_excerpt" class="mt-4">
-            <h3 class="font-semibold text-gray-800">CV Snippet:</h3>
-            <p class="text-xs text-gray-500 italic">{{ eligibilityResult.cv_excerpt }}</p>
-          </div>
-        </div>
-      </div>
+    <!-- Recommendations -->
+    <div v-if="eligibilityResult.recommendations"
+      class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm"
+    >
+      <h3 class="font-semibold text-blue-700 mb-2">Recommendations</h3>
+      <p class="text-sm text-gray-700">{{ eligibilityResult.recommendations }}</p>
     </div>
   </div>
 </div>
 
+</div>
 </template>
 
 <script setup>
