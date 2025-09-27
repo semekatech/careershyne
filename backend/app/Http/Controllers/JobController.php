@@ -64,21 +64,6 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
-Extracts the job description from the Job model.
-
-Sends both CV text and job description to OpenAI.
-
-Gets back a JSON response with:
-
-matchPercentage
-
-matchedSkills
-
-missingSkills
-
-recommendations
-
-use OpenAI;
 
 public function checkEligibility(Request $request)
 {
