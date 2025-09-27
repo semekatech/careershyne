@@ -592,7 +592,7 @@ async function openCvRevamp(job) {
       }
     }, 400);
 
-    const result = await cvRevampService.coverLetter(job.id);
+    const result = await cvRevampService.revamp(job.id);
 
     clearInterval(interval);
     cvRevampProgress.value = 100;

@@ -14,8 +14,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const coverLetter = {
-  async coveLetter(jobId) {
+const generate = {
+  async generate(jobId) {
     try {
       const response = await api.post("/cover-letter", { jobId });
       return response.data; 
@@ -26,4 +26,4 @@ const coverLetter = {
   },
 };
 
-export default coveLetter;
+export default generate;
