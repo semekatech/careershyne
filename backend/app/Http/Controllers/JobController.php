@@ -10,9 +10,10 @@ use DB;
 use OpenAI;
 use App\Services\AIReviewService;
 use Smalot\PdfParser\Parser;
+
 class JobController extends Controller
 {
-  protected $aiReview;
+    protected $aiReview;
 
     public function __construct(AIReviewService $aiReview)
     {
@@ -65,52 +66,51 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
-public function checkEligibility(Request $request)
-{
-    $user = auth('api')->user();
-    $job  = Job::findOrFail($request->jobId);
+    public function checkEligibility(Request $request)
+    {
+        $user = auth('api')->user();
+        $job  = Job::findOrFail($request->jobId);
 
-    // ✅ Ensure CV exists
-    if (!$user->cv_path) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No CV uploaded. Please upload your CV first.'
-        ], 400);
-    }
-
-    $cvPath = storage_path('app/public/' . $user->cv_path);
-
-    if (!file_exists($cvPath)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'CV file not found on server.'
-        ], 404);
-    }
-
-    // ✅ Extract text from CV
-    try {
-        $parser = new \Smalot\PdfParser\Parser();
-        $pdf    = $parser->parseFile($cvPath);
-        $cvText = $pdf->getText() ?? '';
-
-        if (strlen(trim($cvText)) === 0) {
-            info("CV parsing returned empty text. File: $cvPath");
+        // ✅ Ensure CV exists
+        if (!$user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.'
+            ], 400);
         }
 
-        // Basic cleaning
-        $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-        $cvText = preg_replace('/\s+/', ' ', $cvText);
-        $cvText = trim($cvText);
+        $cvPath = storage_path('app/public/' . $user->cv_path);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to read CV: ' . $e->getMessage(),
-        ], 500);
-    }
+        if (!file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.'
+            ], 404);
+        }
 
-    // ✅ Build AI prompt
-    $prompt = <<<PROMPT
+        // ✅ Extract text from CV
+        try {
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf    = $parser->parseFile($cvPath);
+            $cvText = $pdf->getText() ?? '';
+
+            if (strlen(trim($cvText)) === 0) {
+                info("CV parsing returned empty text. File: $cvPath");
+            }
+
+            // Basic cleaning
+            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+            $cvText = preg_replace('/\s+/', ' ', $cvText);
+            $cvText = trim($cvText);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read CV: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // ✅ Build AI prompt
+        $prompt = <<<PROMPT
 Compare the following CV and Job Description.
 Return ONLY valid JSON with the following fields:
 - matchPercentage (0-100)
@@ -125,94 +125,93 @@ Return ONLY valid JSON with the following fields:
 {$cvText}
 PROMPT;
 
-    // ✅ Call OpenAI
-    $client = OpenAI::client(env('OPENAI_API_KEY'));
-    $response = $client->chat()->create([
-        'model' => 'gpt-4o-mini',
-        'messages' => [
-            ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
-            ['role' => 'user', 'content' => $prompt],
-        ],
-        'temperature' => 0.2,
-    ]);
+        // ✅ Call OpenAI
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+        $response = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'temperature' => 0.2,
+        ]);
 
-    $aiOutput = $response->choices[0]->message->content ?? '';
+        $aiOutput = $response->choices[0]->message->content ?? '';
 
-    // ✅ Cleanup (remove ```json fences if present)
-    $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-    $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-    $cleanOutput = trim($cleanOutput);
+        // ✅ Cleanup (remove ```json fences if present)
+        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+        $cleanOutput = trim($cleanOutput);
 
-    $analysis = json_decode($cleanOutput, true);
+        $analysis = json_decode($cleanOutput, true);
 
-    if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
-        return response()->json([
-            'success' => false,
-            'message' => 'AI response could not be parsed',
-            'raw'     => $aiOutput,
-        ], 500);
-    }
-
-    // ✅ Return structured response
-    return response()->json([
-        'success'         => true,
-        'matchPercentage' => $analysis['matchPercentage'] ?? null,
-        'matchedSkills'   => $analysis['matchedSkills'] ?? [],
-        'missingSkills'   => $analysis['missingSkills'] ?? [],
-        'recommendations' => $analysis['recommendations'] ?? '',
-        'cv_path'         => asset('storage/' . $user->cv_path),
-        'cv_excerpt'      => substr($cvText, 0, 300) . '...',
-    ]);
-}
-public function revampCv(Request $request)
-{
-
-
-    $user = auth('api')->user();
-    $job  = Job::findOrFail($request->jobId);
-     info($user);
-
-    // ✅ Ensure CV exists
-    if (!$user->cv_path) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No CV uploaded. Please upload your CV first.'
-        ], 400);
-    }
-
-    $cvPath = storage_path('app/public/' . $user->cv_path);
-
-    if (!file_exists($cvPath)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'CV file not found on server.'
-        ], 404);
-    }
-
-    // ✅ Extract text from CV
-    try {
-        $parser = new \Smalot\PdfParser\Parser();
-        $pdf    = $parser->parseFile($cvPath);
-        $cvText = $pdf->getText() ?? '';
-
-        if (strlen(trim($cvText)) === 0) {
-            info("CV parsing returned empty text. File: $cvPath");
+        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'AI response could not be parsed',
+                'raw'     => $aiOutput,
+            ], 500);
         }
 
-        // Basic cleaning
-        $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-        $cvText = preg_replace('/\s+/', ' ', $cvText);
-        $cvText = trim($cvText);
-
-    } catch (\Exception $e) {
+        // ✅ Return structured response
         return response()->json([
-            'success' => false,
-            'message' => 'Failed to read CV: ' . $e->getMessage(),
-        ], 500);
+            'success'         => true,
+            'matchPercentage' => $analysis['matchPercentage'] ?? null,
+            'matchedSkills'   => $analysis['matchedSkills'] ?? [],
+            'missingSkills'   => $analysis['missingSkills'] ?? [],
+            'recommendations' => $analysis['recommendations'] ?? '',
+            'cv_path'         => asset('storage/' . $user->cv_path),
+            'cv_excerpt'      => substr($cvText, 0, 300) . '...',
+        ]);
     }
+    public function revampCv(Request $request)
+    {
 
-    // ✅ Build AI prompt
-    $prompt = <<<PROMPT
+
+        $user = auth('api')->user();
+        $job  = Job::findOrFail($request->jobId);
+        info($user);
+
+        // ✅ Ensure CV exists
+        if (!$user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.'
+            ], 400);
+        }
+
+        $cvPath = storage_path('app/public/' . $user->cv_path);
+
+        if (!file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.'
+            ], 404);
+        }
+
+        // ✅ Extract text from CV
+        try {
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf    = $parser->parseFile($cvPath);
+            $cvText = $pdf->getText() ?? '';
+
+            if (strlen(trim($cvText)) === 0) {
+                info("CV parsing returned empty text. File: $cvPath");
+            }
+
+            // Basic cleaning
+            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+            $cvText = preg_replace('/\s+/', ' ', $cvText);
+            $cvText = trim($cvText);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read CV: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // ✅ Build AI prompt
+        $prompt = <<<PROMPT
 You are a professional CV writer. Rewrite and enhance the following CV text so that it is tailored for the given job description.
 Keep formatting structured into clear sections:
 - Summary
@@ -232,41 +231,144 @@ Return ONLY valid JSON with the following fields:
 {$cvText}
 PROMPT;
 
-    // ✅ Call OpenAI
-    $client = OpenAI::client(env('OPENAI_API_KEY'));
-    $response = $client->chat()->create([
-        'model' => 'gpt-4o-mini',
-        'messages' => [
-            ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
-            ['role' => 'user', 'content' => $prompt],
-        ],
-        'temperature' => 0.3,
-    ]);
+        // ✅ Call OpenAI
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+        $response = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'temperature' => 0.3,
+        ]);
 
-    $aiOutput = $response->choices[0]->message->content ?? '';
+        $aiOutput = $response->choices[0]->message->content ?? '';
 
-    // ✅ Cleanup (remove code fences if present)
-    $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-    $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-    $cleanOutput = trim($cleanOutput);
+        // ✅ Cleanup (remove code fences if present)
+        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+        $cleanOutput = trim($cleanOutput);
 
-    $analysis = json_decode($cleanOutput, true);
+        $analysis = json_decode($cleanOutput, true);
 
-    if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'AI response could not be parsed',
+                'raw'     => $aiOutput,
+            ], 500);
+        }
+
+        // ✅ Return structured response
         return response()->json([
-            'success' => false,
-            'message' => 'AI response could not be parsed',
-            'raw'     => $aiOutput,
-        ], 500);
+            'success'       => true,
+            'revampedCv'    => $analysis['revampedCv'] ?? '',
+            'recommendations' => $analysis['recommendations'] ?? [],
+            'cv_path'       => asset('storage/' . $user->cv_path),
+        ]);
     }
 
-    // ✅ Return structured response
-    return response()->json([
-        'success'       => true,
-        'revampedCv'    => $analysis['revampedCv'] ?? '',
-        'recommendations' => $analysis['recommendations'] ?? [],
-        'cv_path'       => asset('storage/' . $user->cv_path),
-    ]);
-}
+    public function coveLetter(Request $request)
+    {
 
+
+        $user = auth('api')->user();
+        $job  = Job::findOrFail($request->jobId);
+        info($user);
+        info('asasas');
+        // ✅ Ensure CV exists
+//         if (!$user->cv_path) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'No CV uploaded. Please upload your CV first.'
+//             ], 400);
+//         }
+
+//         $cvPath = storage_path('app/public/' . $user->cv_path);
+
+//         if (!file_exists($cvPath)) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'CV file not found on server.'
+//             ], 404);
+//         }
+
+//         // ✅ Extract text from CV
+//         try {
+//             $parser = new \Smalot\PdfParser\Parser();
+//             $pdf    = $parser->parseFile($cvPath);
+//             $cvText = $pdf->getText() ?? '';
+
+//             if (strlen(trim($cvText)) === 0) {
+//                 info("CV parsing returned empty text. File: $cvPath");
+//             }
+
+//             // Basic cleaning
+//             $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+//             $cvText = preg_replace('/\s+/', ' ', $cvText);
+//             $cvText = trim($cvText);
+//         } catch (\Exception $e) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Failed to read CV: ' . $e->getMessage(),
+//             ], 500);
+//         }
+
+//         // ✅ Build AI prompt
+//         $prompt = <<<PROMPT
+// You are a professional CV writer. Rewrite and enhance the following CV text so that it is tailored for the given job description.
+// Keep formatting structured into clear sections:
+// - Summary
+// - Key Skills
+// - Experience
+// - Education
+// - Additional Recommendations
+
+// Return ONLY valid JSON with the following fields:
+// - revampedCv (HTML formatted CV content, well-structured)
+// - recommendations (short bullet points of extra advice)
+
+// --- JOB DESCRIPTION ---
+// {$job->description}
+
+// --- ORIGINAL CV TEXT ---
+// {$cvText}
+// PROMPT;
+
+//         // ✅ Call OpenAI
+//         $client = OpenAI::client(env('OPENAI_API_KEY'));
+//         $response = $client->chat()->create([
+//             'model' => 'gpt-4o-mini',
+//             'messages' => [
+//                 ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
+//                 ['role' => 'user', 'content' => $prompt],
+//             ],
+//             'temperature' => 0.3,
+//         ]);
+
+//         $aiOutput = $response->choices[0]->message->content ?? '';
+
+//         // ✅ Cleanup (remove code fences if present)
+//         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+//         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+//         $cleanOutput = trim($cleanOutput);
+
+//         $analysis = json_decode($cleanOutput, true);
+
+//         if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'AI response could not be parsed',
+//                 'raw'     => $aiOutput,
+//             ], 500);
+//         }
+
+//         // ✅ Return structured response
+//         return response()->json([
+//             'success'       => true,
+//             'revampedCv'    => $analysis['revampedCv'] ?? '',
+//             'recommendations' => $analysis['recommendations'] ?? [],
+//             'cv_path'       => asset('storage/' . $user->cv_path),
+//         ]);
+    }
 }

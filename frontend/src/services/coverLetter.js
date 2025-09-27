@@ -15,10 +15,10 @@ api.interceptors.request.use((config) => {
 });
 
 const coverLetter = {
-  async revamp(jobId) {
+  async coveLetter(jobId) {
     try {
       const response = await api.post("/cover-letter", { jobId });
-      return response.data; // No need to manually add Authorization here
+      return response.data; 
     } catch (err) {
       console.error("Error revamping CV:", err.response?.data || err.message);
       throw err;
@@ -26,4 +26,4 @@ const coverLetter = {
   },
 };
 
-export default coverLetter;
+export default coveLetter;

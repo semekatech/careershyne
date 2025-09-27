@@ -503,6 +503,7 @@
 import { ref, onMounted } from "vue";
 import JobService from "@/services/jobService";
 import eligibilityService from "@/services/eligibilityService";
+import coverLetterService from "@/services/coverLetter";
 import cvRevampService from "@/services/cvRevamp";
 const showCoverLetterModal = ref(false);
 const coverLetterProgress = ref(0);
@@ -591,7 +592,7 @@ async function openCvRevamp(job) {
       }
     }, 400);
 
-    const result = await cvRevampService.revamp(job.id);
+    const result = await cvRevampService.coverLetter(job.id);
 
     clearInterval(interval);
     cvRevampProgress.value = 100;
@@ -638,12 +639,11 @@ async function openCoverLetter(job) {
   coverLetterResult.value = null;
 
   try {
-    // Fake progress animation
     const interval = setInterval(() => {
       if (coverLetterProgress.value < 90) coverLetterProgress.value += 10;
     }, 400);
 
-    const result = await import("@/services/coverLetterService").then(m => m.default.generate(job.id));
+    const result = await coverLetterService.generate(job.id);
 
     clearInterval(interval);
     coverLetterProgress.value = 100;
@@ -653,6 +653,7 @@ async function openCoverLetter(job) {
     coverLetterResult.value = { error: "Failed to generate cover letter." };
   }
 }
+
 
 function closeCoverLetter() {
   showCoverLetterModal.value = false;
