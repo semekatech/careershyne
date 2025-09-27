@@ -168,7 +168,7 @@ public function revampCv(Request $request)
 {
     $user = auth('api')->user();
     $job  = Job::findOrFail($request->jobId);
-
+     info($user);
     // ✅ Ensure CV exists
     if (!$user->cv_path) {
         return response()->json([
