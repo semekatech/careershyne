@@ -68,7 +68,7 @@ class JobController extends Controller
 {
     $user = auth('api')->user();
     $job  = Job::findOrFail($request->jobId);
-
+      info($user);
     if (!$user->cv_path) {
         return response()->json([
             'success' => false,
