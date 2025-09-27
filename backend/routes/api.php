@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\CvOrderController;
+use App\Http\Controllers\JobController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
@@ -63,13 +64,15 @@ Route::prefix('users')->group(function () {
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [UserController::class, 'store']);
-    Route::get('/payments', [PaymentController::class, 'fetchPayment']);
-    Route::post('/{user}/impersonate', [AuthController::class, 'impersonateLogin']);
-    // routes/api.php
 Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
-
-    // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
 });
+
+Route::prefix('jobs')->middleware('auth:api')->group(function () {
+    Route::post('/add', [JobController::class, 'store']);
+    Route::get('/all', [JobController::class, 'fetchAll']);
+    Route::put('/update/{id}', [JobController::class, 'update']);
+});
+
 Route::prefix('ai')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');

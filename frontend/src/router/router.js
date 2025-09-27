@@ -17,6 +17,8 @@ import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import SetupPage from "@/pages/SetupPage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
+import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
+import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 const routes = [
   {
     path: "/",
@@ -138,6 +140,34 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/manage-jobs",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Jobs",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageJobs,
+      },
+    ],
+  },
+  {
+    path: "/add-job",
+    component: DashboardLayout,
+    meta: {
+      title: "Add Jobs",
+    },
+    children: [
+      {
+        path: "",
+        component: AddJobs,
+      },
+    ],
+  },
+
+  
    {
     path: "/manage-payments",
     component: DashboardLayout,

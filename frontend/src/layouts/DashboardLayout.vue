@@ -6,7 +6,6 @@
       <aside
         v-if="isSidebarOpen || isDesktop"
         class="fixed inset-y-0 left-0 w-64 bg-surface-light dark:bg-surface-darkflex flex-col border-r border-gray-200 dark:border-gray-700 z-30 md:relative md:flex md:flex-shrink-0"
-    
       >
         <div class="flex flex-col h-full">
           <div class="flex items-center justify-center h-16 px-4">
@@ -27,15 +26,13 @@
               &times;
             </button>
           </div>
-          <nav
-            class="flex-1 px-4 py-6 space-y-2"
-          >
+          <nav class="flex-1 px-4 py-6 space-y-2">
             <!-- Dashboard -->
             <a
               href="/dashboard"
               class="flex items-center px-4 py-2 text-white bg-primary rounded-lg"
             >
-             <span class="material-icons-sharp mr-3">dashboard</span>
+              <span class="material-icons-sharp mr-3">dashboard</span>
 
               Dashboard
             </a>
@@ -71,15 +68,23 @@
               <font-awesome-icon :icon="['fas', 'users']" class="mr-3" />
               Manage Users
             </a>
+              <a
+              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
+              href="/manage-jobs"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+             <span class="material-icons-sharp mr-3">business_center</span>
 
-            
+             Manage Jobs
+            </a>
+
             <!-- Cover Letters -->
             <a
               v-if="auth.user?.role != 'radio'"
               href="/cover-letter-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-             <span class="material-icons-sharp mr-3">attach_file</span>
+              <span class="material-icons-sharp mr-3">attach_file</span>
               Cover Letters
             </a>
 
@@ -89,7 +94,7 @@
               href="/email-template-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-            <span class="material-icons-sharp mr-3">email</span>
+              <span class="material-icons-sharp mr-3">email</span>
 
               Email Templates
             </a>
@@ -100,7 +105,7 @@
               href="/cv-revamp-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
-             <span class="material-icons-sharp mr-3">mail_outline</span>
+              <span class="material-icons-sharp mr-3">mail_outline</span>
 
               CV Revamp
             </a>
@@ -245,10 +250,9 @@ const handleLogout = () => {
   transform: translateX(0);
 }
 
-    .material-icons-sharp {
-      font-size: 1.25rem;
-    }
-
+.material-icons-sharp {
+  font-size: 1.25rem;
+}
 </style>
 
 
