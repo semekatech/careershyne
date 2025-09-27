@@ -532,10 +532,18 @@ async function impersonateUser(user) {
 
   try {
     const { data } = await usersService.impersonate(user.id);
+
+    // ✅ Save token persistently
     auth.setToken(data.access_token);
+    localStorage.setItem("token", data.access_token);
+
+    // ✅ Save user
     auth.setUser(data.user);
-    // localStorage.setItem("impersonator_id", data.impersonator_id)
-    // Redirect
+
+    // ✅ Refresh user details to keep everything in sync
+    await auth.refreshUser();
+
+    // ✅ Redirect
     router.push(
       data.redirect === "profile-setup" ? "/profile-setup" : "/dashboard"
     );
@@ -546,6 +554,7 @@ async function impersonateUser(user) {
     $toast.error("Failed to impersonate user");
   }
 }
+
 
 // Delete User
 async function deleteUser(userId) {
