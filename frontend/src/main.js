@@ -10,11 +10,24 @@ import 'quill/dist/quill.snow.css'; // Add this
 import 'quill/dist/quill.core.css'; // Optional but can help
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 // Font Awesome
+// Font Awesome
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faBars,faPhone,faBell,faTimes, faEdit, faTrash,faTimesCircle,faUserCircle,faPlus,faCreditCard, faEnvelope, faBullhorn, faInbox, faCalendarCheck, faUsers, faTachometerAlt, faHeadset, faRightFromBracket, faHourglass, faHourglassHalf, faChevronCircleDown, faCheckCircle, faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import { 
+  faBars, faPhone, faBell, faTimes, faEdit, faTrash, faTimesCircle, faUserCircle, faPlus,
+  faCreditCard, faEnvelope, faBullhorn, faInbox, faCalendarCheck, faUsers, faTachometerAlt, 
+  faHeadset, faRightFromBracket, faHourglass, faHourglassHalf, faChevronCircleDown, 
+  faCheckCircle, faUserPlus, faShoppingCart, faFileAlt, faUserEdit, faSignOutAlt 
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faFacebook, faTwitter, faInstagram, faTiktok, faYoutube } from '@fortawesome/free-brands-svg-icons'
-library.add(faFacebook,faPhone,faTimesCircle,faCreditCard,faUserCircle, faTwitter, faInstagram, faTiktok, faYoutube,faBars,faTimes, faEdit,faTrash,faPlus,faUserPlus,faFacebook, faTwitter, faInstagram, faTiktok, faYoutube,faCheckCircle, faBell,faHourglassHalf, faEnvelope, faBullhorn,faHourglass, faInbox, faCalendarCheck, faUsers, faTachometerAlt, faHeadset, faRightFromBracket)
+
+// Add icons to the library
+library.add(
+  faFacebook, faPhone, faTimesCircle, faCreditCard, faUserCircle, faTwitter, faInstagram, faTiktok, faYoutube,
+  faBars, faTimes, faEdit, faTrash, faPlus, faUserPlus, faCheckCircle, faBell, faHourglassHalf, faEnvelope,
+  faBullhorn, faHourglass, faInbox, faCalendarCheck, faUsers, faTachometerAlt, faHeadset, faRightFromBracket,
+  faChevronCircleDown, faShoppingCart, faFileAlt, faUserEdit, faSignOutAlt
+)
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -22,4 +35,6 @@ app.use(pinia)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(useToast)
 app.use(router)
+
+
 app.mount('#app')

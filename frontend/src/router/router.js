@@ -11,6 +11,9 @@ import ManageOrders from "@/pages/ManageOrders.vue";
 import ManagePayments from "@/pages/ManagePayments.vue";
 // Pages
 import LoginPage from "@/pages/LoginPage.vue";
+import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
+import EmailGenerator from "@/components/EmailGenerator.vue";
+import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
 const routes = [
   {
     path: "/",
@@ -50,6 +53,17 @@ const routes = [
     path: "/pricing",
     name: "Pricing",
     component: () => import("@/pages/Pricing.vue"),
+  },
+  
+  {
+    path: "/free-review",
+    name: "FreeReview",
+    component: () => import("@/pages/CvUpload.vue"),
+  },
+   {
+    path: "/ai",
+    name: "AI",
+    component: () => import("@/pages/AiReview.vue"),
   },
   //backend
   {
@@ -101,6 +115,45 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/cover-letter-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Generate Cover Letters",
+    },
+    children: [
+      {
+        path: "",
+        component: CoverLetter,
+      },
+    ],
+  },
+    {
+    path: "/email-template-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Email Template Generator",
+    },
+    children: [
+      {
+        path: "",
+        component: EmailGenerator,
+      },
+    ],
+  },
+   {
+    path: "/cv-revamp-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Email Template Generator",
+    },
+    children: [
+      {
+        path: "",
+        component: CvRevamp,
+      },
+    ],
+  },
 ];
 
 const router = createRouter({
@@ -122,6 +175,8 @@ router.beforeEach(async (to, from, next) => {
     "/about-us",
     "/services",
     "/pricing",
+     "/free-review",
+    "/ai"
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)

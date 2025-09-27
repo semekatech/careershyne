@@ -6,7 +6,7 @@
       <aside
         v-if="isSidebarOpen || isDesktop"
         class="fixed inset-y-0 left-0 w-64 bg-blue-800 text-white z-30 md:relative md:flex md:flex-shrink-0"
-        style="background:#2c3137"
+        style="background: #2c3137"
       >
         <div class="flex flex-col h-full">
           <div class="flex items-center justify-center h-16 px-4">
@@ -30,6 +30,7 @@
           <nav
             class="flex flex-col flex-grow px-4 py-4 overflow-y-auto space-y-2"
           >
+            <!-- Dashboard -->
             <a
               href="/dashboard"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white text-black"
@@ -41,44 +42,75 @@
               Dashboard
             </a>
 
+            <!-- Manage Orders -->
             <a
-              href="/manage-orders"
+              href="/manage-orders" v-if="auth.user?.role !== 'user'"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
-              <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
+              <font-awesome-icon
+                :icon="['fas', 'shopping-cart']"
+                class="mr-3"
+              />
               Manage Orders
             </a>
-              <a  v-if="auth.user?.role != 'radio'"
+
+            <!-- Manage Payments -->
+            <a
+              v-if="auth.user?.role !== 'radio' && auth.user?.role !== 'user'"
               href="/manage-payments"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
-              <font-awesome-icon :icon="['fas', 'bullhorn']" class="mr-3" />
+              <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
               Manage Payments
             </a>
+
+            <!-- Cover Letters -->
             <a
-              href="/my-profile"
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
-              <font-awesome-icon :icon="['fas', 'user-circle']" class="mr-3" />
-              Profile</a
+              <font-awesome-icon :icon="['fas', 'file-alt']" class="mr-3" />
+              Cover Letters
+            </a>
+
+            <!-- Email Templates -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/email-template-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
+              <font-awesome-icon :icon="['fas', 'envelope']" class="mr-3" />
+              Email Templates
+            </a>
+
+            <!-- CV Revamp -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cv-revamp-generator"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
+            >
+              <font-awesome-icon :icon="['fas', 'user-edit']" class="mr-3" />
+              CV Revamp
+            </a>
+
+            <!-- Logout -->
             <a
               href="#"
               @click.prevent="handleLogout"
               class="flex items-center px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 text-white"
             >
-              <font-awesome-icon
-                :icon="['fas', 'right-from-bracket']"
-                class="w-5 h-5 mr-2"
-              />
+              <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-3" />
               Logout
             </a>
           </nav>
+
           <div class="p-4 border-t border-white-700">
             <div class="flex items-center">
               <img
                 class="w-10 h-10 rounded-full"
-                :src="preview || defaultAvatar" alt="User"
+                :src="preview || defaultAvatar"
+                alt="User"
               />
               <div class="ml-3">
                 <p class="text-sm font-medium">{{ auth.user?.name }}</p>
@@ -129,8 +161,8 @@
             <a href="/my-profile" class="flex items-center focus:outline-none">
               <img
                 class="w-8 h-8 rounded-full"
-                 :src="preview || defaultAvatar"
-                 alt="User"
+                :src="preview || defaultAvatar"
+                alt="User"
               />
             </a>
           </div>

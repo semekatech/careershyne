@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\CvOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
@@ -50,4 +51,16 @@ Route::prefix('orders')->group(function () {
     Route::post('/save', [CvOrderController::class, 'storeOrder']);
     Route::get('/payments', [PaymentController::class, 'fetchPayment']);
     // Route::get('/fetch-all', [CvOrderController::class, 'fetchAll']);
+});
+Route::prefix('ai')->group(function () {
+    Route::post('/upload', [AiController::class, 'uploadCV'])
+        ->middleware('throttle:2,1');
+          Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
+        ->middleware('throttle:2,1');
+         Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
+        ->middleware('throttle:2,1');
+   Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
+        ->middleware('throttle:2,1');
+
+
 });
