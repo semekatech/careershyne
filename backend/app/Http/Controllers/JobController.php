@@ -61,16 +61,47 @@ class JobController extends Controller
     }
     public function checkEligibility(Request $request)
     {
-        // $request->validate([
-        //     'jobId' => 'required|integer|exists:jobs,id',
-        // ]);
-        info($request->jobId);
-        $job = Job::findOrFail($request->jobId);
+        $user = auth('api')->user();
+        $job  = Job::findOrFail($request->jobId);
 
-        // Generate a random match between 30% and 100%
+        if (!$user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.'
+            ], 400);
+        }
+
+        $cvPath = storage_path('app/public/' . $user->cv_path);
+
+        if (!file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.'
+            ], 404);
+        }
+
+        try {
+            // ✅ Wrap file in Symfony UploadedFile for consistency
+            $file = new \Illuminate\Http\UploadedFile(
+                $cvPath,
+                basename($cvPath),
+                mime_content_type($cvPath),
+                null,
+                true // mark as test (skip move checks)
+            );
+
+            // ✅ Extract CV text
+            $cvText = $this->extractTextFromFile($file, 'CV');
+            info("CV text extracted: " . substr($cvText, 0, 200) . "...");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read CV: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // For now just simulate a match %
         $matchPercentage = rand(30, 100);
-
-        // Pick feedback based on the random percentage
         $feedback = "Excellent fit!";
         if ($matchPercentage < 50) {
             $feedback = "Your CV does not align strongly with the requirements. Consider updating your skills.";
@@ -79,8 +110,39 @@ class JobController extends Controller
         }
 
         return response()->json([
+            'success'         => true,
             'matchPercentage' => $matchPercentage,
             'feedback'        => $feedback,
+            'cv_path'         => asset('storage/' . $user->cv_path),
+            'cv_excerpt'      => substr($cvText, 0, 300) . '...' // show snippet
         ]);
+    }
+
+    private function extractTextFromFile($file, $type = 'File')
+    {
+        $jobText = '';
+        try {
+            if ($file->getMimeType() === 'application/pdf') {
+                info("$type: Processing PDF.");
+                [$filePath, $jobText] = $this->aiReview->extractText($file);
+            } else {
+                info("$type: Processing image with OCR directly.");
+                $ocr = new TesseractOCR($file->getPathname());
+                $ocr->lang('eng')->psm(1)->oem(3);
+                $jobText = $ocr->run();
+                info("$type: OCR completed.");
+                $tr = new GoogleTranslate('en'); // target language
+                $jobText = $tr->translate($jobText);
+
+                info("Translated Job text: " . substr($jobText, 0, 200) . "...");
+            }
+
+            $text = $this->aiReview->cleanText($jobText);
+        } catch (\Exception $e) {
+            info("$type: Text extraction failed - " . $e->getMessage());
+            throw new \Exception("$type text extraction failed: " . $e->getMessage());
+        }
+
+        return $text;
     }
 }
