@@ -96,7 +96,7 @@ class JobController extends Controller
 
             // ✅ Extract CV text
             $cvText = $this->extractTextFromFile($file, 'CV');
-            info("CV text extracted: " . substr($cvText, 0, 200) . "...");
+            info("CV text extracted: " . substr($cvText, 0, 2000000) . "...");
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
