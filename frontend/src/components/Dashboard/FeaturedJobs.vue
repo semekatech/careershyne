@@ -191,7 +191,41 @@
           <p class="mt-2 text-gray-600 font-medium">Match Score</p>
         </div>
 
-       
+        <!-- Matched Skills -->
+        <div
+          v-if="eligibilityResult.matchedSkills?.length"
+          class="bg-green-50 border border-green-200 rounded-lg p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-green-700 mb-3 text-lg">
+            ✅ Matched Skills
+          </h3>
+          <ul class="list-disc list-inside text-sm text-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <li
+              v-for="(skill, index) in eligibilityResult.matchedSkills"
+              :key="index"
+            >
+              {{ skill }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Missing Skills -->
+        <div
+          v-if="eligibilityResult.missingSkills?.length"
+          class="bg-red-50 border border-red-200 rounded-lg p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-red-700 mb-3 text-lg">
+            ❌ Missing Skills
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-600 grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <li
+              v-for="(skill, index) in eligibilityResult.missingSkills"
+              :key="index"
+            >
+              {{ skill }}
+            </li>
+          </ul>
+        </div>
 
         <!-- Recommendations -->
         <div
