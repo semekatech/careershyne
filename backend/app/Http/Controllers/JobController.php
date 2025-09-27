@@ -76,6 +76,7 @@ class JobController extends Controller
         ], 400);
     }
 
+
     $cvPath = storage_path('app/public/' . $user->cv_path);
 
     if (!file_exists($cvPath)) {
