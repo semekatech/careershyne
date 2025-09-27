@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -166,9 +167,14 @@ PROMPT;
 }
 public function revampCv(Request $request)
 {
-    $user = auth('api')->user();
+
+     $token = $request->bearerToken();
+        $user = User::where('api_token', hash('sha256', $token))->where('role', '1109')->first();
+
+    // $user = auth('api')->user();
     $job  = Job::findOrFail($request->jobId);
      info($user);
+
     // ✅ Ensure CV exists
     if (!$user->cv_path) {
         return response()->json([
