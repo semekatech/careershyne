@@ -287,9 +287,10 @@ $jobText
 {
     try {
         info("=== CV Revamp Started ===");
+
         $user = auth('api')->user();
 
-        // ✅ Validate file inputs
+        // ✅ Validate incoming files
         $request->validate([
             'job_file' => 'nullable|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'job_pdf'  => 'nullable|mimes:pdf,jpg,jpeg,png|max:5120',
@@ -299,20 +300,19 @@ $jobText
         if (!$user->cv_path) {
             return response()->json([
                 'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
+                'message' => 'No CV uploaded. Please upload your CV first.',
             ], 400);
         }
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
-
+        $cvPath = storage_path("app/public/{$user->cv_path}");
         if (!file_exists($cvPath)) {
             return response()->json([
                 'success' => false,
-                'message' => 'CV file not found on server.'
+                'message' => 'CV file not found on server.',
             ], 404);
         }
 
-        // ✅ Extract text from stored CV
+        // ✅ Extract CV text
         $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
         if (empty(trim($cvText))) {
             return response()->json([
@@ -321,9 +321,8 @@ $jobText
             ], 422);
         }
 
-        // 2️⃣ Capture optional Job Details
+        // 2️⃣ Collect job description (optional)
         $jobText = null;
-
         if ($request->filled('job_text')) {
             $jobText = $request->input('job_text');
         } elseif ($request->hasFile('job_file')) {
@@ -331,13 +330,11 @@ $jobText
         } elseif ($request->hasFile('job_pdf')) {
             $jobText = $this->extractTextFromFile($request->file('job_pdf'), 'Job');
         } elseif ($request->filled('job_url')) {
-            $jobText = "Job details can be found here: " . $request->job_url;
+            $jobText = "Job details can be found here: {$request->job_url}";
         }
 
-        // 3️⃣ Build OpenAI prompt (force HTML output)
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-
-        $prompt = "
+        // 3️⃣ Build prompt
+        $prompt = <<<PROMPT
 You are a professional career consultant.
 Revamp the following CV to make it professional, clear, and impactful.
 
@@ -351,10 +348,10 @@ $cvText
 - Use <strong> for emphasis (bold).
 - Do not include greetings, cover letters, or emails.
 - Keep it structured, scannable, and ATS-friendly.
-";
+PROMPT;
 
         if ($jobText) {
-            $prompt .= "
+            $prompt .= <<<PROMPT
 
 ### Job Description:
 $jobText
@@ -362,41 +359,58 @@ $jobText
 ### Tailoring Instructions:
 - Highlight applicant’s skills and experiences that align with this job.
 - Naturally integrate keywords from the job description.
-";
+PROMPT;
         } else {
-            $prompt .= "
+            $prompt .= <<<PROMPT
 
 ### General Instructions:
 - Improve clarity, grammar, and formatting.
 - Optimize the CV for general job applications.
-";
+PROMPT;
         }
 
         // 4️⃣ Call OpenAI
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+
         $response = $client->chat()->create([
             'model' => 'gpt-4o-mini',
             'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and CV writer. Always return HTML.'],
-                ['role' => 'user', 'content' => $prompt],
+                [
+                    'role' => 'system',
+                    'content' => 'You are an expert career coach and CV writer. Always return HTML only.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ],
             ],
         ]);
 
-        $revampedCV = trim($response->choices[0]->message->content ?? '<p>Error revamping CV.</p>');
+        $revampedCV = trim($response->choices[0]->message->content ?? '');
 
-        // 5️⃣ Return JSON (HTML for Quill editor)
+        if (empty($revampedCV)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OpenAI did not return any content.',
+            ], 500);
+        }
+
+        // 5️⃣ Return response
         return response()->json([
             'success' => true,
             'message' => 'CV revamped successfully.',
             'revamped_cv' => $revampedCV,
         ]);
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         info("Unhandled exception in cvRevamp: " . $e->getMessage());
+
         return response()->json([
             'success' => false,
-            'message' => $e->getMessage(),
+            'message' => 'An error occurred: ' . $e->getMessage(),
         ], 500);
     }
 }
+
 
     private function extractTextFromFile($file, $type = 'File')
     {
