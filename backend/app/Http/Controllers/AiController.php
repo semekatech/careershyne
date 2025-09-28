@@ -333,12 +333,18 @@ $jobText
             }
 
             // File size check (5MB)
-            if ($jobFile->getSize() > 5 * 1024 * 1024) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'File too large. Maximum allowed size is 5MB.'
-                ], 422);
+            if ($jobFile->getMimeType() === 'application/pdf') {
+                $pdf = new \Smalot\PdfParser\Parser();
+                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
+                $pageCount = count($pdfDocument->getPages());
+                if ($pageCount > 3) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
+                    ], 422);
+                }
             }
+
 
             // PDF page limit check (3 pages max)
             if ($jobFile->getMimeType() === 'application/pdf') {
