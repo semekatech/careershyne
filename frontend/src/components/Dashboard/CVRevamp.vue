@@ -1,21 +1,409 @@
 <template>
-  <div>
-    <h3 class="text-xl font-semibold mb-4">Revamp Your CV with AI</h3>
-    <p class="text-muted-light dark:text-muted-dark mb-6">
-      Upload your current CV, and our AI will provide suggestions to improve it.
-    </p>
-    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
-      <span class="material-icons-sharp text-5xl text-primary mb-4">upload_file</span>
-      <p class="font-semibold mb-2">Drag and drop your CV here</p>
-      <p class="text-muted-light dark:text-muted-dark text-sm mb-4">PDF, DOC, DOCX up to 5MB</p>
-      <button class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-        Or browse files
-      </button>
-    </div>
-    <textarea
-      class="w-full mt-6 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4 focus:ring-primary focus:border-primary"
-      placeholder="Or paste your CV content here..."
-      rows="8"
-    ></textarea>
+  <div class="p-4">
+    <header
+      class="w-full border border-border-light dark:border-border-dark rounded-lg p-8 text-center shadow-sm mb-8 bg-white dark:bg-background-dark"
+    >
+      <h1
+        class="text-3xl font-bold mb-2 flex items-center justify-center text-text-light dark:text-text-dark"
+      >
+        AI-Powered CV Revamp
+        <span class="material-icons ml-2 text-primary">flash_on</span>
+      </h1>
+      <p
+        class="text-base text-subtext-light dark:text-subtext-dark max-w-2xl mx-auto"
+      >
+        Provide the job description, and our AI will tailor your CV to highlight
+        the most relevant skills and experience.
+      </p>
+    </header>
+
+    <section class="bg-card-light dark:bg-card-dark p-8 rounded-lg">
+      <div class="mb-8">
+        <ol class="flex items-center w-full">
+          <li
+            :class="{
+              'text-primary dark:text-primary-light after:border-primary dark:after:border-primary-light':
+                currentStep >= 1,
+              'after:border-border-light dark:after:border-border-dark':
+                currentStep < 1,
+            }"
+            class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-4 after:inline-block"
+          >
+            <span
+              :class="{
+                'bg-primary text-white': currentStep >= 1,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 1,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
+            >
+              1
+            </span>
+          </li>
+          <li
+            :class="{
+              'text-primary dark:text-primary-light after:border-primary dark:after:border-primary-light':
+                currentStep >= 2,
+              'after:border-border-light dark:after:border-border-dark':
+                currentStep < 2,
+            }"
+            class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-4 after:inline-block"
+          >
+            <span
+              :class="{
+                'bg-primary text-white': currentStep >= 2,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 2,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
+            >
+              2
+            </span>
+          </li>
+          <li class="flex items-center">
+            <span
+              :class="{
+                'bg-primary text-white': currentStep >= 3,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 3,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
+            >
+              3
+            </span>
+          </li>
+        </ol>
+        <div
+          class="flex justify-between mt-2 text-sm font-medium text-subtext-light dark:text-subtext-dark"
+        >
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 1,
+            }"
+            >Job Details</span
+          >
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 2,
+            }"
+            >Revamped CV</span
+          >
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 3,
+            }"
+            >Download</span
+          >
+        </div>
+      </div>
+
+      <div v-if="currentStep === 1">
+        <h2
+          class="text-2xl font-semibold text-text-light dark:text-text-dark mb-2"
+        >
+          Step 1: Provide Job Description
+        </h2>
+        <p class="text-subtext-light dark:text-subtext-dark mb-6">
+          Paste the job description or upload it as a PDF/DOC.
+        </p>
+
+        <div class="mb-6">
+          <label class="sr-only" for="input-method">Input Method</label>
+          <div class="relative">
+            <select
+              id="input-method"
+              v-model="inputType"
+              class="w-full appearance-none bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="text">Paste Job Description</option>
+              <option value="pdf">Upload PDF/DOC</option>
+            </select>
+            <div
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-subtext-light dark:text-subtext-dark"
+            >
+              <span class="material-icons">expand_more</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="inputType === 'text'">
+          <label class="sr-only" for="job-description"
+            >Paste job description here...</label
+          >
+          <textarea
+            id="job-description"
+            v-model="jobText"
+            rows="10"
+            class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Paste job description here..."
+          ></textarea>
+        </div>
+
+        <div v-else-if="inputType === 'pdf'" class="mt-4">
+          <div
+            class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer"
+            @dragover.prevent
+            @drop.prevent="handleDrop"
+            @click="fileInput.click()"
+          >
+            <p class="font-semibold mb-2">
+              Drag and drop your job description here
+            </p>
+            <p class="text-muted-light dark:text-muted-dark text-sm mb-4">
+              PDF, DOC, DOCX up to 5MB
+            </p>
+            <button
+              type="button"
+              class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+              @click.stop="fileInput.click()"
+            >
+              Or browse files
+            </button>
+            <p
+              v-if="jobFileName"
+              class="mt-4 text-sm text-text-light dark:text-text-dark"
+            >
+              Selected file: {{ jobFileName }}
+            </p>
+            <input
+              type="file"
+              ref="fileInput"
+              accept=".pdf,.doc,.docx"
+              class="hidden"
+              @change="handleJobFileUpload"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-8">
+          <button
+            @click="submitJobDetails"
+            :disabled="!isFormValid || loading"
+            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 disabled:opacity-50"
+          >
+            <span v-if="loading">Processing...</span>
+            <span v-else>Revamp My CV</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="currentStep === 2 && revampedCv">
+        <h2
+          class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4"
+        >
+          Step 2: Your Revamped CV
+        </h2>
+
+        <div
+          class="prose dark:prose-invert max-w-full overflow-x-auto p-4 border rounded-lg bg-background-light dark:bg-background-dark"
+        >
+          <div v-html="formattedRevampedCv"></div>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button
+            @click="goToStep(1)"
+            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+          >
+            Go Back & Change Job Details
+          </button>
+
+          <button
+            @click="goToStep(3)"
+            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+          >
+            Finalize & Download CV
+            <span class="material-icons ml-2">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="currentStep === 3">
+        <h2
+          class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4"
+        >
+          Step 3: Download Your CV
+        </h2>
+        <p class="text-subtext-light dark:text-subtext-dark mb-6">
+          Your CV is ready! Download the file below. It's tailored for the job
+          you provided.
+        </p>
+        <div class="flex justify-between mt-6">
+          <button
+            @click="goToStep(2)"
+            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+          >
+            <span class="material-icons mr-2">arrow_back</span> Review CV
+          </button>
+          <button
+            @click="downloadAsWord"
+            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+          >
+            <span class="material-icons mr-2">download</span> Download CV as
+            Word
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
+<script setup>
+import { ref, computed } from "vue";
+import { generateCvRevamp } from "@/services/cvRevampService.js";
+
+// --- Step and Form State ---
+const currentStep = ref(1);
+const loading = ref(false);
+
+const inputType = ref("text"); // "text" or "pdf"
+const jobText = ref("");        // Job description text
+const jobFile = ref(null);      // Uploaded file
+const jobFileName = ref("");    // Uploaded file name
+const fileInput = ref(null);
+
+const revampedCv = ref("");     // Raw CV returned from backend
+
+// --- Form Validation ---
+const isFormValid = computed(() => {
+  if (inputType.value === "text" && jobText.value.trim().length > 0) return true;
+  if (inputType.value === "pdf" && jobFile.value) return true;
+  return false;
+});
+
+// --- File Handlers ---
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+
+function handleJobFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File is too large. Maximum allowed size is 2 MB.");
+    return;
+  }
+
+  jobFile.value = file;
+  jobFileName.value = file.name;
+}
+
+function handleDrop(event) {
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File is too large. Maximum allowed size is 2 MB.");
+    return;
+  }
+
+  jobFile.value = file;
+  jobFileName.value = file.name;
+}
+
+
+// --- Navigation ---
+function goToStep(step) {
+  currentStep.value = step;
+}
+
+// --- Submit Job Details ---
+async function submitJobDetails() {
+  revampedCv.value = "";
+  loading.value = true;
+
+  const formData = new FormData();
+  if (inputType.value === "text") formData.append("job_text", jobText.value);
+  if (inputType.value === "pdf" && jobFile.value) formData.append("job_file", jobFile.value);
+
+  try {
+    const data = await generateCvRevamp(formData);
+
+    if (data.success && data.revamped_cv) {
+      revampedCv.value = data.revamped_cv;
+      currentStep.value = 2;
+    } else {
+      revampedCv.value = `❌ Error: ${data.message || "CV generation failed."}`;
+      currentStep.value = 2;
+    }
+  } catch (err) {
+    console.error("Error revamping CV:", err);
+    let errorMessage = "❌ An unexpected error occurred. Please try again later.";
+    if (err.response && err.response.data) {
+      const apiErrors = err.response.data.errors
+        ? Object.values(err.response.data.errors).flat().join(" ")
+        : null;
+      errorMessage = `❌ ${err.response.data.message || apiErrors || "Server error occurred."}`;
+    }
+    revampedCv.value = `Error: ${errorMessage}`;
+    currentStep.value = 2;
+  } finally {
+    loading.value = false;
+  }
+}
+
+// --- Format Raw Revamped CV ---
+const formattedRevampedCv = computed(() => {
+  if (!revampedCv.value) return "";
+
+  let html = revampedCv.value;
+
+  // Remove standalone horizontal rules
+  html = html.replace(/^\s*---\s*$/gm, "");
+
+  // Convert bold headers (**Header**) to <strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Convert <strong> headers to <h2>
+  html = html.replace(/^\s*<strong>([^<]+)<\/strong>\s*$/gm, "<h2>$1</h2>");
+
+  // Convert list items: - Frontend: text
+  html = html.replace(/^\s*-\s*(\w+):\s*(.*)$/gm, "<li><strong>$1:</strong> $2</li>");
+  html = html.replace(/^\s*-\s*(.+)$/gm, "<li>$1</li>"); // Generic list items
+  html = html.replace(/(<li>.+?<\/li>(\s*<li>.+?<\/li>)*)/gs, "<ul>$1</ul>");
+
+  // Paragraph handling
+  html = html.replace(/\n\s*\n/g, "</p><p>");
+  html = html.replace(/\n/g, "<br>");
+  html = html
+    .split("<br>")
+    .map((line) => {
+      line = line.trim();
+      if (line.length > 0 && !line.startsWith("<h") && !line.startsWith("<ul") && !line.startsWith("<p") && !line.startsWith("<strong")) {
+        return `<p>${line}</p>`;
+      }
+      return line;
+    })
+    .join("");
+  html = html.replace(/<p>\s*<\/p>/g, "");
+  html = html.replace(/<br>\s*<br>/g, "<br>");
+
+  if (html.length > 0 && !html.startsWith("<p>") && !html.startsWith("<h") && !html.startsWith("<ul")) html = `<p>${html}`;
+  if (html.length > 0 && !html.endsWith("</p>") && !html.endsWith("</ul>") && !html.endsWith("</h1>") && !html.endsWith("</h2>") && !html.endsWith("</h3>")) html = `${html}</p>`;
+
+  return html.trim();
+});
+
+// --- Download as Word ---
+function downloadAsWord() {
+  if (!formattedRevampedCv.value) return;
+
+  const preHtml = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+          xmlns:w='urn:schemas-microsoft-com:office:word' 
+          xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Revamped CV</title></head><body>`;
+  const postHtml = "</body></html>";
+
+  const htmlContent = preHtml + formattedRevampedCv.value + postHtml;
+
+  const blob = new Blob(["\ufeff", htmlContent], { type: "application/msword" });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "revamped_cv.doc";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+</script>

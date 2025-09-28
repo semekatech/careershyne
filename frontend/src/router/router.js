@@ -1,42 +1,29 @@
 import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
-
 // Layouts
 import HomeLayout from "@/components/HomeLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
-
-// Dashboard Pages
 import DashboardHome from "@/pages/DashboardHome.vue";
 import ManageOrders from "@/pages/ManageOrders.vue";
 import ManagePayments from "@/pages/ManagePayments.vue";
-import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
-import ManageJobs from "@/pages/Dashboard/ManageJobs.vue";
-import AddJobs from "@/pages/Dashboard/AddJobs.vue";
+// Pages
+import LoginPage from "@/pages/LoginPage.vue";
 import CoverLetter from "@/pages/Dashboard/CoverLetter.vue";
 import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
-
-// Auth Pages
-import LoginPage from "@/pages/LoginPage.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import SetupPage from "@/pages/SetupPage.vue";
-
-// Extra dashboard menus
-import ProfileSummary from "@/pages/Dashboard/ProfileSummary.vue";
-import Applications from "@/pages/Dashboard/Applications.vue";
-import ChangePassword from "@/pages/Dashboard/ChangePassword.vue";
-import MyPlans from "@/pages/Dashboard/MyPlans.vue";
-
-// Public Pages
+import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
+import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
+import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 const routes = [
   {
     path: "/",
     component: HomeLayout,
   },
-
   {
     path: "/order-cv",
     name: "OrderCV",
@@ -62,29 +49,28 @@ const routes = [
     name: "AboutUs",
     component: () => import("@/pages/AboutUs.vue"),
   },
-  {
+   {
     path: "/services",
     name: "Services",
     component: () => import("@/pages/Services.vue"),
   },
-  {
+   {
     path: "/pricing",
     name: "Pricing",
     component: () => import("@/pages/Pricing.vue"),
   },
+  
   {
     path: "/free-review",
     name: "FreeReview",
     component: () => import("@/pages/CvUpload.vue"),
   },
-  {
+   {
     path: "/ai",
     name: "AI",
     component: () => import("@/pages/AiReview.vue"),
   },
-  
-
-  // Auth
+  //backend
   {
     path: "/admin",
     component: AuthLayout,
@@ -95,7 +81,7 @@ const routes = [
       },
     ],
   },
-  {
+    {
     path: "/register",
     component: AuthLayout,
     children: [
@@ -105,7 +91,7 @@ const routes = [
       },
     ],
   },
-  {
+   {
     path: "/profile-setup",
     component: AuthLayout,
     children: [
@@ -115,77 +101,122 @@ const routes = [
       },
     ],
   },
-
-   
-  // Dashboard (nested routes)
-  {
+   {
     path: "/dashboard",
     component: DashboardLayout,
+    meta: {
+      title: "Dashboard",
+    },
     children: [
       {
         path: "",
         component: DashboardHome,
-        meta: { title: "Dashboard" },
       },
-      {
-        path: "profile-summary",
-        component: ProfileSummary,
-        meta: { title: "Profile Summary" },
-      },
-      {
-        path: "applications",
-        component: Applications,
-        meta: { title: "Applications" },
-      },
-       {
-      path: "my-plans",
-      component: MyPlans,
-      meta: { title: "My Plans" },
+    ],
+  },
+   {
+    path: "/manage-orders",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Orders",
     },
+    children: [
       {
-        path: "change-password",
-        component: ChangePassword,
-        meta: { title: "Change Password" },
-      },
-      {
-        path: "manage-orders",
+        path: "",
         component: ManageOrders,
-        meta: { title: "Manage Orders" },
       },
+    ],
+  },
+  {
+    path: "/manage-users",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Users",
+    },
+    children: [
       {
-        path: "manage-users",
+        path: "",
         component: ManageUsers,
-        meta: { title: "Manage Users" },
       },
+    ],
+  },
+  {
+    path: "/manage-jobs",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Jobs",
+    },
+    children: [
       {
-        path: "manage-jobs",
+        path: "",
         component: ManageJobs,
-        meta: { title: "Manage Jobs" },
       },
+    ],
+  },
+  {
+    path: "/add-job",
+    component: DashboardLayout,
+    meta: {
+      title: "Add Jobs",
+    },
+    children: [
       {
-        path: "add-job",
+        path: "",
         component: AddJobs,
-        meta: { title: "Add Jobs" },
       },
+    ],
+  },
+
+  
+   {
+    path: "/manage-payments",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Payments",
+    },
+    children: [
       {
-        path: "manage-payments",
+        path: "",
         component: ManagePayments,
-        meta: { title: "Manage Payments" },
       },
+    ],
+  },
+  {
+    path: "/cover-letter-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Generate Cover Letters",
+    },
+    children: [
       {
-        path: "cover-letter-generator",
+        path: "",
         component: CoverLetter,
-        meta: { title: "Generate Cover Letters" },
       },
+    ],
+  },
+    {
+    path: "/email-template-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Email Template Generator",
+    },
+    children: [
       {
-        path: "email-template-generator",
+        path: "",
         component: EmailGenerator,
-        meta: { title: "Email Template Generator" },
       },
+    ],
+  },
+   {
+    path: "/cv-revamp-generator",
+    component: DashboardLayout,
+    meta: {
+      title: "Email Template Generator",
+    },
+    children: [
       {
-        path: "cv-revamp-generator",
+        path: "",
         component: CvRevamp,
-        meta: { title: "CV Revamp" }, // fixed title
       },
     ],
   },
@@ -196,7 +227,6 @@ const router = createRouter({
   routes,
 });
 
-// Middleware (Auth Guard)
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
 
@@ -205,18 +235,17 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/admin",
-    "/register",
-    "/how-it-works", // not yet defined but left for future
+    '/register',
+    "/how-it-works",
     "/custom-cv-order",
     "/contact-us",
     "/about-us",
     "/services",
     "/pricing",
-    "/free-review",
+     "/free-review",
     "/ai",
-    "/profile-setup",
+     "/profile-setup"
   ];
-
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
   );
@@ -241,4 +270,3 @@ router.beforeEach(async (to, from, next) => {
 });
 
 export default router;
-

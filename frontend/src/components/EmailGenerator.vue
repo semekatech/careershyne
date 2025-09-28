@@ -166,7 +166,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { generateJobEmail } from "@/services/jobEmailService.js";
+import { generateJobEmail } from "@/services/emailService.js";
 
 const currentStep = ref(1);
 const loading = ref(false);

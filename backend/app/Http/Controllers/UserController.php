@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+
 class UserController extends Controller
 {
 
@@ -54,7 +55,16 @@ class UserController extends Controller
                 'status' => $request->status,
                 'password' => Hash::make('Careershyne@2025'),
             ]);
-
+            DB::table('subscriptions')->insert([
+                'user_id' => $user->id,
+                'plan' => 'Free',
+                'cv' => 1,
+                'coverletters' => 1,
+                'emails' => 1,
+                'checks' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             if ($request->hasFile('cv')) {
                 $user->cv_path = $request->file('cv')->store('cvs', 'public');
             }
@@ -150,38 +160,64 @@ class UserController extends Controller
         }
     }
     public function impersonateLogin(Request $request, User $user)
-{
-    $admin = $request->user();
+    {
+        $admin = $request->user();
 
-    if (!$admin || $admin->role != 1109) { // admin role
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    // Generate new token for the impersonated user
-    $token = Str::random(60);
-    $user->api_token = hash('sha256', $token);
-    $user->save();
-
-    // Determine redirect route
-    $redirectRoute = 'dashboard';
-    if ($user->role == 1098) { // normal user
-        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
-            $redirectRoute = 'profile-setup';
+        if (!$admin || $admin->role != 1109) { // admin role
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        // Generate new token for the impersonated user
+        $token = Str::random(60);
+        $user->api_token = hash('sha256', $token);
+        $user->save();
+
+        // Determine redirect route
+        $redirectRoute = 'dashboard';
+        if ($user->role == 1098) { // normal user
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'photo' => $user->photo,
+                'role' => $user->role,
+            ],
+            'redirect' => $redirectRoute,
+            'impersonator_id' => $admin->id,
+        ]);
+    }
+    public function userLimits(Request $request)
+    {
+        $user = auth('api')->user();
+        $user_id = $user->id;
+        info($user_id);
+        $limit = DB::table('subscriptions')->where('user_id', $user_id)->first();
+
+        return response()->json([
+            'cv' => $limit->cv ?? 0,
+            'coverLetters' => $limit->coverletters ?? 0,
+            'emails' => $limit->emails ?? 0,
+            'checks' => $limit->checks ?? 0,
+            'plan' => $limit->plan ?? 'Free',
+        ]);
     }
 
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'photo' => $user->photo,
-            'role' => $user->role,
-        ],
-        'redirect' => $redirectRoute,
-        'impersonator_id' => $admin->id,
-    ]);
-}
-
+    public function UsageActivities()
+    {
+        $user = auth('api')->user();
+        $user_id = $user->id;
+        info($user_id);
+        $activities = DB::table('usage_activities')->where('user_id', $user_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+info($activities);
+        return response()->json(['data' => $activities]);
+    }
 }

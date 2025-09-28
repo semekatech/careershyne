@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
+use App\Http\Middleware\CheckSubscriptionLimit;
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -64,25 +65,49 @@ Route::prefix('users')->group(function () {
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [UserController::class, 'store']);
+    Route::middleware('auth:api')->post('/limits', [UserController::class, 'userLimits']);
     Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
+    Route::get('/usage-activities', [UserController::class, 'UsageActivities']);
 });
 
 Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::post('/add', [JobController::class, 'store']);
+
     Route::get('/all', [JobController::class, 'fetchAll']);
-    Route::post('/check-eligibility', [JobController::class, 'checkEligibility']);
-    Route::post('/cv-revamp', [JobController::class, 'revampCv']);
+    Route::get('/user-jobs', [JobController::class, 'userJobs']);
+    Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
+        ->middleware(CheckSubscriptionLimit::class . ':eligibility');
+
+    Route::post('/cv-revamp', [JobController::class, 'revampCv'])
+        ->middleware(CheckSubscriptionLimit::class . ':cv');
+
+    Route::post('/cover-letter', [JobController::class, 'coverLetter'])
+        ->middleware(CheckSubscriptionLimit::class . ':coverLetters');
+
+    Route::post('/email-template', [JobController::class, 'emailTemplate'])
+        ->middleware(CheckSubscriptionLimit::class . ':emails');
 
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
 
-Route::prefix('ai')->group(function () {
+Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
-    Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
+    Route::post('/cover-letter', [AiController::class, 'coverletterGenerator'])
         ->middleware('throttle:2,1');
     Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
         ->middleware('throttle:2,1');
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1');
+});
+
+
+// routes/api.php
+Route::get('/phpinfo', function () {
+    return response()->json([
+        'upload_max_filesize' => ini_get('upload_max_filesize'),
+        'post_max_size' => ini_get('post_max_size'),
+        'memory_limit' => ini_get('memory_limit'),
+        'max_execution_time' => ini_get('max_execution_time'),
+    ]);
 });

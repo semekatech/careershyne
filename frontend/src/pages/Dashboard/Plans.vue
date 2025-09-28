@@ -1,5 +1,4 @@
 <template>
-
   <div class="bg-white dark:bg-gray-800 pt-20" id="pricing">
     <!-- Section header -->
     <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
@@ -92,11 +91,7 @@
               <li>✔ Recruiter visibility boost</li>
             </ul>
           </div>
-          <!-- <router-link to="/order-cv"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition">
-            Unlock My Career Package
-          </router-link> -->
-           <a href="https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareerShyne."
+           <a href="https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne."
              class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
            Unlock My Career Package
           </a>
@@ -104,5 +99,4 @@
       </div>
     </div>
   </div>
-  
 </template>

@@ -65,8 +65,6 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        info($request->all());
-
         // Validation
         $validator = Validator::make($request->all(), [
             'fullName' => 'required|string|max:255',
@@ -74,7 +72,6 @@ class AuthController extends Controller
             'phone' => 'nullable|string|max:20|unique:users,phone',
             'password' => 'required|string|confirmed|min:6',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -82,7 +79,6 @@ class AuthController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
         try {
             // Create user
             $user = User::create([
@@ -92,16 +88,17 @@ class AuthController extends Controller
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
-
             // Create subscription
             DB::table('subscriptions')->insert([
                 'user_id' => $user->id,
                 'plan' => 'Free',
-                'limit' => 1,
+                'cv' => 1,
+                'coverletters' => 1,
+                'emails' => 1,
+                'checks' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
             // Send welcome email
             try {
                 Mail::to($user->email)->send(new WelcomeUserMail($user));
@@ -113,7 +110,6 @@ class AuthController extends Controller
                     'user' => $user
                 ], 201);
             }
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'User registered successfully',
@@ -406,39 +402,38 @@ class AuthController extends Controller
         return response()->json(['notifications' => $notifications]);
     }
 
-public function impersonateLogin(Request $request, User $user)
-{
-    $admin = $request->user();
+    public function impersonateLogin(Request $request, User $user)
+    {
+        $admin = $request->user();
 
-    if (!$admin || $admin->role != 1109) { // admin role
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    // Generate new token for the impersonated user
-    $token = Str::random(60);
-    $user->api_token = hash('sha256', $token);
-    $user->save();
-
-    // Determine redirect route
-    $redirectRoute = 'dashboard';
-    if ($user->role == 1098) { // normal user
-        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
-            $redirectRoute = 'profile-setup';
+        if (!$admin || $admin->role != 1109) { // admin role
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        // Generate new token for the impersonated user
+        $token = Str::random(60);
+        $user->api_token = hash('sha256', $token);
+        $user->save();
+
+        // Determine redirect route
+        $redirectRoute = 'dashboard';
+        if ($user->role == 1098) { // normal user
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'photo' => $user->photo,
+                'role' => $user->role,
+            ],
+            'redirect' => $redirectRoute,
+            'impersonator_id' => $admin->id,
+        ]);
     }
-
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'photo' => $user->photo,
-            'role' => $user->role,
-        ],
-        'redirect' => $redirectRoute,
-        'impersonator_id' => $admin->id,
-    ]);
-}
-
 }

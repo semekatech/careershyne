@@ -1,30 +1,55 @@
 <template>
-  <div>
-    <section>
-      <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
-        Featured Jobs
-      </h2>
+  <div class="w-full bg-white shadow rounded-lg p-6">
+    <!-- Loader -->
+    <div v-if="loading" class="flex justify-center items-center py-20">
+      <svg
+        class="animate-spin h-10 w-10 text-primary"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        ></path>
+      </svg>
+    </div>
 
-      <!-- Loader -->
-      <div v-if="loading" class="flex justify-center items-center py-20">
-        <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-        </svg>
+    <!-- Error -->
+    <div v-else-if="error" class="text-center py-10">
+      <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
+      <button
+        @click="fetchJobs"
+        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+
+    <!-- Jobs List -->
+    <div v-else>
+      <!-- Search -->
+      <div class="mb-4">
+        <input
+          v-model="search"
+          placeholder="Search jobs..."
+          class="p-2 border rounded w-full md:w-1/2"
+        />
       </div>
 
-      <!-- Error -->
-      <div v-else-if="error" class="text-center py-10">
-        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
-        <button @click="fetchJobs" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          Retry
-        </button>
-      </div>
-
-      <!-- Jobs List -->
-      <div v-else class="space-y-4">
+      <!-- Jobs -->
+      <div class="space-y-4">
         <div
-          v-for="job in jobs.slice(0, 5)"
+          v-for="job in paginatedJobs"
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
         >
@@ -48,7 +73,7 @@
               </div>
             </div>
 
-            <!-- OPEN DETAILS MODAL -->
+            <!-- View Details Button -->
             <button
               class="mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center whitespace-nowrap"
               @click="openModal(job)"
@@ -66,7 +91,7 @@
                 class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
               >
                 <span class="material-icons text-lg mr-1">check_circle</span>
-                Check Eligibility
+                Eligibility
               </button>
               <button
                 @click="openCvRevamp(job)"
@@ -93,9 +118,28 @@
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- MODALS -->
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4">
+        <button
+          @click="prevPage"
+          :disabled="currentPage <= 1"
+          class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          @click="nextPage"
+          :disabled="currentPage >= totalPages"
+          class="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Modals -->
     <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
     <EligibilityModal
       v-if="showEligibilityModal"
@@ -129,26 +173,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Swal from "sweetalert2";
 
 import JobService from "@/services/jobService";
 import eligibilityService from "@/services/eligibilityService";
-import coverLetterService from "@/services/coverLetter";
 import cvRevampService from "@/services/cvRevamp";
+import coverLetterService from "@/services/coverLetter";
 import emailTemplateService from "@/services/emailTemplate";
 
 import JobModal from "@/components/Dashboard/modals/JobModal.vue";
 import EligibilityModal from "@/components/Dashboard/modals/EligibilityModal.vue";
-import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
 import CvRevampModal from "@/components/Dashboard/modals/CvRevampModal.vue";
+import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
 import EmailTemplateModal from "@/components/Dashboard/modals/EmailTemplateModal.vue";
 
+// --- State ---
 const jobs = ref([]);
 const loading = ref(true);
 const error = ref("");
-const selectedJob = ref(null);
+const search = ref("");
+const currentPage = ref(1);
+const perPage = ref(10);
 
+const selectedJob = ref(null);
 const showModal = ref(false);
 const showEligibilityModal = ref(false);
 const showCvRevampModal = ref(false);
@@ -164,27 +212,51 @@ const coverLetterResult = ref(null);
 const emailTemplateProgress = ref(0);
 const emailTemplateResult = ref(null);
 
-function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString();
-}
-
+// --- Fetch Jobs ---
 async function fetchJobs() {
   loading.value = true;
   error.value = "";
   try {
     const data = await JobService.getJobs();
-    if (Array.isArray(data.data)) jobs.value = data.data;
-    else error.value = "No jobs found.";
+    jobs.value = Array.isArray(data.data) ? data.data : [];
   } catch (err) {
-    error.value = err.response?.status === 403
-      ? "Access denied. Upgrade your plan to access jobs."
-      : "Error fetching jobs. Please try again later.";
+    error.value =
+      err.response?.status === 403
+        ? "Access denied. Upgrade your plan to access jobs."
+        : "Error fetching jobs. Please try again later.";
   } finally {
     loading.value = false;
   }
 }
 
-// Modal handlers
+// --- Computed: Filter + Pagination ---
+const filteredJobs = computed(() => {
+  if (!search.value) return jobs.value;
+  return jobs.value.filter(job =>
+    [job.title, job.company, job.county, job.country].some(f =>
+      f?.toLowerCase().includes(search.value.toLowerCase())
+    )
+  );
+});
+
+const paginatedJobs = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value;
+  return filteredJobs.value.slice(start, start + perPage.value);
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredJobs.value.length / perPage.value)
+);
+
+// --- Pagination ---
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+}
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--;
+}
+
+// --- Modals & Actions ---
 function openModal(job) {
   selectedJob.value = job;
   showModal.value = true;
@@ -194,15 +266,14 @@ function closeModal() {
   showModal.value = false;
 }
 
-// Generic async action handler with 403 checks
 async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
-    text: `Ready to proceed for ${job.title}?`,
+    text: `Proceed with action for "${job.title}"?`,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Yes, proceed",
-    cancelButtonText: "No, cancel",
+    cancelButtonText: "Cancel",
   });
   if (!isConfirmed) return;
 
@@ -223,12 +294,15 @@ async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }
   } catch (err) {
     clearInterval(interval);
     progressRef.value = 100;
-    if (err.response?.status === 403) resultRef.value = { error: err.response.data.message || "Limit reached for this action." };
-    else resultRef.value = { error: "Action failed. Please try again later." };
+    resultRef.value = {
+      error:
+        err.response?.status === 403
+          ? err.response.data.message || "Limit reached."
+          : "Action failed. Please try again later.",
+    };
   }
 }
 
-// Action wrappers
 function openEligibility(job) {
   handleAction({
     job,
@@ -266,10 +340,33 @@ function openEmailTemplate(job) {
   });
 }
 
-function closeEligibility() { showEligibilityModal.value = false; eligibilityProgress.value = 0; eligibilityResult.value = null; }
-function closeCvRevamp() { showCvRevampModal.value = false; cvRevampProgress.value = 0; cvRevampResult.value = null; }
-function closeCoverLetter() { showCoverLetterModal.value = false; coverLetterProgress.value = 0; coverLetterResult.value = null; }
-function closeEmailTemplate() { showEmailTemplateModal.value = false; emailTemplateProgress.value = 0; emailTemplateResult.value = null; }
+function closeEligibility() {
+  showEligibilityModal.value = false;
+  eligibilityProgress.value = 0;
+  eligibilityResult.value = null;
+}
+function closeCvRevamp() {
+  showCvRevampModal.value = false;
+  cvRevampProgress.value = 0;
+  cvRevampResult.value = null;
+}
+function closeCoverLetter() {
+  showCoverLetterModal.value = false;
+  coverLetterProgress.value = 0;
+  coverLetterResult.value = null;
+}
+function closeEmailTemplate() {
+  showEmailTemplateModal.value = false;
+  emailTemplateProgress.value = 0;
+  emailTemplateResult.value = null;
+}
 
+// --- Helper ---
+function formatDate(dateString) {
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleDateString();
+}
+
+// --- Lifecycle ---
 onMounted(fetchJobs);
 </script>
