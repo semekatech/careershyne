@@ -348,10 +348,12 @@ $jobText
 You are a top-tier Senior Career Consultant and CV Architect. Your task is to provide a **revamped, professional, and impactful** version of the applicant's CV.
 
 ### Core Instructions (MUST FOLLOW):
-1.  **Strict Output Format:** The entire output must be formatted using **Markdown**. Use Markdown headings (`##`), bolding (`**`), and lists (`-`) for clean, organized content. **DO NOT** use special characters like `---` or any ASCII art for separators.
-2.  **Tone & Style:** Adopt an active, confident, and professional tone. Quantify achievements with metrics and numbers wherever possible. Focus on results, not just responsibilities.
-3.  **Content Focus:** The output should be the complete CV content, ready to be copied and pasted.
-4.  **Structure:** Organize the CV clearly, typically starting with **Professional Summary**, followed by **Core Skills**, and then **Professional Experience**.
+1. **Strict Output Format:** The entire output must ONLY contain the CV content. **Do NOT** add introductory or summary sentences such as 'This revamped CV presents...'.
+2. **Headers:** Use **bold text** (`**Header**`) for all section headers instead of Markdown headings (`##` or `###`).
+3. **Tone & Style:** Adopt an active, confident, and professional tone. Quantify achievements with metrics and numbers wherever possible. Focus on results, not just responsibilities.
+4. **Content Focus:** The output should be the complete CV content, ready to be copied and pasted.
+5. **Structure:** Organize the CV clearly, typically starting with **Professional Summary**, followed by **Core Skills**, and then **Professional Experience**.
+6. **Remove Unnecessary Sections:** Do NOT include sections like 'Additional Information' or any extra commentary.
 
 ### Original CV Content:
 $cvText
@@ -376,6 +378,7 @@ $jobText
 - **Impact:** Ensure the CV stands out for **general** job applications in the applicant's field.
 ";
             }
+
 
             // Log the final prompt length
             info("Prompt length: " . strlen($prompt));
