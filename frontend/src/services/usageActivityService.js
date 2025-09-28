@@ -18,7 +18,7 @@ api.interceptors.request.use(config => {
 const UsageActivityService = {
   getActivities() {
     // Example: GET /usage-activities
-    return api.get("/usage-activities");
+    return api.get("/users/usage-activities");
   },
 
   // Optional: fetch by user
