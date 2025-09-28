@@ -314,12 +314,14 @@ $jobText
         }
 
         // 2️⃣ Validate uploaded job file (PDF or image)
-        if (!$request->hasFile('job_file')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Job file is required.'
-            ], 422);
-        }
+       if (!$request->hasFile('job_file') || !$request->file('job_file')->isValid()) {
+    $error = $request->file('job_file') ? $request->file('job_file')->getError() : 'No file detected';
+    return response()->json([
+        'success' => false,
+        'message' => "Job file is required or invalid. PHP upload error code: $error"
+    ], 422);
+}
+
 
         $jobFile = $request->file('job_file');
 
