@@ -5,8 +5,8 @@
       <nav aria-label="Tabs" class="-mb-px flex space-x-8 overflow-x-auto">
         <a href="#" @click.prevent="activeTab = 'jobs'" :class="tabClass('jobs')">Featured Jobs</a>
         <a href="#" @click.prevent="activeTab = 'cv'" :class="tabClass('cv')">CV Revamp Generator</a>
-        <a href="#" @click.prevent="activeTab = 'cover'" :class="tabClass('cover')">Cover Letters</a>
-        <a href="#" @click.prevent="activeTab = 'email'" :class="tabClass('email')">Email Templates</a>
+        <a href="#" @click.prevent="activeTab = 'cover'" :class="tabClass('cover')">Cover Letters Generator</a>
+        <a href="#" @click.prevent="activeTab = 'email'" :class="tabClass('email')">Email Templates Generators</a>
         <!-- <a href="#" @click.prevent="activeTab = 'interviews'" :class="tabClass('interviews')">Interviews</a> -->
       </nav>
     </div>
