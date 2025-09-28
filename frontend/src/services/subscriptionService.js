@@ -18,7 +18,7 @@ api.interceptors.request.use((config) => {
 const subscriptionService = {
   async getLimits() {
     try {
-      const response = await api.get("/users/limits");
+      const response = await api.post("/users/limits");
       // Ensure we return defaults if keys are missing
       return {
         cv: response.data.cv ?? 0,
