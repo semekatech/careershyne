@@ -19,6 +19,7 @@ import SetupPage from "@/pages/SetupPage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
+import Plans from "@/pages/Dashboard/Plans.vue";
 const routes = [
   {
     path: "/",
@@ -220,6 +221,20 @@ const routes = [
       },
     ],
   },
+   {
+    path: "/my-plans",
+    component: DashboardLayout,
+    meta: {
+      title: "My Plans",
+    },
+    children: [
+      {
+        path: "",
+        component: Plans,
+      },
+    ],
+  },
+
 ];
 
 const router = createRouter({

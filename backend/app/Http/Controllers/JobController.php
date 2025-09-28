@@ -158,7 +158,7 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
-
+        DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
         // ✅ Return structured response
         return response()->json([
             'success'         => true,
@@ -269,7 +269,7 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
-
+        DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
         // ✅ Return structured response
         return response()->json([
             'success'       => true,
@@ -372,7 +372,7 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
-
+        DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
         // Return structured response
         return response()->json([
             'success'       => true,

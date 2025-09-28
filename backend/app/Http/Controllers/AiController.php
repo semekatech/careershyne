@@ -10,6 +10,7 @@ use thiagoalessio\TesseractOCR\TesseractOCR;
 use Intervention\Image\Facades\Image;
 use Stichoza\GoogleTranslate\GoogleTranslate;
 use DB;
+
 class AiController extends Controller
 {
     protected $aiReview;
@@ -97,16 +98,19 @@ class AiController extends Controller
     public function coverLetterGenerator(Request $request)
     {
         try {
-
             info("=== Cover Letter Generation Started ===");
+
             $user = auth('api')->user();
-            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-            if ($limit->emails == 0) {
+            $subscription = DB::table('subscriptions')->where('user_id', $user->id)->first();
+
+            // Check if user has any credits left
+            if ($subscription->coverletters <= 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You have reached your limit for Cover Letter generation. Please upgrade your subscription plan.'
                 ], 403);
             }
+
             // =========================
             // 1️⃣ Ensure CV exists
             // =========================
@@ -127,10 +131,7 @@ class AiController extends Controller
 
             $cvFile = new \Illuminate\Http\File($cvPath);
             $cvText = $this->extractTextFromFile($cvFile, 'CV');
-            $maxCvLength = 2000; // shorter, since we focus on job description
-            if (strlen($cvText) > $maxCvLength) {
-                $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
-            }
+            $cvText = strlen($cvText) > 2000 ? substr($cvText, 0, 2000) . "\n...[truncated]" : $cvText;
 
             // =========================
             // 2️⃣ Validate Job Input
@@ -138,12 +139,11 @@ class AiController extends Controller
             $jobText = null;
 
             if ($request->filled('job_text')) {
-                info("Job text provided in request.");
                 $jobText = $this->aiReview->cleanText($request->input('job_text'));
             } elseif ($request->hasFile('job_file') && $request->file('job_file')->isValid()) {
                 $jobFile = $request->file('job_file');
 
-                // File type check
+                // File type and size checks
                 $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
                 if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
                     return response()->json([
@@ -151,8 +151,6 @@ class AiController extends Controller
                         'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
                     ], 422);
                 }
-
-                // File size check (5MB)
                 if ($jobFile->getSize() > 5 * 1024 * 1024) {
                     return response()->json([
                         'success' => false,
@@ -160,12 +158,10 @@ class AiController extends Controller
                     ], 422);
                 }
 
-                // PDF page limit (3 pages max)
                 if ($jobFile->getMimeType() === 'application/pdf') {
                     $pdf = new \Smalot\PdfParser\Parser();
                     $pdfDocument = $pdf->parseFile($jobFile->getPathname());
-                    $pageCount = count($pdfDocument->getPages());
-                    if ($pageCount > 3) {
+                    if (count($pdfDocument->getPages()) > 3) {
                         return response()->json([
                             'success' => false,
                             'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
@@ -181,10 +177,7 @@ class AiController extends Controller
                 ], 422);
             }
 
-            $maxJobLength = 4000;
-            if (strlen($jobText) > $maxJobLength) {
-                $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
-            }
+            $jobText = strlen($jobText) > 4000 ? substr($jobText, 0, 4000) . "\n...[truncated]" : $jobText;
 
             if (empty(trim($jobText))) {
                 return response()->json([
@@ -232,13 +225,16 @@ $jobText
                 ], 422);
             }
 
+
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
+
             // =========================
-            // 4️⃣ Return JSON response
+            // 5️⃣ Return JSON response
             // =========================
             return response()->json([
                 'success' => true,
                 'message' => 'Cover letter generated successfully.',
-                'cover_letter' => $coverLetter
+                'cover_letter' => $coverLetter,
             ]);
         } catch (\Exception $e) {
             info("Unhandled exception in coverLetterGenerator: " . $e->getMessage());
@@ -248,6 +244,7 @@ $jobText
             ], 500);
         }
     }
+
 
     public function emailTemplateGenerator(Request $request)
     {
@@ -316,10 +313,9 @@ $jobText
             info(json_encode($response, JSON_PRETTY_PRINT));
             $emailTemplate = trim($response->choices[0]->message->content ?? 'Error generating email template.');
             info("Email template generated successfully.");
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
 
-            // =========================
-            // 3️⃣ Return JSON response
-            // =========================
+
             return response()->json([
                 'success' => true,
                 'message' => 'Job application email template generated successfully.',
@@ -340,7 +336,7 @@ $jobText
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
             $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-            if ($limit->emails == 0) {
+            if ($limit->cv == 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You have reached your limit for CV revamping. Please upgrade your subscription plan.'
@@ -457,7 +453,7 @@ $jobText
             ]);
 
             $revampedCv = $response->choices[0]->message->content ?? '';
-
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
             if (empty($revampedCv)) {
                 return response()->json([
                     'success' => false,
