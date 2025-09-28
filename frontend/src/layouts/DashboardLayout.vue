@@ -4,123 +4,63 @@
     <transition name="slide">
       <aside
         v-if="isSidebarOpen || isDesktop"
-        class="fixed inset-y-0 left-0 w-64 bg-surface-light dark:bg-surface-dark flex flex-col border-r border-gray-200 dark:border-gray-700 z-30 md:relative md:flex md:flex-shrink-0"
+        class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 flex flex-col border-r border-gray-200 dark:border-gray-700 z-30 md:relative md:flex md:flex-shrink-0"
       >
         <div class="flex flex-col h-full">
-          <div class="flex items-center justify-center h-16 px-4">
+          <!-- Logo & Close Button -->
+          <div class="flex items-center justify-between h-16 px-4">
             <a href="/dashboard" class="flex items-center">
-              <span class="self-center text-xl font-semibold whitespace-nowrap text-black">
+              <span
+                class="self-center text-xl font-semibold whitespace-nowrap text-black dark:text-white"
+              >
                 <strong>CAREER PORTAL</strong>
               </span>
             </a>
-            <!-- Close button on small screens -->
             <button
               v-if="!isDesktop"
               @click="toggleSidebar"
-              class="ml-auto text-white text-xl focus:outline-none"
+              class="text-black dark:text-white text-2xl focus:outline-none"
               aria-label="Close sidebar"
             >
               &times;
             </button>
           </div>
 
-          <!-- Sidebar navigation -->
+          <!-- Sidebar Navigation -->
           <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <!-- Dashboard -->
-            <a
-              href="/dashboard"
-              class="flex items-center px-4 py-2 text-white bg-primary rounded-lg"
+            <router-link
+              v-for="link in filteredLinks"
+              :key="link.name"
+              :to="link.href"
+              @click="link.name === 'Logout' ? handleLogout() : null"
+              class="flex items-center px-4 py-2 rounded-lg transition-colors"
+              :class="
+                isActive(link.href)
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+              "
             >
-              <span class="material-icons-sharp mr-3">dashboard</span>
-              Dashboard
-            </a>
+              <!-- Material Icon -->
+              <span
+                v-if="link.icon && link.iconName"
+                :class="link.icon + ' mr-3'"
+              >
+                {{ link.iconName }}
+              </span>
 
-            <!-- Example menus -->
-            <a
-              href="/manage-orders"
-              v-if="auth.user?.role !== '1098'"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <font-awesome-icon :icon="['fas', 'shopping-cart']" class="mr-3" />
-              Manage Orders
-            </a>
+              <!-- FontAwesome Icon -->
+              <font-awesome-icon
+                v-if="link.faIcon"
+                :icon="link.faIcon"
+                class="mr-3"
+              />
 
-            <a
-              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
-              href="/manage-payments"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <font-awesome-icon :icon="['fas', 'credit-card']" class="mr-3" />
-              Manage Payments
-            </a>
-
-            <a
-              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
-              href="/manage-users"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <font-awesome-icon :icon="['fas', 'users']" class="mr-3" />
-              Manage Users
-            </a>
-
-            <a
-              v-if="auth.user?.role !== 'radio' && auth.user?.role !== '1098'"
-              href="/manage-jobs"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <span class="material-icons-sharp mr-3">business_center</span>
-              Manage Jobs
-            </a>
-
-            <!-- Jobseeker Menus -->
-            <a
-              v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <span class="material-icons-sharp mr-3">person</span>
-              Personal Summary
-            </a>
-
-            <a
-              v-if="auth.user?.role != 'radio'"
-              href="/my-plans"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <span class="material-icons-sharp mr-3">workspace_premium</span>
-              My Plans
-            </a>
-
-            <a
-              v-if="auth.user?.role != 'radio'"
-              href="/browse-jobs"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <span class="material-icons-sharp mr-3">business_center</span>
-              My Jobs
-            </a>
-
-            <a
-              v-if="auth.user?.role != 'radio'"
-              href="/browse-acctivities"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <span class="material-icons-sharp mr-3">history</span>
-              My Activities
-            </a>
-
-            <!-- Logout -->
-            <a
-              href="#"
-              @click.prevent="handleLogout"
-              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-3" />
-              Logout
-            </a>
+              {{ link.name }}
+            </router-link>
           </nav>
 
-          <div class="p-4 border-t border-white-700">
+          <!-- User Info -->
+          <div class="p-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
               <img
                 class="w-10 h-10 rounded-full"
@@ -128,7 +68,9 @@
                 alt="User"
               />
               <div class="ml-3">
-                <p class="text-sm font-medium">{{ auth.user?.name }}</p>
+                <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {{ auth.user?.name }}
+                </p>
               </div>
             </div>
           </div>
@@ -143,49 +85,45 @@
       class="fixed inset-0 bg-black bg-opacity-50 z-20"
     ></div>
 
-    <!-- Main Content (fixed, with scrollable dashboard) -->
+    <!-- Main Content -->
     <div class="flex flex-col flex-1 h-screen">
       <!-- Top Navigation -->
       <header
         class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 flex-shrink-0"
       >
         <div class="flex items-center">
-          <!-- Hamburger button visible on small devices -->
+          <!-- Hamburger button on small devices -->
           <button
-            class="md:hidden text-gray-500 focus:outline-none"
+            class="md:hidden text-gray-500 dark:text-gray-300 focus:outline-none"
             @click="toggleSidebar"
             aria-label="Open sidebar"
           >
             <font-awesome-icon icon="bars" />
           </button>
-          <h1
-            style="color: #2c3137"
-            class="text-xl font-semibold text-gray-800 ml-4"
-          >
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white ml-4">
             {{ pageTitle }}
           </h1>
         </div>
+
         <div class="flex items-center space-x-4">
-          <button class="text-gray-500 focus:outline-none">
+          <button class="text-gray-500 dark:text-gray-300 focus:outline-none">
             <i class="fas fa-bell"></i>
           </button>
-          <button class="text-gray-500 focus:outline-none">
+          <button class="text-gray-500 dark:text-gray-300 focus:outline-none">
             <i class="fas fa-envelope"></i>
           </button>
-          <div class="relative">
-            <a href="/my-profile" class="flex items-center focus:outline-none">
-              <img
-                class="w-8 h-8 rounded-full"
-                :src="preview || defaultAvatar"
-                alt="User"
-              />
-            </a>
-          </div>
+          <a href="/my-profile" class="flex items-center focus:outline-none">
+            <img
+              class="w-8 h-8 rounded-full"
+              :src="preview || defaultAvatar"
+              alt="User"
+            />
+          </a>
         </div>
       </header>
 
-      <!-- Dashboard Content -->
-      <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+      <!-- Main Content Area -->
+      <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-800">
         <router-view />
       </main>
     </div>
@@ -193,16 +131,17 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
-const route = useRoute();
 const router = useRouter();
-const pageTitle = computed(() => route.meta.title || "Dashboard");
-
+const route = useRoute();
 const auth = useAuthStore();
 
+const pageTitle = computed(() => route.meta.title || "Dashboard");
+
+// Sidebar state
 const isSidebarOpen = ref(false);
 const isDesktop = ref(window.innerWidth >= 768);
 
@@ -212,31 +151,102 @@ const toggleSidebar = () => {
 
 const handleResize = () => {
   isDesktop.value = window.innerWidth >= 768;
-  if (isDesktop.value) {
-    isSidebarOpen.value = false;
-  }
+  if (isDesktop.value) isSidebarOpen.value = false;
 };
 
-onMounted(() => {
-  window.addEventListener("resize", handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-});
+onMounted(() => window.addEventListener("resize", handleResize));
+onBeforeUnmount(() => window.removeEventListener("resize", handleResize));
 
 const defaultAvatar = auth.user?.photo
   ? `https://demo.ngumzo.com/storage/${auth.user.photo}`
   : "/profile.jpg";
+const preview = ref(null); // optional for avatar preview
 
+// Logout function
 const handleLogout = () => {
   auth.clearToken();
   router.push("/admin");
 };
+
+// Sidebar links with Material & FontAwesome icons
+const sidebarLinks = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: "material-icons-sharp",
+    iconName: "dashboard",
+  },
+  {
+    name: "Manage Orders",
+    href: "/manage-orders",
+    faIcon: ["fas", "shopping-cart"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Payments",
+    href: "/manage-payments",
+    faIcon: ["fas", "credit-card"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Users",
+    href: "/manage-users",
+    faIcon: ["fas", "users"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Jobs",
+    href: "/manage-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Personal Summary",
+    href: "/cover-letter-generator",
+    icon: "material-icons-sharp",
+    iconName: "person",
+    roles: ["1109","1098"],
+  },
+  {
+    name: "My Plans",
+    href: "/my-plans",
+    icon: "material-icons-sharp",
+    iconName: "workspace_premium",
+    roles: ["1098"],
+  },
+  {
+    name: "My Jobs",
+    href: "/browse-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1098"],
+  },
+  {
+    name: "My Activities",
+    href: "/browse-acctivities",
+    icon: "material-icons-sharp",
+    iconName: "history",
+    roles: ["1098"],
+  },
+  { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
+];
+
+// Filter links by user role
+const filteredLinks = computed(() => {
+  return sidebarLinks.filter(
+    (link) => !link.roles || link.roles.includes(auth.user?.role)
+  );
+});
+
+// Highlight active route
+const isActive = (href) => {
+  return route.path === href;
+};
 </script>
 
 <style scoped>
-/* Slide transition for sidebar */
+/* Sidebar slide transition */
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.3s ease;
@@ -250,7 +260,10 @@ const handleLogout = () => {
   transform: translateX(0);
 }
 
+/* Material icon size */
 .material-icons-sharp {
   font-size: 1.25rem;
+  line-height: 1;
+  vertical-align: middle;
 }
 </style>
