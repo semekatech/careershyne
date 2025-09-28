@@ -37,6 +37,7 @@
               Dashboard
             </a>
 
+              <!-- ===== Admin Menus ===== -->
             <!-- Manage Orders -->
             <a
               href="/manage-orders"
@@ -77,19 +78,60 @@
 
              Manage Jobs
             </a>
+            
+            <!-- ===== Jobseeker Menus ===== -->
+            <!-- Personal Summary -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <span class="material-icons-sharp mr-3">person</span>
+             Personal Summary
+            </a>
+
+            <!-- My Plans -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <span class="material-icons-sharp mr-3">workspace_premium</span>
+              My Plans
+            </a>
+
+            <!-- My Jobs -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <span class="material-icons-sharp mr-3">business_center</span>
+              My Jobs
+            </a>
+
+            <!-- My Activities -->
+            <a
+              v-if="auth.user?.role != 'radio'"
+              href="/cover-letter-generator"
+              class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <span class="material-icons-sharp mr-3">history</span>
+              My Activities
+            </a>
 
             <!-- Cover Letters -->
-            <a
+            <!-- <a
               v-if="auth.user?.role != 'radio'"
               href="/cover-letter-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">attach_file</span>
               Cover Letters
-            </a>
+            </a> -->
 
             <!-- Email Templates -->
-            <a
+            <!-- <a
               v-if="auth.user?.role != 'radio'"
               href="/email-template-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
@@ -97,10 +139,10 @@
               <span class="material-icons-sharp mr-3">email</span>
 
               Email Templates
-            </a>
+            </a> -->
 
             <!-- CV Revamp -->
-            <a
+            <!-- <a
               v-if="auth.user?.role != 'radio'"
               href="/cv-revamp-generator"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
@@ -108,7 +150,7 @@
               <span class="material-icons-sharp mr-3">mail_outline</span>
 
               CV Revamp
-            </a>
+            </a> -->
 
             <!-- Logout -->
             <a

@@ -7,7 +7,7 @@
       <div class="absolute inset-0 z-0">
         <img
           src="/img/login-bg.png"
-          alt="Merchandise background"
+          alt="Careershyne background"
           class="w-full h-full object-cover"
         />
       </div>
