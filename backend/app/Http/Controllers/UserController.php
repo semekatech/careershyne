@@ -217,7 +217,7 @@ class UserController extends Controller
         $activities = DB::table('usage_activities')->where('user_id', $user_id)
             ->orderBy('created_at', 'desc')
             ->get();
-
+info($activities);
         return response()->json(['data' => $activities]);
     }
 }
