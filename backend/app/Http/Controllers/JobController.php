@@ -433,7 +433,7 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
-
+        DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
         // Return structured response
         return response()->json([
             'success'       => true,
