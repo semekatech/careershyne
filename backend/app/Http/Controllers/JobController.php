@@ -275,7 +275,8 @@ PROMPT;
             'action'      => 'email_template',
             'status'      => 'success',
             'message'     => 'CV Revamp Generation',
-            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+            'tokens_used' => $response->usage->totalTokens ?? 0,
+
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
@@ -387,7 +388,8 @@ PROMPT;
             'action'      => 'email_template',
             'status'      => 'success',
             'message'     => 'Cover letter Generation',
-            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+           'tokens_used' => $response->usage->totalTokens ?? 0,
+
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
@@ -459,7 +461,7 @@ PROMPT;
             'action'      => 'email_template',
             'status'      => 'success',
             'message'     => 'Email template Generation',
-            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+           'tokens_used' => $response->usage->totalTokens ?? 0,
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
