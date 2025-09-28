@@ -71,12 +71,19 @@ Route::prefix('users')->group(function () {
 Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::post('/add', [JobController::class, 'store']);
     Route::get('/all', [JobController::class, 'fetchAll']);
-    Route::post('/check-eligibility', [JobController::class, 'checkEligibility']);
-    Route::post('/cv-revamp', [JobController::class, 'revampCv']);
-    Route::post('/cover-letter', [JobController::class, 'coverLetter']);
-    Route::post('/email-template', [JobController::class, 'emailTemplate']);
+
+    Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
+        ->middleware('check.subscription.limit:eligibility');
+    Route::post('/cv-revamp', [JobController::class, 'revampCv'])
+        ->middleware('check.subscription.limit:cv');
+    Route::post('/cover-letter', [JobController::class, 'coverLetter'])
+        ->middleware('check.subscription.limit:coverLetters');
+    Route::post('/email-template', [JobController::class, 'emailTemplate'])
+        ->middleware('check.subscription.limit:emails');
+
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
+
 Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
