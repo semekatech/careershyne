@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+
 class UserController extends Controller
 {
 
@@ -54,7 +55,16 @@ class UserController extends Controller
                 'status' => $request->status,
                 'password' => Hash::make('Careershyne@2025'),
             ]);
-
+            DB::table('subscriptions')->insert([
+                'user_id' => $user->id,
+                'plan' => 'Free',
+                'cv' => 1,
+                'coverletters' => 1,
+                'emails' => 1,
+                'checks' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             if ($request->hasFile('cv')) {
                 $user->cv_path = $request->file('cv')->store('cvs', 'public');
             }

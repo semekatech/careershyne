@@ -34,24 +34,7 @@
           <div v-html="job.applicationInstructions" class="prose max-w-full"></div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="mt-6 flex flex-wrap gap-3">
-          <button @click="$emit('check-eligibility', job)" class="flex items-center gap-1 py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50">
-            <span class="material-icons text-base">check_circle</span> Check Eligibility
-          </button>
-
-          <button @click="$emit('cv-revamp', job)" class="flex items-center gap-1 py-2 px-3 border border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50">
-            <span class="material-icons text-base">description</span> CV Revamp
-          </button>
-
-          <button @click="$emit('cover-letter', job)" class="flex items-center gap-1 py-2 px-3 border border-yellow-500 text-yellow-500 font-semibold rounded-lg hover:bg-yellow-50">
-            <span class="material-icons text-base">mail</span> Cover Letter
-          </button>
-
-          <button @click="$emit('email-template', job)" class="flex items-center gap-1 py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50">
-            <span class="material-icons text-base">drafts</span> Email Template
-          </button>
-        </div>
+       
       </div>
     </div>
   </div>

@@ -9,7 +9,7 @@ use OpenAI;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Intervention\Image\Facades\Image;
 use Stichoza\GoogleTranslate\GoogleTranslate;
-
+use DB;
 class AiController extends Controller
 {
     protected $aiReview;

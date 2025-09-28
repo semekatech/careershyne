@@ -7,35 +7,16 @@
 
       <!-- Loader -->
       <div v-if="loading" class="flex justify-center items-center py-20">
-        <svg
-          class="animate-spin h-8 w-8 text-primary"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          ></path>
+        <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
       </div>
 
       <!-- Error -->
       <div v-else-if="error" class="text-center py-10">
         <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
-        <button
-          @click="fetchJobs"
-          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
+        <button @click="fetchJobs" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors">
           Retry
         </button>
       </div>
@@ -47,9 +28,7 @@
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
         >
-          <div
-            class="flex flex-col sm:flex-row justify-between items-start mb-3"
-          >
+          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -57,9 +36,7 @@
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
                 {{ job.company }} - {{ job.type }}
               </p>
-              <div
-                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
-              >
+              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -196,16 +173,12 @@ async function fetchJobs() {
   error.value = "";
   try {
     const data = await JobService.getJobs();
-    if (Array.isArray(data.data)) {
-      jobs.value = data.data;
-    } else {
-      jobs.value = [];
-      error.value = "No jobs found.";
-    }
+    if (Array.isArray(data.data)) jobs.value = data.data;
+    else error.value = "No jobs found.";
   } catch (err) {
-    console.error("Error fetching jobs:", err);
-    jobs.value = [];
-    error.value = "Error fetching jobs. Please try again later.";
+    error.value = err.response?.status === 403
+      ? "Access denied. Upgrade your plan to access jobs."
+      : "Error fetching jobs. Please try again later.";
   } finally {
     loading.value = false;
   }
@@ -221,50 +194,11 @@ function closeModal() {
   showModal.value = false;
 }
 
-// Eligibility
-async function openEligibility(job) {
+// Generic async action handler with 403 checks
+async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
-    text: "Ready to check eligibility for this job?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, check eligibility",
-    cancelButtonText: "No, cancel",
-  });
-  if (!isConfirmed) return;
-
-  selectedJob.value = job;
-  showEligibilityModal.value = true;
-  eligibilityProgress.value = 0;
-  eligibilityResult.value = null;
-
-  const interval = setInterval(() => {
-    if (eligibilityProgress.value < 90) eligibilityProgress.value += 10;
-  }, 400);
-
-  try {
-    const result = await eligibilityService.checkEligibility(job.id);
-    clearInterval(interval);
-    eligibilityProgress.value = 100;
-    eligibilityResult.value = result;
-  } catch {
-    clearInterval(interval);
-    eligibilityProgress.value = 100;
-    eligibilityResult.value = { error: "Failed to check eligibility." };
-  }
-}
-
-function closeEligibility() {
-  showEligibilityModal.value = false;
-  eligibilityProgress.value = 0;
-  eligibilityResult.value = null;
-}
-
-// CV Revamp
-async function openCvRevamp(job) {
-  const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
-    text: "Ready to generate a revamped CV for this job?",
+    text: `Ready to proceed for ${job.title}?`,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Yes, proceed",
@@ -273,109 +207,69 @@ async function openCvRevamp(job) {
   if (!isConfirmed) return;
 
   selectedJob.value = job;
-  showCvRevampModal.value = true;
-  cvRevampProgress.value = 0;
-  cvRevampResult.value = null;
+  modalRef.value = true;
+  progressRef.value = 0;
+  resultRef.value = null;
 
   const interval = setInterval(() => {
-    if (cvRevampProgress.value < 90) cvRevampProgress.value += 10;
+    if (progressRef.value < 90) progressRef.value += 10;
   }, 400);
 
   try {
-    const result = await cvRevampService.revamp(job.id);
+    const result = await serviceFn(job.id);
     clearInterval(interval);
-    cvRevampProgress.value = 100;
-    cvRevampResult.value = result;
-  } catch {
+    progressRef.value = 100;
+    resultRef.value = result;
+  } catch (err) {
     clearInterval(interval);
-    cvRevampProgress.value = 100;
-    cvRevampResult.value = { error: "Failed to revamp CV." };
+    progressRef.value = 100;
+    if (err.response?.status === 403) resultRef.value = { error: err.response.data.message || "Limit reached for this action." };
+    else resultRef.value = { error: "Action failed. Please try again later." };
   }
 }
 
-function closeCvRevamp() {
-  showCvRevampModal.value = false;
-  cvRevampProgress.value = 0;
-  cvRevampResult.value = null;
-}
-
-// Cover Letter
-async function openCoverLetter(job) {
-  const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
-    text: "Ready to generate a cover letter for this job?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, proceed",
-    cancelButtonText: "No, cancel",
+// Action wrappers
+function openEligibility(job) {
+  handleAction({
+    job,
+    serviceFn: eligibilityService.checkEligibility,
+    modalRef: showEligibilityModal,
+    progressRef: eligibilityProgress,
+    resultRef: eligibilityResult,
   });
-  if (!isConfirmed) return;
-
-  selectedJob.value = job;
-  showCoverLetterModal.value = true;
-  coverLetterProgress.value = 0;
-  coverLetterResult.value = null;
-
-  const interval = setInterval(() => {
-    if (coverLetterProgress.value < 90) coverLetterProgress.value += 10;
-  }, 400);
-
-  try {
-    const result = await coverLetterService.generate(job.id);
-    clearInterval(interval);
-    coverLetterProgress.value = 100;
-    coverLetterResult.value = result;
-  } catch {
-    clearInterval(interval);
-    coverLetterProgress.value = 100;
-    coverLetterResult.value = { error: "Failed to generate cover letter." };
-  }
 }
-
-function closeCoverLetter() {
-  showCoverLetterModal.value = false;
-  coverLetterProgress.value = 0;
-  coverLetterResult.value = null;
-}
-
-// Email Template
-async function openEmailTemplate(job) {
-  const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
-    text: "Ready to generate an email template for this job?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, proceed",
-    cancelButtonText: "No, cancel",
+function openCvRevamp(job) {
+  handleAction({
+    job,
+    serviceFn: cvRevampService.revamp,
+    modalRef: showCvRevampModal,
+    progressRef: cvRevampProgress,
+    resultRef: cvRevampResult,
   });
-  if (!isConfirmed) return;
-
-  selectedJob.value = job;
-  showEmailTemplateModal.value = true;
-  emailTemplateProgress.value = 0;
-  emailTemplateResult.value = null;
-
-  const interval = setInterval(() => {
-    if (emailTemplateProgress.value < 90) emailTemplateProgress.value += 10;
-  }, 400);
-
-  try {
-    const result = await emailTemplateService.generate(job.id);
-    clearInterval(interval);
-    emailTemplateProgress.value = 100;
-    emailTemplateResult.value = result;
-  } catch {
-    clearInterval(interval);
-    emailTemplateProgress.value = 100;
-    emailTemplateResult.value = { error: "Failed to generate email template." };
-  }
+}
+function openCoverLetter(job) {
+  handleAction({
+    job,
+    serviceFn: coverLetterService.generate,
+    modalRef: showCoverLetterModal,
+    progressRef: coverLetterProgress,
+    resultRef: coverLetterResult,
+  });
+}
+function openEmailTemplate(job) {
+  handleAction({
+    job,
+    serviceFn: emailTemplateService.generate,
+    modalRef: showEmailTemplateModal,
+    progressRef: emailTemplateProgress,
+    resultRef: emailTemplateResult,
+  });
 }
 
-function closeEmailTemplate() {
-  showEmailTemplateModal.value = false;
-  emailTemplateProgress.value = 0;
-  emailTemplateResult.value = null;
-}
+function closeEligibility() { showEligibilityModal.value = false; eligibilityProgress.value = 0; eligibilityResult.value = null; }
+function closeCvRevamp() { showCvRevampModal.value = false; cvRevampProgress.value = 0; cvRevampResult.value = null; }
+function closeCoverLetter() { showCoverLetterModal.value = false; coverLetterProgress.value = 0; coverLetterResult.value = null; }
+function closeEmailTemplate() { showEmailTemplateModal.value = false; emailTemplateProgress.value = 0; emailTemplateResult.value = null; }
 
 onMounted(fetchJobs);
 </script>

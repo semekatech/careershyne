@@ -24,6 +24,7 @@ const subscriptionService = {
         cv: response.data.cv ?? 0,
         coverLetters: response.data.coverLetters ?? 0,
         emails: response.data.emails ?? 0,
+        checks: response.data.checks ?? 0,
         plan: response.data.plan ?? "Free",
       };
     } catch (err) {

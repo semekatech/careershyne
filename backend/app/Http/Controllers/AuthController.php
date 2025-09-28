@@ -95,6 +95,7 @@ class AuthController extends Controller
                 'cv' => 1,
                 'coverletters' => 1,
                 'emails' => 1,
+                'checks' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
