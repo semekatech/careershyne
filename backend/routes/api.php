@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
-
+use App\Http\Middleware\CheckSubscriptionLimit;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -70,16 +70,20 @@ Route::prefix('users')->group(function () {
 
 Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::post('/add', [JobController::class, 'store']);
+
     Route::get('/all', [JobController::class, 'fetchAll']);
 
     Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
-        ->middleware('check.subscription.limit:eligibility');
+        ->middleware(CheckSubscriptionLimit::class.':eligibility');
+
     Route::post('/cv-revamp', [JobController::class, 'revampCv'])
-        ->middleware('check.subscription.limit:cv');
+        ->middleware(CheckSubscriptionLimit::class.':cv');
+
     Route::post('/cover-letter', [JobController::class, 'coverLetter'])
-        ->middleware('check.subscription.limit:coverLetters');
+        ->middleware(CheckSubscriptionLimit::class.':coverLetters');
+
     Route::post('/email-template', [JobController::class, 'emailTemplate'])
-        ->middleware('check.subscription.limit:emails');
+        ->middleware(CheckSubscriptionLimit::class.':emails');
 
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
