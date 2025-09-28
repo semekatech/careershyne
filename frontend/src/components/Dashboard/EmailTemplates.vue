@@ -93,7 +93,7 @@
           Step 1: Provide Context or Job Description
         </h2>
         <p class="text-subtext-light dark:text-subtext-dark mb-6">
-          Paste the context or upload a file (PDF/DOC) that explains the purpose of your email.
+          Paste the context or upload a file (PDF) that explains the purpose of your email.
         </p>
 
         <div class="mb-6">
@@ -105,7 +105,7 @@
               class="w-full appearance-none bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="text">Paste Context</option>
-              <option value="pdf">Upload PDF/DOC</option>
+              <option value="pdf">Upload PDF</option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-subtext-light dark:text-subtext-dark"
@@ -271,14 +271,14 @@ async function submitContext() {
   loading.value = true;
 
   const formData = new FormData();
-  if (inputType.value === "text") formData.append("email_text", emailContext.value);
-  if (inputType.value === "pdf" && contextFile.value) formData.append("email_file", contextFile.value);
+  if (inputType.value === "text") formData.append("job_text", emailContext.value);
+  if (inputType.value === "pdf" && contextFile.value) formData.append("job_pdf", contextFile.value);
 
   try {
-  const data = await generateJobEmail(formData);
+    const data = await generateJobEmail(formData);
 
-    if (data.success && data.email) {
-      generatedEmail.value = data.email;
+    if (data.success && data.email_template) { // notice backend returns 'email_template'
+      generatedEmail.value = data.email_template;
       currentStep.value = 2;
     } else {
       generatedEmail.value = `❌ Error: ${data.message || "Email generation failed."}`;
@@ -299,6 +299,7 @@ async function submitContext() {
     loading.value = false;
   }
 }
+
 
 // --- Format Email ---
 const formattedEmail = computed(() => {

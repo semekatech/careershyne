@@ -29,6 +29,17 @@
         </svg>
       </div>
 
+      <!-- Error -->
+      <div v-else-if="error" class="text-center py-10">
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
+        <button
+          @click="fetchJobs"
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+
       <!-- Jobs List -->
       <div v-else class="space-y-4">
         <div
@@ -71,9 +82,7 @@
           </div>
 
           <!-- Action Buttons -->
-          <div
-            class="border-t border-border-light dark:border-border-dark pt-3"
-          >
+          <div class="border-t border-border-light dark:border-border-dark pt-3">
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 @click="openEligibility(job)"
@@ -144,6 +153,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
+
 import JobService from "@/services/jobService";
 import eligibilityService from "@/services/eligibilityService";
 import coverLetterService from "@/services/coverLetter";
@@ -155,10 +166,10 @@ import EligibilityModal from "@/components/Dashboard/modals/EligibilityModal.vue
 import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
 import CvRevampModal from "@/components/Dashboard/modals/CvRevampModal.vue";
 import EmailTemplateModal from "@/components/Dashboard/modals/EmailTemplateModal.vue";
-import Swal from "sweetalert2";
 
 const jobs = ref([]);
 const loading = ref(true);
+const error = ref("");
 const selectedJob = ref(null);
 
 const showModal = ref(false);
@@ -182,17 +193,25 @@ function formatDate(dateString) {
 
 async function fetchJobs() {
   loading.value = true;
+  error.value = "";
   try {
     const data = await JobService.getJobs();
-    jobs.value = Array.isArray(data.data) ? data.data : [];
+    if (Array.isArray(data.data)) {
+      jobs.value = data.data;
+    } else {
+      jobs.value = [];
+      error.value = "No jobs found.";
+    }
   } catch (err) {
     console.error("Error fetching jobs:", err);
     jobs.value = [];
+    error.value = "Error fetching jobs. Please try again later.";
   } finally {
     loading.value = false;
   }
 }
 
+// Modal handlers
 function openModal(job) {
   selectedJob.value = job;
   showModal.value = true;
@@ -202,6 +221,7 @@ function closeModal() {
   showModal.value = false;
 }
 
+// Eligibility
 async function openEligibility(job) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
@@ -211,8 +231,8 @@ async function openEligibility(job) {
     confirmButtonText: "Yes, check eligibility",
     cancelButtonText: "No, cancel",
   });
-
   if (!isConfirmed) return;
+
   selectedJob.value = job;
   showEligibilityModal.value = true;
   eligibilityProgress.value = 0;
@@ -240,17 +260,18 @@ function closeEligibility() {
   eligibilityResult.value = null;
 }
 
+// CV Revamp
 async function openCvRevamp(job) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: "Ready to generate a revamped CV for this job?",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Yes, check eligibility",
+    confirmButtonText: "Yes, proceed",
     cancelButtonText: "No, cancel",
   });
-
   if (!isConfirmed) return;
+
   selectedJob.value = job;
   showCvRevampModal.value = true;
   cvRevampProgress.value = 0;
@@ -259,6 +280,7 @@ async function openCvRevamp(job) {
   const interval = setInterval(() => {
     if (cvRevampProgress.value < 90) cvRevampProgress.value += 10;
   }, 400);
+
   try {
     const result = await cvRevampService.revamp(job.id);
     clearInterval(interval);
@@ -277,17 +299,18 @@ function closeCvRevamp() {
   cvRevampResult.value = null;
 }
 
+// Cover Letter
 async function openCoverLetter(job) {
-   const { isConfirmed } = await Swal.fire({
+  const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: "Ready to generate a cover letter for this job?",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Yes, check eligibility",
+    confirmButtonText: "Yes, proceed",
     cancelButtonText: "No, cancel",
   });
-
   if (!isConfirmed) return;
+
   selectedJob.value = job;
   showCoverLetterModal.value = true;
   coverLetterProgress.value = 0;
@@ -296,6 +319,7 @@ async function openCoverLetter(job) {
   const interval = setInterval(() => {
     if (coverLetterProgress.value < 90) coverLetterProgress.value += 10;
   }, 400);
+
   try {
     const result = await coverLetterService.generate(job.id);
     clearInterval(interval);
@@ -314,17 +338,18 @@ function closeCoverLetter() {
   coverLetterResult.value = null;
 }
 
+// Email Template
 async function openEmailTemplate(job) {
-   const { isConfirmed } = await Swal.fire({
+  const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: "Ready to generate an email template for this job?",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Yes, check eligibility",
+    confirmButtonText: "Yes, proceed",
     cancelButtonText: "No, cancel",
   });
-
   if (!isConfirmed) return;
+
   selectedJob.value = job;
   showEmailTemplateModal.value = true;
   emailTemplateProgress.value = 0;
@@ -333,6 +358,7 @@ async function openEmailTemplate(job) {
   const interval = setInterval(() => {
     if (emailTemplateProgress.value < 90) emailTemplateProgress.value += 10;
   }, 400);
+
   try {
     const result = await emailTemplateService.generate(job.id);
     clearInterval(interval);

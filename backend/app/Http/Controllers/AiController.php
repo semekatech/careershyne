@@ -347,7 +347,6 @@ $jobText
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
 
-            // 1️⃣ Ensure CV exists
             if (!$user->cv_path) {
                 return response()->json([
                     'success' => false,

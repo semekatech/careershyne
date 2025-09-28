@@ -64,6 +64,7 @@ Route::prefix('users')->group(function () {
     Route::get('/all', [UserController::class, 'fetchAll']);
     Route::put('/{id}/toggle-status', [CvOrderController::class, 'toggleStatus']);
     Route::post('/save', [UserController::class, 'store']);
+    Route::middleware('auth:api')->post('/limits', [UserController::class, 'userLimits']);
     Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
 });
 
@@ -88,6 +89,8 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1');
 });
+
+
 // routes/api.php
 Route::get('/phpinfo', function () {
     return response()->json([
