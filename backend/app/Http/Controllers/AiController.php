@@ -94,112 +94,111 @@ class AiController extends Controller
     //     $text = preg_replace('/\s+/', ' ', $text);
     //     return trim($text);
     // }
-  public function coverLetterGenerator(Request $request)
-{
-    try {
-        // =========================
-        // 0️⃣ Increase resource limits
-        // =========================
-        ini_set('upload_max_filesize', '20M');
-        ini_set('post_max_size', '20M');
-        ini_set('memory_limit', '512M');
-        set_time_limit(300);
+    public function coverLetterGenerator(Request $request)
+    {
+        try {
 
-        info("=== Cover Letter Generation Started ===");
-        $user = auth('api')->user();
-
-        // =========================
-        // 1️⃣ Ensure CV exists
-        // =========================
-        if (!$user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
-            ], 400);
-        }
-
-        $cvPath = storage_path('app/public/' . $user->cv_path);
-        if (!file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.'
-            ], 404);
-        }
-
-        $cvFile = new \Illuminate\Http\File($cvPath);
-        $cvText = $this->extractTextFromFile($cvFile, 'CV');
-        $maxCvLength = 2000; // shorter, since we focus on job description
-        if (strlen($cvText) > $maxCvLength) {
-            $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
-        }
-
-        // =========================
-        // 2️⃣ Validate Job Input
-        // =========================
-        $jobText = null;
-
-        if ($request->filled('job_text')) {
-            info("Job text provided in request.");
-            $jobText = $this->aiReview->cleanText($request->input('job_text'));
-        } elseif ($request->hasFile('job_file') && $request->file('job_file')->isValid()) {
-            $jobFile = $request->file('job_file');
-
-            // File type check
-            $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-            if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
+            info("=== Cover Letter Generation Started ===");
+            $user = auth('api')->user();
+            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
+            if ($limit->emails == 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
-                ], 422);
+                    'message' => 'You have reached your limit for Cover Letter generation. Please upgrade your subscription plan.'
+                ], 403);
             }
-
-            // File size check (5MB)
-            if ($jobFile->getSize() > 5 * 1024 * 1024) {
+            // =========================
+            // 1️⃣ Ensure CV exists
+            // =========================
+            if (!$user->cv_path) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'File too large. Maximum allowed size is 5MB.'
-                ], 422);
+                    'message' => 'No CV uploaded. Please upload your CV first.'
+                ], 400);
             }
 
-            // PDF page limit (3 pages max)
-            if ($jobFile->getMimeType() === 'application/pdf') {
-                $pdf = new \Smalot\PdfParser\Parser();
-                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
-                $pageCount = count($pdfDocument->getPages());
-                if ($pageCount > 3) {
+            $cvPath = storage_path('app/public/' . $user->cv_path);
+            if (!file_exists($cvPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CV file not found on server.'
+                ], 404);
+            }
+
+            $cvFile = new \Illuminate\Http\File($cvPath);
+            $cvText = $this->extractTextFromFile($cvFile, 'CV');
+            $maxCvLength = 2000; // shorter, since we focus on job description
+            if (strlen($cvText) > $maxCvLength) {
+                $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
+            }
+
+            // =========================
+            // 2️⃣ Validate Job Input
+            // =========================
+            $jobText = null;
+
+            if ($request->filled('job_text')) {
+                info("Job text provided in request.");
+                $jobText = $this->aiReview->cleanText($request->input('job_text'));
+            } elseif ($request->hasFile('job_file') && $request->file('job_file')->isValid()) {
+                $jobFile = $request->file('job_file');
+
+                // File type check
+                $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+                if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
+                        'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
                     ], 422);
                 }
+
+                // File size check (5MB)
+                if ($jobFile->getSize() > 5 * 1024 * 1024) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'File too large. Maximum allowed size is 5MB.'
+                    ], 422);
+                }
+
+                // PDF page limit (3 pages max)
+                if ($jobFile->getMimeType() === 'application/pdf') {
+                    $pdf = new \Smalot\PdfParser\Parser();
+                    $pdfDocument = $pdf->parseFile($jobFile->getPathname());
+                    $pageCount = count($pdfDocument->getPages());
+                    if ($pageCount > 3) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
+                        ], 422);
+                    }
+                }
+
+                $jobText = $this->extractTextFromFile($jobFile, 'Job');
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No job details provided. Please paste text or upload a PDF/image.'
+                ], 422);
             }
 
-            $jobText = $this->extractTextFromFile($jobFile, 'Job');
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job details provided. Please paste text or upload a PDF/image.'
-            ], 422);
-        }
+            $maxJobLength = 4000;
+            if (strlen($jobText) > $maxJobLength) {
+                $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
+            }
 
-        $maxJobLength = 4000;
-        if (strlen($jobText) > $maxJobLength) {
-            $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
-        }
+            if (empty(trim($jobText))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No job description could be extracted from the input.'
+                ], 422);
+            }
 
-        if (empty(trim($jobText))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job description could be extracted from the input.'
-            ], 422);
-        }
+            // =========================
+            // 3️⃣ Generate Cover Letter via OpenAI
+            // =========================
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-        // =========================
-        // 3️⃣ Generate Cover Letter via OpenAI
-        // =========================
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-
-        $prompt = "
+            $prompt = "
 You are a professional career assistant.
 Generate a personalized, professional cover letter for this job. **Prioritize the job description over the CV.** Only highlight CV points that strongly match the job.
 
@@ -217,51 +216,50 @@ $jobText
 - Start with a strong opening aligned with the job.
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and cover letter writer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert career coach and cover letter writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
 
-        $coverLetter = trim($response->choices[0]->message->content ?? '');
-        if (empty($coverLetter)) {
+            $coverLetter = trim($response->choices[0]->message->content ?? '');
+            if (empty($coverLetter)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'OpenAI returned empty output. Please check the CV and job description.'
+                ], 422);
+            }
+
+            // =========================
+            // 4️⃣ Return JSON response
+            // =========================
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover letter generated successfully.',
+                'cover_letter' => $coverLetter
+            ]);
+        } catch (\Exception $e) {
+            info("Unhandled exception in coverLetterGenerator: " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'OpenAI returned empty output. Please check the CV and job description.'
-            ], 422);
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // =========================
-        // 4️⃣ Return JSON response
-        // =========================
-        return response()->json([
-            'success' => true,
-            'message' => 'Cover letter generated successfully.',
-            'cover_letter' => $coverLetter
-        ]);
-
-    } catch (\Exception $e) {
-        info("Unhandled exception in coverLetterGenerator: " . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-        ], 500);
     }
-}
 
     public function emailTemplateGenerator(Request $request)
     {
         try {
-            info("Job Text: " . $request->input('job_text'));
-            info("Job URL: " . $request->input('job_url'));
-            info("Has job_pdf? " . ($request->hasFile('job_pdf') ? 'yes' : 'no'));
-
-            info("=== Job Application Email Template Generation Started ===");
-            // =========================
-            // 1️⃣ Capture Job Description
-            // =========================
+            $user = auth('api')->user();
+            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
+            if ($limit->emails == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached your limit for Email templates. Please upgrade your subscription plan.'
+                ], 403);
+            }
             $jobText = null;
 
             if ($request->filled('job_text')) {
@@ -339,13 +337,16 @@ $jobText
     public function cvRevamp(Request $request)
     {
         try {
-            ini_set('upload_max_filesize', '20M');
-            ini_set('post_max_size', '20M');
-            ini_set('memory_limit', '512M');
-            set_time_limit(300);
-
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
+            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
+            if ($limit->emails == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached your limit for CV revamping. Please upgrade your subscription plan.'
+                ], 403);
+            }
+
 
             if (!$user->cv_path) {
                 return response()->json([

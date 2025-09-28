@@ -75,10 +75,8 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::post('/cv-revamp', [JobController::class, 'revampCv']);
     Route::post('/cover-letter', [JobController::class, 'coverLetter']);
     Route::post('/email-template', [JobController::class, 'emailTemplate']);
-
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
-
 Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
