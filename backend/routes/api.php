@@ -78,7 +78,7 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::put('/update/{id}', [JobController::class, 'update']);
 });
 
-Route::prefix('ai')->group(function () {
+Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
     Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
