@@ -59,7 +59,7 @@ const JobService = {
 
   async getUsersJobs() {
     try {
-      const response = await api.get("/all");
+      const response = await api.get("/user-jobs");
       return response.data;
     } catch (err) {
       console.error("Error fetching jobs:", err);

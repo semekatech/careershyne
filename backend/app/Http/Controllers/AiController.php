@@ -101,8 +101,6 @@ class AiController extends Controller
             info("=== Cover Letter Generation Started ===");
 
             $user = auth('api')->user();
-
-
             // =========================
             // 1️⃣ Ensure CV exists
             // =========================
