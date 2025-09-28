@@ -70,14 +70,7 @@ class JobController extends Controller
     {
         $user = auth('api')->user();
         $job  = Job::findOrFail($request->jobId);
-        $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-        // if ($limit->checks == 0) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'You have reached your limit Eligibility checks. Please upgrade your subscription plan.'
-        //     ], 403);
-        // }
-        // ✅ Ensure CV exists
+
         if (!$user->cv_path) {
             return response()->json([
                 'success' => false,
@@ -185,13 +178,6 @@ PROMPT;
 
 
         $user = auth('api')->user();
-        $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-        if ($limit->cv == 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have reached your limit for CV revamping. Please upgrade your subscription plan.'
-            ], 403);
-        }
         $job  = Job::findOrFail($request->jobId);
         info($user);
 
@@ -302,13 +288,7 @@ PROMPT;
     public function coverLetter(Request $request)
     {
         $user = auth('api')->user();
-        $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-        if ($limit->coverletters == 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have reached your limit for CV revamping. Please upgrade your subscription plan.'
-            ], 403);
-        }
+
         $job  = Job::findOrFail($request->jobId);
 
         if (!$user->cv_path) {
@@ -416,13 +396,7 @@ PROMPT;
     public function emailTemplate(Request $request)
     {
         $user = auth('api')->user();
-        $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-        if ($limit->emails == 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have reached your limit for Email templates. Please upgrade your subscription plan.'
-            ], 403);
-        }
+
         $job = Job::findOrFail($request->jobId);
 
         // Build AI prompt for email template

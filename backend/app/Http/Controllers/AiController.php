@@ -101,15 +101,7 @@ class AiController extends Controller
             info("=== Cover Letter Generation Started ===");
 
             $user = auth('api')->user();
-            $subscription = DB::table('subscriptions')->where('user_id', $user->id)->first();
 
-            // Check if user has any credits left
-            if ($subscription->coverletters <= 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have reached your limit for Cover Letter generation. Please upgrade your subscription plan.'
-                ], 403);
-            }
 
             // =========================
             // 1️⃣ Ensure CV exists
@@ -258,13 +250,7 @@ $jobText
     {
         try {
             $user = auth('api')->user();
-            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-            if ($limit->emails == 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have reached your limit for Email templates. Please upgrade your subscription plan.'
-                ], 403);
-            }
+
             $jobText = null;
 
             if ($request->filled('job_text')) {
@@ -351,13 +337,7 @@ $jobText
         try {
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
-            $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
-            if ($limit->cv == 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have reached your limit for CV revamping. Please upgrade your subscription plan.'
-                ], 403);
-            }
+
 
 
             if (!$user->cv_path) {
