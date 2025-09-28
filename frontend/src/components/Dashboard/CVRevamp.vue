@@ -271,9 +271,16 @@ const isFormValid = computed(() => {
 });
 
 // --- File Handlers ---
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+
 function handleJobFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File is too large. Maximum allowed size is 2 MB.");
+    return;
+  }
 
   jobFile.value = file;
   jobFileName.value = file.name;
@@ -283,9 +290,15 @@ function handleDrop(event) {
   const file = event.dataTransfer.files[0];
   if (!file) return;
 
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File is too large. Maximum allowed size is 2 MB.");
+    return;
+  }
+
   jobFile.value = file;
   jobFileName.value = file.name;
 }
+
 
 // --- Navigation ---
 function goToStep(step) {

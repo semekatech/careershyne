@@ -94,110 +94,163 @@ class AiController extends Controller
     //     $text = preg_replace('/\s+/', ' ', $text);
     //     return trim($text);
     // }
-    public function coveletterGenerator(Request $request)
-    {
-        try {
+  public function coverLetterGenerator(Request $request)
+{
+    try {
+        // =========================
+        // 0️⃣ Increase resource limits
+        // =========================
+        ini_set('upload_max_filesize', '20M');
+        ini_set('post_max_size', '20M');
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
 
-            info("=== Cover Letter Generation Started ===");
+        info("=== Cover Letter Generation Started ===");
+        $user = auth('api')->user();
 
-            // =========================
-            // 1️⃣ Validate CV input
-            // =========================
-            info("Validating CV file.");
-            $request->validate([
-                'cv_file' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
-            ]);
+        // =========================
+        // 1️⃣ Ensure CV exists
+        // =========================
+        if (!$user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.'
+            ], 400);
+        }
 
-            $cvFile = $request->file('cv_file');
-            info("CV file received: " . $cvFile->getClientOriginalName());
+        $cvPath = storage_path('app/public/' . $user->cv_path);
+        if (!file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.'
+            ], 404);
+        }
 
-            $cvText = $this->extractTextFromFile($cvFile, 'CV');
+        $cvFile = new \Illuminate\Http\File($cvPath);
+        $cvText = $this->extractTextFromFile($cvFile, 'CV');
+        $maxCvLength = 2000; // shorter, since we focus on job description
+        if (strlen($cvText) > $maxCvLength) {
+            $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
+        }
 
-            if (empty(trim($cvText))) {
-                info("No text extracted from CV.");
+        // =========================
+        // 2️⃣ Validate Job Input
+        // =========================
+        $jobText = null;
+
+        if ($request->filled('job_text')) {
+            info("Job text provided in request.");
+            $jobText = $this->aiReview->cleanText($request->input('job_text'));
+        } elseif ($request->hasFile('job_file') && $request->file('job_file')->isValid()) {
+            $jobFile = $request->file('job_file');
+
+            // File type check
+            $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+            if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to extract text from the CV. Please upload a clear PDF or image.',
+                    'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
                 ], 422);
             }
 
-            info("Cleaned CV text: " . substr($cvText, 0, 200) . "...");
-
-            // =========================
-            // 2️⃣ Capture Job Description
-            // =========================
-            $jobText = null;
-
-            if ($request->filled('job_text')) {
-                info("Job text provided in request.");
-                $jobText = $this->aiReview->cleanText($request->input('job_text'));
-            } elseif ($request->hasFile('job_pdf')) {
-                info("Job file uploaded: " . $request->file('job_pdf')->getClientOriginalName());
-                $request->validate([
-                    'job_pdf' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
-                ]);
-                $jobFile = $request->file('job_pdf');
-                $jobText = $this->extractTextFromFile($jobFile, 'Job');
-            } else {
-                info("No job details provided.");
+            // File size check (5MB)
+            if ($jobFile->getSize() > 5 * 1024 * 1024) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No job details provided. Please paste a job description, provide a link, or upload a PDF/image.',
+                    'message' => 'File too large. Maximum allowed size is 5MB.'
                 ], 422);
             }
 
-            info("Cleaned Job text: " . substr($jobText, 0, 200) . "...");
+            // PDF page limit (3 pages max)
+            if ($jobFile->getMimeType() === 'application/pdf') {
+                $pdf = new \Smalot\PdfParser\Parser();
+                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
+                $pageCount = count($pdfDocument->getPages());
+                if ($pageCount > 3) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
+                    ], 422);
+                }
+            }
 
-            // =========================
-            // 3️⃣ Generate Cover Letter with OpenAI
-            // =========================
-            info("Calling OpenAI to generate cover letter.");
-            $client = OpenAI::client(env('OPENAI_API_KEY'));
+            $jobText = $this->extractTextFromFile($jobFile, 'Job');
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No job details provided. Please paste text or upload a PDF/image.'
+            ], 422);
+        }
 
-            $prompt = "
+        $maxJobLength = 4000;
+        if (strlen($jobText) > $maxJobLength) {
+            $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
+        }
+
+        if (empty(trim($jobText))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No job description could be extracted from the input.'
+            ], 422);
+        }
+
+        // =========================
+        // 3️⃣ Generate Cover Letter via OpenAI
+        // =========================
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+
+        $prompt = "
 You are a professional career assistant.
-Generate a personalized, professional cover letter using the applicant’s CV and the provided job description.
+Generate a personalized, professional cover letter for this job. **Prioritize the job description over the CV.** Only highlight CV points that strongly match the job.
 
-### CV:
+### CV (for reference only):
 $cvText
 
-### Job Description:
+### Job Description (priority):
 $jobText
 
 ### Instructions:
-- Keep the cover letter formal and concise (max 400 words).
-- Emphasize the applicant’s skills and experiences that match the job requirements.
+- Emphasize skills, experiences, and achievements relevant to the job.
+- Keep it formal, concise (max 400 words).
 - Use a professional but engaging tone.
-- Do not repeat the CV; instead, highlight relevant points.
+- Avoid repeating the entire CV; highlight only what matches the job.
+- Start with a strong opening aligned with the job.
 ";
 
-            $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are an expert career coach and writer.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-            ]);
-            info(json_encode($response, JSON_PRETTY_PRINT));
-            $coverLetter = trim($response->choices[0]->message->content ?? 'Error generating cover letter.');
-            info("Cover letter generated successfully.");
+        $response = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are an expert career coach and cover letter writer.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+        ]);
 
-            // =========================
-            // 4️⃣ Return JSON response
-            // =========================
-            return response()->json([
-                'success' => true,
-                'message' => 'Cover letter generated successfully.',
-                'cover_letter' => $coverLetter,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error("Unhandled exception in cover letter generation: " . $e->getMessage());
+        $coverLetter = trim($response->choices[0]->message->content ?? '');
+        if (empty($coverLetter)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
-            ], 500);
+                'message' => 'OpenAI returned empty output. Please check the CV and job description.'
+            ], 422);
         }
+
+        // =========================
+        // 4️⃣ Return JSON response
+        // =========================
+        return response()->json([
+            'success' => true,
+            'message' => 'Cover letter generated successfully.',
+            'cover_letter' => $coverLetter
+        ]);
+
+    } catch (\Exception $e) {
+        info("Unhandled exception in coverLetterGenerator: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage(),
+        ], 500);
     }
+}
+
     public function emailTemplateGenerator(Request $request)
     {
         try {
@@ -288,8 +341,8 @@ $jobText
         try {
             ini_set('upload_max_filesize', '20M');
             ini_set('post_max_size', '20M');
-            ini_set('memory_limit', '512M'); // optional, for large files
-            set_time_limit(300); // optional, increase max execution time
+            ini_set('memory_limit', '512M');
+            set_time_limit(300);
 
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
