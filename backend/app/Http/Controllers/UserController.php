@@ -187,7 +187,7 @@ class UserController extends Controller
     {
         $user = auth('api')->user();
         $user_id = $user->id;
-
+        info($user_id);
         $limit = DB::table('subscriptions')->where('user_id', $user_id)->first();
 
         return response()->json([
