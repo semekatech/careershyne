@@ -83,7 +83,7 @@
             <!-- Personal Summary -->
             <a
               v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
+              href="/personal-summary"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">person</span>
@@ -93,7 +93,7 @@
             <!-- My Plans -->
             <a
               v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
+              href="/dashboard/my-plans"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">workspace_premium</span>
@@ -103,7 +103,7 @@
             <!-- My Jobs -->
             <a
               v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
+              href="/my-jobs"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">business_center</span>
@@ -113,7 +113,7 @@
             <!-- My Activities -->
             <a
               v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
+              href="/my-activities"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">history</span>
