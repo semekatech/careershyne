@@ -341,48 +341,54 @@ $jobText
             }
 
             // 3️⃣ Build OpenAI prompt
+            // 3️⃣ Build OpenAI prompt
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
-You are a professional career consultant.
-Revamp the following CV to make it professional, clear, and impactful.
+You are a top-tier Senior Career Consultant and CV Architect. Your task is to provide a **revamped, professional, and impactful** version of the applicant's CV.
 
-### CV:
+### Core Instructions (MUST FOLLOW):
+1.  **Strict Output Format:** The entire output must be formatted using **Markdown**. Use Markdown headings (`##`), bolding (`**`), and lists (`-`) for clean, organized content. **DO NOT** use special characters like `---` or any ASCII art for separators.
+2.  **Tone & Style:** Adopt an active, confident, and professional tone. Quantify achievements with metrics and numbers wherever possible. Focus on results, not just responsibilities.
+3.  **Content Focus:** The output should be the complete CV content, ready to be copied and pasted.
+4.  **Structure:** Organize the CV clearly, typically starting with **Professional Summary**, followed by **Core Skills**, and then **Professional Experience**.
+
+### Original CV Content:
 $cvText
-
-### Instructions:
-- ONLY return the improved CV.
-- Do NOT include a cover letter, greeting, or application email.
-- Keep the structure of the CV clean and professional.
 ";
 
             if ($jobText) {
+                info("Appending job description and tailoring instructions to prompt...");
                 $prompt .= "
 
-### Job Description:
+### Target Job Description:
 $jobText
 
-### Instructions:
-- Tailor the CV to highlight the applicant’s skills and experiences that match this job.
-- Use keywords from the job description naturally.
+### Tailoring Instructions:
+- **Keyword Integration:** Strategically integrate **keywords** and required skills directly from the 'Target Job Description' into the Professional Summary, Core Skills, and Experience sections.
+- **Prioritization:** Prioritize and elaborate on experiences that are most relevant to the target job, minimizing less relevant information.
 ";
             } else {
                 $prompt .= "
 
-### Instructions:
-- Improve clarity, grammar, and formatting.
-- Make the CV stand out for general job applications.
+### General Improvement Instructions:
+- **Clarity & Flow:** Significantly improve clarity, grammar, and sentence structure.
+- **Impact:** Ensure the CV stands out for **general** job applications in the applicant's field.
 ";
             }
 
+            // Log the final prompt length
+            info("Prompt length: " . strlen($prompt));
+
             $response = $client->chat()->create([
+                // Consider a stronger model like 'gpt-4o' or 'gpt-4-turbo' if 'gpt-4o-mini' struggles with consistency.
                 'model' => 'gpt-4o-mini',
                 'messages' => [
-                    ['role' => 'system', 'content' => 'You are an expert career coach and CV writer.'],
+                    ['role' => 'system', 'content' => 'You are an expert career coach and CV writer who always outputs well-structured Markdown content.'],
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
-
+            // ... (rest of the function remains the same)
             $revampedCV = trim($response->choices[0]->message->content ?? 'Error revamping CV.');
 
             // 4️⃣ Return response

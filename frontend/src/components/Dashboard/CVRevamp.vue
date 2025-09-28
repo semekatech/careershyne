@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <!-- Header -->
+  <div class="p-4">
     <header
       class="w-full border border-border-light dark:border-border-dark rounded-lg p-8 text-center shadow-sm mb-8 bg-white dark:bg-background-dark"
     >
@@ -8,7 +7,7 @@
         class="text-3xl font-bold mb-2 flex items-center justify-center text-text-light dark:text-text-dark"
       >
         AI-Powered CV Revamp
-        <span class="material-icons ml-2 text-primary-DEFAULT">flash_on</span>
+        <span class="material-icons ml-2 text-primary">flash_on</span>
       </h1>
       <p
         class="text-base text-subtext-light dark:text-subtext-dark max-w-2xl mx-auto"
@@ -18,32 +17,57 @@
       </p>
     </header>
 
-    <!-- Steps Wrapper -->
-    <section class="bg-card-light dark:bg-card-dark p-8 ">
-      <!-- Step indicators -->
+    <section class="bg-card-light dark:bg-card-dark p-8 rounded-lg">
       <div class="mb-8">
         <ol class="flex items-center w-full">
           <li
-            class="flex w-full items-center text-primary-DEFAULT dark:text-primary-light after:content-[''] after:w-full after:h-1 after:border-b after:border-primary-DEFAULT dark:after:border-primary-light after:border-4 after:inline-block"
+            :class="{
+              'text-primary dark:text-primary-light after:border-primary dark:after:border-primary-light':
+                currentStep >= 1,
+              'after:border-border-light dark:after:border-border-dark':
+                currentStep < 1,
+            }"
+            class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-4 after:inline-block"
           >
             <span
-              class="flex items-center justify-center w-10 h-10 bg-primary-DEFAULT rounded-full lg:h-12 lg:w-12 text-white shrink-0"
+              :class="{
+                'bg-primary text-white': currentStep >= 1,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 1,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
             >
               1
             </span>
           </li>
           <li
-            class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-border-light dark:after:border-border-dark after:border-4 after:inline-block"
+            :class="{
+              'text-primary dark:text-primary-light after:border-primary dark:after:border-primary-light':
+                currentStep >= 2,
+              'after:border-border-light dark:after:border-border-dark':
+                currentStep < 2,
+            }"
+            class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-4 after:inline-block"
           >
             <span
-              class="flex items-center justify-center w-10 h-10 bg-border-light dark:bg-border-dark rounded-full lg:h-12 lg:w-12 text-subtext-light dark:text-subtext-dark shrink-0"
+              :class="{
+                'bg-primary text-white': currentStep >= 2,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 2,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
             >
               2
             </span>
           </li>
           <li class="flex items-center">
             <span
-              class="flex items-center justify-center w-10 h-10 bg-border-light dark:bg-border-dark rounded-full lg:h-12 lg:w-12 text-subtext-light dark:text-subtext-dark shrink-0"
+              :class="{
+                'bg-primary text-white': currentStep >= 3,
+                'bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark':
+                  currentStep < 3,
+              }"
+              class="flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0"
             >
               3
             </span>
@@ -52,16 +76,28 @@
         <div
           class="flex justify-between mt-2 text-sm font-medium text-subtext-light dark:text-subtext-dark"
         >
-          <span class="text-primary-DEFAULT dark:text-primary-light"
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 1,
+            }"
             >Job Details</span
           >
-          <span>Revamped CV</span>
-          <span>Download</span>
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 2,
+            }"
+            >Revamped CV</span
+          >
+          <span
+            :class="{
+              'text-primary dark:text-primary-light': currentStep >= 3,
+            }"
+            >Download</span
+          >
         </div>
       </div>
 
-      <!-- Job Description Step -->
-      <div>
+      <div v-if="currentStep === 1">
         <h2
           class="text-2xl font-semibold text-text-light dark:text-text-dark mb-2"
         >
@@ -71,14 +107,13 @@
           Paste the job description or upload it as a PDF/DOC.
         </p>
 
-        <!-- Input method -->
         <div class="mb-6">
           <label class="sr-only" for="input-method">Input Method</label>
           <div class="relative">
             <select
               id="input-method"
               v-model="inputType"
-              class="w-full appearance-none bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT focus:border-transparent"
+              class="w-full appearance-none bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="text">Paste Job Description</option>
               <option value="pdf">Upload PDF/DOC</option>
@@ -91,7 +126,6 @@
           </div>
         </div>
 
-        <!-- Job description text (default) -->
         <div v-if="inputType === 'text'">
           <label class="sr-only" for="job-description"
             >Paste job description here...</label
@@ -100,12 +134,11 @@
             id="job-description"
             v-model="jobText"
             rows="10"
-            class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT focus:border-transparent"
+            class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Paste job description here..."
           ></textarea>
         </div>
 
-        <!-- Upload field -->
         <div v-else-if="inputType === 'pdf'" class="mt-4">
           <div
             class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer"
@@ -113,8 +146,9 @@
             @drop.prevent="handleDrop"
             @click="fileInput.click()"
           >
-            <!-- <span class="material-icons-sharp text-5xl text-primary mb-4">edit_document</span> -->
-            <p class="font-semibold mb-2">Drag and drop your CV or job description here</p>
+            <p class="font-semibold mb-2">
+              Drag and drop your job description here
+            </p>
             <p class="text-muted-light dark:text-muted-dark text-sm mb-4">
               PDF, DOC, DOCX up to 5MB
             </p>
@@ -125,10 +159,12 @@
             >
               Or browse files
             </button>
-            <p v-if="jobFileName" class="mt-4 text-sm text-text-light dark:text-text-dark">
+            <p
+              v-if="jobFileName"
+              class="mt-4 text-sm text-text-light dark:text-text-dark"
+            >
               Selected file: {{ jobFileName }}
             </p>
-            <!-- Hidden file input -->
             <input
               type="file"
               ref="fileInput"
@@ -139,7 +175,6 @@
           </div>
         </div>
 
-        <!-- Submit button -->
         <div class="flex justify-end mt-8">
           <button
             @click="submitJobDetails"
@@ -148,6 +183,64 @@
           >
             <span v-if="loading">Processing...</span>
             <span v-else>Revamp My CV</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="currentStep === 2 && revampedCv">
+        <h2
+          class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4"
+        >
+          Step 2: Your Revamped CV
+        </h2>
+
+        <div
+          class="prose dark:prose-invert max-w-full overflow-x-auto p-4 border rounded-lg bg-background-light dark:bg-background-dark"
+        >
+          <div v-html="formattedRevampedCv"></div>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button
+            @click="goToStep(1)"
+            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+          >
+            Go Back & Change Job Details
+          </button>
+
+          <button
+            @click="goToStep(3)"
+            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+          >
+            Finalize & Download CV
+            <span class="material-icons ml-2">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="currentStep === 3">
+        <h2
+          class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4"
+        >
+          Step 3: Download Your CV
+        </h2>
+        <p class="text-subtext-light dark:text-subtext-dark mb-6">
+          Your CV is ready! Download the file below. It's tailored for the job
+          you provided.
+        </p>
+        <div class="flex justify-between mt-6">
+          <button
+            @click="goToStep(2)"
+            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+          >
+            <span class="material-icons mr-2">arrow_back</span> Review CV
+          </button>
+          <button
+            @click="downloadAsWord"
+            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+          >
+            <span class="material-icons mr-2">download</span> Download CV as
+            Word
           </button>
         </div>
       </div>
@@ -162,28 +255,118 @@ import { generateCvRevamp } from "@/services/cvRevampService.js";
 const currentStep = ref(1);
 const loading = ref(false);
 
-// ✅ Default to text input
 const inputType = ref("text");
 const jobText = ref("");
 const jobFile = ref(null);
 const jobFileName = ref("");
 const fileInput = ref(null);
 
-const revampedCv = ref("");
+const revampedCv = ref(""); // Raw text from the backend
 
-// Validation rules
-const allowedTypes = ["application/pdf", 
-  "application/msword", 
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+// Validation
+const allowedTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 const maxSize = 5 * 1024 * 1024; // 5MB
 
 const isFormValid = computed(() => {
-  if (inputType.value === "text" && jobText.value.length > 0) return true;
+  if (inputType.value === "text" && jobText.value.trim().length > 0)
+    return true;
   if (inputType.value === "pdf" && jobFile.value) return true;
   return false;
 });
 
+// NEW COMPUTED PROPERTY TO FORMAT RAW TEXT
+// This function attempts to convert the raw, unformatted text into basic HTML
+const formattedRevampedCv = computed(() => {
+  if (!revampedCv.value) return "";
+
+  let html = revampedCv.value;
+
+  // --- START OF NEW/MODIFIED LOGIC ---
+
+  // 0. Remove any standalone '---' lines (horizontal rules)
+  html = html.replace(/^\s*---\s*$/gm, "");
+
+  // 1. Convert double asterisks (**) to bold tags
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // 2. Convert triple hash (###) followed by a section title to H2
+  // We'll adapt based on the screenshot, which seems to imply two asterisks for major headings,
+  // let's assume they are structured like **Section Title**
+  html = html.replace(/^\s*\*\*([^\*]+?)\*\*\s*$/gm, "<h2>$1</h2>"); // For titles like **Professional Summary**
+
+  // 3. Convert single asterisks for sub-headings like in "Core Skills" -> - Frontend:
+  // This will handle the - heading: text format
+  html = html.replace(
+    /^\s*-\s*(\w+):\s*(.*)$/gm,
+    "<li><strong>$1:</strong> $2</li>"
+  );
+
+  // Convert generic list items starting with '-' that are not already handled
+  html = html.replace(/^\s*-\s*(.+)$/gm, "<li>$1</li>");
+
+  // Wrap consecutive <li>s in <ul> tags
+  html = html.replace(/(<li>.+?<\/li>(\s*<li>.+?<\/li>)*)/gs, "<ul>$1</ul>");
+
+  // Replace multiple newlines with paragraph tags. This creates blocks of text.
+  html = html.replace(/\n\s*\n/g, "</p><p>");
+
+  // Replace single newlines with <br> inside remaining text blocks
+  html = html.replace(/\n/g, "<br>");
+
+  // Wrap remaining text that's not already in a block-level element in <p> tags
+  // This is a bit complex, but generally, if a line doesn't start with a known HTML tag,
+  // we can assume it's part of a paragraph.
+  html = html
+    .split("<br>")
+    .map((line) => {
+      line = line.trim();
+      if (
+        line.length > 0 &&
+        !line.startsWith("<h") &&
+        !line.startsWith("<ul") &&
+        !line.startsWith("<p") &&
+        !line.startsWith("<strong")
+      ) {
+        return `<p>${line}</p>`;
+      }
+      return line;
+    })
+    .join("");
+
+  // Clean up empty paragraph tags that might have been created
+  html = html.replace(/<p>\s*<\/p>/g, "");
+  html = html.replace(/<br>\s*<br>/g, "<br>"); // Reduce double line breaks
+
+  // Ensure there's a paragraph at the beginning and end if content exists and isn't already block-wrapped
+  if (
+    html.length > 0 &&
+    !html.startsWith("<p>") &&
+    !html.startsWith("<h") &&
+    !html.startsWith("<ul")
+  ) {
+    html = `<p>${html}`;
+  }
+  if (
+    html.length > 0 &&
+    !html.endsWith("</p>") &&
+    !html.endsWith("</ul>") &&
+    !html.endsWith("</h1>") &&
+    !html.endsWith("</h2>") &&
+    !html.endsWith("</h3>")
+  ) {
+    html = `${html}</p>`;
+  }
+
+  // --- END OF NEW/MODIFIED LOGIC ---
+
+  return html.trim();
+});
+
+// File handlers
 function handleJobFileUpload(event) {
   const file = event.target.files[0];
   validateFile(file);
@@ -208,47 +391,77 @@ function validateFile(file) {
   jobFileName.value = file.name;
 }
 
+// Navigation Handler
+function goToStep(step) {
+  currentStep.value = step;
+}
+
+// Submit job details and get revamped CV
 async function submitJobDetails() {
+  revampedCv.value = "";
   loading.value = true;
-  currentStep.value = 2;
 
   const formData = new FormData();
-  if (inputType.value === "text") {
-    formData.append("job_text", jobText.value);
-  }
-  if (inputType.value === "pdf" && jobFile.value) {
+  if (inputType.value === "text") formData.append("job_text", jobText.value);
+  if (inputType.value === "pdf" && jobFile.value)
     formData.append("job_file", jobFile.value);
-  }
 
   try {
     const data = await generateCvRevamp(formData);
 
-    if (!data.success) {
-      // Backend returned failure
-      revampedCv.value = `❌ ${data.message}`;
-      return;
+    if (data.success && data.revamped_cv) {
+      revampedCv.value = data.revamped_cv;
+      currentStep.value = 2;
+    } else {
+      revampedCv.value = `❌ Error: ${
+        data.message || "CV generation failed with an unknown error."
+      }`;
+      currentStep.value = 2;
     }
-
-    revampedCv.value = data.revamped_cv;
   } catch (err) {
     console.error("Error revamping CV:", err);
-
+    let errorMessage =
+      "❌ An unexpected error occurred. Please try again later. Check your network connection or try a different file.";
     if (err.response && err.response.data) {
-      // Laravel validation errors
-      if (err.response.data.errors) {
-        revampedCv.value =
-          "❌ " + Object.values(err.response.data.errors).flat().join(" ");
-      } else if (err.response.data.message) {
-        revampedCv.value = "❌ " + err.response.data.message;
-      }
-    } else {
-      revampedCv.value =
-        "❌ An unexpected error occurred. Please try again later.";
+      const apiErrors = err.response.data.errors
+        ? Object.values(err.response.data.errors).flat().join(" ")
+        : null;
+      errorMessage = `❌ ${
+        err.response.data.message || apiErrors || "Server error occurred."
+      }`;
     }
+    revampedCv.value = `Error: ${errorMessage}`;
+    currentStep.value = 2;
   } finally {
     loading.value = false;
   }
 }
+function downloadAsWord() {
+  if (!formattedRevampedCv.value) return;
 
+  // Wrap the HTML content in a full Word-compatible HTML structure
+  const preHtml = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+          xmlns:w='urn:schemas-microsoft-com:office:word' 
+          xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Revamped CV</title></head><body>`;
+  const postHtml = "</body></html>";
 
+  const htmlContent = preHtml + formattedRevampedCv.value + postHtml;
+
+  // Create a Blob for Word document
+  const blob = new Blob(["\ufeff", htmlContent], {
+    type: "application/msword",
+  });
+
+  // Create a download link and trigger click
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "revamped_cv.doc";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 </script>
