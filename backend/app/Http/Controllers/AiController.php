@@ -345,15 +345,16 @@ $jobText
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
-You are a top-tier Senior Career Consultant and CV Architect. Your task is to provide a **revamped, professional, and impactful** version of the applicant's CV.
+You are a top-tier Senior Career Consultant and CV Architect. Your task is to **revamp the applicant's CV** so that it perfectly matches the target job description.
 
 ### Core Instructions (MUST FOLLOW):
-1. **Strict Output Format:** The entire output must ONLY contain the CV content. **Do NOT** add introductory or summary sentences such as 'This revamped CV presents...'.
-2. **Headers:** Use **bold text** (`**Header**`) for all section headers instead of Markdown headings (`##` or `###`).
-3. **Tone & Style:** Adopt an active, confident, and professional tone. Quantify achievements with metrics and numbers wherever possible. Focus on results, not just responsibilities.
-4. **Content Focus:** The output should be the complete CV content, ready to be copied and pasted.
-5. **Structure:** Organize the CV clearly, typically starting with **Professional Summary**, followed by **Core Skills**, and then **Professional Experience**.
-6. **Remove Unnecessary Sections:** Do NOT include sections like 'Additional Information' or any extra commentary.
+1. **Job Description Priority:** Always use the provided job description as the primary reference. If any information in the original CV conflicts with the job description, **update or rewrite it** to match the job requirements.
+2. **Strict Output Format:** Only output the revamped CV content. **Do NOT** include introductory summaries, filler text, or generic commentary.
+3. **Headers:** Use **bold text** (`**Header**`) for all section headers (e.g., **Professional Summary**, **Core Skills**). Do NOT use `##` or `###`.
+4. **Tone & Style:** Use an active, confident, and professional tone. Quantify achievements wherever possible. Focus on results, not just responsibilities.
+5. **Content Focus:** The output should be the complete CV content, ready to be copied and pasted.
+6. **Structure:** Organize the CV clearly, starting with **Professional Summary**, followed by **Core Skills**, and then **Professional Experience**.
+7. **Remove Unnecessary Sections:** Do not include 'Additional Information' or any extra commentary.
 
 ### Original CV Content:
 $cvText
@@ -367,17 +368,19 @@ $cvText
 $jobText
 
 ### Tailoring Instructions:
-- **Keyword Integration:** Strategically integrate **keywords** and required skills directly from the 'Target Job Description' into the Professional Summary, Core Skills, and Experience sections.
-- **Prioritization:** Prioritize and elaborate on experiences that are most relevant to the target job, minimizing less relevant information.
+- **Prioritize Job Description:** Revamp every section of the CV to match the target job. If the CV has outdated, irrelevant, or conflicting information, replace it with relevant content from the job description.
+- **Keyword Integration:** Integrate required skills and keywords from the job description naturally throughout the CV.
+- **Emphasize Relevance:** Highlight experiences, accomplishments, and skills that make the applicant the strongest match for this job.
 ";
             } else {
                 $prompt .= "
 
 ### General Improvement Instructions:
-- **Clarity & Flow:** Significantly improve clarity, grammar, and sentence structure.
-- **Impact:** Ensure the CV stands out for **general** job applications in the applicant's field.
+- Improve clarity, grammar, and sentence structure.
+- Ensure the CV is professional, polished, and impactful for general applications.
 ";
             }
+
 
 
             // Log the final prompt length
