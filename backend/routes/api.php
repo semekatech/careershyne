@@ -81,7 +81,7 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
 Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
         ->middleware('throttle:2,1');
-    Route::post('/cover-letter', [AiController::class, 'coveletterGenerator'])
+    Route::post('/cover-letter', [AiController::class, 'coverletterGenerator'])
         ->middleware('throttle:2,1');
     Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
         ->middleware('throttle:2,1');

@@ -1,12 +1,10 @@
 // src/services/apiService.js
 import axios from "axios";
 
-// Create an Axios instance
 const api = axios.create({
   baseURL: "https://careershyne.com/api",
 });
 
-// Add request interceptor to include token if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -15,10 +13,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// --- Cover Letter Generation ---
-export async function generateCoverLetter(formData) {
+export async function generateCvRevamp(formData) {
   try {
-    const response = await api.post("/ai/cover-letter", formData, {
+    const response = await api.post("/ai/cv-revamp", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
