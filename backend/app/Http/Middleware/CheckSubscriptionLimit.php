@@ -46,10 +46,10 @@ class CheckSubscriptionLimit
         ->where('user_id', $user->id)
         ->sum('tokens_used');
 
-    if ($totalTokens >= 1000) {
+    if ($totalTokens >= 20000) {
         return response()->json([
             'success' => false,
-            'message' => 'Token limit exceeded. Please upgrade your subscription plan.'
+            'message' => 'Token limit exceeded. Please try again later.'
         ], 403);
     }
 
