@@ -247,164 +247,59 @@
     </section>
   </div>
 </template>
-
 <script setup>
 import { ref, computed } from "vue";
 import { generateCvRevamp } from "@/services/cvRevampService.js";
 
+// --- Step and Form State ---
 const currentStep = ref(1);
 const loading = ref(false);
 
-const inputType = ref("text");
-const jobText = ref("");
-const jobFile = ref(null);
-const jobFileName = ref("");
+const inputType = ref("text"); // "text" or "pdf"
+const jobText = ref("");        // Job description text
+const jobFile = ref(null);      // Uploaded file
+const jobFileName = ref("");    // Uploaded file name
 const fileInput = ref(null);
 
-const revampedCv = ref(""); // Raw text from the backend
+const revampedCv = ref("");     // Raw CV returned from backend
 
-// Validation
-const allowedTypes = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-const maxSize = 5 * 1024 * 1024; // 5MB
-
+// --- Form Validation ---
 const isFormValid = computed(() => {
-  if (inputType.value === "text" && jobText.value.trim().length > 0)
-    return true;
+  if (inputType.value === "text" && jobText.value.trim().length > 0) return true;
   if (inputType.value === "pdf" && jobFile.value) return true;
   return false;
 });
 
-// NEW COMPUTED PROPERTY TO FORMAT RAW TEXT
-// This function attempts to convert the raw, unformatted text into basic HTML
-const formattedRevampedCv = computed(() => {
-  if (!revampedCv.value) return "";
-
-  let html = revampedCv.value;
-
-  // --- START OF NEW/MODIFIED LOGIC ---
-
-  // 0. Remove any standalone '---' lines (horizontal rules)
-  html = html.replace(/^\s*---\s*$/gm, "");
-
-  // 1. Convert double asterisks (**) to bold tags
-  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // 2. Convert triple hash (###) followed by a section title to H2
-  // We'll adapt based on the screenshot, which seems to imply two asterisks for major headings,
-  // let's assume they are structured like **Section Title**
-  html = html.replace(/^\s*\*\*([^\*]+?)\*\*\s*$/gm, "<h2>$1</h2>"); // For titles like **Professional Summary**
-
-  // 3. Convert single asterisks for sub-headings like in "Core Skills" -> - Frontend:
-  // This will handle the - heading: text format
-  html = html.replace(
-    /^\s*-\s*(\w+):\s*(.*)$/gm,
-    "<li><strong>$1:</strong> $2</li>"
-  );
-
-  // Convert generic list items starting with '-' that are not already handled
-  html = html.replace(/^\s*-\s*(.+)$/gm, "<li>$1</li>");
-
-  // Wrap consecutive <li>s in <ul> tags
-  html = html.replace(/(<li>.+?<\/li>(\s*<li>.+?<\/li>)*)/gs, "<ul>$1</ul>");
-
-  // Replace multiple newlines with paragraph tags. This creates blocks of text.
-  html = html.replace(/\n\s*\n/g, "</p><p>");
-
-  // Replace single newlines with <br> inside remaining text blocks
-  html = html.replace(/\n/g, "<br>");
-
-  // Wrap remaining text that's not already in a block-level element in <p> tags
-  // This is a bit complex, but generally, if a line doesn't start with a known HTML tag,
-  // we can assume it's part of a paragraph.
-  html = html
-    .split("<br>")
-    .map((line) => {
-      line = line.trim();
-      if (
-        line.length > 0 &&
-        !line.startsWith("<h") &&
-        !line.startsWith("<ul") &&
-        !line.startsWith("<p") &&
-        !line.startsWith("<strong")
-      ) {
-        return `<p>${line}</p>`;
-      }
-      return line;
-    })
-    .join("");
-
-  // Clean up empty paragraph tags that might have been created
-  html = html.replace(/<p>\s*<\/p>/g, "");
-  html = html.replace(/<br>\s*<br>/g, "<br>"); // Reduce double line breaks
-
-  // Ensure there's a paragraph at the beginning and end if content exists and isn't already block-wrapped
-  if (
-    html.length > 0 &&
-    !html.startsWith("<p>") &&
-    !html.startsWith("<h") &&
-    !html.startsWith("<ul")
-  ) {
-    html = `<p>${html}`;
-  }
-  if (
-    html.length > 0 &&
-    !html.endsWith("</p>") &&
-    !html.endsWith("</ul>") &&
-    !html.endsWith("</h1>") &&
-    !html.endsWith("</h2>") &&
-    !html.endsWith("</h3>")
-  ) {
-    html = `${html}</p>`;
-  }
-
-  // --- END OF NEW/MODIFIED LOGIC ---
-
-  return html.trim();
-});
-
-// File handlers
+// --- File Handlers ---
 function handleJobFileUpload(event) {
   const file = event.target.files[0];
-  validateFile(file);
-}
-
-function handleDrop(event) {
-  const file = event.dataTransfer.files[0];
-  validateFile(file);
-}
-
-function validateFile(file) {
   if (!file) return;
-  if (!allowedTypes.includes(file.type)) {
-    alert("❌ Invalid file type. Please upload PDF, DOC, or DOCX.");
-    return;
-  }
-  if (file.size > maxSize) {
-    alert("❌ File too large. Maximum allowed size is 5MB.");
-    return;
-  }
+
   jobFile.value = file;
   jobFileName.value = file.name;
 }
 
-// Navigation Handler
+function handleDrop(event) {
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+
+  jobFile.value = file;
+  jobFileName.value = file.name;
+}
+
+// --- Navigation ---
 function goToStep(step) {
   currentStep.value = step;
 }
 
-// Submit job details and get revamped CV
+// --- Submit Job Details ---
 async function submitJobDetails() {
   revampedCv.value = "";
   loading.value = true;
 
   const formData = new FormData();
   if (inputType.value === "text") formData.append("job_text", jobText.value);
-  if (inputType.value === "pdf" && jobFile.value)
-    formData.append("job_file", jobFile.value);
+  if (inputType.value === "pdf" && jobFile.value) formData.append("job_file", jobFile.value);
 
   try {
     const data = await generateCvRevamp(formData);
@@ -413,22 +308,17 @@ async function submitJobDetails() {
       revampedCv.value = data.revamped_cv;
       currentStep.value = 2;
     } else {
-      revampedCv.value = `❌ Error: ${
-        data.message || "CV generation failed with an unknown error."
-      }`;
+      revampedCv.value = `❌ Error: ${data.message || "CV generation failed."}`;
       currentStep.value = 2;
     }
   } catch (err) {
     console.error("Error revamping CV:", err);
-    let errorMessage =
-      "❌ An unexpected error occurred. Please try again later. Check your network connection or try a different file.";
+    let errorMessage = "❌ An unexpected error occurred. Please try again later.";
     if (err.response && err.response.data) {
       const apiErrors = err.response.data.errors
         ? Object.values(err.response.data.errors).flat().join(" ")
         : null;
-      errorMessage = `❌ ${
-        err.response.data.message || apiErrors || "Server error occurred."
-      }`;
+      errorMessage = `❌ ${err.response.data.message || apiErrors || "Server error occurred."}`;
     }
     revampedCv.value = `Error: ${errorMessage}`;
     currentStep.value = 2;
@@ -436,10 +326,53 @@ async function submitJobDetails() {
     loading.value = false;
   }
 }
+
+// --- Format Raw Revamped CV ---
+const formattedRevampedCv = computed(() => {
+  if (!revampedCv.value) return "";
+
+  let html = revampedCv.value;
+
+  // Remove standalone horizontal rules
+  html = html.replace(/^\s*---\s*$/gm, "");
+
+  // Convert bold headers (**Header**) to <strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Convert <strong> headers to <h2>
+  html = html.replace(/^\s*<strong>([^<]+)<\/strong>\s*$/gm, "<h2>$1</h2>");
+
+  // Convert list items: - Frontend: text
+  html = html.replace(/^\s*-\s*(\w+):\s*(.*)$/gm, "<li><strong>$1:</strong> $2</li>");
+  html = html.replace(/^\s*-\s*(.+)$/gm, "<li>$1</li>"); // Generic list items
+  html = html.replace(/(<li>.+?<\/li>(\s*<li>.+?<\/li>)*)/gs, "<ul>$1</ul>");
+
+  // Paragraph handling
+  html = html.replace(/\n\s*\n/g, "</p><p>");
+  html = html.replace(/\n/g, "<br>");
+  html = html
+    .split("<br>")
+    .map((line) => {
+      line = line.trim();
+      if (line.length > 0 && !line.startsWith("<h") && !line.startsWith("<ul") && !line.startsWith("<p") && !line.startsWith("<strong")) {
+        return `<p>${line}</p>`;
+      }
+      return line;
+    })
+    .join("");
+  html = html.replace(/<p>\s*<\/p>/g, "");
+  html = html.replace(/<br>\s*<br>/g, "<br>");
+
+  if (html.length > 0 && !html.startsWith("<p>") && !html.startsWith("<h") && !html.startsWith("<ul")) html = `<p>${html}`;
+  if (html.length > 0 && !html.endsWith("</p>") && !html.endsWith("</ul>") && !html.endsWith("</h1>") && !html.endsWith("</h2>") && !html.endsWith("</h3>")) html = `${html}</p>`;
+
+  return html.trim();
+});
+
+// --- Download as Word ---
 function downloadAsWord() {
   if (!formattedRevampedCv.value) return;
 
-  // Wrap the HTML content in a full Word-compatible HTML structure
   const preHtml = `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' 
           xmlns:w='urn:schemas-microsoft-com:office:word' 
@@ -449,12 +382,8 @@ function downloadAsWord() {
 
   const htmlContent = preHtml + formattedRevampedCv.value + postHtml;
 
-  // Create a Blob for Word document
-  const blob = new Blob(["\ufeff", htmlContent], {
-    type: "application/msword",
-  });
+  const blob = new Blob(["\ufeff", htmlContent], { type: "application/msword" });
 
-  // Create a download link and trigger click
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

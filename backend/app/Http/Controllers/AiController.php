@@ -283,70 +283,93 @@ $jobText
         }
     }
 
-   public function cvRevamp(Request $request)
-{
-    try {
-        info("=== CV Revamp Started ===");
-        $user = auth('api')->user();
+    public function cvRevamp(Request $request)
+    {
+        try {
+            info("=== CV Revamp Started ===");
+            $user = auth('api')->user();
 
-        // Validate uploaded job file
-        $request->validate([
-            'job_file' => 'mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-        ]);
+            // 1️⃣ Ensure CV exists
+            if (!$user->cv_path) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No CV uploaded. Please upload your CV first.'
+                ], 400);
+            }
 
-        // 1️⃣ Ensure CV exists
-        if (!$user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
-            ], 400);
-        }
+            $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
+            if (!file_exists($cvPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CV file not found on server.'
+                ], 404);
+            }
 
-        if (!file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.'
-            ], 404);
-        }
+            // Extract text from stored CV and trim to prevent abuse
+            $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
+            $maxCvLength = 4000;
+            if (strlen($cvText) > $maxCvLength) {
+                $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
+            }
 
-        // Extract text from stored CV
-        $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
+            // 2️⃣ Validate uploaded job file (PDF or image)
+            if (!$request->hasFile('job_file')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Job file is required.'
+                ], 422);
+            }
 
-        if (empty(trim($cvText))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to extract text from the CV.',
-            ], 422);
-        }
-
-        // 2️⃣ Capture optional Job Details
-        $jobText = null;
-
-        if ($request->filled('job_text')) {
-            $jobText = $request->input('job_text');
-        } elseif ($request->hasFile('job_file')) {
             $jobFile = $request->file('job_file');
+
+            // File type check
+            $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+            if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
+                ], 422);
+            }
+
+            // File size check (5MB)
+            if ($jobFile->getSize() > 5 * 1024 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File too large. Maximum allowed size is 5MB.'
+                ], 422);
+            }
+
+            // PDF page limit check (3 pages max)
+            if ($jobFile->getMimeType() === 'application/pdf') {
+                $pdf = new \Smalot\PdfParser\Parser();
+                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
+                if ($pdfDocument->getPages() > 3) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
+                    ], 422);
+                }
+            }
+
+            // 3️⃣ Capture optional Job Details and trim
             $jobText = $this->extractTextFromFile($jobFile, 'Job');
-        } elseif ($request->hasFile('job_pdf')) {
-            $jobFile = $request->file('job_pdf');
-            $jobText = $this->extractTextFromFile($jobFile, 'Job');
-        } elseif ($request->filled('job_url')) {
-            $jobText = "Job details can be found here: " . $request->job_url;
-        }
+            $maxJobLength = 4000;
+            if (strlen($jobText) > $maxJobLength) {
+                $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
+            }
 
-        if (empty($jobText)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No job description provided.',
-            ], 422);
-        }
+            if (empty($jobText)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No job description could be extracted from the file.'
+                ], 422);
+            }
 
-        // 3️⃣ Build single prompt to validate and revamp CV
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
+            // 4️⃣ Build prompt for OpenAI (UNCHANGED)
+            $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-        $prompt = "
+            $prompt = "
 You are a top-tier Career Consultant and CV Architect.
 
 Task:
@@ -372,47 +395,47 @@ Respond strictly in JSON format like this:
 }
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert career coach and CV writer.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
-
-        $apiOutput = $response->choices[0]->message->content ?? '';
-        $data = json_decode($apiOutput, true);
-
-        if (!$data) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to process the job description. Please check the file or text provided.',
-                'raw_output' => $apiOutput
-            ], 422);
-        }
-
-        if (isset($data['is_job']) && $data['is_job'] === true) {
-            return response()->json([
-                'success' => true,
-                'message' => 'CV revamped successfully.',
-                'revamped_cv' => $data['revamped_cv'] ?? ''
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert career coach and CV writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
-        } else {
+
+            $apiOutput = $response->choices[0]->message->content ?? '';
+            $data = json_decode($apiOutput, true);
+
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to process the job description. Please check the file or text provided.',
+                    'raw_output' => $apiOutput
+                ], 422);
+            }
+
+            if (isset($data['is_job']) && $data['is_job'] === true) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'CV revamped successfully.',
+                    'revamped_cv' => $data['revamped_cv'] ?? ''
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $data['message'] ?? 'The uploaded content does not appear to be a valid job description.',
+                    'extracted_content' => $jobText
+                ], 422);
+            }
+        } catch (\Exception $e) {
+            info("Unhandled exception in cvRevamp: " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => $data['message'] ?? 'The uploaded content does not appear to be a valid job description.',
-                'extracted_content' => $jobText
-            ], 422);
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-    } catch (\Exception $e) {
-        info("Unhandled exception in cvRevamp: " . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
     }
-}
+
 
     private function extractTextFromFile($file, $type = 'File')
     {
