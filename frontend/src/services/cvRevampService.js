@@ -1,8 +1,8 @@
-// services/cvRevampService.js
+// src/services/apiService.js
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/api/ai",
+  baseURL: "https://careershyne.com/api",
 });
 
 api.interceptors.request.use((config) => {
@@ -13,21 +13,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const cvRevamp = {
-  async revamp(jobId) {
-    try {
-      const response = await api.post("/cv-revamp", { jobId });
-      return response.data; // No need to manually add Authorization here
-    } catch (err) {
-      console.error("Error revamping CV:", err.response?.data || err.message);
-      throw err;
-    }
-  },
-};
-
-const  generateCvRevamp(formData) {
+export async function generateCvRevamp(formData) {
   try {
-    const response = await axios.post(API_URL, formData, {
+    const response = await api.post("/ai/cv-revamp", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -38,5 +26,3 @@ const  generateCvRevamp(formData) {
     throw error;
   }
 }
-
-export default cvRevamp;
