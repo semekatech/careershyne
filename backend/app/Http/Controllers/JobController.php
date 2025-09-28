@@ -70,7 +70,13 @@ class JobController extends Controller
     {
         $user = auth('api')->user();
         $job  = Job::findOrFail($request->jobId);
-
+        $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
+        if ($limit->checks == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have reached your limit Eligibility checks. Please upgrade your subscription plan.'
+            ], 403);
+        }
         // ✅ Ensure CV exists
         if (!$user->cv_path) {
             return response()->json([
@@ -378,7 +384,7 @@ PROMPT;
 
     public function emailTemplate(Request $request)
     {
-          $user = auth('api')->user();
+        $user = auth('api')->user();
         $limit = DB::table('subscriptions')->where('user_id', $user->id)->first();
         if ($limit->emails == 0) {
             return response()->json([

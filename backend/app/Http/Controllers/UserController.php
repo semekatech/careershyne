@@ -194,6 +194,7 @@ class UserController extends Controller
             'cv' => $limit->cv ?? 0,
             'coverLetters' => $limit->coverletters ?? 0,
             'emails' => $limit->emails ?? 0,
+            'checks' => $limit->checks ?? 0,
             'plan' => $limit->plan ?? 'Free',
         ]);
     }
