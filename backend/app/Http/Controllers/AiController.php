@@ -332,25 +332,11 @@ $jobText
                 ], 422);
             }
 
-            // File size check (5MB)
             if ($jobFile->getMimeType() === 'application/pdf') {
                 $pdf = new \Smalot\PdfParser\Parser();
                 $pdfDocument = $pdf->parseFile($jobFile->getPathname());
                 $pageCount = count($pdfDocument->getPages());
                 if ($pageCount > 3) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
-                    ], 422);
-                }
-            }
-
-
-            // PDF page limit check (3 pages max)
-            if ($jobFile->getMimeType() === 'application/pdf') {
-                $pdf = new \Smalot\PdfParser\Parser();
-                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
-                if ($pdfDocument->getPages() > 3) {
                     return response()->json([
                         'success' => false,
                         'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
