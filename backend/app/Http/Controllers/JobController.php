@@ -270,6 +270,15 @@ PROMPT;
             ], 500);
         }
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
+        DB::table('usage_activities')->insert([
+            'user_id'     => $user->id,
+            'action'      => 'email_template',
+            'status'      => 'success',
+            'message'     => 'CV Revamp Generation',
+            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
         // ✅ Return structured response
         return response()->json([
             'success'       => true,
@@ -373,6 +382,16 @@ PROMPT;
             ], 500);
         }
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
+        DB::table('usage_activities')->insert([
+            'user_id'     => $user->id,
+            'action'      => 'email_template',
+            'status'      => 'success',
+            'message'     => 'Cover letter Generation',
+            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
         // Return structured response
         return response()->json([
             'success'       => true,
@@ -434,6 +453,17 @@ PROMPT;
             ], 500);
         }
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
+        // Log usage on success only
+        DB::table('usage_activities')->insert([
+            'user_id'     => $user->id,
+            'action'      => 'email_template',
+            'status'      => 'success',
+            'message'     => 'Email template Generation',
+            'tokens_used' => $response->usage['total_tokens'] ?? 0,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
         // Return structured response
         return response()->json([
             'success'       => true,
