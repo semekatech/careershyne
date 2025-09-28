@@ -208,4 +208,16 @@ class UserController extends Controller
             'plan' => $limit->plan ?? 'Free',
         ]);
     }
+
+    public function UsageActivities()
+    {
+        $user = auth('api')->user();
+        $user_id = $user->id;
+        info($user_id);
+        $activities = DB::table('usage_activities')->where('user_id', $user_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(['data' => $activities]);
+    }
 }

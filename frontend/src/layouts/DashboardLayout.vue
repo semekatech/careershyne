@@ -102,7 +102,7 @@
 
             <a
               v-if="auth.user?.role != 'radio'"
-              href="/cover-letter-generator"
+              href="/browse-acctivities"
               class="flex items-center px-4 py-2 text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <span class="material-icons-sharp mr-3">history</span>

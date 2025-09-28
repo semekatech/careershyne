@@ -21,6 +21,7 @@ import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
 import UserJobs from "@/pages/Dashboard/UserJobs.vue";
+import UserActivity from "@/pages/Dashboard/UserActivity.vue";
 const routes = [
   {
     path: "/",
@@ -245,6 +246,19 @@ const routes = [
       {
         path: "",
         component: UserJobs,
+      },
+    ],
+  },
+   {
+    path: "/browse-acctivities",
+    component: DashboardLayout,
+    meta: {
+      title: "Activities History",
+    },
+    children: [
+      {
+        path: "",
+        component: UserActivity,
       },
     ],
   },

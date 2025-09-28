@@ -67,6 +67,7 @@ Route::prefix('users')->group(function () {
     Route::post('/save', [UserController::class, 'store']);
     Route::middleware('auth:api')->post('/limits', [UserController::class, 'userLimits']);
     Route::middleware('auth:api')->post('/users/{user}/impersonate', [UserController::class, 'impersonateLogin']);
+    Route::get('/usage-activities', [UserController::class, 'UsageActivities']);
 });
 
 Route::prefix('jobs')->middleware('auth:api')->group(function () {
