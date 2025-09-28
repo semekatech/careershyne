@@ -361,17 +361,18 @@ $jobText
             // 4️⃣ Build prompt for OpenAI (UNCHANGED)
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-            $prompt = "
+          $prompt = "
 You are a top-tier Career Consultant and CV Architect.
 
 Task:
 1. Determine if the provided text is a **valid job description**.
-2. If it **is a valid job description**, revamp the user's CV to perfectly match the job requirements.
+2. If it **is a valid job description**, revamp the user's CV to align with the job requirements.
+   - Do NOT check if the user's current CV matches the job.
    - Prioritize the job description over any conflicting info in the CV.
    - Use **bold text** for all section headers (e.g., **Professional Summary**, **Core Skills**).
    - Adopt an active, confident, professional tone. Quantify achievements where possible.
    - Only output the **revamped CV content**. Do NOT include any summaries, filler text, or 'Additional Information'.
-3. If it **is NOT a valid job description**, return a JSON message indicating the text is not a valid job, and include any extracted content from the uploaded file.
+3. If it **is NOT a valid job description**, return a JSON message indicating the text is not a job description and include any extracted content from the uploaded file.
 
 Original CV:
 $cvText
@@ -383,9 +384,10 @@ Respond strictly in JSON format like this:
 {
   \"is_job\": true/false,
   \"revamped_cv\": \"If is_job=true, include the revamped CV; otherwise, leave empty\",
-  \"message\": \"If is_job=false, explain that the uploaded content is not a job description\"
+  \"message\": \"If is_job=false, explain that the uploaded content is not a valid job description\"
 }
 ";
+
 
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
