@@ -401,6 +401,7 @@ function handleCoverLetterUpload(e) {
   form.value.cover_letter = e.target.files[0] ?? null;
 }
 
+
 // Form Validation
 const isFormValid = computed(
   () =>
