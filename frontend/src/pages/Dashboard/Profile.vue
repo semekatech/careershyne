@@ -4,7 +4,6 @@
       <!-- Tabs -->
       <div class="border-b border-gray-200 dark:border-gray-600">
         <nav aria-label="Tabs" class="-mb-px flex space-x-8">
-          <!-- Profile Edit Tab -->
           <a
             href="#"
             @click.prevent="activeTab = 'profile'"
@@ -19,7 +18,6 @@
             Profile Edit
           </a>
 
-          <!-- My Uploads Tab -->
           <a
             href="#"
             @click.prevent="activeTab = 'uploads'"
@@ -34,7 +32,6 @@
             My Uploads
           </a>
 
-          <!-- Change Password Tab -->
           <a
             href="#"
             @click.prevent="activeTab = 'password'"
@@ -51,425 +48,363 @@
         </nav>
       </div>
 
-      <!-- Profile Form -->
+      <!-- PROFILE TAB -->
       <div v-if="activeTab === 'profile'" class="mt-8">
         <div class="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-md">
-          <h2
-            class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark"
-          >
-            Edit Profile
-          </h2>
+          <h2 class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">Edit Profile</h2>
 
-          <form @submit.prevent="submitForm" class="space-y-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Full Name -->
+          <form @submit.prevent="submitProfile" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Name -->
               <div>
-                <label class="block text-gray-700 font-medium">Full Name</label>
-                <input
-                  v-model="form.name"
-                  type="text"
-                  placeholder="John Doe"
-                  class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
-                />
-                <p
-                  v-if="validationErrors.name"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.name[0] }}
-                </p>
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Full Name</label>
+                <input v-model="form.name" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm p-2" />
+                <p v-if="validationErrors.name" class="text-red-600 text-sm mt-1">{{ validationErrors.name[0] }}</p>
               </div>
 
-              <!-- Email -->
+              <!-- Email (readonly) -->
               <div>
-                <label class="block text-gray-700 font-medium">Email</label>
-                <input
-                  v-model="form.email"
-                  type="email"
-                  placeholder="you@example.com"
-                  class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
-                />
-                <p
-                  v-if="validationErrors.email"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.email[0] }}
-                </p>
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Email</label>
+                <input v-model="form.email" type="email" readonly class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-slate-700 shadow-sm sm:text-sm p-2" />
               </div>
 
               <!-- Phone -->
               <div>
-                <label class="block text-gray-700 font-medium">Phone</label>
-                <input
-                  v-model="form.phone"
-                  type="tel"
-                  placeholder="+254700000000"
-                  class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
-                />
-                <p
-                  v-if="validationErrors.phone"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.phone[0] }}
-                </p>
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Phone</label>
+                <input v-model="form.phone" type="tel" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm p-2" />
+                <p v-if="validationErrors.phone" class="text-red-600 text-sm mt-1">{{ validationErrors.phone[0] }}</p>
               </div>
 
-            
-          
               <!-- Industry -->
               <div>
-                <label class="block text-gray-700 font-medium">Industry</label>
-                <select
-                  v-model="form.industry_id"
-                  class="w-full px-3 py-2 border rounded-lg"
-                >
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Industry</label>
+                <select v-model="form.industry_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm p-2">
                   <option value="" disabled>Select industry</option>
-                  <option
-                    v-for="option in industryOptions"
-                    :key="option.id"
-                    :value="option.id"
-                  >
-                    {{ option.name }}
-                  </option>
+                  <option v-for="opt in industryOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                 </select>
-                <p
-                  v-if="validationErrors.industry_id"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.industry_id[0] }}
-                </p>
+                <p v-if="validationErrors.industry_id" class="text-red-600 text-sm mt-1">{{ validationErrors.industry_id[0] }}</p>
               </div>
 
-              <!-- Education Level -->
+              <!-- Education -->
               <div>
-                <label class="block text-gray-700 font-medium"
-                  >Education Level</label
-                >
-                <select
-                  v-model="form.education_level_id"
-                  class="w-full px-3 py-2 border rounded-lg"
-                >
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Education Level</label>
+                <select v-model="form.education_level_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm p-2">
                   <option value="" disabled>Select education level</option>
-                  <option
-                    v-for="option in educationOptions"
-                    :key="option.id"
-                    :value="option.id"
-                  >
-                    {{ option.name }}
-                  </option>
+                  <option v-for="opt in educationOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                 </select>
-                <p
-                  v-if="validationErrors.education_level_id"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.education_level_id[0] }}
-                </p>
+                <p v-if="validationErrors.education_level_id" class="text-red-600 text-sm mt-1">{{ validationErrors.education_level_id[0] }}</p>
               </div>
 
               <!-- County -->
               <div>
-                <label class="block text-gray-700 font-medium">County</label>
-                <select
-                  v-model="form.county_id"
-                  class="w-full px-3 py-2 border rounded-lg"
-                >
+                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">County</label>
+                <select v-model="form.county_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm p-2">
                   <option value="" disabled>Select county</option>
-                  <option
-                    v-for="option in countyOptions"
-                    :key="option.id"
-                    :value="option.id"
-                  >
-                    {{ option.name }}
-                  </option>
+                  <option v-for="opt in countyOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                 </select>
-                <p
-                  v-if="validationErrors.county_id"
-                  class="text-red-600 text-sm mt-1"
-                >
-                  {{ validationErrors.county_id[0] }}
-                </p>
+                <p v-if="validationErrors.county_id" class="text-red-600 text-sm mt-1">{{ validationErrors.county_id[0] }}</p>
               </div>
-
-             
-
             </div>
 
-            <!-- Submit Button -->
-            <button
-              type="submit"
-              :disabled="loading || !isFormValid"
-              class="w-full bg-[#ff9c30] text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 mt-4"
-            >
-              <span v-if="loading">Submitting...</span>
-              <span v-else>{{ editMode ? "Update User" : "Submit User" }}</span>
-            </button>
+            <div class="flex justify-end pt-4">
+              <button type="button" @click="resetForm" class="bg-gray-200 dark:bg-slate-600 text-text-light dark:text-text-dark py-2 px-4 rounded-lg mr-3">Cancel</button>
+              <button type="submit" :disabled="profileLoading" class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">
+                <span v-if="profileLoading">Saving...</span>
+                <span v-else>Save Changes</span>
+              </button>
+            </div>
 
-            <!-- General Error Message -->
-            <p v-if="errorMessage" class="text-red-600 text-sm mt-2">
-              {{ errorMessage }}
-            </p>
-            <p v-if="successMessage" class="text-green-600 text-sm mt-2">
-              {{ successMessage }}
-            </p>
+            <p v-if="profileError" class="text-red-600 text-sm mt-2">{{ profileError }}</p>
+            <p v-if="profileSuccess" class="text-green-600 text-sm mt-2">{{ profileSuccess }}</p>
           </form>
         </div>
       </div>
 
-      <!-- Uploads Tab -->
+      <!-- UPLOADS TAB -->
       <div v-if="activeTab === 'uploads'" class="mt-8">
         <div class="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-md">
-          <h2
-            class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark"
-          >
-            My Uploads
-          </h2>
+          <h2 class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">My Uploads</h2>
 
-          <form
-            action="#"
-            method="POST"
-            enctype="multipart/form-data"
-            class="space-y-6"
-          >
-            <!-- CV Upload -->
+          <form @submit.prevent="submitUploads" enctype="multipart/form-data" class="space-y-6">
+            <!-- CV -->
             <div>
-              <label
-                for="cv"
-                class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark"
-                >Upload CV (PDF only)</label
-              >
-              <input
-                id="cv"
-                name="cv"
-                type="file"
-                accept=".pdf"
-                class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-white hover:file:bg-orange-600"
-              />
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">CV (PDF)</label>
+              <div v-if="form.cv_url" class="mt-2">
+                <a :href="form.cv_url" target="_blank" class="text-primary underline hover:text-orange-600">View current CV</a>
+              </div>
+              <input @change="handleFileChange($event, 'cv')" accept=".pdf" type="file" class="mt-2 block w-full" />
+              <p v-if="validationErrors.cv" class="text-red-600 text-sm mt-1">{{ validationErrors.cv[0] }}</p>
             </div>
 
-            <!-- Cover Letter Upload -->
+            <!-- Cover Letter -->
             <div>
-              <label
-                for="cover_letter"
-                class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark"
-                >Cover Letter (PDF/DOC/DOCX)</label
-              >
-              <input
-                id="cover_letter"
-                name="cover_letter"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-gray-500 file:text-white hover:file:bg-gray-600"
-              />
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Cover Letter (PDF/DOC/DOCX)</label>
+              <div v-if="form.cover_letter_url" class="mt-2">
+                <a :href="form.cover_letter_url" target="_blank" class="text-primary underline hover:text-orange-600">View current Cover Letter</a>
+              </div>
+              <input @change="handleFileChange($event, 'cover_letter')" accept=".pdf,.doc,.docx" type="file" class="mt-2 block w-full" />
+              <p v-if="validationErrors.cover_letter" class="text-red-600 text-sm mt-1">{{ validationErrors.cover_letter[0] }}</p>
             </div>
 
-            <!-- Actions -->
+            <!-- Photo preview + upload -->
+            <div>
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Profile Photo</label>
+              <div v-if="form.photo_url" class="mt-2">
+                <img :src="form.photo_url" alt="photo" class="w-20 h-20 rounded-full object-cover" />
+              </div>
+              <input @change="handleFileChange($event, 'photo')" accept="image/*" type="file" class="mt-2 block w-full" />
+              <p v-if="validationErrors.photo" class="text-red-600 text-sm mt-1">{{ validationErrors.photo[0] }}</p>
+            </div>
+
             <div class="flex justify-end pt-4">
-              <button
-                type="submit"
-                class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
-              >
-                Upload Files
+              <button type="submit" :disabled="uploadsLoading" class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">
+                <span v-if="uploadsLoading">Uploading...</span>
+                <span v-else>Update Files</span>
               </button>
             </div>
+
+            <p v-if="uploadsError" class="text-red-600 text-sm mt-2">{{ uploadsError }}</p>
+            <p v-if="uploadsSuccess" class="text-green-600 text-sm mt-2">{{ uploadsSuccess }}</p>
           </form>
         </div>
       </div>
 
-      <!-- Change Password Tab -->
+      <!-- PASSWORD TAB -->
       <div v-if="activeTab === 'password'" class="mt-8">
         <div class="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-md">
-          <h2
-            class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark"
-          >
-            Change Password
-          </h2>
+          <h2 class="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">Change Password</h2>
 
-          <form action="#" method="POST" class="space-y-6">
+          <form @submit.prevent="submitPassword" class="space-y-6">
             <div>
-              <label
-                for="current_password"
-                class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark"
-                >Current Password</label
-              >
-              <input
-                id="current_password"
-                name="current_password"
-                type="password"
-                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm focus:border-primary focus:ring-primary"
-              />
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Current Password</label>
+              <input v-model="password.current" type="password" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 p-2" />
             </div>
             <div>
-              <label
-                for="new_password"
-                class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark"
-                >New Password</label
-              >
-              <input
-                id="new_password"
-                name="new_password"
-                type="password"
-                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm focus:border-primary focus:ring-primary"
-              />
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">New Password</label>
+              <input v-model="password.new" type="password" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 p-2" />
             </div>
             <div>
-              <label
-                for="confirm_password"
-                class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark"
-                >Confirm Password</label
-              >
-              <input
-                id="confirm_password"
-                name="confirm_password"
-                type="password"
-                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-background-light dark:bg-slate-800 shadow-sm sm:text-sm focus:border-primary focus:ring-primary"
-              />
+              <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Confirm Password</label>
+              <input v-model="password.confirm" type="password" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 p-2" />
             </div>
-            <div class="flex justify-end pt-4">
-              <button
-                type="submit"
-                class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
-              >
-                Update Password
-              </button>
+
+            <div class="flex justify-end">
+              <button type="submit" class="bg-primary text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">Update Password</button>
             </div>
+            <p v-if="passwordError" class="text-red-600 text-sm mt-2">{{ passwordError }}</p>
+            <p v-if="passwordSuccess" class="text-green-600 text-sm mt-2">{{ passwordSuccess }}</p>
           </form>
         </div>
       </div>
     </div>
   </main>
 </template>
+
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import usersService from "@/services/profileService"; // you already set up
-import OptionsService from "@/services/optionsService";
-import { useToast } from "vue-toast-notification";
-import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import usersService from "@/services/profileService";        // your service
+import OptionsService from "@/services/optionsService";     // your options service
 
-const activeTab = ref("profile"); // default tab
-const auth = useAuthStore();
-const $toast = useToast();
-const route = useRoute();
-const router = useRouter();
+// tabs
+const activeTab = ref("profile");
 
-const showModal = ref(false);
-const editMode = ref(false);
-const loading = ref(false);
-const successMessage = ref("");
-const errorMessage = ref("");
+// loading & messages
+const profileLoading = ref(false);
+const uploadsLoading = ref(false);
+const loading = ref(false); // initial fetch loader
+const profileError = ref("");
+const profileSuccess = ref("");
+const uploadsError = ref("");
+const uploadsSuccess = ref("");
 const validationErrors = ref({});
 
-// Profile form
+// form: keep file fields separate from urls
 const form = ref({
   id: null,
   name: "",
   email: "",
   phone: "",
-  role: "user",
-  status: "active",
   industry_id: "",
   education_level_id: "",
   county_id: "",
+  // files (File objects)
   cv: null,
   cover_letter: null,
-  photo_url: null, // in case you want to preview photo
+  photo: null,
+  // urls returned by backend
+  cv_url: null,
+  cover_letter_url: null,
+  photo_url: null,
 });
 
-// Options
+// dropdown options
 const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
 
-// Fetch profile info
+// password state
+const password = ref({ current: "", new: "", confirm: "" });
+const passwordError = ref("");
+const passwordSuccess = ref("");
+
+// Helpers
+function handleFileChange(e, field) {
+  const file = e.target.files?.[0] ?? null;
+  form.value[field] = file;
+}
+
+// fetch profile & map backend keys -> front fields
 async function fetchProfile() {
+  loading.value = true;
   try {
     const { data } = await usersService.fetchProfile();
+    // data has keys: id,name,email,phone,industry_id,education_level_id,county_id,cv,cover_letter,photo_url
     form.value = {
-      ...form.value, // keep defaults
-      ...data,       // overwrite with backend values
+      ...form.value,
+      id: data.id ?? form.value.id,
+      name: data.name ?? form.value.name,
+      email: data.email ?? form.value.email,
+      phone: data.phone ?? form.value.phone,
+      industry_id: data.industry_id !== undefined ? Number(data.industry_id) : form.value.industry_id,
+      education_level_id: data.education_level_id !== undefined ? Number(data.education_level_id) : form.value.education_level_id,
+      county_id: data.county_id !== undefined ? Number(data.county_id) : form.value.county_id,
+      cv_url: data.cv ?? form.value.cv_url,
+      cover_letter_url: data.cover_letter ?? form.value.cover_letter_url,
+      photo_url: data.photo_url ?? form.value.photo_url,
     };
   } catch (err) {
-    console.error("Failed to fetch profile:", err);
-    errorMessage.value = "Could not load profile data.";
-  }
-}
-
-// File Uploads
-function handleCvUpload(e) {
-  form.value.cv = e.target.files[0] ?? null;
-}
-function handleCoverLetterUpload(e) {
-  form.value.cover_letter = e.target.files[0] ?? null;
-}
-
-
-// Form Validation
-const isFormValid = computed(
-  () =>
-    form.value.name &&
-    form.value.email &&
-    form.value.phone &&
-    form.value.role &&
-    form.value.status
-);
-
-// Submit
-async function submitForm() {
-  loading.value = true;
-  successMessage.value = "";
-  errorMessage.value = "";
-  validationErrors.value = {};
-
-  const phonePattern = /^(?:254\d{9}|0[17]\d{8})$/;
-
-  if (!phonePattern.test(form.value.phone)) {
-    errorMessage.value =
-      "Invalid phone number. Use format 254XXXXXXXXX (12 digits) or 07XXXXXXXX / 01XXXXXXXX (10 digits).";
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-    Object.keys(form.value).forEach((key) => {
-      if (form.value[key] !== null) formData.append(key, form.value[key]);
-    });
-
-    if (editMode.value) {
-      await usersService.update(form.value.id, formData);
-      successMessage.value = "Profile updated successfully!";
-    } else {
-      await usersService.updateProfile(formData); // use your profile-setup API
-      successMessage.value = "Profile saved successfully!";
-    }
-  } catch (err) {
-    if (err.response?.status === 422) {
-      validationErrors.value = err.response.data.errors;
-    } else {
-      errorMessage.value = "Failed to submit profile.";
-    }
+    console.error("fetchProfile error:", err);
+    profileError.value = "Could not load profile data.";
   } finally {
     loading.value = false;
   }
 }
 
-// Load options + profile
-onMounted(async () => {
-  await auth.refreshUser();
+// load options (industries, education, counties)
+async function loadOptions() {
   try {
     const [industries, education, counties] = await Promise.all([
       OptionsService.getIndustries(),
       OptionsService.getEducationLevels(),
       OptionsService.getCounties(),
     ]);
-    industryOptions.value = industries.data;
-    educationOptions.value = education.data;
-    countyOptions.value = counties.data;
-
-    // Fetch user profile after options
-    await fetchProfile();
+    industryOptions.value = industries.data ?? industries;
+    educationOptions.value = education.data ?? education;
+    countyOptions.value = counties.data ?? counties;
   } catch (err) {
+    console.error("loadOptions error:", err);
+  }
+}
+
+// PROFILE submit (text fields only)
+async function submitProfile() {
+  profileLoading.value = true;
+  profileError.value = "";
+  profileSuccess.value = "";
+  validationErrors.value = {};
+
+  try {
+    const fd = new FormData();
+    fd.append("name", form.value.name ?? "");
+    fd.append("phone", form.value.phone ?? "");
+    fd.append("industry_id", form.value.industry_id ?? "");
+    fd.append("education_level_id", form.value.education_level_id ?? "");
+    fd.append("county_id", form.value.county_id ?? "");
+
+    // use same endpoint that supports multipart (profile-setup)
+    const { data } = await usersService.updateProfile(fd);
+
+    // backend should return updated profile shape; refresh
+    await fetchProfile();
+    profileSuccess.value = "Profile updated successfully.";
+  } catch (err) {
+    if (err.response?.status === 422) {
+      validationErrors.value = err.response.data.errors || {};
+    } else {
+      profileError.value = "Failed to update profile.";
+      console.error(err);
+    }
+  } finally {
+    profileLoading.value = false;
+  }
+}
+
+// UPLOADS submit (files only) – using same updateProfile API because it accepts multipart
+async function submitUploads() {
+  uploadsLoading.value = true;
+  uploadsError.value = "";
+  uploadsSuccess.value = "";
+  validationErrors.value = {};
+
+  try {
+    const fd = new FormData();
+    if (form.value.cv) fd.append("cv", form.value.cv);
+    if (form.value.cover_letter) fd.append("cover_letter", form.value.cover_letter);
+    if (form.value.photo) fd.append("photo", form.value.photo);
+
+    const { data } = await usersService.updateProfile(fd);
+
+    // map returned urls (backend should return cv, cover_letter, photo_url)
+    form.value.cv_url = data.cv ?? data.cv_url ?? form.value.cv_url;
+    form.value.cover_letter_url = data.cover_letter ?? data.cover_letter_url ?? form.value.cover_letter_url;
+    form.value.photo_url = data.photo_url ?? form.value.photo_url;
+
+    uploadsSuccess.value = "Files updated successfully.";
+    // clear file inputs (so next selection is fresh)
+    form.value.cv = null;
+    form.value.cover_letter = null;
+    form.value.photo = null;
+  } catch (err) {
+    if (err.response?.status === 422) {
+      validationErrors.value = err.response.data.errors || {};
+    } else {
+      uploadsError.value = "Failed to upload files.";
+      console.error(err);
+    }
+  } finally {
+    uploadsLoading.value = false;
+  }
+}
+
+// simple password submit (call your password endpoint or usersService method if available)
+async function submitPassword() {
+  passwordError.value = "";
+  passwordSuccess.value = "";
+  if (!password.value.current || !password.value.new || password.value.new !== password.value.confirm) {
+    passwordError.value = "Please ensure passwords are filled and match.";
+    return;
+  }
+  try {
+    // replace with your real password change call if available
+    // await usersService.changePassword({ current: password.value.current, password: password.value.new, password_confirmation: password.value.confirm });
+    passwordSuccess.value = "Password updated (example).";
+    password.value.current = password.value.new = password.value.confirm = "";
+  } catch (err) {
+    passwordError.value = "Failed to update password.";
     console.error(err);
   }
+}
+
+function resetForm() {
+  // revert form to last fetched profile
+  fetchProfile();
+  validationErrors.value = {};
+  profileError.value = "";
+  profileSuccess.value = "";
+}
+
+// initial load
+onMounted(async () => {
+  loading.value = true;
+  await loadOptions();
+  await fetchProfile();
+  loading.value = false;
 });
 </script>
 
+<style scoped>
+/* small helper so inputs match look */
+input[type="file"] {
+  display: block;
+}
+</style>

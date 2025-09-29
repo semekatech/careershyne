@@ -295,8 +295,8 @@ class AuthController extends Controller
             'industry_id' => $user->industry_id,
             'education_level_id' => $user->education_level_id,
             'county_id' => $user->county_id,
-            'cv' => $user->cv_url,
-            'cover_letter' => $user->cover_letter_url,
+            'cv' => $user->cv_path,
+            'cover_letter' => $user->cover_letter_path,
             'photo_url' => $user->photo_url,
         ]);
     }
