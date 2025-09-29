@@ -282,6 +282,40 @@ class AuthController extends Controller
         ]);
     }
 
+    public function profile(Request $request)
+{
+    // get token and find user by hashed api_token
+    $token = $request->bearerToken();
+    $user = User::where('api_token', hash('sha256', $token))->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    // Eager-load relationships
+    $user->load(['industry', 'educationLevel', 'county']);
+
+    // Build full URLs for uploaded files
+    $user->cv_url = $user->cv_path ? asset('storage/' . $user->cv_path) : null;
+    $user->cover_letter_url = $user->cover_letter_path ? asset('storage/' . $user->cover_letter_path) : null;
+    $user->photo_url = $user->photo ? asset('storage/' . $user->photo) : null;
+
+    // Return extra fields as part of the response
+    return response()->json([
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'phone' => $user->phone,
+        'industry' => $user->industry ? $user->industry->name : null,
+        'education_level' => $user->educationLevel ? $user->educationLevel->name : null,
+        'county' => $user->county ? $user->county->name : null,
+        'cv_url' => $user->cv_url,
+        'cover_letter_url' => $user->cover_letter_url,
+        'photo_url' => $user->photo_url,
+    ]);
+}
+
+
     public function updateProfile(Request $request)
     {
         $token = $request->bearerToken();
