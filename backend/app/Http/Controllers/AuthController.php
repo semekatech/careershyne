@@ -126,48 +126,52 @@ class AuthController extends Controller
             ], 500);
         }
     }
-    public function profileSetup(Request $request)
-    {
-        $user = auth('api')->user();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        // Validate incoming request
-        $validated = $request->validate([
-            'industry_id' => 'required|integer|exists:industries,id',
-            'education_level_id' => 'required|integer|exists:education_levels,id',
-            'county_id' => 'required|integer|exists:counties,id',
-            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-            'coverLetterFile' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-        ]);
-
-        // Update user profile fields
-        $user->industry_id = $validated['industry_id'];
-        $user->education_level_id = $validated['education_level_id'];
-        $user->county_id = $validated['county_id'];
-
-        // Handle CV upload
-        if ($request->hasFile('cv')) {
-            $cvFile = $request->file('cv');
-            $cvPath = $cvFile->store('cvs', 'public');
-            $user->cv_path = $cvPath;
-        }
-
-        // Handle Cover Letter upload
-        if ($request->hasFile('coverLetterFile')) {
-            $coverLetterFile = $request->file('coverLetterFile');
-            $coverLetterPath = $coverLetterFile->store('cover_letters', 'public'); // storage/app/public/cover_letters
-            $user->cover_letter_path = $coverLetterPath;
-        }
-
-        $user->save();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
+   public function profileSetup(Request $request)
+{
+    $user = auth('api')->user();
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+    // Validate incoming request
+    $validated = $request->validate([
+        'name' => 'nullable|string|max:255',
+        'phone' => 'nullable|string|max:20',
+        'industry_id' => 'required|integer|exists:industries,id',
+        'education_level_id' => 'required|integer|exists:education_levels,id',
+        'county_id' => 'required|integer|exists:counties,id',
+        'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+        'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+    ]);
+    // Update text fields
+    if (isset($validated['name'])) {
+        $user->name = $validated['name'];
+    }
+    if (isset($validated['phone'])) {
+        $user->phone = $validated['phone'];
+    }
+    $user->industry_id = $validated['industry_id'];
+    $user->education_level_id = $validated['education_level_id'];
+    $user->county_id = $validated['county_id'];
+
+    // Handle CV upload
+    if ($request->hasFile('cv')) {
+        $cvPath = $request->file('cv')->store('cvs', 'public');
+        $user->cv_path = $cvPath;
+    }
+
+    // Handle Cover Letter upload
+    if ($request->hasFile('cover_letter')) {
+        $coverLetterPath = $request->file('cover_letter')->store('cover_letters', 'public');
+        $user->cover_letter_path = $coverLetterPath;
+    }
+
+    $user->save();
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Profile updated successfully',
+    ], 200);
+}
 
     public function industries()
 
