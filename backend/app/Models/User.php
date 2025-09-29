@@ -40,4 +40,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function industry()
+{
+    return $this->belongsTo(Industry::class);
+}
+
+public function educationLevel()
+{
+    return $this->belongsTo(EducationLevel::class, 'education_level_id');
+}
+
+public function county()
+{
+    return $this->belongsTo(County::class, 'county_id');
+}
+
 }
