@@ -19,6 +19,10 @@ import SetupPage from "@/pages/SetupPage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 import ManageJobs from "../pages/Dashboard/ManageJobs.vue";
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
+import Profile from "@/pages/Dashboard/Profile.vue";
+import Plans from "@/pages/Dashboard/Plans.vue";
+import UserJobs from "@/pages/Dashboard/UserJobs.vue";
+import UserActivity from "@/pages/Dashboard/UserActivity.vue";
 const routes = [
   {
     path: "/",
@@ -217,6 +221,58 @@ const routes = [
       {
         path: "",
         component: CvRevamp,
+      },
+    ],
+  },
+   {
+    path: "/my-plans",
+    component: DashboardLayout,
+    meta: {
+      title: "My Plans",
+    },
+    children: [
+      {
+        path: "",
+        component: Plans,
+      },
+    ],
+  },
+     {
+    path: "/profile",
+    component: DashboardLayout,
+    meta: {
+      title: "Profile Summary",
+    },
+    children: [
+      {
+        path: "",
+        component: Profile,
+      },
+    ],
+  },
+ {
+    path: "/browse-jobs",
+    component: DashboardLayout,
+    meta: {
+      title: "Browse Jobs",
+    },
+    children: [
+      {
+        path: "",
+        component: UserJobs,
+      },
+    ],
+  },
+   {
+    path: "/browse-acctivities",
+    component: DashboardLayout,
+    meta: {
+      title: "Activities History",
+    },
+    children: [
+      {
+        path: "",
+        component: UserActivity,
       },
     ],
   },
