@@ -15,7 +15,8 @@ use App\Http\Middleware\CheckSubscriptionLimit;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/profile-setup', [AuthController::class, 'profileSetup']);
+    Route::middleware('auth:api')->post('/profile-setup', [AuthController::class, 'profileSetup']);
+    Route::middleware('auth:api')->post('/fetch-profile', [AuthController::class, 'fetchProfile']);
 });
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
@@ -28,7 +29,7 @@ Route::get('industries', [AuthController::class, 'industries']);
 Route::get('education-levels', [AuthController::class, 'educationLevels']);
 Route::get('counties', [AuthController::class, 'counties']);
 Route::post('/log-visitor', function (Request $request) {
-    $ip = $request->input('ip', $request->ip()); // ✅ use frontend IP if available
+    $ip = $request->input('ip', $request->ip());
     $userAgent = $request->header('User-Agent');
     $page = $request->input('page', 'unknown');
 
@@ -100,15 +101,4 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
         ->middleware('throttle:2,1');
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1');
-});
-
-
-// routes/api.php
-Route::get('/phpinfo', function () {
-    return response()->json([
-        'upload_max_filesize' => ini_get('upload_max_filesize'),
-        'post_max_size' => ini_get('post_max_size'),
-        'memory_limit' => ini_get('memory_limit'),
-        'max_execution_time' => ini_get('max_execution_time'),
-    ]);
 });
