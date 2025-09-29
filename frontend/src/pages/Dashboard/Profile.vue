@@ -539,7 +539,9 @@ async function submitProfile() {
     fd.append("education_level_id", form.value.education_level_id ?? "");
     fd.append("county_id", form.value.county_id ?? "");
 
+    // use same endpoint that supports multipart (profile-setup)
     const { data } = await usersService.updateProfile(fd);
+
     // backend should return updated profile shape; refresh
     await fetchProfile();
     profileSuccess.value = "Profile updated successfully.";
@@ -556,6 +558,7 @@ async function submitProfile() {
 }
 
 // UPLOADS submit (files only) – using same updateProfile API because it accepts multipart
+// UPLOADS submit (files only)
 async function submitUploads() {
   uploadsLoading.value = true;
   uploadsError.value = "";
@@ -565,20 +568,16 @@ async function submitUploads() {
   try {
     const fd = new FormData();
     if (form.value.cv) fd.append("cv", form.value.cv);
-    if (form.value.cover_letter)
-      fd.append("cover_letter", form.value.cover_letter);
+    if (form.value.cover_letter) fd.append("cover_letter", form.value.cover_letter);
     if (form.value.photo) fd.append("photo", form.value.photo);
 
     const { data } = await usersService.updateProfile(fd);
 
-    // map returned urls (backend should return cv, cover_letter, photo_url)
-    form.value.cv_url = data.cv ?? data.cv_url ?? form.value.cv_url;
-    form.value.cover_letter_url =
-      data.cover_letter ?? data.cover_letter_url ?? form.value.cover_letter_url;
-    form.value.photo_url = data.photo_url ?? form.value.photo_url;
+    await fetchProfile();
 
     uploadsSuccess.value = "Files updated successfully.";
-    // clear file inputs (so next selection is fresh)
+
+    // clear file inputs (for fresh selection next time)
     form.value.cv = null;
     form.value.cover_letter = null;
     form.value.photo = null;
@@ -593,6 +592,7 @@ async function submitUploads() {
     uploadsLoading.value = false;
   }
 }
+
 
 // simple password submit (call your password endpoint or usersService method if available)
 async function submitPassword() {
