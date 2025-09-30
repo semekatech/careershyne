@@ -5,7 +5,7 @@
       <!-- HEADER -->
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
-          Frequently Asked Questions
+          FAQs
         </h2>
         <p class="mt-3 text-lg text-gray-600">
           Quick answers to common questions about CareerShyne AI.
