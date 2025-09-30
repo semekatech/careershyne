@@ -35,4 +35,7 @@ export default {
   fetchProfile() {
     return api.get("fetch-profile");
   },
+  updatePassword(payload) {
+    return api.post("update-password", payload);
+  },
 };

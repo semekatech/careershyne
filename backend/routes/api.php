@@ -17,6 +17,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:api')->post('/profile-setup', [AuthController::class, 'profileSetup']);
     Route::middleware('auth:api')->get('/fetch-profile', [AuthController::class, 'fetchProfile']);
+    Route::middleware('auth:api')->post('/update-password', [AuthController::class, 'updatePassword']);
 });
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);

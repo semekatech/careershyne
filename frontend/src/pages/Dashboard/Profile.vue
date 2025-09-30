@@ -57,7 +57,7 @@
       <div v-else>
         <!-- PROFILE TAB -->
         <div v-if="activeTab === 'profile'" class="mt-8">
-          <div class="bg-card-light dark:bg-card-dark p-8 ">
+          <div class="bg-card-light dark:bg-card-dark p-8">
             <!-- Alerts -->
             <div
               v-if="profileError"
@@ -222,7 +222,7 @@
 
         <!-- UPLOADS TAB -->
         <div v-if="activeTab === 'uploads'" class="mt-8">
-          <div class="bg-card-light dark:bg-card-dark p-8 ">
+          <div class="bg-card-light dark:bg-card-dark p-8">
             <!-- Alerts -->
             <div
               v-if="uploadsError"
@@ -315,7 +315,6 @@
               </a>
             </div>
 
-        
             <!-- Actions -->
             <div class="flex justify-end pt-4">
               <button
@@ -333,7 +332,7 @@
 
         <!-- PASSWORD TAB -->
         <div v-if="activeTab === 'password'" class="mt-8">
-          <div class="bg-card-light dark:bg-card-dark p-8 ">
+          <div class="bg-card-light dark:bg-card-dark p-8">
             <!-- Alerts -->
             <div
               v-if="passwordError"
@@ -552,8 +551,10 @@ async function submitUploads() {
 }
 
 // Submit Password
+// Submit Password
 async function submitPassword() {
   passwordError.value = passwordSuccess.value = "";
+
   if (
     !password.value.current ||
     !password.value.new ||
@@ -562,12 +563,22 @@ async function submitPassword() {
     passwordError.value = "Please ensure passwords are filled and match.";
     return;
   }
+
   try {
-    // Example placeholder
-    passwordSuccess.value = "Password updated (example).";
+    await usersService.updatePassword({
+      current_password: password.value.current,
+      new_password: password.value.new,
+      new_password_confirmation: password.value.confirm,
+    });
+
+    passwordSuccess.value = "Password updated successfully.";
     password.value.current = password.value.new = password.value.confirm = "";
   } catch (err) {
-    passwordError.value = "Failed to update password.";
+    if (err.response?.status === 422) {
+      passwordError.value = err.response.data.message || "Validation failed.";
+    } else {
+      passwordError.value = "Failed to update password.";
+    }
   }
 }
 
