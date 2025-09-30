@@ -3,22 +3,39 @@ import axios from "axios";
 
 const API = "https://careershyne.com/api/auth/";
 
+// Create axios instance
+const api = axios.create({
+  baseURL: API,
+});
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default {
   updateProfile(formData) {
-    return axios.post(API + "profile-setup", formData, {
+    return api.post("profile-setup", formData, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "multipart/form-data",
       },
     });
   },
 
-  // ✅ Fetch user profile
   getProfile() {
-    return axios.get(API + "verify-token", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    return api.get("verify-token");
+  },
+
+  fetchProfile() {
+    return api.get("fetch-profile");
+  },
+  updatePassword(payload) {
+    return api.post("update-password", payload);
   },
 };

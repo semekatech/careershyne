@@ -128,48 +128,56 @@ class AuthController extends Controller
     }
     public function profileSetup(Request $request)
     {
-        // Authenticate user
-        $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
-
+        $user = auth('api')->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         // Validate incoming request
         $validated = $request->validate([
-            'industry_id' => 'required|integer|exists:industries,id',
-            'education_level_id' => 'required|integer|exists:education_levels,id',
-            'county_id' => 'required|integer|exists:counties,id',
-            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-            'coverLetterFile' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+            'name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'industry_id' => 'nullable|integer|exists:industries,id',
+            'education_level_id' => 'nullable|integer|exists:education_levels,id',
+            'county_id' => 'nullable|integer|exists:counties,id',
+            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        // Update user profile fields
-        $user->industry_id = $validated['industry_id'];
-        $user->education_level_id = $validated['education_level_id'];
-        $user->county_id = $validated['county_id'];
+        // Update text fields
+        if (isset($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+        if (isset($validated['phone'])) {
+            $user->phone = $validated['phone'];
+        }
+        if (isset($validated['industry_id'])) {
+            $user->industry_id = $validated['industry_id'];
+        }
+        if (isset($validated['education_level_id'])) {
+            $user->education_level_id = $validated['education_level_id'];
+        }
+        if (isset($validated['county_id'])) {
+            $user->county_id = $validated['county_id'];
+        }
 
         // Handle CV upload
         if ($request->hasFile('cv')) {
-            $cvFile = $request->file('cv');
-            $cvPath = $cvFile->store('cvs', 'public');
+            $cvPath = $request->file('cv')->store('cvs', 'public');
             $user->cv_path = $cvPath;
         }
 
         // Handle Cover Letter upload
-        if ($request->hasFile('coverLetterFile')) {
-            $coverLetterFile = $request->file('coverLetterFile');
-            $coverLetterPath = $coverLetterFile->store('cover_letters', 'public'); // storage/app/public/cover_letters
+        if ($request->hasFile('cover_letter')) {
+            $coverLetterPath = $request->file('cover_letter')->store('cover_letters', 'public');
             $user->cover_letter_path = $coverLetterPath;
         }
 
         $user->save();
+
         return response()->json([
             'status' => 'success',
-            'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
+            'message' => 'Profile updated successfully',
+        ], 200);
     }
 
     public function industries()
@@ -282,159 +290,29 @@ class AuthController extends Controller
         ]);
     }
 
-    public function profile(Request $request)
-{
-    // get token and find user by hashed api_token
-    $token = $request->bearerToken();
-    $user = User::where('api_token', hash('sha256', $token))->first();
-
-    if (!$user) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    // Eager-load relationships
-    $user->load(['industry', 'educationLevel', 'county']);
-
-    // Build full URLs for uploaded files
-    $user->cv_url = $user->cv_path ? asset('storage/' . $user->cv_path) : null;
-    $user->cover_letter_url = $user->cover_letter_path ? asset('storage/' . $user->cover_letter_path) : null;
-    $user->photo_url = $user->photo ? asset('storage/' . $user->photo) : null;
-
-    // Return extra fields as part of the response
-    return response()->json([
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'phone' => $user->phone,
-        'industry' => $user->industry ? $user->industry->name : null,
-        'education_level' => $user->educationLevel ? $user->educationLevel->name : null,
-        'county' => $user->county ? $user->county->name : null,
-        'cv_url' => $user->cv_url,
-        'cover_letter_url' => $user->cover_letter_url,
-        'photo_url' => $user->photo_url,
-    ]);
-}
-
-
-    public function updateProfile(Request $request)
+    public function fetchProfile(Request $request)
     {
-        $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
 
-        // Base validation rules
-        $rules = [
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'required|email|max:255',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            // Social media links
-            'tiktok' => 'nullable|url|max:255',
-            'facebook' => 'nullable|url|max:255',
-            'twitter' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
-            'youtube' => 'nullable|url|max:255',
-            'linkedin' => 'nullable|url|max:255',
-            'bio' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'dob' => 'nullable|string|max:255',
-        ];
-
-        // If password is present, require current_password and validate password confirmation
-        if ($request->filled('password')) {
-            $rules['current_password'] = 'required|string';
-            $rules['password'] = 'nullable|string|min:6|confirmed';
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        // If password is being changed, validate current password
-        if ($request->filled('password') && !Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect.',
-            ], 403);
-        }
-
-        // Update basic info
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-
-        // Update password
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-
-        // Upload photo
-        if ($request->hasFile('photo')) {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            $path = $request->file('photo')->store('profiles', 'public');
-            $user->photo = $path;
-        }
-
-        // Update social media
-        $user->tiktok = $request->tiktok;
-        $user->facebook = $request->facebook;
-        $user->twitter = $request->twitter;
-        $user->instagram = $request->instagram;
-        $user->youtube = $request->youtube;
-        $user->linkedin = $request->linkedin;
-        $user->niche = $request->niche;
-        $user->location = $request->location;
-        $user->bio = $request->bio;
-        $user->dob = $request->dob;
-        $user->save();
 
         return response()->json([
-            'message' => 'Profile updated successfully.',
-            'user' => $user,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'industry_id' => $user->industry_id,
+            'education_level_id' => $user->education_level_id,
+            'county_id' => $user->county_id,
+            'cv' => $user->cv_path,
+            'cover_letter' => $user->cover_letter_path,
+            'photo_url' => $user->photo_url,
         ]);
     }
 
-    public function getNotifications(Request $request)
-    {
-        $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $notifications = [];
-
-        if ($user->role === 'promoter') {
-            $platforms = ['tiktok', 'facebook', 'twitter', 'instagram', 'youtube'];
-            $missing = [];
-
-            foreach ($platforms as $platform) {
-                if (empty($user->$platform)) {
-                    $missing[] = ucfirst($platform);
-                }
-            }
-            if (!empty($missing)) {
-                $formattedList = collect($missing)->map(function ($item) {
-                    return "<strong style='color:#db2777'>" . e($item) . "</strong>";
-                })->implode(', ');
-
-                $notifications[] = [
-                    'id' => count($notifications) + 1,
-                    'message' => "Your profile is missing the following social links: {$formattedList}. Adding them can improve your visibility and chances of getting hired by brands.",
-                    'created_at' => now()->toDateTimeString(),
-                ];
-            }
-        }
-
-
-        return response()->json(['notifications' => $notifications]);
-    }
 
     public function impersonateLogin(Request $request, User $user)
     {
@@ -468,6 +346,42 @@ class AuthController extends Controller
             ],
             'redirect' => $redirectRoute,
             'impersonator_id' => $admin->id,
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check if current password matches
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Current password is incorrect.'
+            ], 400);
+        }
+
+        // Update password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password updated successfully.'
         ]);
     }
 }
