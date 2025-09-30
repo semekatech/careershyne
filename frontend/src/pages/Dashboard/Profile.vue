@@ -576,6 +576,8 @@ async function submitPassword() {
   } catch (err) {
     if (err.response?.status === 422) {
       passwordError.value = err.response.data.message || "Validation failed.";
+    }else if (err.response?.status === 400) {
+      passwordError.value = err.response.data.message || "Current Password is incorrect.";
     } else {
       passwordError.value = "Failed to update password.";
     }
