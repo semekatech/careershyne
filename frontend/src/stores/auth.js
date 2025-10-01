@@ -44,7 +44,6 @@ export const useAuthStore = defineStore("auth", {
         });
         this.setUser(response.data);
       } catch (error) {
-        console.error("Failed to refresh user:", error);
       }
     },
   },

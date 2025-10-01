@@ -1,5 +1,6 @@
 <template>
   <div class="p-4">
+    <!-- Header -->
     <header
       class="w-full border border-border-light dark:border-border-dark rounded-lg p-8 text-center shadow-sm mb-8 bg-white dark:bg-background-dark"
     >
@@ -17,6 +18,7 @@
     </header>
 
     <section class="bg-card-light dark:bg-card-dark p-8 rounded-lg">
+      <!-- Stepper -->
       <div class="mb-8">
         <ol class="flex items-center w-full">
           <li
@@ -72,28 +74,20 @@
             </span>
           </li>
         </ol>
-        <div
-          class="flex justify-between mt-2 text-sm font-medium text-subtext-light dark:text-subtext-dark"
-        >
-          <span :class="{'text-primary dark:text-primary-light': currentStep >= 1}">
-            Email Context
-          </span>
-          <span :class="{'text-primary dark:text-primary-light': currentStep >= 2}">
-            Generated Email
-          </span>
-          <span :class="{'text-primary dark:text-primary-light': currentStep >= 3}">
-            Download / Copy
-          </span>
+        <div class="flex justify-between mt-2 text-sm font-medium text-subtext-light dark:text-subtext-dark">
+          <span :class="{'text-primary dark:text-primary-light': currentStep >= 1}">Email Context</span>
+          <span :class="{'text-primary dark:text-primary-light': currentStep >= 2}">Generated Email</span>
+          <span :class="{'text-primary dark:text-primary-light': currentStep >= 3}">Download / Copy</span>
         </div>
       </div>
 
-      <!-- Step 1: Provide Job / Context -->
+      <!-- Step 1: Provide Context -->
       <div v-if="currentStep === 1">
         <h2 class="text-2xl font-semibold text-text-light dark:text-text-dark mb-2">
           Step 1: Provide Context or Job Description
         </h2>
         <p class="text-subtext-light dark:text-subtext-dark mb-6">
-          Paste the context or upload a file (PDF) that explains the purpose of your email.
+          Paste the context or upload a file (PDF, DOC, DOCX) that explains the purpose of your email.
         </p>
 
         <div class="mb-6">
@@ -105,7 +99,7 @@
               class="w-full appearance-none bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="text">Paste Context</option>
-              <option value="pdf">Upload PDF</option>
+              <option value="pdf">Upload File</option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-subtext-light dark:text-subtext-dark"
@@ -115,6 +109,7 @@
           </div>
         </div>
 
+        <!-- Text Input -->
         <div v-if="inputType === 'text'">
           <textarea
             v-model="emailContext"
@@ -124,7 +119,8 @@
           ></textarea>
         </div>
 
-        <div v-else-if="inputType === 'pdf'" class="mt-4">
+        <!-- File Upload -->
+        <div v-else class="mt-4">
           <div
             class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer"
             @dragover.prevent
@@ -132,7 +128,7 @@
             @click="fileInput.click()"
           >
             <p class="font-semibold mb-2">Drag and drop your file here</p>
-            <p class="text-muted-light dark:text-muted-dark text-sm mb-4">PDF, DOC, DOCX up to 5MB</p>
+            <p class="text-muted-light dark:text-muted-dark text-sm mb-4">PDF, DOC, DOCX up to 2MB</p>
             <button
               type="button"
               class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
@@ -165,15 +161,14 @@
         </div>
       </div>
 
-      <!-- Step 2: Show Generated Email -->
+      <!-- Step 2: Edit Generated Email (Tiptap Integrated Directly) -->
       <div v-else-if="currentStep === 2 && generatedEmail">
         <h2 class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4">
-          Step 2: Generated Email
+          Step 2: Edit Generated Email
         </h2>
 
-        <div class="prose dark:prose-invert max-w-full overflow-x-auto p-4 border rounded-lg bg-background-light dark:bg-background-dark">
-          <div v-html="formattedEmail"></div>
-        </div>
+        <!-- Tiptap Editor -->
+        <EditorContent :editor="editor" class="border p-4 rounded bg-white dark:bg-background-dark max-h-[500px] overflow-y-auto" />
 
         <div class="flex justify-between mt-6">
           <button @click="goToStep(1)" class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
@@ -209,10 +204,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onBeforeUnmount, watch } from "vue";
+import { Editor, EditorContent } from "@tiptap/vue-3";
+import StarterKit from "@tiptap/starter-kit";
 import { generateJobEmail } from "@/services/emailService.js";
 
-// --- Step and Form State ---
+// --- Step & Form State ---
 const currentStep = ref(1);
 const loading = ref(false);
 
@@ -237,11 +234,7 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-
-  if (file.size > MAX_FILE_SIZE) {
-    alert("File is too large. Maximum allowed size is 2 MB.");
-    return;
-  }
+  if (file.size > MAX_FILE_SIZE) return alert("File is too large (2MB max).");
 
   contextFile.value = file;
   contextFileName.value = file.name;
@@ -250,11 +243,7 @@ function handleFileUpload(event) {
 function handleDrop(event) {
   const file = event.dataTransfer.files[0];
   if (!file) return;
-
-  if (file.size > MAX_FILE_SIZE) {
-    alert("File is too large. Maximum allowed size is 2 MB.");
-    return;
-  }
+  if (file.size > MAX_FILE_SIZE) return alert("File is too large (2MB max).");
 
   contextFile.value = file;
   contextFileName.value = file.name;
@@ -277,60 +266,47 @@ async function submitContext() {
   try {
     const data = await generateJobEmail(formData);
 
-    if (data.success && data.email_template) { // notice backend returns 'email_template'
+    if (data.success && data.email_template) {
       generatedEmail.value = data.email_template;
+      editor.commands.setContent(generatedEmail.value);
       currentStep.value = 2;
     } else {
       generatedEmail.value = `❌ Error: ${data.message || "Email generation failed."}`;
+      editor.commands.setContent(generatedEmail.value);
       currentStep.value = 2;
     }
   } catch (err) {
-    console.error("Error generating email:", err);
-    let errorMessage = "❌ An unexpected error occurred. Please try again later.";
-    if (err.response && err.response.data) {
-      const apiErrors = err.response.data.errors
-        ? Object.values(err.response.data.errors).flat().join(" ")
-        : null;
-      errorMessage = `❌ ${err.response.data.message || apiErrors || "Server error occurred."}`;
+    let errorMessage = "❌ An unexpected error occurred.";
+    if (err.response?.data) {
+      const apiErrors = err.response.data.errors ? Object.values(err.response.data.errors).flat().join(" ") : null;
+      errorMessage = `❌ ${err.response.data.message || apiErrors || "Server error."}`;
     }
-    generatedEmail.value = `Error: ${errorMessage}`;
+    generatedEmail.value = errorMessage;
+    editor.commands.setContent(errorMessage);
     currentStep.value = 2;
   } finally {
     loading.value = false;
   }
 }
 
-
-// --- Format Email ---
-const formattedEmail = computed(() => {
-  if (!generatedEmail.value) return "";
-
-  let html = generatedEmail.value;
-
-  // Convert bold headers (**Header**) to <strong>
-  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // Paragraph handling
-  html = html.replace(/\n\s*\n/g, "</p><p>");
-  html = html.replace(/\n/g, "<br>");
-  html = html
-    .split("<br>")
-    .map((line) => {
-      line = line.trim();
-      if (line.length > 0 && !line.startsWith("<strong") && !line.startsWith("<p")) {
-        return `<p>${line}</p>`;
-      }
-      return line;
-    })
-    .join("");
-
-  html = html.replace(/<p>\s*<\/p>/g, "");
-  return html.trim();
+// --- Tiptap Editor ---
+const editor = new Editor({
+  extensions: [StarterKit],
+  content: generatedEmail.value || "<p>Start editing...</p>",
+  onUpdate: ({ editor }) => {
+    generatedEmail.value = editor.getHTML();
+  },
 });
+
+watch(() => generatedEmail.value, (newVal) => {
+  if (newVal !== editor.getHTML()) editor.commands.setContent(newVal, false);
+});
+
+onBeforeUnmount(() => editor.destroy());
 
 // --- Download as Word ---
 function downloadAsWord() {
-  if (!formattedEmail.value) return;
+  if (!generatedEmail.value) return;
 
   const preHtml = `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' 
@@ -339,10 +315,9 @@ function downloadAsWord() {
     <head><meta charset='utf-8'><title>Generated Email</title></head><body>`;
   const postHtml = "</body></html>";
 
-  const htmlContent = preHtml + formattedEmail.value + postHtml;
+  const htmlContent = preHtml + generatedEmail.value + postHtml;
 
   const blob = new Blob(["\ufeff", htmlContent], { type: "application/msword" });
-
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

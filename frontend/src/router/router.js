@@ -6,7 +6,7 @@ import HomeLayout from "@/components/HomeLayout.vue";
 import PaymentPage from "@/pages/PaymentPage.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
-import DashboardHome from "@/pages/DashboardHome.vue";
+import DashboardHome from "@/pages/Dashboard/DashboardHome.vue";
 import ManageOrders from "@/pages/ManageOrders.vue";
 import ManagePayments from "@/pages/ManagePayments.vue";
 // Pages

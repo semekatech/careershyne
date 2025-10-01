@@ -1,40 +1,26 @@
 <template>
-  <div>
+  <div class="w-full px-2 sm:px-4 md:px-6 lg:px-8">
+    <!-- Banner -->
     <UserBanner />
-    <br/> 
-    <UserTabs />
+
+    <!-- Space -->
+    <div class="mt-4 sm:mt-6">
+      <UserTabs />
+    </div>
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, onMounted } from "vue";
-import DashboardService from "@/services/dashboardService";
+import { onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
-import OrdersGraph from "@/components/OrdersGraph.vue";
+
 import UserBanner from "@/components/Dashboard/UserBanner.vue";
 import UserTabs from "@/components/Dashboard/UserTabs.vue";
-const auth = useAuthStore();
-const pendingRequests = ref(0);
-const approvedRequests = ref(0);
-const totalAmount = ref(0);
-const totalPendingAmount = ref(0);
-const totalApprovedAmount = ref(0);
-const allRequests = ref(0);
-const graphData = ref([]);
 
+const auth = useAuthStore();
 onMounted(async () => {
   await auth.refreshUser();
-  try {
-    const stats = await DashboardService.getDashboardStats();
-    pendingRequests.value = stats.pending;
-    approvedRequests.value = stats.approved;
-    allRequests.value = stats.all;
-    totalAmount.value = stats.totalAmount;
-    totalApprovedAmount.value = stats.totalApprovedAmount;
-    totalPendingAmount.value = stats.totalPendingAmount;
-    graphData.value = stats.graphData; // ✅ set graph data
-  } catch (error) {
-    console.error("Failed to load dashboard stats:", error);
-  }
 });
 </script>
