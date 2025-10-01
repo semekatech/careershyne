@@ -1,0 +1,2 @@
+1) Security Measures
+- Throttle for login( max 3 incorrect attempts per account,wait time 5 mins,10 attempts max per IP).

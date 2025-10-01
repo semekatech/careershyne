@@ -18,7 +18,7 @@
         </div>
         <p class="text-sm px-8 leading-relaxed">
           Log in to explore opportunities and let our AI tools help you
-          <br>apply with speed and confidence.
+          <br />apply with speed and confidence.
         </p>
       </div>
     </div>
@@ -39,6 +39,12 @@
           </p>
           <p v-if="errorMessage" class="text-sm text-red-600 mt-2 text-center">
             {{ errorMessage }}
+          </p>
+          <p
+            v-if="successMessage"
+            class="text-sm text-green-600 mt-2 text-center"
+          >
+            {{ successMessage }}
           </p>
         </div>
         <form @submit.prevent="handleLogin" class="mt-8 space-y-6">
@@ -177,9 +183,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useToast } from "vue-toast-notification";
 import { useAuthStore } from "@/stores/auth";
 import LoginService from "@/services/loginService";
 
@@ -187,10 +192,10 @@ const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const errorMessage = ref("");
+const successMessage = ref("");
 const passwordVisible = ref(false);
 const route = useRoute();
 const router = useRouter();
-const $toast = useToast();
 const auth = useAuthStore();
 
 const togglePasswordVisibility = () => {
@@ -199,6 +204,7 @@ const togglePasswordVisibility = () => {
 
 const handleLogin = async () => {
   errorMessage.value = "";
+  successMessage.value = "";
 
   if (!email.value || !password.value) {
     errorMessage.value = "Please fill in both email and password.";
@@ -212,26 +218,33 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     });
-    const data = response.data;
-    $toast.success("Login successful!", { position: "top-right" });
 
+    const data = response.data;
     const token = data.access_token;
     const user = data.user;
+
     auth.setToken(token);
     auth.setUser(user);
-    const redirectPath = data.redirect;
-    if (redirectPath) {
-      // alert("sasa");
-       const path = "/" + redirectPath;
-       router.push(path);
-    } else {
-      alert("no");
-    }
+
+    successMessage.value = "Login successful! Redirecting...";
+
+    setTimeout(() => {
+      const redirectPath = data.redirect ? "/" + data.redirect : "/dashboard";
+      router.push(redirectPath);
+    }, 2000); // 2-second delay
   } catch (error) {
     if (error.response) {
-      errorMessage.value = "Invalid login credentials! Please try again";
+      if (error.response.status === 401) {
+        errorMessage.value = "Invalid email or password.";
+      } else if (error.response.status === 429) {
+        errorMessage.value = "Too many login attempts. Please try again later.";
+      } else if (error.response.status === 500) {
+        errorMessage.value = "Server error. Please try again later.";
+      } else {
+        errorMessage.value = "Unexpected error. Please try again.";
+      }
     } else {
-      errorMessage.value = "Server error. Please try again.";
+      errorMessage.value = "Network error. Please check your connection.";
     }
   } finally {
     loading.value = false;

@@ -17,58 +17,72 @@ use App\Mail\WelcomeUserMail;
 use App\Models\CvOrder;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
+
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function login(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-    $key = 'login_attempts:' . $request->ip() . ':' . $request->email;
-    // check if locked out
-    if (Cache::get($key, 0) >= 3) {
-        return response()->json([
-            'message' => 'Too many failed login attempts. Please try again later.'
-        ], 429);
-    }
-    $user = User::where('email', $request->email)->first();
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        // increase attempts
-        Cache::add($key, 0, now()->addMinutes(5)); // start counter with 5min expiry
-        Cache::increment($key);
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+        $ipKey = 'login_attempts:ip:' . $request->ip();
+        $emailKey = 'login_attempts:email:' . strtolower($request->email);
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-    Cache::forget($key);
-    // Generate token
-    $token = Str::random(60);
-    $user->api_token = hash('sha256', $token);
-    $user->save();
-
-    // Determine redirect route
-    $redirectRoute = 'dashboard';
-    if ($user->role == 1098) {
-        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
-            $redirectRoute = 'profile-setup';
+        // check if locked out by IP
+        if (Cache::get($ipKey, 0) >= 10) {
+            return response()->json([
+                'message' => 'Too many failed login attempts from this IP. Please try again later.'
+            ], 429);
         }
+
+        // check if locked out by email
+        if (Cache::get($emailKey, 0) >= 3) {
+            return response()->json([
+                'message' => 'Too many failed login attempts for this account. Please try again later.'
+            ], 429);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            // increase attempts
+            Cache::add($ipKey, 0, now()->addMinutes(5));
+            Cache::increment($ipKey);
+
+            Cache::add($emailKey, 0, now()->addMinutes(5));
+            Cache::increment($emailKey);
+
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // ✅ success → reset counters
+        Cache::forget($ipKey);
+        Cache::forget($emailKey);
+
+        // Generate token
+        $token = Str::random(60);
+        $user->api_token = hash('sha256', $token);
+        $user->last_login_at = now();
+        $user->save();
+        // Determine redirect route
+        $redirectRoute = 'dashboard';
+        if ($user->role == 1098) {
+            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+                $redirectRoute = 'profile-setup';
+            }
+        }
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->role,
+            ],
+            'redirect' => $redirectRoute,
+        ]);
     }
-
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'role' => $user->role,
-        ],
-        'redirect' => $redirectRoute,
-    ]);
-}
-
 
     public function register(Request $request)
     {
