@@ -351,30 +351,34 @@ class AuthController extends Controller
 
     public function updatePassword(Request $request)
     {
+
+        info('hello');
         $user = auth('api')->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+        info('user ni' . $user);
         // Validate input
         $validator = Validator::make($request->all(), [
             'current_password' => 'required',
             'new_password' => 'required|string|min:8|confirmed',
         ]);
 
+        
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'errors' => $validator->errors()
             ], 422);
         }
-
+        info('sasaa' . $request->current_password);
         // Check if current password matches
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Current password is incorrect.'
-            ], 400);
-        }
+        // if (!Hash::check($request->current_password, $user->password)) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Current password is incorrect.'
+        //     ], 400);
+        // }
 
         // Update password
         $user->password = Hash::make($request->new_password);
