@@ -430,16 +430,19 @@ Revamp the user's CV based on the provided job description.
 - Use <p> tags for paragraphs and <ul><li> for lists. Avoid unnecessary <div> or <br> tags.
 - Adopt an active, confident, professional tone. Quantify achievements where possible.
 - Only output the **revamped CV content**.
-- Return ONLY valid JSON with fields:
-  - HTML-formatted content
+- Return ONLY valid JSON with a single field:
+  {
+    \"revampedCv\": \"<HTML formatted content here>\"
+  }
+- Do NOT include or reference a cover letter or any other fields.
 
 Original CV:
 $cvText
 
 Job Description:
 $jobText
-
 ";
+
 
             // 5️⃣ Send to OpenAI
             $response = $client->chat()->create([
@@ -507,5 +510,4 @@ $jobText
             throw new \Exception("$type text extraction failed: " . $e->getMessage());
         }
     }
-
 }
