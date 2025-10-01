@@ -23,44 +23,51 @@ class AuthController extends Controller
      * Display a listing of the resource.
      */
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        // Generate token
-        $token = Str::random(60);
-        $user->api_token = hash('sha256', $token);
-        $user->save();
-
-        // Determine redirect route
-        $redirectRoute = 'dashboard'; // default
-
-        if ($user->role == 1098) {
-            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
-                $redirectRoute = 'profile-setup';
-            }
-        }
-        // info($redirectRoute);
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+    $key = 'login_attempts:' . $request->ip() . ':' . $request->email;
+    // check if locked out
+    if (Cache::get($key, 0) >= 3) {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'photo' => $user->photo,
-                'role' => $user->role,
-            ],
-            'redirect' => $redirectRoute,
-        ]);
+            'message' => 'Too many failed login attempts. Please try again later.'
+        ], 429);
     }
+    $user = User::where('email', $request->email)->first();
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        // increase attempts
+        Cache::add($key, 0, now()->addMinutes(5)); // start counter with 5min expiry
+        Cache::increment($key);
+
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+    Cache::forget($key);
+    // Generate token
+    $token = Str::random(60);
+    $user->api_token = hash('sha256', $token);
+    $user->save();
+
+    // Determine redirect route
+    $redirectRoute = 'dashboard';
+    if ($user->role == 1098) {
+        if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            $redirectRoute = 'profile-setup';
+        }
+    }
+
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'role' => $user->role,
+        ],
+        'redirect' => $redirectRoute,
+    ]);
+}
 
 
     public function register(Request $request)
