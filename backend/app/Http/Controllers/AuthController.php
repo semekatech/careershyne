@@ -299,9 +299,7 @@ class AuthController extends Controller
 
     public function userDetails(Request $request)
     {
-        $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
-
+        $user = auth('api')->user();
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
