@@ -420,7 +420,7 @@ $jobText
             // 4️⃣ Build prompt for OpenAI
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-            $prompt = "
+$prompt = "
 You are a top-tier Career Consultant and CV Architect.
 
 Task:
@@ -429,12 +429,7 @@ Revamp the user's CV based on the provided job description.
 - Use **bold text** for all section headers (e.g., **Professional Summary**, **Core Skills**).
 - Use <p> tags for paragraphs and <ul><li> for lists. Avoid unnecessary <div> or <br> tags.
 - Adopt an active, confident, professional tone. Quantify achievements where possible.
-- Only output the **revamped CV content**.
-- Return ONLY valid JSON with a single field:
-  {
-    \"revampedCv\": \"<HTML formatted content here>\"
-  }
-- Do NOT include or reference a cover letter or any other fields.
+- Only output the **HTML content of the revamped CV**. Do NOT wrap it in JSON or any other tags, and do NOT include cover letters or other fields.
 
 Original CV:
 $cvText
