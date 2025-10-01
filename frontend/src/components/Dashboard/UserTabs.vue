@@ -1,65 +1,129 @@
 <template>
-  <div>
+  <div id="user-tabs" class="">
     <!-- Tabs -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav aria-label="Tabs" class="-mb-px flex space-x-8 overflow-x-auto">
-        <a href="#" @click.prevent="activeTab = 'jobs'" :class="tabClass('jobs')">Featured Jobs</a>
-        <a href="#" @click.prevent="activeTab = 'cv'" :class="tabClass('cv')">CV Revamp Generator</a>
-        <a href="#" @click.prevent="activeTab = 'cover'" :class="tabClass('cover')">Cover Letters Generator</a>
-        <a href="#" @click.prevent="activeTab = 'email'" :class="tabClass('email')">Email Templates Generator</a>
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-4 sm:mb-6">
+      <nav aria-label="Tabs" class="-mb-px flex flex-wrap gap-3 sm:gap-4">
+        <a
+          href="#"
+          @click.prevent="activeTab = 'jobs'"
+          :class="tabClass('jobs')"
+        >
+          Featured Jobs
+        </a>
+        <a href="#" @click.prevent="activeTab = 'cv'" :class="tabClass('cv')">
+          CV Revamp
+        </a>
+        <a
+          href="#"
+          @click.prevent="activeTab = 'cover'"
+          :class="tabClass('cover')"
+        >
+          Cover Letters
+        </a>
+        <a
+          href="#"
+          @click.prevent="activeTab = 'email'"
+          :class="tabClass('email')"
+        >
+          Email Templates
+        </a>
       </nav>
     </div>
 
-    <div class="grid grid-cols-[75%_23%] gap-8 items-start">
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-4 sm:gap-6 items-start"
+    >
       <!-- Left content -->
-      <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm">
+      <div
+        class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm"
+      >
         <component
           :is="currentTabComponent"
-          @check-eligibility="performAction(eligibilityService.checkEligibility, 'eligibility')"
+          @check-eligibility="
+            performAction(eligibilityService.checkEligibility, 'eligibility')
+          "
           @revamp-cv="performAction(cvRevampService.revamp, 'cv')"
-          @generate-cover="performAction(coverLetterService.generate, 'coverLetters')"
-          @generate-email="performAction(emailTemplateService.generate, 'emails')"
+          @generate-cover="
+            performAction(coverLetterService.generate, 'coverLetters')
+          "
+          @generate-email="
+            performAction(emailTemplateService.generate, 'emails')
+          "
         />
       </div>
 
       <!-- Right sidebar -->
-      <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm">
+      <div
+        class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm"
+      >
         <template v-if="loading">
           <div class="flex justify-center items-center py-20">
-            <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            <svg
+              class="animate-spin h-10 w-10 text-primary"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
             </svg>
           </div>
         </template>
 
         <template v-else>
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Subscription Info</h2>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            Subscription Info
+          </h2>
 
           <div class="space-y-4">
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">Plan:</span>
-              <span class="font-semibold text-orange-500">{{ limits.plan }}</span>
+              <span class="font-semibold text-orange-500">{{
+                limits.plan
+              }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">CV Revamps:</span>
               <span class="font-semibold text-primary">{{ limits.cv }}</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-gray-600 dark:text-gray-400">Cover Letters:</span>
-              <span class="font-semibold text-primary">{{ limits.coverLetters }}</span>
+              <span class="text-gray-600 dark:text-gray-400"
+                >Cover Letters:</span
+              >
+              <span class="font-semibold text-primary">{{
+                limits.coverLetters
+              }}</span>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-gray-600 dark:text-gray-400">Email Templates:</span>
-              <span class="font-semibold text-primary">{{ limits.emails }}</span>
+              <span class="text-gray-600 dark:text-gray-400"
+                >Email Templates:</span
+              >
+              <span class="font-semibold text-primary">{{
+                limits.emails
+              }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">Eligibility:</span>
-              <span class="font-semibold text-primary">{{ limits.checks }}</span>
+              <span class="font-semibold text-primary">{{
+                limits.checks
+              }}</span>
             </div>
           </div>
 
-          <button class="mt-8 w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out">
+          <button
+            class="mt-8 w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out"
+          >
             Upgrade Plan
           </button>
         </template>
@@ -85,16 +149,27 @@ import EmailTemplates from "@/components/Dashboard/EmailTemplates.vue";
 
 const activeTab = ref("jobs");
 const loading = ref(true);
-const limits = ref({ cv: 0, coverLetters: 0, emails: 0, checks: 0, plan: "Free" });
+const limits = ref({
+  cv: 0,
+  coverLetters: 0,
+  emails: 0,
+  checks: 0,
+  plan: "Free",
+});
 
 // Determine current tab component
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
-    case "jobs": return FeaturedJobs;
-    case "cv": return CVRevamp;
-    case "cover": return CoverLetters;
-    case "email": return EmailTemplates;
-    default: return FeaturedJobs;
+    case "jobs":
+      return FeaturedJobs;
+    case "cv":
+      return CVRevamp;
+    case "cover":
+      return CoverLetters;
+    case "email":
+      return EmailTemplates;
+    default:
+      return FeaturedJobs;
   }
 });
 
@@ -129,16 +204,24 @@ async function performAction(serviceFn, type) {
   if (!isConfirmed) return;
 
   try {
-    const response = await serviceFn(); 
+    const response = await serviceFn();
     if (response.success) {
       Swal.fire("Success", `${type} completed successfully!`, "success");
-      await fetchLimits(); 
+      await fetchLimits();
     }
   } catch (err) {
     if (err.response?.status === 403) {
-      Swal.fire("Limit reached", err.response.data.message || `You have reached your ${type} limit.`, "error");
+      Swal.fire(
+        "Limit reached",
+        err.response.data.message || `You have reached your ${type} limit.`,
+        "error"
+      );
     } else {
-      Swal.fire("Error", `Failed to perform ${type}. Please try again.`, "error");
+      Swal.fire(
+        "Error",
+        `Failed to perform ${type}. Please try again.`,
+        "error"
+      );
     }
   }
 }

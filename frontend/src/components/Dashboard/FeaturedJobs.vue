@@ -7,16 +7,37 @@
 
       <!-- Loader -->
       <div v-if="loading" class="flex justify-center items-center py-20">
-        <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        <svg
+          class="animate-spin h-8 w-8 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
         </svg>
       </div>
 
       <!-- Error -->
       <div v-else-if="error" class="text-center py-10">
-        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
-        <button @click="fetchJobs" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">
+          {{ error }}
+        </p>
+        <button
+          @click="fetchJobs"
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
           Retry
         </button>
       </div>
@@ -26,9 +47,11 @@
         <div
           v-for="job in jobs.slice(0, 5)"
           :key="job.id"
-          class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -36,7 +59,9 @@
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
                 {{ job.company }} - {{ job.type }}
               </p>
-              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
+              <div
+                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
+              >
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -59,7 +84,9 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="border-t border-border-light dark:border-border-dark pt-3">
+          <div
+            class="border-t border-border-light dark:border-border-dark pt-3"
+          >
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 @click="openEligibility(job)"
@@ -176,9 +203,10 @@ async function fetchJobs() {
     if (Array.isArray(data.data)) jobs.value = data.data;
     else error.value = "No jobs found.";
   } catch (err) {
-    error.value = err.response?.status === 403
-      ? "Access denied. Upgrade your plan to access jobs."
-      : "Error fetching jobs. Please try again later.";
+    error.value =
+      err.response?.status === 403
+        ? "Access denied. Upgrade your plan to access jobs."
+        : "Error fetching jobs. Please try again later.";
   } finally {
     loading.value = false;
   }
@@ -195,7 +223,13 @@ function closeModal() {
 }
 
 // Generic async action handler with 403 checks
-async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }) {
+async function handleAction({
+  job,
+  serviceFn,
+  modalRef,
+  progressRef,
+  resultRef,
+}) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: `Ready to proceed for ${job.title}?`,
@@ -223,7 +257,10 @@ async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }
   } catch (err) {
     clearInterval(interval);
     progressRef.value = 100;
-    if (err.response?.status === 403) resultRef.value = { error: err.response.data.message || "Limit reached for this action." };
+    if (err.response?.status === 403)
+      resultRef.value = {
+        error: err.response.data.message || "Limit reached for this action.",
+      };
     else resultRef.value = { error: "Action failed. Please try again later." };
   }
 }
@@ -266,10 +303,26 @@ function openEmailTemplate(job) {
   });
 }
 
-function closeEligibility() { showEligibilityModal.value = false; eligibilityProgress.value = 0; eligibilityResult.value = null; }
-function closeCvRevamp() { showCvRevampModal.value = false; cvRevampProgress.value = 0; cvRevampResult.value = null; }
-function closeCoverLetter() { showCoverLetterModal.value = false; coverLetterProgress.value = 0; coverLetterResult.value = null; }
-function closeEmailTemplate() { showEmailTemplateModal.value = false; emailTemplateProgress.value = 0; emailTemplateResult.value = null; }
+function closeEligibility() {
+  showEligibilityModal.value = false;
+  eligibilityProgress.value = 0;
+  eligibilityResult.value = null;
+}
+function closeCvRevamp() {
+  showCvRevampModal.value = false;
+  cvRevampProgress.value = 0;
+  cvRevampResult.value = null;
+}
+function closeCoverLetter() {
+  showCoverLetterModal.value = false;
+  coverLetterProgress.value = 0;
+  coverLetterResult.value = null;
+}
+function closeEmailTemplate() {
+  showEmailTemplateModal.value = false;
+  emailTemplateProgress.value = 0;
+  emailTemplateResult.value = null;
+}
 
 onMounted(fetchJobs);
 </script>

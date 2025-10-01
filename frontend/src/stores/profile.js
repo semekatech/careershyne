@@ -15,7 +15,7 @@ export const useProfileStore = defineStore("profile", {
       this.error = null;
       try {
         const res = await ProfileService.getProfile();
-        this.profile = res.data.user; // adjust depending on backend response
+        this.profile = res.data.user;
       } catch (err) {
         console.error("Error fetching profile:", err.response?.data || err.message);
         this.error = "Failed to load profile";
