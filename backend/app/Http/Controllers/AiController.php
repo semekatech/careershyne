@@ -429,7 +429,8 @@ Revamp the user's CV based on the provided job description.
 - Use **bold text** for all section headers (e.g., **Professional Summary**, **Core Skills**).
 - Adopt an active, confident, professional tone. Quantify achievements where possible.
 - Only output the **revamped CV content**. Do NOT include any summaries, filler text, or 'Additional Information'.
-
+- Return ONLY valid JSON with fields:
+- coverLetter (HTML formatted)
 Original CV:
 $cvText
 
