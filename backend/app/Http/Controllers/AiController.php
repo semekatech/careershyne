@@ -429,7 +429,7 @@ Revamp the user's CV based on the provided job description.
 - Use **bold text** for all section headers (e.g., **Professional Summary**, **Core Skills**).
 - Use <p> tags for paragraphs and <ul><li> for lists. Avoid unnecessary <div> or <br> tags.
 - Adopt an active, confident, professional tone. Quantify achievements where possible.
-- Only output the **HTML content of the revamped CV**. Do NOT wrap it in JSON or any other tags, and do NOT include cover letters or other fields.
+- ONLY output the HTML content of the revamped CV. DO NOT wrap it in JSON or return any other fields.
 
 Original CV:
 $cvText
@@ -437,6 +437,7 @@ $cvText
 Job Description:
 $jobText
 ";
+
 
 
             // 5️⃣ Send to OpenAI
