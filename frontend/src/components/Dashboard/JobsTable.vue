@@ -25,7 +25,7 @@
       <div
         v-for="job in paginatedJobs"
         :key="job.id"
-        class="border rounded p-4 hover:shadow transition flex justify-between items-center"
+        class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
       >
         <div>
           <h3 class="text-lg font-semibold text-blue-600">{{ job.title }}</h3>

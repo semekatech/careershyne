@@ -10,11 +10,11 @@
           <!-- Logo & Close Button -->
           <div class="flex items-center justify-between h-16 px-4">
             <a href="/dashboard" class="flex items-center">
-              <span
-                class="self-center text-xl font-semibold whitespace-nowrap text-black dark:text-white"
-              >
-                <strong>CAREER PORTAL</strong>
-              </span>
+              <img
+                src="/logo.png"
+                alt="Careershyne Logo"
+                class="h-15 w-auto mb-0"
+              />
             </a>
             <button
               v-if="!isDesktop"
@@ -112,7 +112,7 @@
           <button class="text-gray-500 dark:text-gray-300 focus:outline-none">
             <i class="fas fa-envelope"></i>
           </button>
-          <a href="/my-profile" class="flex items-center focus:outline-none">
+          <a href="/profile" class="flex items-center focus:outline-none">
             <img
               class="w-8 h-8 rounded-full"
               :src="preview || defaultAvatar"
@@ -121,8 +121,6 @@
           </a>
         </div>
       </header>
-
-      <!-- Main Content Area -->
       <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-800">
         <router-view />
       </main>
@@ -206,7 +204,7 @@ const sidebarLinks = [
     href: "/profile",
     icon: "material-icons-sharp",
     iconName: "person",
-    roles: ["1109","1098"],
+    roles: ["1109", "1098"],
   },
   {
     name: "My Plans",

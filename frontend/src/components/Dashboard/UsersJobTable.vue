@@ -51,7 +51,7 @@
         <div
           v-for="job in paginatedJobs"
           :key="job.id"
-          class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md border border-border-light dark:border-border-dark"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
           <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
             <div>

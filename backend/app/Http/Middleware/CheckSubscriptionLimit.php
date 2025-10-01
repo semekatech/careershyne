@@ -28,7 +28,7 @@ class CheckSubscriptionLimit
     $limitField = match (strtolower($type)) {
         'cv' => 'cv',
         'emails' => 'emails',
-        'coverletters' => 'coverLetters',
+        'coverletters' => 'coverletters',
         'checks' => 'checks',
         default => null,
     };

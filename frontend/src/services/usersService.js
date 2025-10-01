@@ -29,7 +29,7 @@ export default {
   },
  impersonate(userId) {
   return axios.post(
-    `${API_URL}/users/${userId}/impersonate`, // user ID in URL
+    `${API_URL}/users/${userId}/impersonate`,
     {}, // empty body
     {
       headers: {
