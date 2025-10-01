@@ -56,7 +56,7 @@
           </summary>
           <p class="mt-3 text-gray-600">
             Yes — you’ll need to create a free account to access all tools.  
-    Registration ensures your documents are saved securely and lets you revisit or update them anytime.
+            Registration ensures your documents are saved securely and lets you revisit or update them anytime.
           </p>
         </details>
       </div>
