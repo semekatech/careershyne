@@ -16,7 +16,7 @@ use DB;
 use App\Mail\WelcomeUserMail;
 use App\Models\CvOrder;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Support\Facades\Cache;
 class AuthController extends Controller
 {
     /**
