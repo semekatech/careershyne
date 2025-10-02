@@ -79,7 +79,7 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
     Route::get('/all', [JobController::class, 'fetchAll']);
     Route::get('/user-jobs', [JobController::class, 'userJobs']);
     Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
-        ->middleware(CheckSubscriptionLimit::class . ':eligibility');
+        ->middleware(CheckSubscriptionLimit::class . ':checks');
 
     Route::post('/cv-revamp', [JobController::class, 'revampCv'])
         ->middleware(CheckSubscriptionLimit::class . ':cv');
