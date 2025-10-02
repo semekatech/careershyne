@@ -8,49 +8,55 @@
           Your AI Career Tool Kit
         </p>
         <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
-          <!-- The <span class="text-orange-600">Ultimate Power</span> of Careershyne AI -->
           CareerShyne AI, Simplified
         </h2>
       </div>
 
       <!-- TOOLS GRID -->
-      <div class="flex flex-wrap justify-center gap-4">
+      <div class="flex flex-wrap justify-center gap-4 mb-12">
         <div
-          class="px-6 py-3 rounded-xl border shadow-sm font-semibold text-gray-700 bg-white 
-                 hover:bg-orange-50 hover:text-orange-600 
-                 transition-transform transition-shadow transform hover:scale-105 hover:shadow-lg cursor-pointer"
+          v-for="(service, index) in services"
+          :key="index"
+          @click="selectService(service)"
+          :class="[
+            'px-6 py-3 rounded-xl border shadow-sm font-semibold cursor-pointer transition-transform transition-shadow transform',
+            selectedService?.name === service.name 
+              ? 'bg-orange-100 text-orange-600 scale-105 shadow-lg' 
+              : 'bg-white text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105 hover:shadow-lg'
+          ]"
         >
-          CV Revamp
+          {{ service.name }}
         </div>
-        <div
-          class="px-6 py-3 rounded-xl border shadow-sm font-semibold text-gray-700 bg-white 
-                 hover:bg-orange-50 hover:text-orange-600 
-                 transition-transform transition-shadow transform hover:scale-105 hover:shadow-lg cursor-pointer"
-        >
-          Cover Letter Builder
-        </div>
-        <div
-          class="px-6 py-3 rounded-xl border shadow-sm font-semibold text-gray-700 bg-white 
-                 hover:bg-orange-50 hover:text-orange-600 
-                 transition-transform transition-shadow transform hover:scale-105 hover:shadow-lg cursor-pointer"
-        >
-          Email Drafts
-        </div>
-        <div
-          class="px-6 py-3 rounded-xl border shadow-sm font-semibold text-gray-700 bg-white 
-                 hover:bg-orange-50 hover:text-orange-600 
-                 transition-transform transition-shadow transform hover:scale-105 hover:shadow-lg cursor-pointer"
-        >
-          Job Eligibility Checker
-        </div>
-        <!-- <div
-          class="px-6 py-3 rounded-xl border shadow-sm font-semibold text-gray-700 bg-white 
-                 hover:bg-orange-50 hover:text-orange-600 
-                 transition-transform transition-shadow transform hover:scale-105 hover:shadow-lg cursor-pointer"
-        >
-          LinkedIn Optimization
-        </div> -->
       </div>
+
+      <!-- BANNER IMAGE -->
+      <div v-if="selectedService" class="flex justify-center">
+        <img 
+          :src="selectedService.banner" 
+          :alt="selectedService.name" 
+          class="max-w-3xl w-full h-[300px] md:h-[450px] lg:h-[550px] object-cover rounded-xl shadow-md transition-all duration-500"
+        />
+      </div>
+      
     </div>
   </section>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+// Service list with banners
+const services = [
+  { name: "CV Revamp", banner: "/img/cv-banner.jpg" },
+  { name: "Cover Letter Builder", banner: "/img/coverletter-banner.jpg" },
+  { name: "Email Drafts", banner: "/img/email-banner.jpg" },
+  { name: "Job Eligibility Checker", banner: "/img/jobchecker-banner.jpg" },
+];
+
+// Default: CV Revamp selected
+const selectedService = ref(services[0]);
+
+function selectService(service) {
+  selectedService.value = service;
+}
+</script>

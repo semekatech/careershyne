@@ -3,6 +3,7 @@
   <AiHero />
   <AiCaption />
   <AiService />
+  <AiPricing />
   <AiFAQ />
   <AiCTA />
   <FooterSection />
@@ -14,10 +15,12 @@ import TheWelcome from "@/components/TheWelcome.vue";
 import AiHero from "@/components/AiHero.vue";
 import AiCaption from "@/components/AiCaption.vue";
 import AiService from "@/components/AiService.vue";
+import AiPricing from "@/components/AiPricing.vue";
 import AiFAQ from "@/components/AiFAQ.vue";
 import FooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
 import AiCTA from "@/components/AiCTA.vue";
+
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const fileName = ref("");
