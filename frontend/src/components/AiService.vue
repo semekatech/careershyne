@@ -34,7 +34,7 @@
         <img 
           :src="selectedService.banner" 
           :alt="selectedService.name" 
-          class="max-w-3xl w-full h-[300px] md:h-[450px] lg:h-[550px] object-cover rounded-xl shadow-md transition-all duration-500"
+          class="max-w-3xl w-full h-[300px] md:h-[450px] lg:h-[550px] object-cover shadow-md transition-all duration-500"
         />
       </div>
       

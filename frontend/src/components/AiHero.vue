@@ -85,7 +85,7 @@
         <!-- Primary CTA -->
         <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6">
           <router-link
-            to="/free-review"
+            to="/admin"
             class="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition text-center rounded-lg"
           >
             Unlock My Career

@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-gradient-to-br from-orange-50 via-white to-orange-50 py-16">
+  <section class="bg-white py-16">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       
       <!-- HEADER -->

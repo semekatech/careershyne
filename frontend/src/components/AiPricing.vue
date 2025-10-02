@@ -3,12 +3,14 @@
     <!-- Section header -->
     <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
       <div class="mx-auto max-w-2xl lg:max-w-4xl">
-        <h2 class="text-4xl font-bold leading-8 text-black dark:text-orange-400">
-          Pricing
-        </h2>
-        <p class="mt-2 text-1xl  tracking-tight text-gray-900 dark:text-gray-200">
-          Invest in your career with the right plan — affordable, transparent, and designed to help you land interviews faster.
-        </p>
+        <div class="text-center mb-12">
+          <p class="text-sm font-semibold text-orange-500 uppercase tracking-wide">
+            Clear. Simple. Affordable.
+          </p>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
+         Fair Price. Real Value.
+          </h2>
+        </div>
       </div>
     </div>
     <!-- Pricing grid -->

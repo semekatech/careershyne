@@ -1,5 +1,5 @@
 <template>
-  <TheWelcome />
+  <AiTheWelcome />
   <AiHero />
   <AiCaption />
   <AiService />
@@ -11,7 +11,7 @@
 
 <script setup>
 import { ref } from "vue";
-import TheWelcome from "@/components/TheWelcome.vue";
+import AiTheWelcome from "@/components/AiTheWelcome.vue";
 import AiHero from "@/components/AiHero.vue";
 import AiCaption from "@/components/AiCaption.vue";
 import AiService from "@/components/AiService.vue";

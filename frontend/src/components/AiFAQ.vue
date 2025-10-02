@@ -4,12 +4,12 @@
       
       <!-- HEADER -->
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
-          FAQs
-        </h2>
-        <p class="mt-3 text-lg text-gray-600">
-          Quick answers to common questions about CareerShyne AI.
+        <p class="text-sm font-semibold text-orange-500 uppercase mb-2">
+         Your Questions, Answered
         </p>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
+          Frequently Asked Questions
+        </h2>
       </div>
 
       <!-- FAQ LIST -->
@@ -57,6 +57,50 @@
           <p class="mt-3 text-gray-600">
             Yes — you’ll need to create a free account to access all tools.  
             Registration ensures your documents are saved securely and lets you revisit or update them anytime.
+          </p>
+        </details>
+
+        <!-- Q5 -->
+        <details class="group border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-gray-900">
+            Can I edit the documents after CareerShyne AI generates them?
+            <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Absolutely. You can download your CV, cover letter, or email drafts and make further edits to customize them as you wish.
+          </p>
+        </details>
+
+        <!-- Q6 -->
+        <details class="group border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-gray-900">
+            Are the documents ATS-friendly?
+            <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Yes, all documents are optimized to pass Applicant Tracking Systems (ATS) used by recruiters and employers.
+          </p>
+        </details>
+
+        <!-- Q7 -->
+        <details class="group border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-gray-900">
+            What if I’m not satisfied with the output?
+            <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            You can regenerate results as many times as you want until you’re happy. The platform is designed for flexibility and refinement.
+          </p>
+        </details>
+
+        <!-- Q8 -->
+        <details class="group border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-gray-900">
+            Is my information secure with CareerShyne AI?
+            <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Yes. Your data is encrypted and stored securely. We do not share or sell your information to third parties.
           </p>
         </details>
       </div>
