@@ -25,6 +25,7 @@ class CheckSubscriptionLimit
 
     // Determine the limit field
     $type = $type ?? $request->route()->getName();
+    info('type ni'.$type);
     $limitField = match (strtolower($type)) {
         'cv' => 'cv',
         'emails' => 'emails',
@@ -32,7 +33,7 @@ class CheckSubscriptionLimit
         'checks' => 'checks',
         default => null,
     };
-
+   info($subscription->$limitField);
     // Check subscription field limit
     if (!$limitField || $subscription->$limitField <= 0) {
         return response()->json([
