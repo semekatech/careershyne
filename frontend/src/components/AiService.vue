@@ -47,10 +47,10 @@ import { ref } from "vue";
 
 // Service list with banners
 const services = [
-  { name: "CV Revamp", banner: "/img/cv-banner.jpg" },
-  { name: "Cover Letter Builder", banner: "/img/coverletter-banner.jpg" },
-  { name: "Email Drafts", banner: "/img/email-banner.jpg" },
-  { name: "Job Eligibility Checker", banner: "/img/jobchecker-banner.jpg" },
+  { name: "CV Revamp", banner: "/img/cv-banner.png" },
+  { name: "Cover Letter Builder", banner: "/img/coverletter-banner.png" },
+  { name: "Email Drafts", banner: "/img/email-banner.png" },
+  { name: "Job Eligibility Checker", banner: "/img/jobchecker-banner.png" },
 ];
 
 // Default: CV Revamp selected
