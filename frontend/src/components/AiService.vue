@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-white py-16">
+  <section class="bg-white py-16" id="ai-services">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
       
       <!-- HEADER -->
@@ -34,7 +34,7 @@
         <img 
           :src="selectedService.banner" 
           :alt="selectedService.name" 
-          class="max-w-3xl w-full h-[300px] md:h-[450px] lg:h-[550px] object-cover rounded-xl shadow-md transition-all duration-500"
+          class="max-w-3xl w-full h-[300px] md:h-[450px] lg:h-[550px] object-cover shadow-md transition-all duration-500"
         />
       </div>
       
@@ -47,10 +47,10 @@ import { ref } from "vue";
 
 // Service list with banners
 const services = [
-  { name: "CV Revamp", banner: "/img/cv-banner.jpg" },
-  { name: "Cover Letter Builder", banner: "/img/coverletter-banner.jpg" },
-  { name: "Email Drafts", banner: "/img/email-banner.jpg" },
-  { name: "Job Eligibility Checker", banner: "/img/jobchecker-banner.jpg" },
+  { name: "CV Revamp", banner: "/img/cv-banner.png" },
+  { name: "Cover Letter Builder", banner: "/img/coverletter-banner.png" },
+  { name: "Email Drafts", banner: "/img/email-banner.png" },
+  { name: "Job Eligibility Checker", banner: "/img/jobchecker-banner.png" },
 ];
 
 // Default: CV Revamp selected

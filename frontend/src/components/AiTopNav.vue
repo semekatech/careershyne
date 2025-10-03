@@ -1,0 +1,138 @@
+<script setup>
+import { ref, computed } from "vue";
+import { useAuthStore } from "@/stores/auth";
+const isMobileMenuOpen = ref(false);
+const auth = useAuthStore();
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+};
+const isLoggedIn = computed(() => !!auth.token);
+const scrollToSection = (id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+    isMobileMenuOpen.value = false;
+  }
+};
+</script>
+<template>
+  <nav class="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <!-- Logo -->
+        <router-link to="/" class="flex items-center space-x-2">
+          <!-- Normal mode -->
+          <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
+          <!-- Dark mode -->
+          <img src="/logo-white.png" alt="Logo White" class="hidden dark:block h-[80px] w-auto bg-transparent p-0 m-0" />
+        </router-link>
+
+
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex items-center space-x-8">
+          
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-hero')" class="nav-link">
+            Home
+          </router-link>
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-services')" class="nav-link">
+            Services
+          </router-link>
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-pricing')" class="nav-link">
+            Pricing
+          </router-link>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center space-x-3">
+          <router-link
+            to="/admin"
+            class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-[#32383f] transition-colors duration-300"
+          >
+            Get Started
+          </router-link>
+
+          <!-- Mobile menu toggle -->
+          <button
+            @click="toggleMobileMenu"
+            class="inline-flex items-center p-2 text-gray-700 dark:text-gray-300 rounded-lg lg:hidden focus:outline-none"
+          >
+            <svg
+              v-if="!isMobileMenuOpen"
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+            <svg
+              v-else
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <transition name="fade">
+        <div v-if="isMobileMenuOpen" class="lg:hidden pb-4">
+          <div class="flex flex-col space-y-3">
+            <router-link
+              @click="toggleMobileMenu"
+              to="/ai"
+              class="nav-link-mobile"
+              >Home</router-link
+            >
+            <router-link
+              @click="scrollToSection('ai-services')"
+              class="nav-link-mobile"
+            >
+              Services
+            </router-link>
+            <router-link @click="scrollToSection('ai-pricing')" class="nav-link-mobile">
+              Pricing
+            </router-link>
+
+          </div>
+        </div>
+      </transition>
+    </div>
+  </nav>
+</template>
+<style scoped>
+.nav-link {
+  @apply text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-white font-medium transition;
+}
+.nav-link-mobile {
+  @apply block w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 rounded transition;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
+
+
+

@@ -1,5 +1,5 @@
 <template>
-  <section class="relative bg-gradient-to-br from-green-50 via-white to-purple-100 py-32">
+  <section class="relative bg-gradient-to-br from-green-50 via-white to-purple-100 py-32" id="ai-hero">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 flex justify-center items-starts text-center">
       <!-- LEFT CONTENT -->
       <div>
@@ -85,7 +85,7 @@
         <!-- Primary CTA -->
         <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6">
           <router-link
-            to="/free-review"
+            to="/admin"
             class="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition text-center rounded-lg"
           >
             Unlock My Career

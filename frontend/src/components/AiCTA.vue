@@ -3,9 +3,9 @@
     class="
       relative
       bg-gradient-to-r
-      from-purple-600
-      via-indigo-600
-      to-teal-500
+      from-orange-500
+      via-orange-500
+      to-orange-500
       py-20
       text-white
       rounded-xl
@@ -28,8 +28,8 @@
       <h2 class="text-3xl md:text-4xl font-extrabold drop-shadow-lg">
         Ready to Land More Interviews?
       </h2>
-      <p class="mt-4 text-lg md:text-xl text-indigo-100 max-w-2xl mx-auto">
-        CareerShyne AI helps you craft a resume that gets noticed. <br />
+      <p class="mt-4 text-lg md:text-xl text-white-100 drop-shadow-lg max-w-2xl mx-auto">
+        CareerShyne AI tools help you craft a resume that gets noticed. <br />
         Stop missing opportunities — let your resume shine today.
       </p>
 
@@ -51,7 +51,7 @@
             />
           </svg>
         </div>
-        <p class="text-indigo-100 text-sm font-medium">
+        <p class="text-white-100 text-sm font-medium">
           ⭐ Trusted by <span class="font-semibold text-white">500+ professionals</span> in the last 30 days
         </p>
       </div>
@@ -59,8 +59,8 @@
             <!-- CTA BUTTONS -->
       <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
         <a
-          href="/free-review"
-          class="px-6 py-3 bg-white text-indigo-700 font-semibold rounded-lg shadow-md hover:shadow-lg hover:bg-gray-100 transition"
+          href="/admin"
+          class="px-6 py-3 bg-white text-orange-600 font-semibold rounded-lg shadow-md hover:shadow-lg hover:bg-[#343434] hover:text-white transition duration-300"
         >
           Unlock My Career
         </a>
