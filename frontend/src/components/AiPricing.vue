@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 pt-20" id="pricing">
+  <div class="bg-white dark:bg-gray-800 pt-20" id="ai-pricing">
     <!-- Section header -->
     <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
       <div class="mx-auto max-w-2xl lg:max-w-4xl">

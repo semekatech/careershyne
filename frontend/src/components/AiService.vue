@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-white py-16">
+  <section class="bg-white py-16" id="ai-services">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
       
       <!-- HEADER -->

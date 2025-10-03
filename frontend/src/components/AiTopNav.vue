@@ -30,24 +30,19 @@ const scrollToSection = (id) => {
 
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
-          <router-link to="/" class="nav-link" exact>Home</router-link>
-          <!-- <router-link to="/about-us" class="nav-link">About Us</router-link> -->
-          <router-link to="/services" class="nav-link">Services</router-link>
-          <router-link to="/pricing" class="nav-link">Pricing</router-link>
-
-          <!-- now scrolls to sections -->
-          <!-- <button @click="scrollToSection('services')" class="nav-link">
+          
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-home')" class="nav-link">
+            Home
+          </router-link>
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-services')" class="nav-link">
             Services
-          </button>
-          <button @click="scrollToSection('pricing')" class="nav-link">
+          </router-link>
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-pricing')" class="nav-link">
             Pricing
-          </button> -->
+          </router-link>
 
-          <!-- <router-link to="/" class="nav-link">Resources</router-link> -->
-          <!-- <router-link to="/contact-us" class="nav-link"
-            >Contact Us</router-link -->
-          <!-- > -->
         </div>
+
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
@@ -102,32 +97,20 @@ const scrollToSection = (id) => {
           <div class="flex flex-col space-y-3">
             <router-link
               @click="toggleMobileMenu"
-              to="/"
+              to="/ai"
               class="nav-link-mobile"
               >Home</router-link
             >
             <router-link
-              @click="scrollToSection('services')"
+              @click="scrollToSection('ai-services')"
               class="nav-link-mobile"
             >
               Services
             </router-link>
-            <router-link @click="scrollToSection('pricing')" class="nav-link-mobile">
+            <router-link @click="scrollToSection('ai-pricing')" class="nav-link-mobile">
               Pricing
             </router-link>
 
-            <!-- <router-link
-              @click="toggleMobileMenu"
-              to="/about-us"
-              class="nav-link-mobile"
-              >About Us</router-link
-            > -->
-            <!-- <router-link
-              @click="toggleMobileMenu"
-              to="/contact-us"
-              class="nav-link-mobile"
-              >Contact</router-link -->
-            <!-- > -->
           </div>
         </div>
       </transition>
@@ -150,3 +133,6 @@ const scrollToSection = (id) => {
   opacity: 0;
 }
 </style>
+
+
+

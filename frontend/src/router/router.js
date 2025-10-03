@@ -23,6 +23,8 @@ import Profile from "@/pages/Dashboard/Profile.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
 import UserJobs from "@/pages/Dashboard/UserJobs.vue";
 import UserActivity from "@/pages/Dashboard/UserActivity.vue";
+
+
 const routes = [
   {
     path: "/",
@@ -298,9 +300,12 @@ router.beforeEach(async (to, from, next) => {
     "/about-us",
     "/services",
     "/pricing",
-     "/free-review",
+    "/free-review",
     "/ai",
-     "/profile-setup"
+    "/ai-hero",
+    "/ai-pricing",
+    "/ai-services",
+    "/profile-setup"
   ];
   const isPublic = to.matched.some((route) =>
     publicRoutes.includes(route.path)
