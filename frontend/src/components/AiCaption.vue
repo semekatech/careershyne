@@ -20,7 +20,7 @@
         
         <!-- STEP 1 -->
         <div
-          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl hover:bg-orange-50"
+          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl"
         >
           <div class="text-5xl font-extrabold text-orange-200 absolute -top-6 -6">1</div>
           <p class="text-sm text-gray-500 font-medium mb-1">Step 1</p>
@@ -34,7 +34,7 @@
 
         <!-- STEP 2 -->
         <div
-          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl hover:bg-orange-50"
+          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl"
         >
           <div class="text-5xl font-extrabold text-orange-200 absolute -top-6 left-6">2</div>
           <p class="text-sm text-gray-500 font-medium mb-1">Step 2</p>
@@ -48,7 +48,7 @@
 
         <!-- STEP 3 -->
         <div
-          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl hover:bg-orange-50"
+          class="relative bg-white rounded-2xl shadow-md p-8 text-center transition-transform transform hover:scale-105 hover:shadow-xl"
         >
           <div class="text-5xl font-extrabold text-orange-200 absolute -top-6 left-6">3</div>
           <p class="text-sm text-gray-500 font-medium mb-1">Step 3</p>

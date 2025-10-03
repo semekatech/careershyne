@@ -21,8 +21,8 @@
           :class="[
             'px-6 py-3 rounded-xl border shadow-sm font-semibold cursor-pointer transition-transform transition-shadow transform',
             selectedService?.name === service.name 
-              ? 'bg-orange-100 text-orange-600 scale-105 shadow-lg' 
-              : 'bg-white text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105 hover:shadow-lg'
+              ? 'text-orange-600 scale-105 shadow-lg' 
+              : 'bg-white text-gray-700 hover:text-orange-600 hover:scale-105 hover:shadow-lg'
           ]"
         >
           {{ service.name }}
