@@ -29,7 +29,10 @@
               <span class="text-xl font-semibold text-gray-500">/month</span>
             </p>
 
-            <button class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md">
+            <button
+              @click="$router.push('/admin')"
+              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
+            >
               Get Started
             </button>
 
@@ -64,10 +67,14 @@
               KES 1,000
               <span class="text-xl font-semibold text-gray-500">/month</span>
             </p>
-
-            <button class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md">
+            
+            <button
+              @click="$router.push('/admin')"
+              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
+            >
               Subscribe Now
             </button>
+
 
             <div class="mt-8 flex-1">
               <h3 class="text-base font-semibold text-gray-700 mb-3">Included Features</h3>
