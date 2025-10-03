@@ -21,7 +21,7 @@
             <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
           </summary>
           <p class="mt-3 text-gray-600">
-            We revamp your CV, craft tailored cover letters, write professional email drafts,
+            CareerShyne AI helps you optimize your CV, craft tailored cover letters, write professional email drafts,
             and check your job eligibility — all in one platform.
           </p>
         </details>
@@ -33,7 +33,7 @@
             <span class="ml-2 transition-transform group-open:rotate-180">⌄</span>
           </summary>
           <p class="mt-3 text-gray-600">
-            Most services are delivered instantly. For more personalized requests, you’ll get your updated documents within minutes.
+            All services are delivered instantly.
           </p>
         </details>
 

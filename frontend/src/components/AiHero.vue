@@ -12,7 +12,7 @@
         </h1>
 
         <p class="mt-6 text-lg text-gray-600 text-center">
-          Why juggle multiple tools? Our AI handles it all — from resumes and cover letters <br />
+          Why juggle multiple tools? Careershyne AI handles it all — from resumes and cover letters <br />
           to job eligibility checks and polished emails — so you can focus on landing the job.
         </p>
 
@@ -77,7 +77,7 @@
             </div>
 
             <p class="text-gray-700 text-sm font-medium">
-              Trusted by 500+ paid users (30d)
+              Trusted by 500+ job seekers
             </p>
           </div>
         </div>

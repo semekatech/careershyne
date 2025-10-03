@@ -2,7 +2,10 @@
   <section
     class="
       relative
-      bg-[#32383f]
+      bg-gradient-to-r
+      from-orange-500
+      via-orange-500
+      to-orange-500
       py-20
       text-white
       rounded-xl
@@ -49,7 +52,7 @@
           </svg>
         </div>
         <p class="text-white-100 text-sm font-medium">
-          ⭐ Trusted by <span class="font-semibold text-orange-400">500+ professionals</span> in the last 30 days
+          ⭐ Trusted by <span class="font-semibold text-white">500+ professionals</span> in the last 30 days
         </p>
       </div>
 
@@ -57,7 +60,7 @@
       <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
         <a
           href="/admin"
-          class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-orange-500 transition duration-300"
+          class="px-6 py-3 bg-white text-orange-600 font-semibold rounded-lg shadow-md hover:shadow-lg hover:bg-[#343434] hover:text-white transition duration-300"
         >
           Unlock My Career
         </a>

@@ -16,7 +16,7 @@
       <div class="flex flex-col md:flex-row justify-center items-stretch gap-12">
         
         <!-- Free Plan -->
-        <div class="relative bg-white rounded-xl shadow-xl overflow-hidden w-[380px] border-2 border-orange-500 min-h-[600px] flex flex-col">
+        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
           <div class="p-6 pt-12 sm:p-8 sm:pt-16 flex-1 flex flex-col">
             <h2 class="text-2xl font-bold text-orange-600 mb-4">Basic</h2>
 
@@ -51,7 +51,7 @@
         </div>
 
         <!-- Premium Plan -->
-        <div class="relative bg-white rounded-xl shadow-xl overflow-hidden w-[380px] border-2 border-orange-500 min-h-[600px] flex flex-col">
+        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
           <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-semibold uppercase px-4 py-1 rounded-bl-xl">
             Most Popular
           </div>
@@ -64,7 +64,7 @@
             
             <!-- New price -->
             <p class="text-5xl font-extrabold text-gray-900 mb-2">
-              KES 1,000
+              KES 800
               <span class="text-xl font-semibold text-gray-500">/month</span>
             </p>
             
