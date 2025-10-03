@@ -9,16 +9,16 @@ const scrollToSection = (id) => {
 
 <template>
   <footer class="flex flex-col space-y-10 justify-center m-10">
-    <!-- Footer Navigation -->
+    <!-- AiFooter Navigation -->
     <nav class="flex justify-center flex-wrap gap-6 text-gray-500 font-medium">
-      <router-link to="/ai" @click.prevent="scrollToSection('ai-hero')" class="hover:text-gray-900">Home</router-link>
+      <router-link to="/ai" class="hover:text-gray-900">Home</router-link>
       <!-- <router-link to="/about-us" class="hover:text-gray-900">About</router-link> -->
       
       <!-- ✅ smooth scroll links -->
-      <button @click.prevent="scrollToSection('ai-services')" class="hover:text-gray-900">
+      <button @click="scrollToSection('ai-services')" class="hover:text-gray-900">
         Services
       </button>
-      <button @click.prevent="scrollToSection('ai-pricing')" class="hover:text-gray-900">
+      <button @click="scrollToSection('ai-pricing')" class="hover:text-gray-900">
         Pricing
       </button>
       
@@ -47,7 +47,7 @@ const scrollToSection = (id) => {
     </p>
 
     <!-- Floating WhatsApp Chat Button -->
-    <!-- <a 
+    <a 
       href="https://wa.me/+254758393029" 
       target="_blank" 
       rel="noopener noreferrer"
@@ -56,6 +56,6 @@ const scrollToSection = (id) => {
     >
       <span>Chat with us</span>
       <img src="https://img.icons8.com/ios-filled/24/ffffff/whatsapp.png" alt="WhatsApp" />
-    </a> -->
+    </a>
   </footer>
 </template>

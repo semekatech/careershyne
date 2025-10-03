@@ -31,7 +31,7 @@ const scrollToSection = (id) => {
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center space-x-8">
           
-          <router-link to="/ai" @click.prevent="scrollToSection('ai-home')" class="nav-link">
+          <router-link to="/ai" @click.prevent="scrollToSection('ai-hero')" class="nav-link">
             Home
           </router-link>
           <router-link to="/ai" @click.prevent="scrollToSection('ai-services')" class="nav-link">

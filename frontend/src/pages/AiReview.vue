@@ -6,7 +6,7 @@
   <AiPricing />
   <AiFAQ />
   <AiCTA />
-  <FooterSection />
+  <AiFooterSection />
 </template>
 
 <script setup>
@@ -17,7 +17,7 @@ import AiCaption from "@/components/AiCaption.vue";
 import AiService from "@/components/AiService.vue";
 import AiPricing from "@/components/AiPricing.vue";
 import AiFAQ from "@/components/AiFAQ.vue";
-import FooterSection from "@/components/AiFooter.vue";
+import AiFooterSection from "@/components/AiFooter.vue";
 import UploadService from "@/services/UploadService";
 import AiCTA from "@/components/AiCTA.vue";
 
