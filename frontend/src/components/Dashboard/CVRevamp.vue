@@ -116,6 +116,7 @@
             id="job-description"
             v-model="jobText"
             rows="10"
+            :disabled="loading"
             class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Paste job description here..."
           ></textarea>
@@ -127,7 +128,7 @@
             class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer"
             @dragover.prevent
             @drop.prevent="handleDrop"
-            @click="fileInput.click()"
+            @click="$refs.fileInput && $refs.fileInput.click()"
           >
             <p class="font-semibold mb-2">
               Drag and drop your job description here
@@ -137,8 +138,9 @@
             </p>
             <button
               type="button"
+              :disabled="loading"
               class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-              @click.stop="fileInput.click()"
+              @click.stop="$refs.fileInput && $refs.fileInput.click()"
             >
               Or browse files
             </button>
@@ -149,8 +151,8 @@
               Selected file: {{ jobFileName }}
             </p>
             <input
-              type="file"
               ref="fileInput"
+              type="file"
               accept=".pdf,.doc,.docx"
               class="hidden"
               @change="handleJobFileUpload"
@@ -158,15 +160,46 @@
           </div>
         </div>
 
-        <div class="flex justify-end mt-8">
-          <button
-            @click="submitJobDetails"
-            :disabled="!isFormValid || loading"
-            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 disabled:opacity-50"
+        <div class="flex flex-col items-end mt-6">
+          <div class="w-full sm:w-auto">
+            <button
+              @click="submitJobDetails"
+              :disabled="!isFormValid || loading"
+              class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 disabled:opacity-50 flex items-center"
+            >
+              <svg
+                v-if="loading"
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span v-if="loading">Generating your tailored CV...</span>
+              <span v-else>Revamp My CV</span>
+            </button>
+          </div>
+
+          <!-- Progress message -->
+          <p
+            v-if="loading"
+            class="mt-3 text-sm text-subtext-light dark:text-subtext-dark animate-pulse text-center w-full sm:w-auto"
           >
-            <span v-if="loading">Processing...</span>
-            <span v-else>Revamp My CV</span>
-          </button>
+            {{ progressMessage }}
+          </p>
         </div>
       </div>
 
@@ -233,6 +266,7 @@
               {{ size }}
             </option>
           </select>
+
           <select
             v-model="fontFamily"
             @change="setFontFamily"
@@ -246,6 +280,7 @@
               {{ family }}
             </option>
           </select>
+
           <input
             type="color"
             v-model="textColor"
@@ -377,9 +412,10 @@ const inputType = ref("text");
 const jobText = ref("");
 const jobFile = ref(null);
 const jobFileName = ref("");
-const fileInput = ref(null);
 const revampedCv = ref("");
 const editor = ref(null);
+const progressMessage = ref("");
+let progressInterval = null;
 
 const fontSize = ref("14px");
 const fontFamily = ref("Arial");
@@ -393,6 +429,8 @@ const fontFamilies = [
   "Courier New",
 ];
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+
 const isFormValid = computed(() => {
   if (inputType.value === "text" && jobText.value.trim().length > 0)
     return true;
@@ -400,25 +438,52 @@ const isFormValid = computed(() => {
   return false;
 });
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 function handleJobFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (file.size > MAX_FILE_SIZE) return alert("File too large. Max 2MB.");
-  jobFile.value = file;
-  jobFileName.value = file.name;
-}
-function handleDrop(event) {
-  const file = event.dataTransfer.files[0];
-  if (!file) return;
-  if (file.size > MAX_FILE_SIZE) return alert("File too large. Max 2MB.");
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File too large. Max 2MB.");
+    return;
+  }
   jobFile.value = file;
   jobFileName.value = file.name;
 }
 
+function handleDrop(event) {
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  if (file.size > MAX_FILE_SIZE) {
+    alert("File too large. Max 2MB.");
+    return;
+  }
+  jobFile.value = file;
+  jobFileName.value = file.name;
+}
+
+// Progress messages sequence
+const PROGRESS_MESSAGES = [
+  "Analyzing your job description...",
+  "Extracting key skills and qualifications...",
+  "Aligning your CV with the job requirements...",
+  "Polishing tone and formatting...",
+  "Finalizing your revamped CV...",
+];
+
 async function submitJobDetails() {
+  // reset state
   revampedCv.value = "";
   loading.value = true;
+  progressMessage.value = PROGRESS_MESSAGES[0];
+
+  // start simulated progress (will be cleared when request finishes)
+  let i = 1;
+  progressInterval = setInterval(() => {
+    if (i < PROGRESS_MESSAGES.length) {
+      progressMessage.value = PROGRESS_MESSAGES[i++];
+    }
+  }, 2500);
+
+  // prepare formData
   const formData = new FormData();
   if (inputType.value === "text") formData.append("job_text", jobText.value);
   if (inputType.value === "pdf" && jobFile.value)
@@ -426,11 +491,38 @@ async function submitJobDetails() {
 
   try {
     const data = await generateCvRevamp(formData);
-    if (data.success && data.revamped_cv) {
-      revampedCv.value = data.revamped_cv;
+
+    // stop the simulated progress immediately
+    clearProgressInterval();
+
+    if (data && data.success && data.revamped_cv) {
+      // Clean up any JSON-like wrapping such as ```json { "revampedCv": " ... " } ```
+      let cleaned = data.revamped_cv;
+
+      // Remove Markdown fences (```json or ``` etc.)
+      cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
+        // If there's actual JSON inside, extract the string
+        try {
+          const json = JSON.parse(match.replace(/```json|```/g, "").trim());
+          return json.revampedCv || "";
+        } catch {
+          return match.replace(/```json|```/g, "");
+        }
+      });
+
+      // If still contains { "revampedCv": "...", strip manually
+      const jsonMatch = cleaned.match(/{\s*"revampedCv"\s*:\s*"([\s\S]*)"\s*}/);
+      if (jsonMatch) cleaned = jsonMatch[1];
+
+      // Decode escaped quotes/newlines
+      cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
+
+      revampedCv.value = cleaned;
       currentStep.value = 2;
 
       await nextTick();
+
+      // init or set editor content
       if (!editor.value) {
         editor.value = new Editor({
           extensions: [
@@ -452,17 +544,30 @@ async function submitJobDetails() {
         editor.value.commands.setContent(revampedCv.value, false);
       }
     } else {
-      revampedCv.value = `❌ Error: ${data.message || "CV generation failed."}`;
+      // API returned success:false or no content
+      revampedCv.value = `❌ Error: ${
+        data?.message || "CV generation failed."
+      }`;
       currentStep.value = 2;
     }
   } catch (err) {
+    clearProgressInterval();
     revampedCv.value = `❌ Error generating CV.`;
     currentStep.value = 2;
   } finally {
+    clearProgressInterval();
     loading.value = false;
   }
 }
 
+function clearProgressInterval() {
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+}
+
+// Navigation
 function goToStep(step) {
   currentStep.value = step;
 }
@@ -538,16 +643,34 @@ function copyToClipboard() {
 // Step / Circle Classes
 const stepClass = (step) => ({
   "text-primary dark:text-primary-light after:border-primary dark:after:border-primary-light":
-    currentStep >= step,
-  "after:border-border-light dark:after:border-border-dark": currentStep < step,
+    currentStep.value >= step,
+  "after:border-border-light dark:after:border-border-dark":
+    currentStep.value < step,
 });
 const circleClass = (step) => ({
-  "bg-primary text-white": currentStep >= step,
+  "bg-primary text-white": currentStep.value >= step,
   "bg-border-light dark:bg-border-dark text-subtext-light dark:text-subtext-dark":
-    currentStep < step,
+    currentStep.value < step,
 });
 
 onBeforeUnmount(() => {
   if (editor.value) editor.value.destroy();
+  clearProgressInterval();
 });
 </script>
+
+<style scoped>
+/* small pulse (keeps your existing animate-pulse feel but scoped) */
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+</style>
