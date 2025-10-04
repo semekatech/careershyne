@@ -72,10 +72,24 @@
           </div>
           <p class="text-gray-700 font-medium">{{ progress }}%</p>
         </div>
-        <EditorContent v-else-if="editor" :editor="editor" class="min-h-[60vh] max-w-full bg-gray-50 p-4 rounded-lg focus:outline-none"/>
-        <div v-else class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full">
-          {{ result?.error || "No cover letter available." }}
+        <div v-else>
+          <div
+            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh]"
+          >
+            <EditorContent
+              v-if="editor"
+              :editor="editor"
+              class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+            />
+            <div
+              v-else
+              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
+            >
+              {{ props.result?.error || "No template available." }}
+            </div>
+          </div>
         </div>
+        
       </div>
     </div>
   </div>
@@ -225,4 +239,10 @@ const currentGradient = computed(()=>{
 
 @keyframes pulse {0%,100% {opacity:0}50% {opacity:1}}
 .animate-pulse {animation:pulse 1s infinite}
+
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-radius: 1px;
+}
 </style>

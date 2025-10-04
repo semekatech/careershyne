@@ -249,34 +249,18 @@ $jobText
         try {
             $user = auth('api')->user();
 
-            $jobText = null;
-
-            if ($request->filled('job_text')) {
-                info("Job text provided in request.");
-                $jobText = $this->aiReview->cleanText($request->input('job_text'));
-            } elseif ($request->hasFile('job_pdf')) {
-                info("Job PDF uploaded: " . $request->file('job_pdf')->getClientOriginalName());
-                $request->validate([
-                    'job_pdf' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
-                ]);
-                $jobFile = $request->file('job_pdf');
-                $jobText = $this->extractTextFromFile($jobFile, 'Job');
-            } elseif ($request->filled('job_url')) {
-                info("Job URL provided: " . $request->job_url);
-                $jobText = "Job details can be found here: " . $request->job_url;
-            } else {
-                info("No job details provided.");
+            // 1️⃣ Extract job details
+            $jobText = $this->getJobText($request);
+            if (!$jobText) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Please provide job details (paste text, upload a PDF/image, or provide a link).',
                 ], 422);
             }
 
-            info("Cleaned Job text: " . substr($jobText, 0, 200) . "...");
+            $jobText = $this->trimText($jobText);
 
-            // =========================
-            // 2️⃣ Generate Email Template with OpenAI
-            // =========================
+            // 2️⃣ Generate Email Template
             info("Calling OpenAI to generate job application email template.");
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
@@ -302,27 +286,17 @@ $jobText
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
-            info(json_encode($response, JSON_PRETTY_PRINT));
-            $emailTemplate = trim($response->choices[0]->message->content ?? 'Error generating email template.');
-            info("Email template generated successfully.");
-            DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
 
-            DB::table('usage_activities')->insert([
-                'user_id'     => $user->id,
-                'action'      => 'email_template',
-                'status'      => 'success',
-                'message'     => 'Email template Generation',
-                'tokens_used' => $response->usage->totalTokens ?? 0,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ]);
+            $emailTemplate = trim($response->choices[0]->message->content ?? 'Error generating email template.');
+            $this->recordUsage($user->id, 'email_template', $response->usage->totalTokens ?? 0);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Job application email template generated successfully.',
                 'email_template' => $emailTemplate,
             ]);
         } catch (\Exception $e) {
-            \Log::error("Unhandled exception in email template generation: " . $e->getMessage());
+            info("Unhandled exception in email template generation: " . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
@@ -336,8 +310,7 @@ $jobText
             info("=== CV Revamp Started ===");
             $user = auth('api')->user();
 
-
-
+            // 1️⃣ Ensure CV exists
             if (!$user->cv_path) {
                 return response()->json([
                     'success' => false,
@@ -346,7 +319,6 @@ $jobText
             }
 
             $cvPath = storage_path('app/public/' . $user->cv_path);
-
             if (!file_exists($cvPath)) {
                 return response()->json([
                     'success' => false,
@@ -354,70 +326,22 @@ $jobText
                 ], 404);
             }
 
-            // Extract text from stored CV and trim to prevent abuse
+            // 2️⃣ Extract CV text
             $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
-            $maxCvLength = 4000;
-            if (strlen($cvText) > $maxCvLength) {
-                $cvText = substr($cvText, 0, $maxCvLength) . "\n...[truncated]";
-            }
+            $cvText = $this->trimText($cvText);
 
-            // 2️⃣ Validate uploaded job file (PDF or image)
-            if (!$request->hasFile('job_file') || !$request->file('job_file')->isValid()) {
-                $error = $request->file('job_file') ? $request->file('job_file')->getError() : 'No file detected';
+            // 3️⃣ Extract job details
+            $jobText = $this->getJobText($request);
+            if (!$jobText) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Job file is required or invalid. PHP upload error code: $error"
+                    'message' => 'Please provide job details (paste text, upload a PDF/image, or provide a link).',
                 ], 422);
             }
+            $jobText = $this->trimText($jobText);
 
-
-            $jobFile = $request->file('job_file');
-
-            // File type check
-            $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-            if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
-                ], 422);
-            }
-
-            // File size check (5MB)
-            if ($jobFile->getSize() > 5 * 1024 * 1024) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'File too large. Maximum allowed size is 5MB.'
-                ], 422);
-            }
-
-            // PDF page limit check (3 pages max)
-            if ($jobFile->getMimeType() === 'application/pdf') {
-                $pdf = new \Smalot\PdfParser\Parser();
-                $pdfDocument = $pdf->parseFile($jobFile->getPathname());
-                $pageCount = count($pdfDocument->getPages());
-                if ($pageCount > 3) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
-                    ], 422);
-                }
-            }
-
-            // 3️⃣ Extract job description text and trim
-            $jobText = $this->extractTextFromFile($jobFile, 'Job');
-            $maxJobLength = 4000;
-            if (strlen($jobText) > $maxJobLength) {
-                $jobText = substr($jobText, 0, $maxJobLength) . "\n...[truncated]";
-            }
-
-            if (empty($jobText)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No job description could be extracted from the file.'
-                ], 422);
-            }
-
-            // 4️⃣ Build prompt for OpenAI
+            // 4️⃣ Generate revamped CV
+            info("Calling OpenAI for CV revamp...");
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
             $prompt = "
@@ -443,8 +367,6 @@ Job Description:
 $jobText
 ";
 
-
-            // 5️⃣ Send to OpenAI
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
                 'messages' => [
@@ -454,20 +376,12 @@ $jobText
             ]);
 
             $revampedCv = $response->choices[0]->message->content ?? '';
-            DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
-            DB::table('usage_activities')->insert([
-                'user_id'     => $user->id,
-                'action'      => 'cv_revamp',
-                'status'      => 'success',
-                'message'     => 'CV Revamp Generation',
-                'tokens_used' => $response->usage->totalTokens ?? 0,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ]);
+            $this->recordUsage($user->id, 'cv_revamp', $response->usage->totalTokens ?? 0);
+
             if (empty($revampedCv)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'OpenAI returned empty output. Please check the job file or text.',
+                    'message' => 'OpenAI returned empty output. Please check the job details.',
                 ], 422);
             }
 
@@ -484,7 +398,6 @@ $jobText
             ], 500);
         }
     }
-
 
     private function extractTextFromFile($file, $type = 'File')
     {
@@ -509,5 +422,64 @@ $jobText
             info("$type: Text extraction failed - " . $e->getMessage());
             throw new \Exception("$type text extraction failed: " . $e->getMessage());
         }
+    }
+    protected function getJobText(Request $request)
+    {
+        if ($request->filled('job_text')) {
+            info("Job text provided in request.");
+            return $this->aiReview->cleanText($request->input('job_text'));
+        }
+
+        if ($request->hasFile('job_file')) {
+            $this->validateJobFile($request->file('job_file'));
+            info("Job file uploaded: " . $request->file('job_file')->getClientOriginalName());
+            return $this->extractTextFromFile($request->file('job_file'), 'Job');
+        }
+
+        if ($request->filled('job_url')) {
+            info("Job URL provided: " . $request->job_url);
+            return "Job details can be found here: " . $request->job_url;
+        }
+
+        return null;
+    }
+    protected function validateJobFile($file)
+    {
+        $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            throw new \Exception('Invalid file type. Only PDF, JPG, PNG are allowed.');
+        }
+
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            throw new \Exception('File too large. Maximum allowed size is 5MB.');
+        }
+
+        if ($file->getMimeType() === 'application/pdf') {
+            $pdf = new \Smalot\PdfParser\Parser();
+            $pdfDocument = $pdf->parseFile($file->getPathname());
+            if (count($pdfDocument->getPages()) > 3) {
+                throw new \Exception('PDF exceeds 3 pages. Please upload a shorter file.');
+            }
+        }
+    }
+    protected function trimText($text, $maxLength = 4000)
+    {
+        return strlen($text) > $maxLength
+            ? substr($text, 0, $maxLength) . "\n...[truncated]"
+            : $text;
+    }
+    protected function recordUsage($userId, $action, $tokensUsed = 0)
+    {
+        DB::table('subscriptions')->where('user_id', $userId)->decrement($action === 'cv_revamp' ? 'cv' : 'emails', 1);
+
+        DB::table('usage_activities')->insert([
+            'user_id'     => $userId,
+            'action'      => $action,
+            'status'      => 'success',
+            'message'     => ucfirst(str_replace('_', ' ', $action)) . ' Generation',
+            'tokens_used' => $tokensUsed,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
     }
 }

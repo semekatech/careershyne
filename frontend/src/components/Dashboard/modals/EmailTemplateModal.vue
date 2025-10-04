@@ -192,16 +192,20 @@
         </div>
 
         <div v-else>
-          <EditorContent
-            v-if="editor"
-            :editor="editor"
-            class="min-h-[60vh] prose prose-sm max-w-full focus:outline-none w-full"
-          />
           <div
-            v-else
-            class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
+            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh]"
           >
-            {{ props.result?.error || "No template available." }}
+            <EditorContent
+              v-if="editor"
+              :editor="editor"
+              class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+            />
+            <div
+              v-else
+              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
+            >
+              {{ props.result?.error || "No template available." }}
+            </div>
           </div>
         </div>
       </div>
@@ -372,5 +376,11 @@ function copyToClipboard() {
 }
 .animate-pulse {
   animation: pulse 1s infinite;
+}
+/* Optional: soft focus like MS Word */
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-radius: 1px;
 }
 </style>
