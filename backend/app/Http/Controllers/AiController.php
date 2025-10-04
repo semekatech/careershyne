@@ -462,16 +462,29 @@ $jobText
             }
         }
     }
-    protected function trimText($text, $maxLength = 4000)
+    protected function trimText($text, $maxLength = 8000)
     {
-        return strlen($text) > $maxLength
-            ? substr($text, 0, $maxLength) . "\n...[truncated]"
-            : $text;
+        // Remove HTML tags and normalize whitespace
+        $text = strip_tags($text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+
+        // Use mbstring-safe functions
+        if (mb_strlen($text, 'UTF-8') > $maxLength) {
+            // Cut at the last full stop or space before the limit
+            $trimmed = mb_substr($text, 0, $maxLength, 'UTF-8');
+            $lastPeriod = mb_strrpos($trimmed, '.', 0, 'UTF-8');
+            $lastSpace = mb_strrpos($trimmed, ' ', 0, 'UTF-8');
+            $cutPoint = $lastPeriod ?: $lastSpace ?: $maxLength;
+            return mb_substr($text, 0, $cutPoint, 'UTF-8') . " ...[truncated]";
+        }
+
+        return $text;
     }
+
     protected function recordUsage($userId, $action, $tokensUsed = 0)
     {
         DB::table('subscriptions')->where('user_id', $userId)->decrement($action === 'cv_revamp' ? 'cv' : 'emails', 1);
-
         DB::table('usage_activities')->insert([
             'user_id'     => $userId,
             'action'      => $action,

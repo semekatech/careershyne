@@ -1,2 +1,7 @@
 1) Security Measures
 - Throttle for login( max 3 incorrect attempts per account,wait time 5 mins,10 attempts max per IP).
+- Job Description capped to 1500 words max.
+- Text cleaning to remove specicial characters and shrink content without losing meaning to save on AI tokens.
+- Limiting file to 5mb and 3 pages maximum and validating files.
+- Tracking user activities and permanently banning ips.
+- Middleware for checking user limits before execution.
