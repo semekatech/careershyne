@@ -186,10 +186,6 @@ $jobText
         }
     }
 
-
-
-
-
     public function emailTemplateGenerator(Request $request)
     {
         try {
