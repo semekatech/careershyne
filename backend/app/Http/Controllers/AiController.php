@@ -90,7 +90,7 @@ class AiController extends Controller
     }
 
 
- public function coverLetterGenerator(Request $request)
+    public function coverLetterGenerator(Request $request)
     {
         try {
             info("=== Coverletter Generatiorn ===");
@@ -130,7 +130,7 @@ class AiController extends Controller
             info("Calling OpenAI for CV revamp...");
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-           $prompt = "
+            $prompt = "
 You are a top-tier Career Consultant and Cover Letter Architect.
 
 Task:
@@ -212,18 +212,25 @@ $jobText
 
             $prompt = "
 You are a professional career assistant.
-Generate a job application email template tailored to the provided job description.
+
+Generate a professional job application email for the user based on their CV and the provided job description.
 
 ### Job Description:
 $jobText
 
 ### Instructions:
-- Write a formal job application email (max 300 words).
-- Structure it with: greeting, short introduction, why the applicant is a good fit, polite closing.
-- Use a professional but engaging tone.
-- Do not include placeholders like [Name] or [Company] unless necessary.
-- The email should sound natural and ready to send.
+- Emphasize skills, experiences, and achievements relevant to the job.
+- Keep the email formal, concise, and no longer than 300 words.
+- Use a professional but engaging tone; avoid repeating the entire CV.
+- Start with a strong opening aligned with the job description.
+- Structure the email using <p> tags for paragraphs for readability; do not use <div> or <br> tags.
+- Return ONLY valid JSON with a single field as follows:
+
+{
+  \"revampedCv\": \"<HTML formatted email content here>\"
+}
 ";
+
 
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',

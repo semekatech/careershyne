@@ -7,7 +7,7 @@
       <h1
         class="text-3xl font-bold mb-2 flex items-center justify-center text-text-light dark:text-text-dark"
       >
-       AI-Powered Cover Letter Generator
+        AI-Powered Cover Letter Generator
         <span class="material-icons ml-2 text-primary">flash_on</span>
       </h1>
       <p
@@ -188,7 +188,9 @@
                   d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                 ></path>
               </svg>
-              <span v-if="loading">Generating your tailored Cover Letter...</span>
+              <span v-if="loading"
+                >Generating your tailored Cover Letter...</span
+              >
               <span v-else>Tailor my Cover Letter</span>
             </button>
           </div>
@@ -366,8 +368,8 @@
             @click="downloadWord"
             class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
           >
-            <span class="material-icons mr-2">download</span> Download Cover Letter as
-            Word
+            <span class="material-icons mr-2">download</span> Download Cover
+            Letter as Word
           </button>
         </div>
       </div>
@@ -476,75 +478,62 @@ async function submitJobDetails() {
 
   try {
     const data = await generateCoverLetter(formData);
-
-    // stop the simulated progress immediately
+    console.log("API response:", data);
     clearProgressInterval();
+    if (data && data.success && data.revamped_cv) {
+      let cleaned = data.revamped_cv;
+      if (
+        cleaned.includes("❌ Error: Cover letter generated successfully") ||
+        cleaned.toLowerCase().includes("error")
+      ) {
+        revampedCv.value =
+          "❌ The cover letter API returned a placeholder message. Please check your input or try again.";
+      } else {
+        // Remove markdown fences and JSON wrapping
+        cleaned = cleaned.replace(/```[\s\S]*?```/g, "");
+        const jsonMatch = cleaned.match(
+          /{\s*"revampedCv"\s*:\s*"([\s\S]*)"\s*}/
+        );
+        if (jsonMatch) cleaned = jsonMatch[1];
 
-    if (data && data.success && data.cover_letter) {
-  // Clean up any JSON-like wrapping such as ```json { "revampedCv": " ... " } ```
-  let cleaned = data.cover_letter;
+        cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
+        cleaned = cleaned.replace(/\n{2,}/g, "\n");
+        cleaned = cleaned.replace(/<p>(\s|&nbsp;)*<\/p>/g, "");
 
-  // Remove Markdown fences (```json or ``` etc.)
-  cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
-    try {
-      const json = JSON.parse(match.replace(/```json|```/g, "").trim());
-      return json.revampedCv || "";
-    } catch {
-      return match.replace(/```json|```/g, "");
+        revampedCv.value = cleaned;
+        currentStep.value = 2;
+
+        await nextTick();
+
+        if (!editor.value) {
+          editor.value = new Editor({
+            extensions: [
+              StarterKit,
+              Underline,
+              Link,
+              CodeBlock,
+              BulletList,
+              OrderedList,
+              ListItem,
+              Strike,
+              TextStyle,
+              Color,
+              TextAlign.configure({ types: ["heading", "paragraph"] }),
+            ],
+            content: revampedCv.value,
+          });
+        } else {
+          editor.value.commands.setContent(revampedCv.value, false);
+        }
+      }
+    } else {
+      revampedCv.value =
+        "❌ The cover letter API returned no content. Please try again.";
+      currentStep.value = 2;
     }
-  });
-
-  // If still contains { "revampedCv": "...", strip manually
-  const jsonMatch = cleaned.match(/{\s*"revampedCv"\s*:\s*"([\s\S]*)"\s*}/);
-  if (jsonMatch) cleaned = jsonMatch[1];
-
-  // Decode escaped quotes/newlines
-  cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
-
-  // --- NEW CLEANUP: remove extra empty lines and multiple <p> ---
-  // Replace multiple consecutive newlines with a single newline
-  cleaned = cleaned.replace(/\n{2,}/g, "\n");
-
-  // Remove empty <p> tags if they exist (from previous conversions)
-  cleaned = cleaned.replace(/<p>(\s|&nbsp;)*<\/p>/g, "");
-
-  revampedCv.value = cleaned;
-  currentStep.value = 2;
-
-  await nextTick();
-
-  // init or set editor content
-  if (!editor.value) {
-    editor.value = new Editor({
-      extensions: [
-        StarterKit,
-        Underline,
-        Link,
-        CodeBlock,
-        BulletList,
-        OrderedList,
-        ListItem,
-        Strike,
-        TextStyle,
-        Color,
-        TextAlign.configure({ types: ["heading", "paragraph"] }),
-      ],
-      content: revampedCv.value,
-    });
-  } else {
-    editor.value.commands.setContent(revampedCv.value, false);
-  }
-} else {
-  // API returned success:false or no content
-  revampedCv.value = `❌ Error: ${
-    data?.message || "CV generation failed."
-  }`;
-  currentStep.value = 2;
-}
-
   } catch (err) {
     clearProgressInterval();
-    revampedCv.value = `❌ Error generating CV.`;
+    revampedCv.value = "❌ Error generating CV. Please try again.";
     currentStep.value = 2;
   } finally {
     clearProgressInterval();
@@ -619,7 +608,7 @@ function downloadWord() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "revamped_cv.doc";
+  link.download = "cover_letter.doc";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -660,15 +649,22 @@ async function downloadPDF() {
   container.style.fontFamily = "'Times New Roman', serif";
   container.style.fontSize = "12pt";
   container.style.lineHeight = "1.6";
-  container.style.whiteSpace = "pre-wrap";
+  container.style.whiteSpace = "normal"; // change from pre-wrap
   container.style.padding = "20px";
+
+  // Maintain paragraph spacing
+  clone.querySelectorAll("p").forEach((p) => {
+    p.style.marginTop = "0.5em";
+    p.style.marginBottom = "0.5em";
+  });
+
   container.appendChild(clone);
 
   // Generate PDF
   await html2pdf()
     .set({
       margin: 10,
-      filename: "cv_revamp.pdf",
+      filename: "cover_letter.pdf",
       html2canvas: { scale: 2, letterRendering: true },
       jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
     })
@@ -701,5 +697,4 @@ onBeforeUnmount(() => {
   margin-bottom: 0.25em;
   line-height: 1.4;
 }
-
 </style>

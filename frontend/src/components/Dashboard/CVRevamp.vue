@@ -660,8 +660,15 @@ async function downloadPDF() {
   container.style.fontFamily = "'Times New Roman', serif";
   container.style.fontSize = "12pt";
   container.style.lineHeight = "1.6";
-  container.style.whiteSpace = "pre-wrap";
+  container.style.whiteSpace = "normal"; // change from pre-wrap
   container.style.padding = "20px";
+
+  // Maintain paragraph spacing
+  clone.querySelectorAll("p").forEach((p) => {
+    p.style.marginTop = "0.5em";
+    p.style.marginBottom = "0.5em";
+  });
+
   container.appendChild(clone);
 
   // Generate PDF

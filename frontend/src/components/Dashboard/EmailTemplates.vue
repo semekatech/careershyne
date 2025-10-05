@@ -7,13 +7,13 @@
       <h1
         class="text-3xl font-bold mb-2 flex items-center justify-center text-text-light dark:text-text-dark"
       >
-         AI-Powered Email Template Generator
+        AI-Powered Email Template Generator
         <span class="material-icons ml-2 text-primary">flash_on</span>
       </h1>
       <p
         class="text-base text-subtext-light dark:text-subtext-dark max-w-2xl mx-auto"
       >
-        Provide the context or job description, and our AI will craft a professional email tailored to your needs.
+       Provide the context or job description, and our AI will craft a professional email tailored to your needs.
       </p>
     </header>
 
@@ -70,7 +70,7 @@
             :class="{
               'text-primary dark:text-primary-light': currentStep >= 3,
             }"
-            >Download / Copy</span
+            >Download</span
           >
         </div>
       </div>
@@ -207,13 +207,11 @@
         <h2
           class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4"
         >
-          Step 2: Edit & Email Template
+          Step 2: Edit & Customize Your Revamped CV
         </h2>
 
-        <!-- Toolbar -->
-        <div
-          class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center mb-4"
-        >
+        <!-- Editor Toolbar -->
+        <div class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center">
           <button @click="toggleBold" :class="toolbarBtnClass(isBold)">
             <span class="material-icons text-sm">format_bold</span>
           </button>
@@ -285,6 +283,7 @@
             v-model="textColor"
             @input="setTextColor"
             class="w-8 h-8 border-0 cursor-pointer"
+            title="Text color"
           />
 
           <button
@@ -313,48 +312,34 @@
           </button>
 
           <button
-            @click="selectAll"
-            class="p-2 rounded-md hover:bg-gray-200"
-            title="Select All"
-          >
-            <span class="material-icons text-sm">select_all</span>
-          </button>
-          <button
             @click="downloadWord"
-            class="p-2 rounded-md hover:bg-gray-200 text-green-600"
+            class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons text-sm">download</span>
+            <span class="material-icons text-base">description</span> Word
           </button>
           <button
-            @click="copyToClipboard"
-            class="p-2 rounded-md hover:bg-gray-200 text-blue-600"
+            @click="downloadPDF"
+            class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons text-sm">content_copy</span>
+            <span class="material-icons text-base">picture_as_pdf</span> PDF
           </button>
         </div>
 
-        <!-- Editor -->
-        <EditorContent
-          v-if="editor"
-          :editor="editor"
-          class="min-h-[60vh] prose dark:prose-invert max-w-full focus:outline-none w-full border rounded-lg p-6 bg-white shadow"
-        />
-
-        <!-- Navigation -->
-        <div class="flex justify-between mt-6">
-          <button
-            @click="goToStep(1)"
-            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+        <!-- Editor Content -->
+        <div
+          class="flex-1 p-4 overflow-y-auto bg-gray-50 relative min-h-[60vh]"
+        >
+          <EditorContent
+            v-if="editor"
+            :editor="editor"
+            class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed bg-white shadow rounded-lg p-6"
+          />
+          <div
+            v-else
+            class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
           >
-            Go Back & Change Job Details
-          </button>
-          <button
-            @click="goToStep(3)"
-            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-          >
-            Finalize & Download CV
-            <span class="material-icons ml-2">arrow_forward</span>
-          </button>
+            {{ revampedCv || "No template available." }}
+          </div>
         </div>
       </div>
 
@@ -366,7 +351,8 @@
           Step 3: Download Your CV
         </h2>
         <p class="text-subtext-light dark:text-subtext-dark mb-6">
-         Your professional email is ready! Copy it or download it as a Word document.
+          Your CV is ready! Download the file below. It's tailored for the job
+          you provided.
         </p>
         <div class="flex justify-between mt-6">
           <button
@@ -403,7 +389,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { generateJobEmail } from "@/services/emailService.js";
-
+import html2pdf from "html2pdf.js";
 const currentStep = ref(1);
 const loading = ref(false);
 const inputType = ref("text");
@@ -462,9 +448,8 @@ function handleDrop(event) {
 const PROGRESS_MESSAGES = [
   "Analyzing your job description...",
   "Extracting key skills and qualifications...",
-  "Aligning your CV with the job requirements...",
   "Polishing tone and formatting...",
-  "Finalizing your revamped CV...",
+  "Finalizing your Email Template...",
 ];
 
 async function submitJobDetails() {
@@ -488,18 +473,17 @@ async function submitJobDetails() {
     formData.append("job_file", jobFile.value);
 
   try {
-  const data = await generateJobEmail(formData);
-
+    const data = await generateJobEmail(formData);
+    console.log("API response:", data);
     // stop the simulated progress immediately
     clearProgressInterval();
 
-    if (data && data.success && data.mail_template) {
+    if (data && data.success && data.email_template) {
       // Clean up any JSON-like wrapping such as ```json { "revampedCv": " ... " } ```
-      let cleaned = data.mail_template;
+      let cleaned = data.email_template;
 
       // Remove Markdown fences (```json or ``` etc.)
       cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
-        // If there's actual JSON inside, extract the string
         try {
           const json = JSON.parse(match.replace(/```json|```/g, "").trim());
           return json.revampedCv || "";
@@ -514,6 +498,13 @@ async function submitJobDetails() {
 
       // Decode escaped quotes/newlines
       cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
+
+      // --- NEW CLEANUP: remove extra empty lines and multiple <p> ---
+      // Replace multiple consecutive newlines with a single newline
+      cleaned = cleaned.replace(/\n{2,}/g, "\n");
+
+      // Remove empty <p> tags if they exist (from previous conversions)
+      cleaned = cleaned.replace(/<p>(\s|&nbsp;)*<\/p>/g, "");
 
       revampedCv.value = cleaned;
       currentStep.value = 2;
@@ -625,7 +616,7 @@ function downloadWord() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "email_template.doc";
+  link.download = "revamped_cv.doc";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -651,6 +642,44 @@ const circleClass = (step) => ({
     currentStep.value < step,
 });
 
+async function downloadPDF() {
+  if (!editor.value) return;
+
+  // Select the editor's content
+  const editorEl = document.querySelector(".ProseMirror");
+  if (!editorEl) return;
+
+  // Clone the content to preserve formatting
+  const clone = editorEl.cloneNode(true);
+
+  // Create a container for html2pdf
+  const container = document.createElement("div");
+  container.style.fontFamily = "'Times New Roman', serif";
+  container.style.fontSize = "12pt";
+  container.style.lineHeight = "1.6";
+  container.style.whiteSpace = "normal"; // change from pre-wrap
+  container.style.padding = "20px";
+
+  // Maintain paragraph spacing
+  clone.querySelectorAll("p").forEach((p) => {
+    p.style.marginTop = "0.5em";
+    p.style.marginBottom = "0.5em";
+  });
+
+  container.appendChild(clone);
+
+  // Generate PDF
+  await html2pdf()
+    .set({
+      margin: 10,
+      filename: "mail_template.pdf",
+      html2canvas: { scale: 2, letterRendering: true },
+      jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+    })
+    .from(container)
+    .save();
+}
+
 onBeforeUnmount(() => {
   if (editor.value) editor.value.destroy();
   clearProgressInterval();
@@ -670,5 +699,10 @@ onBeforeUnmount(() => {
   50% {
     opacity: 1;
   }
+}
+.prose p {
+  margin-top: 0.25em; /* default is 1em */
+  margin-bottom: 0.25em;
+  line-height: 1.4;
 }
 </style>
