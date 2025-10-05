@@ -88,22 +88,15 @@ class AiController extends Controller
             ], 500);
         }
     }
-    // private function cleanText($text)
-    // {
-    //     $text = strip_tags($text);
-    //     $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
-    //     $text = preg_replace('/\s+/', ' ', $text);
-    //     return trim($text);
-    // }
-    public function coverLetterGenerator(Request $request)
+
+
+ public function coverLetterGenerator(Request $request)
     {
         try {
-            info("=== Cover Letter Generation Started ===");
-
+            info("=== Coverletter Generatiorn ===");
             $user = auth('api')->user();
-            // =========================
+
             // 1️⃣ Ensure CV exists
-            // =========================
             if (!$user->cv_path) {
                 return response()->json([
                     'success' => false,
@@ -119,129 +112,82 @@ class AiController extends Controller
                 ], 404);
             }
 
-            $cvFile = new \Illuminate\Http\File($cvPath);
-            $cvText = $this->extractTextFromFile($cvFile, 'CV');
-            $cvText = strlen($cvText) > 2000 ? substr($cvText, 0, 2000) . "\n...[truncated]" : $cvText;
+            // 2️⃣ Extract CV text
+            $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
+            $cvText = $this->trimText($cvText);
 
-            // =========================
-            // 2️⃣ Validate Job Input
-            // =========================
-            $jobText = null;
-
-            if ($request->filled('job_text')) {
-                $jobText = $this->aiReview->cleanText($request->input('job_text'));
-            } elseif ($request->hasFile('job_file') && $request->file('job_file')->isValid()) {
-                $jobFile = $request->file('job_file');
-
-                // File type and size checks
-                $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-                if (!in_array($jobFile->getMimeType(), $allowedTypes)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Invalid file type. Only PDF, JPG, PNG are allowed.'
-                    ], 422);
-                }
-                if ($jobFile->getSize() > 5 * 1024 * 1024) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'File too large. Maximum allowed size is 5MB.'
-                    ], 422);
-                }
-
-                if ($jobFile->getMimeType() === 'application/pdf') {
-                    $pdf = new \Smalot\PdfParser\Parser();
-                    $pdfDocument = $pdf->parseFile($jobFile->getPathname());
-                    if (count($pdfDocument->getPages()) > 3) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'PDF exceeds 3 pages. Please upload a shorter file.'
-                        ], 422);
-                    }
-                }
-
-                $jobText = $this->extractTextFromFile($jobFile, 'Job');
-            } else {
+            // 3️⃣ Extract job details
+            $jobText = $this->getJobText($request);
+            if (!$jobText) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No job details provided. Please paste text or upload a PDF/image.'
+                    'message' => 'Please provide job details (paste text, upload a PDF/image, or provide a link).',
                 ], 422);
             }
+            $jobText = $this->trimText($jobText);
 
-            $jobText = strlen($jobText) > 4000 ? substr($jobText, 0, 4000) . "\n...[truncated]" : $jobText;
-
-            if (empty(trim($jobText))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No job description could be extracted from the input.'
-                ], 422);
-            }
-
-            // =========================
-            // 3️⃣ Generate Cover Letter via OpenAI
-            // =========================
+            // 4️⃣ Generate revamped CV
+            info("Calling OpenAI for CV revamp...");
             $client = OpenAI::client(env('OPENAI_API_KEY'));
 
-            $prompt = "
-You are a professional career assistant.
-Generate a personalized, professional cover letter for this job. **Prioritize the job description over the CV.** Only highlight CV points that strongly match the job.
+           $prompt = "
+You are a top-tier Career Consultant and Cover Letter Architect.
 
-### CV (for reference only):
+Task:
+Generate a professional cover letter for the user based on their CV and the provided job description.
+- Emphasize skills, experiences, and achievements that are relevant to the job.
+- Keep the letter formal, concise, and no longer than 400 words.
+- Use a professional but engaging tone; avoid repeating the entire CV.
+- Start with a strong opening aligned with the job description.
+- Structure the letter with paragraphs (<p>) for readability; do not use unnecessary <div> or <br> tags.
+- Only output the **cover letter content**.
+- Return ONLY valid JSON with a single field:
+  {
+    \"revampedCv\": \"<HTML formatted cover letter content here>\"
+  }
+
+Original CV:
 $cvText
 
-### Job Description (priority):
+Job Description:
 $jobText
-
-### Instructions:
-- Emphasize skills, experiences, and achievements relevant to the job.
-- Keep it formal, concise (max 400 words).
-- Use a professional but engaging tone.
-- Avoid repeating the entire CV; highlight only what matches the job.
-- Start with a strong opening aligned with the job.
 ";
+
 
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
                 'messages' => [
-                    ['role' => 'system', 'content' => 'You are an expert career coach and cover letter writer.'],
+                    ['role' => 'system', 'content' => 'You are an expert career coach and CV writer.'],
                     ['role' => 'user', 'content' => $prompt],
                 ],
             ]);
 
-            $coverLetter = trim($response->choices[0]->message->content ?? '');
-            if (empty($coverLetter)) {
+            $revampedCv = $response->choices[0]->message->content ?? '';
+            $this->recordUsage($user->id, 'cover_letter', $response->usage->totalTokens ?? 0);
+
+            if (empty($revampedCv)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'OpenAI returned empty output. Please check the CV and job description.'
+                    'message' => 'OpenAI returned empty output. Please check the job details.',
                 ], 422);
             }
 
-
-            DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
-            DB::table('usage_activities')->insert([
-                'user_id'     => $user->id,
-                'action'      => 'cover_letter',
-                'status'      => 'success',
-                'message'     => 'Cover Letter Generation.',
-                'tokens_used' => $response->usage->totalTokens ?? 0,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ]);
-            // =========================
-            // 5️⃣ Return JSON response
-            // =========================
             return response()->json([
                 'success' => true,
                 'message' => 'Cover letter generated successfully.',
-                'cover_letter' => $coverLetter,
+                'revamped_cv' => $revampedCv
             ]);
         } catch (\Exception $e) {
-            info("Unhandled exception in coverLetterGenerator: " . $e->getMessage());
+            info("Unhandled exception in cvRevamp: " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
+
+
+
 
 
     public function emailTemplateGenerator(Request $request)

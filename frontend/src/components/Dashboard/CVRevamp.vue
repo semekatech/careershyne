@@ -211,10 +211,8 @@
           Step 2: Edit & Customize Your Revamped CV
         </h2>
 
-        <!-- Toolbar -->
-        <div
-          class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center mb-4"
-        >
+        <!-- Editor Toolbar -->
+        <div class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center">
           <button @click="toggleBold" :class="toolbarBtnClass(isBold)">
             <span class="material-icons text-sm">format_bold</span>
           </button>
@@ -286,6 +284,7 @@
             v-model="textColor"
             @input="setTextColor"
             class="w-8 h-8 border-0 cursor-pointer"
+            title="Text color"
           />
 
           <button
@@ -314,48 +313,34 @@
           </button>
 
           <button
-            @click="selectAll"
-            class="p-2 rounded-md hover:bg-gray-200"
-            title="Select All"
-          >
-            <span class="material-icons text-sm">select_all</span>
-          </button>
-          <button
             @click="downloadWord"
-            class="p-2 rounded-md hover:bg-gray-200 text-green-600"
+            class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons text-sm">download</span>
+            <span class="material-icons text-base">description</span> Word
           </button>
           <button
-            @click="copyToClipboard"
-            class="p-2 rounded-md hover:bg-gray-200 text-blue-600"
+            @click="downloadPDF"
+            class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons text-sm">content_copy</span>
+            <span class="material-icons text-base">picture_as_pdf</span> PDF
           </button>
         </div>
 
-        <!-- Editor -->
-        <EditorContent
-          v-if="editor"
-          :editor="editor"
-          class="min-h-[60vh] prose dark:prose-invert max-w-full focus:outline-none w-full border rounded-lg p-6 bg-white shadow"
-        />
-
-        <!-- Navigation -->
-        <div class="flex justify-between mt-6">
-          <button
-            @click="goToStep(1)"
-            class="bg-gray-200 dark:bg-gray-600 text-text-light dark:text-text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+        <!-- Editor Content -->
+        <div
+          class="flex-1 p-4 overflow-y-auto bg-gray-50 relative min-h-[60vh]"
+        >
+          <EditorContent
+            v-if="editor"
+            :editor="editor"
+            class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed bg-white shadow rounded-lg p-6"
+          />
+          <div
+            v-else
+            class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
           >
-            Go Back & Change Job Details
-          </button>
-          <button
-            @click="goToStep(3)"
-            class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-          >
-            Finalize & Download CV
-            <span class="material-icons ml-2">arrow_forward</span>
-          </button>
+            {{ revampedCv || "No template available." }}
+          </div>
         </div>
       </div>
 
@@ -405,7 +390,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { generateCvRevamp } from "@/services/cvRevampService.js";
-
+import html2pdf from "html2pdf.js";
 const currentStep = ref(1);
 const loading = ref(false);
 const inputType = ref("text");
@@ -496,60 +481,67 @@ async function submitJobDetails() {
     clearProgressInterval();
 
     if (data && data.success && data.revamped_cv) {
-      // Clean up any JSON-like wrapping such as ```json { "revampedCv": " ... " } ```
-      let cleaned = data.revamped_cv;
+  // Clean up any JSON-like wrapping such as ```json { "revampedCv": " ... " } ```
+  let cleaned = data.revamped_cv;
 
-      // Remove Markdown fences (```json or ``` etc.)
-      cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
-        // If there's actual JSON inside, extract the string
-        try {
-          const json = JSON.parse(match.replace(/```json|```/g, "").trim());
-          return json.revampedCv || "";
-        } catch {
-          return match.replace(/```json|```/g, "");
-        }
-      });
-
-      // If still contains { "revampedCv": "...", strip manually
-      const jsonMatch = cleaned.match(/{\s*"revampedCv"\s*:\s*"([\s\S]*)"\s*}/);
-      if (jsonMatch) cleaned = jsonMatch[1];
-
-      // Decode escaped quotes/newlines
-      cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
-
-      revampedCv.value = cleaned;
-      currentStep.value = 2;
-
-      await nextTick();
-
-      // init or set editor content
-      if (!editor.value) {
-        editor.value = new Editor({
-          extensions: [
-            StarterKit,
-            Underline,
-            Link,
-            CodeBlock,
-            BulletList,
-            OrderedList,
-            ListItem,
-            Strike,
-            TextStyle,
-            Color,
-            TextAlign.configure({ types: ["heading", "paragraph"] }),
-          ],
-          content: revampedCv.value,
-        });
-      } else {
-        editor.value.commands.setContent(revampedCv.value, false);
-      }
-    } else {
-      // API returned success:false or no content
-      revampedCv.value = `❌ Error: ${
-        data?.message || "CV generation failed."
-      }`;
-      currentStep.value = 2;
+  // Remove Markdown fences (```json or ``` etc.)
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
+    try {
+      const json = JSON.parse(match.replace(/```json|```/g, "").trim());
+      return json.revampedCv || "";
+    } catch {
+      return match.replace(/```json|```/g, "");
     }
+  });
+
+  // If still contains { "revampedCv": "...", strip manually
+  const jsonMatch = cleaned.match(/{\s*"revampedCv"\s*:\s*"([\s\S]*)"\s*}/);
+  if (jsonMatch) cleaned = jsonMatch[1];
+
+  // Decode escaped quotes/newlines
+  cleaned = cleaned.replace(/\\"/g, '"').replace(/\\n/g, "\n").trim();
+
+  // --- NEW CLEANUP: remove extra empty lines and multiple <p> ---
+  // Replace multiple consecutive newlines with a single newline
+  cleaned = cleaned.replace(/\n{2,}/g, "\n");
+
+  // Remove empty <p> tags if they exist (from previous conversions)
+  cleaned = cleaned.replace(/<p>(\s|&nbsp;)*<\/p>/g, "");
+
+  revampedCv.value = cleaned;
+  currentStep.value = 2;
+
+  await nextTick();
+
+  // init or set editor content
+  if (!editor.value) {
+    editor.value = new Editor({
+      extensions: [
+        StarterKit,
+        Underline,
+        Link,
+        CodeBlock,
+        BulletList,
+        OrderedList,
+        ListItem,
+        Strike,
+        TextStyle,
+        Color,
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+      ],
+      content: revampedCv.value,
+    });
+  } else {
+    editor.value.commands.setContent(revampedCv.value, false);
+  }
+} else {
+  // API returned success:false or no content
+  revampedCv.value = `❌ Error: ${
+    data?.message || "CV generation failed."
+  }`;
+  currentStep.value = 2;
+}
+
   } catch (err) {
     clearProgressInterval();
     revampedCv.value = `❌ Error generating CV.`;
@@ -653,6 +645,37 @@ const circleClass = (step) => ({
     currentStep.value < step,
 });
 
+async function downloadPDF() {
+  if (!editor.value) return;
+
+  // Select the editor's content
+  const editorEl = document.querySelector(".ProseMirror");
+  if (!editorEl) return;
+
+  // Clone the content to preserve formatting
+  const clone = editorEl.cloneNode(true);
+
+  // Create a container for html2pdf
+  const container = document.createElement("div");
+  container.style.fontFamily = "'Times New Roman', serif";
+  container.style.fontSize = "12pt";
+  container.style.lineHeight = "1.6";
+  container.style.whiteSpace = "pre-wrap";
+  container.style.padding = "20px";
+  container.appendChild(clone);
+
+  // Generate PDF
+  await html2pdf()
+    .set({
+      margin: 10,
+      filename: "cv_revamp.pdf",
+      html2canvas: { scale: 2, letterRendering: true },
+      jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+    })
+    .from(container)
+    .save();
+}
+
 onBeforeUnmount(() => {
   if (editor.value) editor.value.destroy();
   clearProgressInterval();
@@ -673,4 +696,10 @@ onBeforeUnmount(() => {
     opacity: 1;
   }
 }
+.prose p {
+  margin-top: 0.25em; /* default is 1em */
+  margin-bottom: 0.25em;
+  line-height: 1.4;
+}
+
 </style>

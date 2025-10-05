@@ -165,7 +165,7 @@
       <!-- Editor -->
       <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
         <div
-          v-if="!props.result?.template || props.progress < 100"
+          v-if="!props.result?.coverLetter || props.progress < 100"
           class="flex flex-col items-center justify-center h-full text-center space-y-2"
         >
           <p class="text-gray-600 text-lg font-medium">
@@ -239,7 +239,7 @@ const fontFamilies = [
 ];
 
 watch(
-  () => props.result?.template,
+  () => props.result?.coverLetter,
   async (val) => {
     if (!val) return;
     await nextTick();
