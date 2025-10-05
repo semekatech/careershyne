@@ -79,7 +79,8 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import Swal from 'sweetalert2'
-import { initiatePayment, checkPaymentStatus } from '@/services/renewPlan'
+import renewPlanService from '@/services/renewPlan'
+const { initiatePayment, checkPaymentStatus } = renewPlanService
 
 // Budget
 const budget = ref(100)
@@ -133,7 +134,7 @@ async function makePayment() {
 
   const confirmResult = await Swal.fire({
     title: "Confirm Payment",
-    html: `<b>Phone:</b> ${phone}<br/><b>Amount:</b> KES ${order.data.amount}<br/><b>Order ID:</b> ${order.data.orderID}`,
+    html: `<b>Phone:</b> ${phone}<br/><b>Amount:</b> KES ${order.data.amount}`,
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Yes, Proceed",

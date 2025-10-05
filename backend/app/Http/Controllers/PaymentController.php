@@ -14,6 +14,9 @@ use DB;
 class PaymentController extends Controller
 {
 
+
+
+
     public function initiate(Request $request)
     {
         $validated = $request->validate([
@@ -21,6 +24,16 @@ class PaymentController extends Controller
             'amount'  => 'required|numeric|min:1',
         ]);
         $amount = $request->input('amount');
+        $items = [];
+        if ($request->input('payment_type') == 'subscription') {
+            $n = floor($amount / 100);
+            $items = [
+                'cv' => 2 * $n,
+                'eligibility' => $n,
+                'email' => 2 * floor($amount / 200),
+                'cover_letter' => 2 * $n - floor($amount / 200),
+            ];
+        }
         $plan = $request->input('plan');
         $account_number = $request->input('orderID');
         $phone1 = $validated['phone'];
@@ -62,7 +75,7 @@ class PaymentController extends Controller
         $Timestamp = date("YmdHis");
         // $Timestamp = date('YYYYMMDDHHis');
         $PartyA = $phonenumber;
-        $Amount = $amount;
+        $Amount = 1;
         $CallBackURL = "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551";
         $AccountReference = $account_number;
         $TransactionDesc = "Subscription ";
@@ -104,6 +117,7 @@ class PaymentController extends Controller
             "resultCode" => $ResponseCode ?? '13',
             "plan_id" => $account_number,
             "plan" =>  $account_number,
+            "items"=>$items,
             "payment_type" =>  $request->input('payment_type'),
             "user_id" =>  $user->id,
             "created_at" => now(),
@@ -317,8 +331,8 @@ class PaymentController extends Controller
                         'message' => nl2br($message),
                         'order'   => $order,
                     ];
-                    $this->sendMessage( '254705030613', $message);
-                    $this->sendMessage( '254703644281', $message);
+                    $this->sendMessage('254705030613', $message);
+                    $this->sendMessage('254703644281', $message);
                     Mail::to($order->email)->send(new OrderMail($details));
                     Mail::to(['georgemuemah@gmail.com', 'nancymunee@gmail.com'])->send(new OrderMail($admindetails));
                 }

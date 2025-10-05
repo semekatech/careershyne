@@ -23,7 +23,7 @@ async initiatePayment(payload) {
   const payloadWithType = { ...payload, payment_type: "subscription" };
   const { data } = await api.post("/payments/pay", payloadWithType);
   return data;
-}
+},
 
 
   // Check payment status (polling)
