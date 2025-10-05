@@ -106,6 +106,7 @@ class AuthController extends Controller
                 'name' => $request->fullName,
                 'email' => $request->email,
                 'role' => '1098',
+                'status' => 'active',
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
@@ -113,9 +114,9 @@ class AuthController extends Controller
             DB::table('subscriptions')->insert([
                 'user_id' => $user->id,
                 'plan' => 'Free',
-                'cv' => 1,
-                'coverletters' => 1,
-                'emails' => 1,
+                'cv' => 0,
+                'coverletters' => 0,
+                'emails' => 0,
                 'checks' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
