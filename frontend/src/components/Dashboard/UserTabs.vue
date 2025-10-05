@@ -120,12 +120,13 @@
               }}</span>
             </div>
           </div>
-
-          <button
+          <br />
+          <router-link
+            to="/my-plans"
             class="mt-8 w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out"
           >
-            Upgrade Plan
-          </button>
+            Purchase More Credits
+          </router-link>
         </template>
       </div>
     </div>
@@ -194,7 +195,7 @@ async function fetchLimits() {
 // Generic action handler with subscription refresh
 async function performAction(serviceFn, type) {
   const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
+    title: "Are You Ready?",
     text: `Do you want to proceed with ${type}?`,
     icon: "warning",
     showCancelButton: true,

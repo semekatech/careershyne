@@ -3,30 +3,41 @@
     class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 overflow-auto p-4"
   >
     <div
-      class="bg-white w-full md:max-w-4xl h-[80vh] rounded-xl shadow-xl flex flex-col overflow-hidden"
+      class="bg-white w-full md:max-w-4xl h-[85vh] rounded-xl shadow-xl flex flex-col overflow-hidden"
     >
       <!-- Header -->
       <div
         class="flex justify-between items-center p-4 border-b bg-white sticky top-0 z-10"
       >
-        <h2 class="text-2xl font-semibold text-gray-800">Email Template</h2>
+        <h2 class="text-2xl font-semibold text-gray-800">Email Template Editor</h2>
         <div class="flex items-center gap-3">
           <button
             v-if="editor"
             @click="downloadWord"
-            class="text-green-600 hover:text-green-800"
-            title="Download Word"
+            class="flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons">download</span>
+            <span class="material-icons text-base">description</span>
+            Download Word
           </button>
+
+          <button
+            v-if="editor"
+            @click="downloadPDF"
+            class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium"
+          >
+            <span class="material-icons text-base">picture_as_pdf</span>
+            Download PDF
+          </button>
+
           <button
             v-if="editor"
             @click="copyToClipboard"
-            class="text-blue-600 hover:text-blue-800"
-            title="Copy HTML"
+            class="flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium"
           >
-            <span class="material-icons">content_copy</span>
+            <span class="material-icons text-base">content_copy</span>
+            Copy HTML
           </button>
+
           <button
             @click="$emit('close')"
             class="text-gray-500 hover:text-gray-800 text-xl font-bold"
@@ -41,7 +52,6 @@
         v-if="editor && props.progress >= 100"
         class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center"
       >
-        <!-- Basic formatting -->
         <button @click="toggleBold" :class="toolbarBtnClass(isBold)">
           <span class="material-icons text-sm">format_bold</span>
         </button>
@@ -55,24 +65,16 @@
           <span class="material-icons text-sm">strikethrough_s</span>
         </button>
 
-        <!-- Lists -->
-        <button
-          @click="toggleBulletList"
-          :class="toolbarBtnClass(isBulletList)"
-        >
+        <button @click="toggleBulletList" :class="toolbarBtnClass(isBulletList)">
           <span class="material-icons text-sm">format_list_bulleted</span>
         </button>
-        <button
-          @click="toggleOrderedList"
-          :class="toolbarBtnClass(isOrderedList)"
-        >
+        <button @click="toggleOrderedList" :class="toolbarBtnClass(isOrderedList)">
           <span class="material-icons text-sm">format_list_numbered</span>
         </button>
         <button @click="toggleCodeBlock" :class="toolbarBtnClass(isCodeBlock)">
           <span class="material-icons text-sm">code</span>
         </button>
 
-        <!-- Undo / Redo -->
         <button @click="undo" class="p-2 rounded-md hover:bg-gray-200">
           <span class="material-icons text-sm">undo</span>
         </button>
@@ -80,27 +82,14 @@
           <span class="material-icons text-sm">redo</span>
         </button>
 
-        <!-- Select All -->
-        <button
-          @click="selectAll"
-          class="p-2 rounded-md hover:bg-gray-200"
-          title="Select All"
-        >
-          <span class="material-icons text-sm">select_all</span>
-        </button>
-
-        <!-- Font size -->
         <select
           v-model="fontSize"
           @change="setFontSize"
           class="border rounded p-1 text-sm"
         >
-          <option v-for="size in fontSizes" :key="size" :value="size">
-            {{ size }}
-          </option>
+          <option v-for="size in fontSizes" :key="size" :value="size">{{ size }}</option>
         </select>
 
-        <!-- Font family -->
         <select
           v-model="fontFamily"
           @change="setFontFamily"
@@ -111,7 +100,6 @@
           </option>
         </select>
 
-        <!-- Text color -->
         <input
           type="color"
           v-model="textColor"
@@ -120,7 +108,6 @@
           class="w-8 h-8 p-0 border-0 cursor-pointer"
         />
 
-        <!-- Text Align -->
         <button
           @click="setTextAlign('left')"
           class="p-2 rounded-md hover:bg-gray-200"
@@ -151,8 +138,7 @@
         </button>
       </div>
 
-      <!-- Editor / Loading / Error -->
-      <!-- Editor / Loading / Error -->
+      <!-- Editor -->
       <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
         <div
           v-if="!props.result?.template || props.progress < 100"
@@ -163,28 +149,12 @@
             <span class="inline-block animate-pulse">...</span>
           </p>
 
-          <!-- Progress messages -->
-          <p class="text-gray-700 font-medium">
-            {{
-              props.progress < 25
-                ? "Initializing..."
-                : props.progress < 50
-                ? "Fetching content..."
-                : props.progress < 75
-                ? "Applying formatting..."
-                : props.progress < 100
-                ? "Almost done..."
-                : "Finishing up..."
-            }}
-          </p>
-
-          <!-- Progress bar -->
           <div class="w-3/4 h-4 rounded-full overflow-hidden bg-gray-200">
             <div
               class="h-4 rounded-full animate-slide"
               :style="{
                 width: props.progress + '%',
-                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`,
+                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`
               }"
             ></div>
           </div>
@@ -193,7 +163,7 @@
 
         <div v-else>
           <div
-            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh]"
+            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh] mx-auto"
           >
             <EditorContent
               v-if="editor"
@@ -227,20 +197,21 @@ import { Strike } from "@tiptap/extension-strike";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
+import html2pdf from "html2pdf.js";
 
 const props = defineProps({ job: Object, result: Object, progress: Number });
 
 const editor = ref(null);
-const fontSize = ref("14px");
-const fontFamily = ref("Arial");
+const fontSize = ref("12pt");
+const fontFamily = ref("Times New Roman");
 const textColor = ref("#000000");
-const fontSizes = ["12px", "14px", "16px", "18px", "20px", "24px"];
+const fontSizes = ["10pt", "11pt", "12pt", "14pt", "16pt", "18pt"];
 const fontFamilies = [
+  "Times New Roman",
   "Arial",
   "Verdana",
   "Georgia",
-  "Times New Roman",
-  "Courier New",
+  "Courier New"
 ];
 
 watch(
@@ -263,7 +234,19 @@ watch(
           Color,
           TextAlign.configure({ types: ["heading", "paragraph"] }),
         ],
-        content: val,
+        content: `<div style="font-family:'Times New Roman'; font-size:12pt; line-height:1.6;">${val}</div>`,
+        editorProps: {
+          handleKeyDown(view, event) {
+            if (event.key === "Tab" && !event.shiftKey) {
+              event.preventDefault();
+              const { state, dispatch } = view;
+              const { from, to } = state.selection;
+              dispatch(state.tr.insertText("\u00a0\u00a0\u00a0\u00a0", from, to));
+              return true;
+            }
+            return false;
+          },
+        },
       });
     } else {
       editor.value.commands.setContent(val, false);
@@ -272,49 +255,28 @@ watch(
   { immediate: true }
 );
 
-onBeforeUnmount(() => {
-  if (editor.value) editor.value.destroy();
-});
+onBeforeUnmount(() => editor.value?.destroy());
 
-// Toolbar actions
+// Formatting
 const toggleBold = () => editor.value.chain().focus().toggleBold().run();
 const toggleItalic = () => editor.value.chain().focus().toggleItalic().run();
-const toggleUnderline = () =>
-  editor.value.chain().focus().toggleUnderline().run();
+const toggleUnderline = () => editor.value.chain().focus().toggleUnderline().run();
 const toggleStrike = () => editor.value.chain().focus().toggleStrike().run();
-const toggleBulletList = () =>
-  editor.value.chain().focus().toggleBulletList().run();
-const toggleOrderedList = () =>
-  editor.value.chain().focus().toggleOrderedList().run();
-const toggleCodeBlock = () =>
-  editor.value.chain().focus().toggleCodeBlock().run();
+const toggleBulletList = () => editor.value.chain().focus().toggleBulletList().run();
+const toggleOrderedList = () => editor.value.chain().focus().toggleOrderedList().run();
+const toggleCodeBlock = () => editor.value.chain().focus().toggleCodeBlock().run();
 const undo = () => editor.value.chain().focus().undo().run();
 const redo = () => editor.value.chain().focus().redo().run();
-const selectAll = () => editor.value.commands.focus().selectAll();
 
-// Text style
 const setFontSize = () =>
-  editor.value
-    .chain()
-    .focus()
-    .setMark("textStyle", { fontSize: fontSize.value })
-    .run();
+  editor.value.chain().focus().setMark("textStyle", { fontSize: fontSize.value }).run();
 const setFontFamily = () =>
-  editor.value
-    .chain()
-    .focus()
-    .setMark("textStyle", { fontFamily: fontFamily.value })
-    .run();
+  editor.value.chain().focus().setMark("textStyle", { fontFamily: fontFamily.value }).run();
 const setTextColor = () =>
-  editor.value
-    .chain()
-    .focus()
-    .setMark("textStyle", { color: textColor.value })
-    .run();
+  editor.value.chain().focus().setMark("textStyle", { color: textColor.value }).run();
 const setTextAlign = (align) =>
   editor.value.chain().focus().setNode("paragraph", { textAlign: align }).run();
 
-// Toolbar state
 const isBold = computed(() => editor.value?.isActive("bold"));
 const isItalic = computed(() => editor.value?.isActive("italic"));
 const isUnderline = computed(() => editor.value?.isActive("underline"));
@@ -326,10 +288,22 @@ const isCodeBlock = computed(() => editor.value?.isActive("codeBlock"));
 const toolbarBtnClass = (active) =>
   `p-2 rounded-md hover:bg-gray-200 ${active ? "bg-gray-300" : ""}`;
 
-// Word download
-function downloadWord() {
+// --- EXPORTS ---
+
+async function downloadWord() {
   if (!editor.value) return;
-  const content = `<html><head><meta charset="utf-8"><title>Email</title></head><body>${editor.value.getHTML()}</body></html>`;
+  editor.value.commands.blur();
+  await nextTick();
+  const editorEl = document.querySelector(".ProseMirror");
+  const latestHTML = editorEl ? editorEl.innerHTML : editor.value.getHTML();
+
+  const content = `
+    <html>
+      <head><meta charset="utf-8"><title>Email Template</title></head>
+      <body style="font-family:'Times New Roman'; font-size:12pt; line-height:1.6;">${latestHTML}</body>
+    </html>
+  `;
+
   const blob = new Blob(["\ufeff", content], { type: "application/msword" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -340,47 +314,41 @@ function downloadWord() {
   document.body.removeChild(link);
 }
 
-// Copy
-function copyToClipboard() {
+async function downloadPDF() {
   if (!editor.value) return;
-  navigator.clipboard
-    .writeText(editor.value.getHTML())
-    .then(() => alert("Copied!"));
+  const editorEl = document.querySelector(".ProseMirror");
+  const clone = editorEl.cloneNode(true);
+  const container = document.createElement("div");
+  container.style.fontFamily = "'Times New Roman'";
+  container.style.fontSize = "12pt";
+  container.style.lineHeight = "1.6";
+  container.style.whiteSpace = "pre-wrap";
+  container.style.padding = "20px";
+  container.appendChild(clone);
+  html2pdf()
+    .set({ margin: 10, filename: "email-template.pdf" })
+    .from(container)
+    .save();
+}
+
+function copyToClipboard() {
+  const editorEl = document.querySelector(".ProseMirror");
+  const html = editorEl ? editorEl.innerHTML : editor.value?.getHTML() || "";
+  navigator.clipboard.writeText(html).then(() => alert("Copied!"));
 }
 </script>
 
 <style>
 @keyframes slide {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 .animate-slide {
   background-size: 200% 100%;
   animation: slide 1.5s linear infinite;
 }
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-.animate-pulse {
-  animation: pulse 1s infinite;
-}
-/* Optional: soft focus like MS Word */
 .ProseMirror:focus {
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-  border-radius: 1px;
 }
 </style>

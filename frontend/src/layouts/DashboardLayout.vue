@@ -207,7 +207,7 @@ const sidebarLinks = [
     roles: ["1109", "1098"],
   },
   {
-    name: "My Plans",
+    name: "Subscriptions",
     href: "/my-plans",
     icon: "material-icons-sharp",
     iconName: "workspace_premium",
