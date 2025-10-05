@@ -94,11 +94,15 @@ Route::prefix('jobs')->middleware('auth:api')->group(function () {
 
 Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/upload', [AiController::class, 'uploadCV'])
-        ->middleware('throttle:2,1');
+        ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
+;
     Route::post('/cover-letter', [AiController::class, 'coverletterGenerator'])
-        ->middleware('throttle:2,1');
+        ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':coverLetters');
+;
     Route::post('/email-template', [AiController::class, 'emailTemplateGenerator'])
-        ->middleware('throttle:2,1');
+        ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':emails');
+;
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
-        ->middleware('throttle:2,1');
+        ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
+;
 });

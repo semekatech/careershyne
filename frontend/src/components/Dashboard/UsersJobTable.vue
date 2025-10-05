@@ -53,7 +53,9 @@
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -61,7 +63,9 @@
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
                 {{ job.company }} - {{ job.type }}
               </p>
-              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
+              <div
+                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
+              >
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -84,7 +88,9 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="border-t border-border-light dark:border-border-dark pt-3">
+          <div
+            class="border-t border-border-light dark:border-border-dark pt-3"
+          >
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 @click="openEligibility(job)"
@@ -232,8 +238,8 @@ async function fetchJobs() {
 // --- Computed: Filter + Pagination ---
 const filteredJobs = computed(() => {
   if (!search.value) return jobs.value;
-  return jobs.value.filter(job =>
-    [job.title, job.company, job.county, job.country].some(f =>
+  return jobs.value.filter((job) =>
+    [job.title, job.company, job.county, job.country].some((f) =>
       f?.toLowerCase().includes(search.value.toLowerCase())
     )
   );
@@ -266,7 +272,13 @@ function closeModal() {
   showModal.value = false;
 }
 
-async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }) {
+async function handleAction({
+  job,
+  serviceFn,
+  modalRef,
+  progressRef,
+  resultRef,
+}) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: `Proceed with action for "${job.title}"?`,
@@ -286,21 +298,20 @@ async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }
     if (progressRef.value < 90) progressRef.value += 10;
   }, 400);
 
-  try {
-    const result = await serviceFn(job.id);
-    clearInterval(interval);
-    progressRef.value = 100;
-    resultRef.value = result;
-  } catch (err) {
-    clearInterval(interval);
-    progressRef.value = 100;
-    resultRef.value = {
-      error:
-        err.response?.status === 403
-          ? err.response.data.message || "Limit reached."
-          : "Action failed. Please try again later.",
-    };
+ try {
+  const result = await serviceFn(job.id);
+  resultRef.value = {
+    template: result.data?.template || "",
+    error: result.success === false ? result.message : null,
+  };
+} catch (err) {
+  if (err.response?.status === 403) {
+    resultRef.value = { template: "", error: "Access denied (403). Tokens limit exceeded." };
+  } else {
+    resultRef.value = { template: "", error: err.message || "Action failed" };
   }
+}
+
 }
 
 function openEligibility(job) {

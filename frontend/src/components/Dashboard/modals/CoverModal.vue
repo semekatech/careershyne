@@ -162,47 +162,54 @@
         </button>
       </div>
 
-      <!-- Editor -->
-      <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
-        <div
-          v-if="!props.result?.coverLetter || props.progress < 100"
-          class="flex flex-col items-center justify-center h-full text-center space-y-2"
-        >
-          <p class="text-gray-600 text-lg font-medium">
-            Generating cover letter
-            <span class="inline-block animate-pulse">...</span>
-          </p>
+      <!-- Editor / Error / Loading -->
+<div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
+  <!-- Loading state -->
+  <div
+    v-if="props.progress < 100 && !props.result?.error"
+    class="flex flex-col items-center justify-center h-full text-center space-y-2"
+  >
+    <p class="text-gray-600 text-lg font-medium">
+      Generating cover letter
+      <span class="inline-block animate-pulse">...</span>
+    </p>
 
-          <div class="w-3/4 h-4 rounded-full overflow-hidden bg-gray-200">
-            <div
-              class="h-4 rounded-full animate-slide"
-              :style="{
-                width: props.progress + '%',
-                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`,
-              }"
-            ></div>
-          </div>
-          <p class="text-gray-700 font-medium">{{ props.progress }}%</p>
-        </div>
+    <div class="w-3/4 h-4 rounded-full overflow-hidden bg-gray-200">
+      <div
+        class="h-4 rounded-full animate-slide"
+        :style="{
+          width: props.progress + '%',
+          background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`,
+        }"
+      ></div>
+    </div>
+    <p class="text-gray-700 font-medium">{{ props.progress }}%</p>
+  </div>
 
-        <div v-else>
-          <div
-            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh] mx-auto"
-          >
-            <EditorContent
-              v-if="editor"
-              :editor="editor"
-              class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
-            />
-            <div
-              v-else
-              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
-            >
-              {{ props.result?.error || "No template available." }}
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- Error state -->
+  <div
+    v-else-if="props.result?.error"
+    class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+  >
+    {{ props.result.error }}
+  </div>
+
+  <!-- Editor state -->
+  <EditorContent
+    v-else-if="editor && props.result?.coverLetter"
+    :editor="editor"
+    class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+  />
+
+  <!-- Fallback -->
+  <div
+    v-else
+    class="text-gray-500 font-medium bg-gray-50 border border-gray-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+  >
+    No cover letter available.
+  </div>
+</div>
+
     </div>
   </div>
 </template>

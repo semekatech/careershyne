@@ -43,7 +43,7 @@
               <span class="material-icons text-base">picture_as_pdf</span>
               Download PDF
             </button>
-<!-- 
+            <!-- 
             <button
               v-if="editor"
               @click="copyToClipboard"
@@ -164,8 +164,9 @@
 
       <!-- Editor -->
       <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
+        <!-- Loading state -->
         <div
-          v-if="!props.result?.template || props.progress < 100"
+          v-if="props.progress < 100 && !props.result?.error"
           class="flex flex-col items-center justify-center h-full text-center space-y-2"
         >
           <p class="text-gray-600 text-lg font-medium">
@@ -185,22 +186,24 @@
           <p class="text-gray-700 font-medium">{{ props.progress }}%</p>
         </div>
 
-        <div v-else>
-          <div
-            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh] mx-auto"
-          >
-            <EditorContent
-              v-if="editor"
-              :editor="editor"
-              class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
-            />
-            <div
-              v-else
-              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
-            >
-              {{ props.result?.error || "No template available." }}
-            </div>
-          </div>
+        <!-- Error state -->
+        <div
+          v-else-if="props.result?.error"
+          class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
+        >
+          {{ props.result.error }}
+        </div>
+
+        <!-- Editor state -->
+        <EditorContent
+          v-else-if="editor && props.result?.template"
+          :editor="editor"
+          class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+        />
+
+        <!-- Fallback -->
+        <div v-else class="text-gray-500 font-medium">
+          No template available.
         </div>
       </div>
     </div>

@@ -616,7 +616,7 @@ function downloadWord() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "revamped_cv.doc";
+  link.download = "mail_template.doc";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

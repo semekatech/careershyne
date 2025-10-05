@@ -11,9 +11,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 p-4">
           <!-- Title + Close -->
           <div class="flex items-center justify-between w-full sm:w-auto">
-            <h2 class="text-2xl font-semibold text-gray-800">
-          CV Revamp
-            </h2>
+            <h2 class="text-2xl font-semibold text-gray-800">CV Revamp</h2>
             <button
               @click="$emit('close')"
               class="text-gray-500 hover:text-gray-800 text-2xl font-bold sm:hidden"
@@ -43,7 +41,7 @@
               <span class="material-icons text-base">picture_as_pdf</span>
               Download PDF
             </button>
-<!-- 
+            <!-- 
             <button
               v-if="editor"
               @click="copyToClipboard"
@@ -163,13 +161,15 @@
       </div>
 
       <!-- Editor -->
+      <!-- Editor / Error / Loading -->
       <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
+        <!-- Loading state -->
         <div
-          v-if="!props.result?.revampedCv || props.progress < 100"
+          v-if="props.progress < 100 && !props.result?.error"
           class="flex flex-col items-center justify-center h-full text-center space-y-2"
         >
           <p class="text-gray-600 text-lg font-medium">
-            Generating cover letter
+            Generating CV Revamp
             <span class="inline-block animate-pulse">...</span>
           </p>
 
@@ -185,22 +185,27 @@
           <p class="text-gray-700 font-medium">{{ props.progress }}%</p>
         </div>
 
-        <div v-else>
-          <div
-            class="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl min-h-[70vh] mx-auto"
-          >
-            <EditorContent
-              v-if="editor"
-              :editor="editor"
-              class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
-            />
-            <div
-              v-else
-              class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full"
-            >
-              {{ props.result?.error || "No template available." }}
-            </div>
-          </div>
+        <!-- Error state -->
+        <div
+          v-else-if="props.result?.error"
+          class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+        >
+          {{ props.result.error }}
+        </div>
+
+        <!-- Editor state -->
+        <EditorContent
+          v-else-if="editor && props.result?.revampedCv"
+          :editor="editor"
+          class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+        />
+
+        <!-- Fallback -->
+        <div
+          v-else
+          class="text-gray-500 font-medium bg-gray-50 border border-gray-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+        >
+          No CV available.
         </div>
       </div>
     </div>
