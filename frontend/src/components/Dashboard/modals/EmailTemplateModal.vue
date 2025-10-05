@@ -6,44 +6,60 @@
       class="bg-white w-full md:max-w-4xl h-[85vh] rounded-xl shadow-xl flex flex-col overflow-hidden"
     >
       <!-- Header -->
-      <div
-        class="flex justify-between items-center p-4 border-b bg-white sticky top-0 z-10"
-      >
-        <h2 class="text-2xl font-semibold text-gray-800">Email Template Editor</h2>
-        <div class="flex items-center gap-3">
-          <button
-            v-if="editor"
-            @click="downloadWord"
-            class="flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium"
-          >
-            <span class="material-icons text-base">description</span>
-            Download Word
-          </button>
+      <!-- Header -->
+      <div class="border-b bg-white sticky top-0 z-10">
+        <div class="flex flex-wrap justify-between items-center gap-3 p-4">
+          <!-- Title + Close -->
+          <div class="flex items-center justify-between w-full sm:w-auto">
+            <h2 class="text-2xl font-semibold text-gray-800">
+              Email Template Editor
+            </h2>
+            <button
+              @click="$emit('close')"
+              class="text-gray-500 hover:text-gray-800 text-2xl font-bold sm:hidden"
+            >
+              ✕
+            </button>
+          </div>
 
-          <button
-            v-if="editor"
-            @click="downloadPDF"
-            class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium"
+          <!-- Buttons -->
+          <div
+            class="flex flex-wrap justify-end items-center gap-3 w-full sm:w-auto"
           >
-            <span class="material-icons text-base">picture_as_pdf</span>
-            Download PDF
-          </button>
+            <button
+              v-if="editor"
+              @click="downloadWord"
+              class="flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">description</span>
+              Download Word
+            </button>
 
-          <button
-            v-if="editor"
-            @click="copyToClipboard"
-            class="flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium"
-          >
-            <span class="material-icons text-base">content_copy</span>
-            Copy HTML
-          </button>
+            <button
+              v-if="editor"
+              @click="downloadPDF"
+              class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">picture_as_pdf</span>
+              Download PDF
+            </button>
+<!-- 
+            <button
+              v-if="editor"
+              @click="copyToClipboard"
+              class="flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">content_copy</span>
+              Copy HTML
+            </button> -->
 
-          <button
-            @click="$emit('close')"
-            class="text-gray-500 hover:text-gray-800 text-xl font-bold"
-          >
-            ✕
-          </button>
+            <button
+              @click="$emit('close')"
+              class="hidden sm:block text-gray-500 hover:text-gray-800 text-2xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       </div>
 
@@ -65,10 +81,16 @@
           <span class="material-icons text-sm">strikethrough_s</span>
         </button>
 
-        <button @click="toggleBulletList" :class="toolbarBtnClass(isBulletList)">
+        <button
+          @click="toggleBulletList"
+          :class="toolbarBtnClass(isBulletList)"
+        >
           <span class="material-icons text-sm">format_list_bulleted</span>
         </button>
-        <button @click="toggleOrderedList" :class="toolbarBtnClass(isOrderedList)">
+        <button
+          @click="toggleOrderedList"
+          :class="toolbarBtnClass(isOrderedList)"
+        >
           <span class="material-icons text-sm">format_list_numbered</span>
         </button>
         <button @click="toggleCodeBlock" :class="toolbarBtnClass(isCodeBlock)">
@@ -87,7 +109,9 @@
           @change="setFontSize"
           class="border rounded p-1 text-sm"
         >
-          <option v-for="size in fontSizes" :key="size" :value="size">{{ size }}</option>
+          <option v-for="size in fontSizes" :key="size" :value="size">
+            {{ size }}
+          </option>
         </select>
 
         <select
@@ -154,7 +178,7 @@
               class="h-4 rounded-full animate-slide"
               :style="{
                 width: props.progress + '%',
-                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`
+                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`,
               }"
             ></div>
           </div>
@@ -211,7 +235,7 @@ const fontFamilies = [
   "Arial",
   "Verdana",
   "Georgia",
-  "Courier New"
+  "Courier New",
 ];
 
 watch(
@@ -241,7 +265,9 @@ watch(
               event.preventDefault();
               const { state, dispatch } = view;
               const { from, to } = state.selection;
-              dispatch(state.tr.insertText("\u00a0\u00a0\u00a0\u00a0", from, to));
+              dispatch(
+                state.tr.insertText("\u00a0\u00a0\u00a0\u00a0", from, to)
+              );
               return true;
             }
             return false;
@@ -260,20 +286,36 @@ onBeforeUnmount(() => editor.value?.destroy());
 // Formatting
 const toggleBold = () => editor.value.chain().focus().toggleBold().run();
 const toggleItalic = () => editor.value.chain().focus().toggleItalic().run();
-const toggleUnderline = () => editor.value.chain().focus().toggleUnderline().run();
+const toggleUnderline = () =>
+  editor.value.chain().focus().toggleUnderline().run();
 const toggleStrike = () => editor.value.chain().focus().toggleStrike().run();
-const toggleBulletList = () => editor.value.chain().focus().toggleBulletList().run();
-const toggleOrderedList = () => editor.value.chain().focus().toggleOrderedList().run();
-const toggleCodeBlock = () => editor.value.chain().focus().toggleCodeBlock().run();
+const toggleBulletList = () =>
+  editor.value.chain().focus().toggleBulletList().run();
+const toggleOrderedList = () =>
+  editor.value.chain().focus().toggleOrderedList().run();
+const toggleCodeBlock = () =>
+  editor.value.chain().focus().toggleCodeBlock().run();
 const undo = () => editor.value.chain().focus().undo().run();
 const redo = () => editor.value.chain().focus().redo().run();
 
 const setFontSize = () =>
-  editor.value.chain().focus().setMark("textStyle", { fontSize: fontSize.value }).run();
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { fontSize: fontSize.value })
+    .run();
 const setFontFamily = () =>
-  editor.value.chain().focus().setMark("textStyle", { fontFamily: fontFamily.value }).run();
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { fontFamily: fontFamily.value })
+    .run();
 const setTextColor = () =>
-  editor.value.chain().focus().setMark("textStyle", { color: textColor.value }).run();
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { color: textColor.value })
+    .run();
 const setTextAlign = (align) =>
   editor.value.chain().focus().setNode("paragraph", { textAlign: align }).run();
 
@@ -340,8 +382,13 @@ function copyToClipboard() {
 
 <style>
 @keyframes slide {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 .animate-slide {
   background-size: 200% 100%;

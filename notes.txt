@@ -6,8 +6,8 @@
 - Tracking user activities and permanently banning ips.
 - Middleware for checking user limits before execution.
 - Items should be recalculated again in backend as user can manipulate in browser or postman.
-
-
+- Temporary banning accounts sending more than 5 reguests to our server
+- Temporary banning ips sending more than 15 reguests to our server
 
 
 
