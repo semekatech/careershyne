@@ -95,6 +95,7 @@ class PaymentController extends Controller
         $ResponseCode = $resp_data->ResponseCode;
         $ResponseDescription = $resp_data->ResponseDescription;
         curl_close($curl);
+        $user = auth('api')->user();
         $mpesa_stk = DB::table('mpesa_stks')->insert([
             "merchant_request_id" => $MerchantRequestID,
             "checkout_request_id" => $CheckoutRequestID,
@@ -103,7 +104,8 @@ class PaymentController extends Controller
             "resultCode" => $ResponseCode ?? '13',
             "plan_id" => $account_number,
             "plan" =>  $account_number,
-            "user_id" =>  $account_number,
+            "payment_type" =>  $request->input('payment_type'),
+            "user_id" =>  $user->id,
             "created_at" => now(),
             "updated_at" => now(),
             "status" => 0,
