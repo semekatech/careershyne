@@ -217,7 +217,6 @@ Generate a professional job application email for the user based on their CV and
 
 ### Job Description:
 $jobText
-
 ### Instructions:
 - Emphasize skills, experiences, and achievements relevant to the job.
 - Keep the email formal, concise, and no longer than 300 words.
@@ -230,8 +229,6 @@ $jobText
   \"revampedCv\": \"<HTML formatted email content here>\"
 }
 ";
-
-
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
                 'messages' => [
