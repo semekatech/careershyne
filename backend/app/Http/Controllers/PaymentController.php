@@ -117,7 +117,7 @@ class PaymentController extends Controller
             "resultCode" => $ResponseCode ?? '13',
             "plan_id" => $account_number,
             "plan" =>  $account_number,
-            "items"=>$items,
+           "items" => json_encode($items),
             "payment_type" =>  $request->input('payment_type'),
             "user_id" =>  $user->id,
             "created_at" => now(),
