@@ -19,10 +19,9 @@ const subscriptionService = {
   async getLimits() {
     try {
       const response = await api.post("/users/limits");
-      // Ensure we return defaults if keys are missing
       return {
         cv: response.data.cv ?? 0,
-        coverLetters: response.data.coverLetters ?? 0,
+        coverletters: response.data.coverLetters ?? 0,
         emails: response.data.emails ?? 0,
         checks: response.data.checks ?? 0,
         plan: response.data.plan ?? "Free",
