@@ -163,7 +163,7 @@ const preview = ref(null); // optional for avatar preview
 // Logout function
 const handleLogout = () => {
   auth.clearToken();
-  router.push("/admin");
+  router.push("/login");
 };
 
 // Sidebar links with Material & FontAwesome icons
@@ -199,13 +199,7 @@ const sidebarLinks = [
     iconName: "business_center",
     roles: ["1109", "manager"],
   },
-  {
-    name: "Personal Summary",
-    href: "/profile",
-    icon: "material-icons-sharp",
-    iconName: "person",
-    roles: ["1109", "1098"],
-  },
+ 
   {
     name: "Subscriptions",
     href: "/my-plans",
@@ -226,6 +220,13 @@ const sidebarLinks = [
     icon: "material-icons-sharp",
     iconName: "history",
     roles: ["1098"],
+  },
+   {
+    name: "Personal Summary",
+    href: "/profile",
+    icon: "material-icons-sharp",
+    iconName: "person",
+    roles: ["1109", "1098"],
   },
   { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
 ];

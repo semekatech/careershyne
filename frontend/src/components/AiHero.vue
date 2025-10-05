@@ -8,12 +8,12 @@
         </p>
 
         <h1 class="mt-4 text-4xl font-extrabold text-gray-900 sm:text-5xl text-center">
-          Your All-in-One AI Career <br /> Wingman
+         Your All-in-One Career<br /> Helper
         </h1>
 
         <p class="mt-6 text-lg text-gray-600 text-center">
-          Why juggle multiple tools? Careershyne AI handles it all — from resumes and cover letters <br />
-          to job eligibility checks and polished emails — so you can focus on landing the job.
+         Why use many different tools? Careershyne AI does everything for you — it helps you make your cv,<br /> write cover letters,
+        check if you qualify for jobs, <br />and even write professional emails — all in one place, so you can focus on getting hired.
         </p>
 
         <!-- SOCIAL PROOF -->
@@ -56,7 +56,6 @@
             </div>
           </div>
 
-          <!-- STARS + TEXT -->
           <div class="flex items-center gap-2">
             <!-- Stars -->
             <div class="flex text-yellow-400">
@@ -85,7 +84,7 @@
         <!-- Primary CTA -->
         <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6">
           <router-link
-            to="/admin"
+            to="/login"
             class="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition text-center rounded-lg"
           >
             Unlock My Career

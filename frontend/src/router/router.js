@@ -78,7 +78,7 @@ const routes = [
   },
   //backend
   {
-    path: "/admin",
+    path: "/login",
     component: AuthLayout,
     children: [
       {
@@ -292,7 +292,8 @@ router.beforeEach(async (to, from, next) => {
     "/",
     "/payment/:id",
     "/order-cv",
-    "/admin",
+    "/login",
+    "/login",
     '/register',
     "/how-it-works",
     "/custom-cv-order",
@@ -312,7 +313,7 @@ router.beforeEach(async (to, from, next) => {
   );
 
   if (!isPublic && !auth.token) {
-    return next("/admin");
+    return next("/login");
   }
 
   if (!isPublic && auth.token) {
@@ -323,7 +324,7 @@ router.beforeEach(async (to, from, next) => {
       return next();
     } catch (err) {
       auth.clearToken();
-      return next("/admin");
+      return next("/login");
     }
   }
 

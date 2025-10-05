@@ -46,7 +46,7 @@ axios.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       const auth = useAuthStore()
       auth.clearToken()
-      window.location.href = '/admin' 
+      window.location.href = '/login' 
     }
     return Promise.reject(error)
   }

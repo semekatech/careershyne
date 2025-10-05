@@ -20,7 +20,7 @@ const scrollToSection = (id) => {
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
-        <router-link to="/" class="flex items-center space-x-2">
+        <router-link to="/ai" class="flex items-center space-x-2">
           <!-- Normal mode -->
           <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
           <!-- Dark mode -->
@@ -46,7 +46,7 @@ const scrollToSection = (id) => {
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
-            to="/admin"
+            to="/login"
             class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-[#32383f] transition-colors duration-300"
           >
             Get Started

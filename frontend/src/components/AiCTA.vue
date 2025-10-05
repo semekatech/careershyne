@@ -1,23 +1,10 @@
 <template>
   <section
-    class="
-      relative
-      bg-[#32383f]
-      py-20
-      text-white
-      rounded-xl
-      shadow-xl
-      mx-4
-    "
+    class="relative bg-[#32383f] py-20 text-white rounded-xl shadow-xl mx-4 overflow-hidden"
   >
     <!-- Subtle overlay texture -->
     <div
-      class="
-        absolute inset-0
-        bg-[url('https://www.toptal.com/designers/subtlepatterns/patterns/dots.png')]
-        opacity-10
-        rounded-3xl
-      "
+      class="absolute inset-0 bg-[url('https://www.toptal.com/designers/subtlepatterns/patterns/dots.png')] opacity-10 rounded-3xl"
     ></div>
 
     <div class="relative max-w-4xl mx-auto text-center px-6">
@@ -25,9 +12,12 @@
       <h2 class="text-3xl md:text-4xl font-extrabold drop-shadow-lg">
         Ready to Land More Interviews?
       </h2>
-      <p class="mt-4 text-lg md:text-xl text-white-100 drop-shadow-lg max-w-2xl mx-auto">
-        CareerShyne AI tools help you craft a resume that gets noticed. <br />
-        Stop missing opportunities — let your resume shine today.
+      <p
+        class="mt-4 text-lg md:text-xl text-white-100 drop-shadow-lg max-w-2xl mx-auto"
+      >
+        CareerShyne AI helps you craft a CV, cover letters, and email templates
+        that get noticed. Unlock job eligibility insights and stop missing
+        opportunities — let your applications shine today.
       </p>
 
       <!-- SOCIAL PROOF -->
@@ -49,17 +39,28 @@
           </svg>
         </div>
         <p class="text-white-100 text-sm font-medium">
-          ⭐ Trusted by <span class="font-semibold text-orange-400">500+ professionals</span> in the last 30 days
+          ⭐ Trusted by
+          <span class="font-semibold text-orange-400">500+ professionals</span>
+          recently
         </p>
       </div>
 
-            <!-- CTA BUTTONS -->
+      <!-- CTA BUTTONS -->
       <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+        <!-- Secondary CTA -->
         <a
-          href="/admin"
-          class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-orange-500 transition duration-300"
+          href="/learn-more"
+          class="px-6 py-3 border border-white text-white font-semibold rounded-lg hover:bg-white hover:text-gray-900 transition duration-300"
         >
-          Unlock My Career
+          Learn How AI Helps
+        </a>
+
+        <!-- Primary CTA -->
+        <a
+          href="/login"
+          class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition duration-300"
+        >
+          Get Started Today
         </a>
       </div>
     </div>

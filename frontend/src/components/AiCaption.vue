@@ -42,7 +42,7 @@
             Share Your Details
           </h3>
           <p class="text-gray-600">
-            Provide your career history, target job, or job link. The more details, the more tailored your documents.
+            Provide your target job or job link. The more details, the more tailored your documents.
           </p>
         </div>
 
