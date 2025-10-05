@@ -102,7 +102,7 @@
                 >Cover Letters:</span
               >
               <span class="font-semibold text-primary">{{
-                limits.coverLetters
+                limits.coverletters
               }}</span>
             </div>
             <div class="flex justify-between items-center">
