@@ -93,10 +93,12 @@
                 limits.plan
               }}</span>
             </div>
+
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">CV Revamps:</span>
               <span class="font-semibold text-primary">{{ limits.cv }}</span>
             </div>
+
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400"
                 >Cover Letters:</span
@@ -105,6 +107,7 @@
                 limits.coverletters
               }}</span>
             </div>
+
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400"
                 >Email Templates:</span
@@ -113,6 +116,7 @@
                 limits.emails
               }}</span>
             </div>
+
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">Eligibility:</span>
               <span class="font-semibold text-primary">{{
@@ -120,13 +124,16 @@
               }}</span>
             </div>
           </div>
-          <br />
-          <router-link
-            to="/my-plans"
-            class="mt-8 w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out"
-          >
-            Purchase More Credits
-          </router-link>
+
+          <!-- Button section -->
+          <div class="mt-8">
+            <router-link
+              to="/my-plans"
+              class="block w-full text-center border border-orange-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-orange-500 hover:text-white transition duration-150 ease-in-out"
+            >
+              Purchase More Credits
+            </router-link>
+          </div>
         </template>
       </div>
     </div>

@@ -94,7 +94,7 @@
             class="flex justify-between text-lg font-bold text-gray-900 mb-6"
           >
             <span>Total cost</span>
-            <span>KES {{ items.total }}</span>
+            <span>KES {{ budget }}</span>
           </div>
 
           <button
@@ -102,7 +102,7 @@
             @click="openModal = true"
             class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Pay {{ items.total }} Via STK
+            Pay {{ budget }} Via STK
           </button>
         </div>
       </div>
@@ -133,7 +133,7 @@
             @click="makePayment"
             class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
           >
-            Pay KES {{ items.total }}
+            Pay KES {{ budget }}
           </button>
           <button
             @click="closeModal"
@@ -148,37 +148,49 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed } from "vue";
 import Swal from "sweetalert2";
 import renewPlanService from "@/services/renewPlan";
 const { initiatePayment, checkPaymentStatus } = renewPlanService;
 
-// Budget
+// Budget (in multiples of 100)
 const budget = ref(100);
 
-// Prices
+// Prices per item
 const prices = reactive({
   cv: 20,
-  coverLetter: 20,
-  eligibility: 20,
+  coverLetter: 15,
+  eligibility: 15,
   email: 10,
 });
 
-// Computed items
+// Computed allocation
 const items = computed(() => {
   const P = budget.value;
   if (P <= 0 || P % 100 !== 0)
     return { cv: 0, coverLetter: 0, eligibility: 0, email: 0, total: 0 };
-  const n = Math.floor(P / 100);
-  const cv = 2 * n;
-  const eligibility = n;
-  const email = 2 * Math.floor(P / 200);
-  const coverLetter = 2 * n - Math.floor(P / 200);
+
+  // Split budget based on percentage
+  const allocation = {
+    cv: P * 0.4,
+    coverLetter: P * 0.3,
+    eligibility: P * 0.2,
+    email: P * 0.1,
+  };
+
+  // Calculate how many of each item can be bought
+  const cv = Math.floor(allocation.cv / prices.cv);
+  const coverLetter = Math.floor(allocation.coverLetter / prices.coverLetter);
+  const eligibility = Math.floor(allocation.eligibility / prices.eligibility);
+  const email = Math.floor(allocation.email / prices.email);
+
+  // Calculate total spent value
   const total =
     cv * prices.cv +
     coverLetter * prices.coverLetter +
     eligibility * prices.eligibility +
     email * prices.email;
+
   return { cv, coverLetter, eligibility, email, total };
 });
 
