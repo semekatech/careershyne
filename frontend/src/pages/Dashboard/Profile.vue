@@ -462,6 +462,11 @@ async function fetchProfile() {
   loading.value = true;
   try {
     const { data } = await usersService.fetchProfile();
+
+    // Add "storage/" prefix if file paths exist and don’t already include it
+    const withStorage = (path) =>
+      path ? (path.startsWith("storage/") ? path : `storage/${path}`) : null;
+
     form.value = {
       ...form.value,
       id: data.id,
@@ -471,9 +476,9 @@ async function fetchProfile() {
       industry_id: Number(data.industry_id) || "",
       education_level_id: Number(data.education_level_id) || "",
       county_id: Number(data.county_id) || "",
-      cv_url: data.cv,
-      cover_letter_url: data.cover_letter,
-      photo_url: data.photo_url,
+      cv_url: withStorage(data.cv),
+      cover_letter_url: withStorage(data.cover_letter),
+      photo_url: withStorage(data.photo_url),
     };
   } catch (err) {
     profileError.value = "Could not load profile data.";
@@ -481,6 +486,7 @@ async function fetchProfile() {
     loading.value = false;
   }
 }
+
 
 async function loadOptions() {
   try {
