@@ -119,6 +119,14 @@
             </div>
           </div>
         </div>
+        <div class="flex justify-center mt-6">
+          <router-link
+            to="/browse-jobs"
+            class="px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-indigo-700 transition-colors"
+          >
+            View More Jobs
+          </router-link>
+        </div>
       </div>
     </section>
 
