@@ -89,7 +89,9 @@
 
       <!-- Application Deadline -->
       <div>
-        <label class="block text-sm font-medium mb-2">Application Deadline *</label>
+        <label class="block text-sm font-medium mb-2"
+          >Application Deadline *</label
+        >
         <input
           v-model="job.deadline"
           type="date"
@@ -131,15 +133,19 @@
       </div>
 
       <!-- Application Instructions -->
+      <!-- Application Instructions -->
       <div>
-        <label class="block text-sm font-medium mb-2">Application Instructions *</label>
-        <textarea
-          v-model="job.applicationInstructions"
-          rows="4"
-          placeholder="e.g. Send your CV to hr@company.com"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
+        <label class="block text-sm font-medium mb-2"
+          >Application Instructions *</label
+        >
+        <quill-editor
+          v-model:content="job.applicationInstructions"
+          content-type="html"
+          theme="snow"
+          class="bg-white border rounded w-full"
+          style="min-height: 150px"
           required
-        ></textarea>
+        />
       </div>
 
       <!-- Job Country -->
@@ -174,7 +180,9 @@
 
       <!-- Job Location / Office -->
       <div>
-        <label class="block text-sm font-medium mb-2">Job Location / Office *</label>
+        <label class="block text-sm font-medium mb-2"
+          >Job Location / Office *</label
+        >
         <input
           v-model="job.office"
           type="text"
@@ -191,11 +199,14 @@
           class="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 flex items-center justify-center"
           :disabled="loading"
         >
-          <span v-if="loading" class="mr-2 animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+          <span
+            v-if="loading"
+            class="mr-2 animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"
+          ></span>
           {{ loading ? "Posting..." : "Post Job" }}
         </button>
       </div>
-       <div v-if="successMessage" class="mt-4 text-green-600 font-medium">
+      <div v-if="successMessage" class="mt-4 text-green-600 font-medium">
         {{ successMessage }}
       </div>
     </form>
@@ -206,7 +217,7 @@
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import OptionsService from "@/services/optionsService";
-import JobService from "@/services/jobService"; 
+import JobService from "@/services/jobService";
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
@@ -225,7 +236,7 @@ const job = ref({
   applicationInstructions: "",
   country: "Kenya",
   county: "",
-  office: ""
+  office: "",
 });
 
 const industryOptions = ref([]);
@@ -262,7 +273,7 @@ async function submitJob() {
     postedBy: auth.user?.id || null,
   };
   try {
-    const res = await JobService.createJob(payload); 
+    const res = await JobService.createJob(payload);
     console.log("Job created:", res);
     successMessage.value = "Job posted successfully!";
     job.value = {
@@ -278,7 +289,7 @@ async function submitJob() {
       applicationInstructions: "",
       country: "Kenya",
       county: "",
-      office: ""
+      office: "",
     };
   } catch (err) {
     console.error("Error submitting job:", err);
