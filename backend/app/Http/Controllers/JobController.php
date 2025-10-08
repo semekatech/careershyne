@@ -64,36 +64,36 @@ class JobController extends Controller
         });
     }
 
-    $perPage = $request->get('per_page', 10);
+    $perPage = $request->get('per_page', 100);
     $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
     return response()->json($jobs);
 }
 
-   public function userJobs(Request $request)
+  public function userJobs(Request $request)
 {
-    $query = Job::query()
+    $query = Job::from('job_listings as job_listings')
         ->leftJoin('industries', 'industries.id', '=', 'job_listings.field_name')
         ->select('job_listings.*', 'industries.name as field');
 
-    // Optional: implement search
-    if ($request->has('search') && !empty($request->search)) {
+    if ($request->filled('search')) {
         $search = $request->search;
         $query->where(function ($q) use ($search) {
             $q->where('job_listings.title', 'like', "%{$search}%")
                 ->orWhere('job_listings.company', 'like', "%{$search}%")
                 ->orWhere('job_listings.county', 'like', "%{$search}%")
                 ->orWhere('job_listings.country', 'like', "%{$search}%")
-                ->orWhere('job_listings.name', 'like', "%{$search}%");
+                ->orWhere('industries.name', 'like', "%{$search}%");
         });
     }
 
-
-    $perPage = $request->get('per_page', 100);
+    $perPage = (int) $request->get('per_page', 10);
     $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
+    // Return raw pagination data (Laravel default)
     return response()->json($jobs);
 }
+
     public function checkEligibility(Request $request)
     {
         $user = auth('api')->user();
