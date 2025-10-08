@@ -112,7 +112,7 @@
           <option
             v-for="option in industryOptions"
             :key="option.id || option.value"
-            :value="option.name || option.label || option.value"
+            :value="option.id || option.label || option.value"
           >
             {{ option.name || option.label || option.value }}
           </option>
