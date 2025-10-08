@@ -36,7 +36,7 @@
     </div>
 
     <!-- Jobs List -->
-    <div v-else>
+    <div v-else class="relative">
       <!-- Search -->
       <div class="mb-4">
         <input
@@ -143,6 +143,33 @@
           Next
         </button>
       </div>
+
+      <!-- 🔒 Overlay: Always shown after jobs load -->
+      <div
+        v-if="!loading && !limitsLoading && totalLimits <= 0"
+        class="absolute left-0 right-0 top-[10%] bottom-0 bg-white/40 dark:bg-black/40 backdrop-blur-[3px]
+ flex flex-col items-center justify-start pt-10 text-center z-20 md:z-30"
+      >
+        <div
+          class="bg-white/90 dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl max-w-md w-[90%]"
+        >
+          <div class="flex flex-col items-center space-y-4">
+            <span class="material-icons text-6xl text-gray-500">lock</span>
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              Access Locked
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+              Kindly choose a plan to unlock job listings.
+            </p>
+            <button
+              @click="goToPlans"
+              class="mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full shadow hover:bg-indigo-700 transition"
+            >
+              Choose Plan
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Modals -->
@@ -193,6 +220,9 @@ import EligibilityModal from "@/components/Dashboard/modals/EligibilityModal.vue
 import CvRevampModal from "@/components/Dashboard/modals/CvRevampModal.vue";
 import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
 import EmailTemplateModal from "@/components/Dashboard/modals/EmailTemplateModal.vue";
+import subscriptionService from "@/services/subscriptionService";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 // --- State ---
 const jobs = ref([]);
@@ -234,7 +264,19 @@ async function fetchJobs() {
     loading.value = false;
   }
 }
+const limits = ref({
+  plan: null,
+  cv: 0,
+  coverletters: 0,
+  emails: 0,
+  checks: 0,
+});
 
+// ✅ Computed total of all limits
+const totalLimits = computed(() => {
+  const { cv, coverletters, emails, checks } = limits.value;
+  return (cv || 0) + (coverletters || 0) + (emails || 0) + (checks || 0);
+});
 // --- Computed: Filter + Pagination ---
 const filteredJobs = computed(() => {
   if (!search.value) return jobs.value;
@@ -298,20 +340,22 @@ async function handleAction({
     if (progressRef.value < 90) progressRef.value += 10;
   }, 400);
 
- try {
-  const result = await serviceFn(job.id);
-  resultRef.value = {
-    template: result.data?.template || "",
-    error: result.success === false ? result.message : null,
-  };
-} catch (err) {
-  if (err.response?.status === 403) {
-    resultRef.value = { template: "", error: "Access denied (403). Tokens limit exceeded." };
-  } else {
-    resultRef.value = { template: "", error: err.message || "Action failed" };
+  try {
+    const result = await serviceFn(job.id);
+    resultRef.value = {
+      template: result.data?.template || "",
+      error: result.success === false ? result.message : null,
+    };
+  } catch (err) {
+    if (err.response?.status === 403) {
+      resultRef.value = {
+        template: "",
+        error: "Access denied (403). Tokens limit exceeded.",
+      };
+    } else {
+      resultRef.value = { template: "", error: err.message || "Action failed" };
+    }
   }
-}
-
 }
 
 function openEligibility(job) {
@@ -377,7 +421,24 @@ function formatDate(dateString) {
   if (!dateString) return "-";
   return new Date(dateString).toLocaleDateString();
 }
+const limitsLoading = ref(true);
 
+async function fetchLimits() {
+  try {
+    const data = await subscriptionService.getLimits();
+    limits.value = data || limits.value;
+  } catch (error) {
+    console.error("Error fetching limits:", error);
+  } finally {
+    limitsLoading.value = false;
+  }
+}
+function goToPlans() {
+  router.push("/my-plans");
+}
 // --- Lifecycle ---
-onMounted(fetchJobs);
+onMounted(async () => {
+  await fetchJobs();
+  await fetchLimits();
+});
 </script>

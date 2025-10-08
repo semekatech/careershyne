@@ -26,7 +26,6 @@ class AiController extends Controller
             $count = \DB::table('ai_reviews')
                 ->whereDate('created_at', now()->toDateString())
                 ->count();
-
             if ($count >= 100) {
                 return response()->json([
                     'success' => false,

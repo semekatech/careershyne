@@ -46,43 +46,53 @@ class JobController extends Controller
             'data' => $job
         ], 201);
     }
-    public function fetchAll(Request $request)
-    {
-        // Optional: implement search
-        $query = Job::query();
+   public function fetchAll(Request $request)
+{
+    $query = Job::query()
+        ->leftJoin('industries', 'industries.id', '=', 'jobs.field')
+        ->select('jobs.*', 'industries.name as field'); // ✅ industry name as 'field'
 
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('company', 'like', "%{$search}%")
-                    ->orWhere('county', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%");
-            });
-        }
-        $perPage = $request->get('per_page', 10);
-        $jobs = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json($jobs);
+    // Optional search
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('jobs.title', 'like', "%{$search}%")
+                ->orWhere('jobs.company', 'like', "%{$search}%")
+                ->orWhere('jobs.county', 'like', "%{$search}%")
+                ->orWhere('jobs.country', 'like', "%{$search}%")
+                ->orWhere('industries.name', 'like', "%{$search}%");
+        });
     }
-    public function userJobs(Request $request)
-    {
-        // Optional: implement search
-        $query = Job::query();
 
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('company', 'like', "%{$search}%")
-                    ->orWhere('county', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%");
-            });
-        }
-        $perPage = $request->get('per_page', 10);
-        $jobs = $query->orderBy('created_at', 'desc')->paginate($perPage);
-        return response()->json($jobs);
+    $perPage = $request->get('per_page', 10);
+    $jobs = $query->orderBy('jobs.created_at', 'desc')->paginate($perPage);
+
+    return response()->json($jobs);
+}
+
+   public function userJobs(Request $request)
+{
+    $query = Job::query()
+        ->leftJoin('industries', 'industries.id', '=', 'jobs.field')
+        ->select('jobs.*', 'industries.name as field');
+
+    // Optional: implement search
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('jobs.title', 'like', "%{$search}%")
+                ->orWhere('jobs.company', 'like', "%{$search}%")
+                ->orWhere('jobs.county', 'like', "%{$search}%")
+                ->orWhere('jobs.country', 'like', "%{$search}%")
+                ->orWhere('industries.name', 'like', "%{$search}%");
+        });
     }
+
+    $perPage = $request->get('per_page', 10);
+    $jobs = $query->orderBy('jobs.created_at', 'desc')->paginate($perPage);
+
+    return response()->json($jobs);
+}
     public function checkEligibility(Request $request)
     {
         $user = auth('api')->user();
