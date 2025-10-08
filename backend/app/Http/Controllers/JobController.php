@@ -65,7 +65,7 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
- public function userJobs(Request $request)
+    public function userJobs(Request $request)
     {
         // Optional: implement search
         $query = Job::query();
@@ -250,7 +250,10 @@ Return ONLY valid JSON with the following fields:
 
 --- JOB DESCRIPTION ---
 {$job->description}
-
+--- HIRING COMPANY ---
+{$job->company}
+---JOB TITLE ---
+{$job->title}
 --- ORIGINAL CV TEXT ---
 {$cvText}
 PROMPT;
@@ -357,7 +360,10 @@ You are a professional career coach and cover letter writer. Using the following
 
 --- JOB DESCRIPTION ---
 {$job->description}
-
+--- HIRING COMPANY ---
+{$job->company}
+---JOB TITLE ---
+{$job->title}
 --- CV TEXT ---
 {$cvText}
 PROMPT;
@@ -419,14 +425,34 @@ PROMPT;
         // Build AI prompt for email template
         $prompt = <<<PROMPT
 You are a professional career coach and recruiter assistant.
-Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job:
 
+Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job.
+
+IMPORTANT:
+- Use the job details and the candidate's personal details provided below.
+- Include the **email subject** as the first line (e.g., "Subject: Application for [Job Title] at [Company]").
+- Write the email in HTML format (with paragraphs, line breaks, etc.).
+- Keep it short, friendly, and professional (120–200 words).
+- If any personal detail is missing, omit it gracefully.
+- Return ONLY valid JSON with this field:
+  - emailTemplate (HTML formatted)
+
+--- PERSONAL DETAILS ---
+{$user->name},{$user->email},{$user->phone}
 --- JOB DESCRIPTION ---
 {$job->description}
+--- HIRING COMPANY ---
+{$job->company}
+--- JOB TITLE ---
+{$job->title}
 
-Return ONLY valid JSON with fields:
-  - emailTemplate (HTML formatted)
+Example output structure:
+{
+  "emailTemplate": "<p><strong>Subject:</strong> Application for [Job Title] at [Company]</p><p>Dear Hiring Manager, ...</p><p>Kind regards,<br>[Candidate Name]</p>"
+}
 PROMPT;
+
+
 
         // Call OpenAI
         $client = OpenAI::client(env('OPENAI_API_KEY'));
