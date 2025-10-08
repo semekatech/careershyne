@@ -65,7 +65,7 @@ class JobController extends Controller
     }
 
     $perPage = $request->get('per_page', 10);
-    $jobs = $query->orderBy('jobs.created_at', 'desc')->paginate($perPage);
+    $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
     return response()->json($jobs);
 }
@@ -89,7 +89,7 @@ class JobController extends Controller
     }
 
     $perPage = $request->get('per_page', 10);
-    $jobs = $query->orderBy('jobs.created_at', 'desc')->paginate($perPage);
+    $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
     return response()->json($jobs);
 }
