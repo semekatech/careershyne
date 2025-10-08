@@ -122,7 +122,7 @@
         <strong>Salary:</strong> {{ selectedJob.salary }}
       </p>
       <p class="text-gray-700 mb-2">
-        <strong>Field:</strong> {{ selectedJob.field }}
+        <strong>Field:</strong> {{ selectedJob.field_name }}
       </p>
       <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
       <div

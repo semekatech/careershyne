@@ -50,7 +50,7 @@ class JobController extends Controller
 {
     $query = Job::query()
         ->leftJoin('industries', 'industries.id', '=', 'jobs.field')
-        ->select('jobs.*', 'industries.name as field'); // ✅ industry name as 'field'
+        ->select('jobs.*', 'industries.name as field_name');
 
     // Optional search
     if ($request->has('search') && !empty($request->search)) {
@@ -73,7 +73,7 @@ class JobController extends Controller
    public function userJobs(Request $request)
 {
     $query = Job::query()
-        ->leftJoin('industries', 'industries.id', '=', 'jobs.field')
+        ->leftJoin('industries', 'industries.id', '=', 'jobs.field_name')
         ->select('jobs.*', 'industries.name as field');
 
     // Optional: implement search
