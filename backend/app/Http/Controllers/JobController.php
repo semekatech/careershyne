@@ -350,23 +350,40 @@ PROMPT;
 
         // Build AI prompt for cover letter
         $prompt = <<<PROMPT
-You are a professional career coach and cover letter writer. Using the following CV text, generate a personalized cover letter tailored for the job description.
-- Keep it concise, professional, and engaging.
-- Highlight relevant experience, skills, and achievements from the CV.
-- Address the letter to the hiring manager if possible.
-- End with a strong call to action.
-- Return ONLY valid JSON with fields:
-  - coverLetter (HTML formatted)
+You are a professional career coach and expert cover letter writer.
 
+Task:
+Generate a personalized, professional, and compelling cover letter tailored to the job description below, using the candidate’s CV text and personal details to highlight relevant experience, skills, and achievements.
+
+Requirements:
+- Address the letter to the hiring manager if possible (e.g., "Dear Hiring Manager," or use the company name if appropriate).
+- Mention the candidate’s name and optionally include their contact information at the top (email and phone).
+- Highlight the candidate’s most relevant qualifications and achievements that match the job description.
+- Keep the tone confident, polite, and professional.
+- Length: 150–250 words (concise but detailed enough to show fit).
+- End with a strong closing paragraph or call to action (e.g., expressing interest in an interview).
+- Format the output in valid **HTML** with paragraph tags and line breaks.
+- If any field (like company name or phone) is missing, omit it gracefully.
+- Return **ONLY** valid JSON with this field:
+  - "coverLetter" (HTML formatted)
+
+--- PERSONAL DETAILS ---
+{$user->name}, {$user->email}, {$user->phone}
 --- JOB DESCRIPTION ---
 {$job->description}
 --- HIRING COMPANY ---
 {$job->company}
----JOB TITLE ---
+--- JOB TITLE ---
 {$job->title}
 --- CV TEXT ---
 {$cvText}
+
+Example output structure:
+{
+  "coverLetter": "<p><strong>{$user->name}</strong><br>{$user->email} | {$user->phone}</p><p>Dear Hiring Manager,</p><p>I am excited to apply for the [Job Title] position at [Company]. ...</p><p>Kind regards,<br>{$user->name}</p>"
+}
 PROMPT;
+
 
         // Call OpenAI
         $client = OpenAI::client(env('OPENAI_API_KEY'));
