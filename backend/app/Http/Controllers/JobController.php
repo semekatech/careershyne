@@ -422,6 +422,7 @@ PROMPT;
 
         $job = Job::findOrFail($request->jobId);
 
+
         // Build AI prompt for email template
         $prompt = <<<PROMPT
 You are a professional career coach and recruiter assistant.
