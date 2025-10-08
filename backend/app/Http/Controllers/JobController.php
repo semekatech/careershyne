@@ -238,25 +238,43 @@ PROMPT;
 
         // ✅ Build AI prompt
         $prompt = <<<PROMPT
-You are a professional CV writer. Rewrite and enhance the following CV text so that it is tailored for the given job description.
-Keep formatting structured into clear sections:
-- Summary
-- Key Skills
-- Experience
-- Education
+You are a professional CV writer and career branding specialist.
 
-Return ONLY valid JSON with the following fields:
-- revampedCv (HTML formatted CV content, well-structured)
+Task:
+Rewrite and enhance the following CV text to make it highly tailored and optimized for the given job description and title.
 
+Requirements:
+- Keep the formatting structured and recruiter-friendly with clear HTML section headers:
+  - Summary
+  - Key Skills
+  - Experience
+  - Education
+- Focus on aligning the candidate’s achievements, experience, and skills with the job description.
+- Improve language, grammar, and phrasing to sound polished and professional.
+- Use concise bullet points for skills and experience where relevant.
+- Do not fabricate false information — only enhance or rephrase existing content.
+- Format the output in valid **HTML** (use `<h2>`, `<ul>`, `<li>`, `<p>`, etc.).
+- If any section data is missing, omit that section gracefully.
+- Return **ONLY** valid JSON with this field:
+  - "revampedCv" (HTML formatted CV content, well-structured)
+
+--- PERSONAL DETAILS ---
+{$user->name}, {$user->email}, {$user->phone}
 --- JOB DESCRIPTION ---
 {$job->description}
 --- HIRING COMPANY ---
 {$job->company}
----JOB TITLE ---
+--- JOB TITLE ---
 {$job->title}
 --- ORIGINAL CV TEXT ---
 {$cvText}
+
+Example output structure:
+{
+  "revampedCv": "<h2>Summary</h2><p>Results-driven professional with proven experience in...</p><h2>Key Skills</h2><ul><li>Team Leadership</li><li>Project Management</li></ul><h2>Experience</h2><p>...</p><h2>Education</h2><p>...</p>"
+}
 PROMPT;
+
 
         // ✅ Call OpenAI
         $client = OpenAI::client(env('OPENAI_API_KEY'));
@@ -364,6 +382,7 @@ Requirements:
 - End with a strong closing paragraph or call to action (e.g., expressing interest in an interview).
 - Format the output in valid **HTML** with paragraph tags and line breaks.
 - If any field (like company name or phone) is missing, omit it gracefully.
+- Do not fabricate false information — use the provided CV text and personal details.
 - Return **ONLY** valid JSON with this field:
   - "coverLetter" (HTML formatted)
 
