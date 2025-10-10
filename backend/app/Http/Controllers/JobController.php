@@ -120,7 +120,7 @@ class JobController extends Controller
             $parser = new \Smalot\PdfParser\Parser();
             $pdf    = $parser->parseFile($cvPath);
             $cvText = $pdf->getText() ?? '';
-
+              info('CV text');
             if (strlen(trim($cvText)) === 0) {
                 info("CV parsing returned empty text. File: $cvPath");
             }
@@ -130,6 +130,7 @@ class JobController extends Controller
             $cvText = preg_replace('/\s+/', ' ', $cvText);
             $cvText = trim($cvText);
         } catch (\Exception $e) {
+            info($e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to read CV: ' . $e->getMessage(),
