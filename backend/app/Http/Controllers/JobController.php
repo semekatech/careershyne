@@ -839,7 +839,7 @@ PROMPT;
 
         return response()->json([
             'success'       => true,
-            'emailTemplate' => $analysis['emailTemplate'] ?? '',
+            'email_template' => $analysis['email_template'] ?? '',
             'cv_path'       => asset('storage/' . $user->cv_path),
             'job_id'        => $job->id,
         ]);
