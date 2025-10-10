@@ -12,9 +12,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 use App\Http\Middleware\CheckSubscriptionLimit;
 use App\Http\Middleware\LogActivity;
-Route::prefix('api')->group(function () {
-    Route::post('auth/login', [AuthController::class, 'login']);
-});
+// Route::prefix('api')->group(function () {
+//     Route::post('auth/login', [AuthController::class, 'login']);
+// });
 Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -23,6 +23,8 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:api')->get('/fetch-profile', [AuthController::class, 'fetchProfile']);
     Route::middleware('auth:api')->post('/update-password', [AuthController::class, 'updatePassword']);
 });
+
+
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
 Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
