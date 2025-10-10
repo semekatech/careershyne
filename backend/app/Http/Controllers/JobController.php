@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Services\AIReviewService;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use DB;
 use OpenAI;
-use App\Services\AIReviewService;
 use Smalot\PdfParser\Parser;
 
 class JobController extends Controller
@@ -23,122 +22,145 @@ class JobController extends Controller
     {
         // ✅ Validate incoming request
         $validated = $request->validate([
-            'company' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'type' => 'required|string',
-            'experience' => 'required|integer|min:0',
-            'education' => 'required|string|max:255',
-            'salary' => 'required|string|max:255',
-            'deadline' => 'required|date',
-            'field' => 'required|string|max:255',
-            'description' => 'required|string',
+            'company'                 => 'required|string|max:255',
+            'title'                   => 'required|string|max:255',
+            'type'                    => 'required|string',
+            'experience'              => 'required|integer|min:0',
+            'education'               => 'required|string|max:255',
+            'salary'                  => 'required|string|max:255',
+            'deadline'                => 'required|date',
+            'field'                   => 'required|string|max:255',
+            'description'             => 'required|string',
             'applicationInstructions' => 'required|string',
-            'country' => 'required|string|max:255',
-            'county' => 'required|string|max:255',
-            'office' => 'required|string|max:255',
+            'country'                 => 'required|string|max:255',
+            'county'                  => 'required|string|max:255',
+            'office'                  => 'required|string|max:255',
         ]);
         $validated['posted_by'] = auth('api')->id();
-        $validated['slug'] = Str::slug($validated['title'] . '-' . time());
-        $job = Job::create($validated);
+        $validated['slug']      = Str::slug($validated['title'] . '-' . time());
+        $job                    = Job::create($validated);
         return response()->json([
             'success' => true,
             'message' => 'Job created successfully',
-            'data' => $job
+            'data'    => $job,
         ], 201);
     }
-   public function fetchAll(Request $request)
-{
-    $query = Job::query()
-        ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
-        ->select('job_listings.*', 'industries.name as field_name');
+    public function fetchAll(Request $request)
+    {
+        $query = Job::query()
+            ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
+            ->select('job_listings.*', 'industries.name as field_name');
 
-    // Optional search
-    if ($request->has('search') && !empty($request->search)) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('job_listings.title', 'like', "%{$search}%")
-                ->orWhere('job_listings.company', 'like', "%{$search}%")
-                ->orWhere('job_listings.county', 'like', "%{$search}%")
-                ->orWhere('job_listings.country', 'like', "%{$search}%")
-                ->orWhere('job_listings.name', 'like', "%{$search}%");
-        });
+        // Optional search
+        if ($request->has('search') && ! empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('job_listings.title', 'like', "%{$search}%")
+                    ->orWhere('job_listings.company', 'like', "%{$search}%")
+                    ->orWhere('job_listings.county', 'like', "%{$search}%")
+                    ->orWhere('job_listings.country', 'like', "%{$search}%")
+                    ->orWhere('job_listings.name', 'like', "%{$search}%");
+            });
+        }
+
+        $perPage = $request->get('per_page', 100);
+        $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
+
+        return response()->json($jobs);
     }
 
-    $perPage = $request->get('per_page', 100);
-    $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
+    public function userJobs(Request $request)
+    {
+        $query = Job::from('job_listings as job_listings')
+            ->leftJoin('industries', 'industries.id', '=', 'job_listings.field_name')
+            ->select('job_listings.*', 'industries.name as field');
 
-    return response()->json($jobs);
-}
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('job_listings.title', 'like', "%{$search}%")
+                    ->orWhere('job_listings.company', 'like', "%{$search}%")
+                    ->orWhere('job_listings.county', 'like', "%{$search}%")
+                    ->orWhere('job_listings.country', 'like', "%{$search}%")
+                    ->orWhere('industries.name', 'like', "%{$search}%");
+            });
+        }
 
-  public function userJobs(Request $request)
-{
-    $query = Job::from('job_listings as job_listings')
-        ->leftJoin('industries', 'industries.id', '=', 'job_listings.field_name')
-        ->select('job_listings.*', 'industries.name as field');
+        $perPage = (int) $request->get('per_page', 10);
+        $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('job_listings.title', 'like', "%{$search}%")
-                ->orWhere('job_listings.company', 'like', "%{$search}%")
-                ->orWhere('job_listings.county', 'like', "%{$search}%")
-                ->orWhere('job_listings.country', 'like', "%{$search}%")
-                ->orWhere('industries.name', 'like', "%{$search}%");
-        });
+        // Return raw pagination data (Laravel default)
+        return response()->json($jobs);
     }
-
-    $perPage = (int) $request->get('per_page', 10);
-    $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
-
-    // Return raw pagination data (Laravel default)
-    return response()->json($jobs);
-}
 
     public function checkEligibility(Request $request)
     {
         $user = auth('api')->user();
         $job  = Job::findOrFail($request->jobId);
 
-        if (!$user->cv_path) {
+        if (! $user->cv_path) {
             return response()->json([
                 'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
+                'message' => 'No CV uploaded. Please upload your CV first.',
             ], 400);
         }
 
         $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        if (!file_exists($cvPath)) {
+        if (! file_exists($cvPath)) {
             return response()->json([
                 'success' => false,
-                'message' => 'CV file not found on server.'
+                'message' => 'CV file not found on server.',
             ], 404);
         }
 
         // ✅ Extract text from CV
         try {
-            $parser = new \Smalot\PdfParser\Parser();
+            $parser = new Parser();
             $pdf    = $parser->parseFile($cvPath);
             $cvText = $pdf->getText() ?? '';
-              info('CV text');
+
+            // Check if parser returned empty text
             if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. File: $cvPath");
+                info("CV parsing returned empty text. Trying OCR... File: $cvPath");
+
+                try {
+                    // 🔹 Fallback: Tesseract OCR for scanned/image-based PDFs
+                    $ocrText = (new TesseractOCR($cvPath))->run();
+                    $cvText  = trim($ocrText);
+
+                    if (strlen($cvText) === 0) {
+                        info("OCR also returned empty text for file: $cvPath");
+                    }
+                } catch (\Throwable $ocrError) {
+                    info("OCR failed for $cvPath — " . $ocrError->getMessage());
+                }
             }
 
-            // Basic cleaning
+            // Basic cleaning (after either method)
             $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
             $cvText = preg_replace('/\s+/', ' ', $cvText);
             $cvText = trim($cvText);
-        } catch (\Exception $e) {
-            info($e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
 
-        // ✅ Build AI prompt
-        $prompt = <<<PROMPT
+        } catch (\Throwable $e) {
+            info("PDF parsing failed for: $cvPath — " . $e->getMessage());
+
+            // 🔹 Attempt OCR if parser completely fails
+            try {
+                info("Trying OCR fallback for failed parser file: $cvPath");
+                $ocrText = (new TesseractOCR($cvPath))->run();
+                $cvText  = trim($ocrText);
+            } catch (\Throwable $ocrError) {
+                info("OCR fallback also failed for $cvPath — " . $ocrError->getMessage());
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to read CV. Please upload a valid, text-based PDF file.',
+                ], 422);
+            }
+
+            // ✅ Build AI prompt
+            $prompt = <<<PROMPT
 Compare the following CV and Job Description.
 Return ONLY valid JSON with the following fields:
 - matchPercentage (0-100)
@@ -153,103 +175,102 @@ Return ONLY valid JSON with the following fields:
 {$cvText}
 PROMPT;
 
-        // ✅ Call OpenAI
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.2,
-        ]);
+            // ✅ Call OpenAI
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.2,
+            ]);
 
-        $aiOutput = $response->choices[0]->message->content ?? '';
+            $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // ✅ Cleanup (remove ```json fences if present)
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            // ✅ Cleanup (remove ```json fences if present)
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        $analysis = json_decode($cleanOutput, true);
+            $analysis = json_decode($cleanOutput, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+            if (json_last_error() !== JSON_ERROR_NONE || ! $analysis) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI response could not be parsed',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
+            DB::table('usage_activities')->insert([
+                'user_id'     => $user->id,
+                'action'      => 'check_eligibility',
+                'status'      => 'success',
+                'message'     => 'Check Eligibility',
+                'tokens_used' => $response->usage->totalTokens ?? 0,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+
+            // ✅ Return structured response
             return response()->json([
-                'success' => false,
-                'message' => 'AI response could not be parsed',
-                'raw'     => $aiOutput,
-            ], 500);
+                'success'         => true,
+                'matchPercentage' => $analysis['matchPercentage'] ?? null,
+                'matchedSkills'   => $analysis['matchedSkills'] ?? [],
+                'missingSkills'   => $analysis['missingSkills'] ?? [],
+                'recommendations' => $analysis['recommendations'] ?? '',
+                'cv_path'         => asset('storage/' . $user->cv_path),
+                'cv_excerpt'      => substr($cvText, 0, 300) . '...',
+            ]);
         }
-        DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
-        DB::table('usage_activities')->insert([
-            'user_id'     => $user->id,
-            'action'      => 'check_eligibility',
-            'status'      => 'success',
-            'message'     => 'Check Eligibility',
-            'tokens_used' => $response->usage->totalTokens ?? 0,
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
+        public function revampCv(Request $request)
+        {
 
-        // ✅ Return structured response
-        return response()->json([
-            'success'         => true,
-            'matchPercentage' => $analysis['matchPercentage'] ?? null,
-            'matchedSkills'   => $analysis['matchedSkills'] ?? [],
-            'missingSkills'   => $analysis['missingSkills'] ?? [],
-            'recommendations' => $analysis['recommendations'] ?? '',
-            'cv_path'         => asset('storage/' . $user->cv_path),
-            'cv_excerpt'      => substr($cvText, 0, 300) . '...',
-        ]);
-    }
-    public function revampCv(Request $request)
-    {
+            $user = auth('api')->user();
+            $job  = Job::findOrFail($request->jobId);
+            info($user);
 
-
-        $user = auth('api')->user();
-        $job  = Job::findOrFail($request->jobId);
-        info($user);
-
-        // ✅ Ensure CV exists
-        if (!$user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
-            ], 400);
-        }
-
-        $cvPath = storage_path('app/public/' . $user->cv_path);
-
-        if (!file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.'
-            ], 404);
-        }
-
-        // ✅ Extract text from CV
-        try {
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf    = $parser->parseFile($cvPath);
-            $cvText = $pdf->getText() ?? '';
-
-            if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. File: $cvPath");
+            // ✅ Ensure CV exists
+            if (! $user->cv_path) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No CV uploaded. Please upload your CV first.',
+                ], 400);
             }
 
-            // Basic cleaning
-            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-            $cvText = preg_replace('/\s+/', ' ', $cvText);
-            $cvText = trim($cvText);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
+            $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        // ✅ Build AI prompt
-        $prompt = <<<PROMPT
+            if (! file_exists($cvPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CV file not found on server.',
+                ], 404);
+            }
+
+            // ✅ Extract text from CV
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf    = $parser->parseFile($cvPath);
+                $cvText = $pdf->getText() ?? '';
+
+                if (strlen(trim($cvText)) === 0) {
+                    info("CV parsing returned empty text. File: $cvPath");
+                }
+
+                // Basic cleaning
+                $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+                $cvText = preg_replace('/\s+/', ' ', $cvText);
+                $cvText = trim($cvText);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to read CV: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            // ✅ Build AI prompt
+            $prompt = <<<PROMPT
 You are a professional CV writer and career branding specialist.
 
 Task:
@@ -287,99 +308,98 @@ Example output structure:
 }
 PROMPT;
 
+            // ✅ Call OpenAI
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.3,
+            ]);
 
-        // ✅ Call OpenAI
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert CV revamp assistant. Always respond with valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.3,
-        ]);
+            $aiOutput = $response->choices[0]->message->content ?? '';
 
-        $aiOutput = $response->choices[0]->message->content ?? '';
+            // ✅ Cleanup (remove code fences if present)
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        // ✅ Cleanup (remove code fences if present)
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            $analysis = json_decode($cleanOutput, true);
 
-        $analysis = json_decode($cleanOutput, true);
+            if (json_last_error() !== JSON_ERROR_NONE || ! $analysis) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI response could not be parsed',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
+            DB::table('usage_activities')->insert([
+                'user_id'     => $user->id,
+                'action'      => 'cv_revamp',
+                'status'      => 'success',
+                'message'     => 'CV Revamp Generation',
+                'tokens_used' => $response->usage->totalTokens ?? 0,
 
-        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+            // ✅ Return structured response
             return response()->json([
-                'success' => false,
-                'message' => 'AI response could not be parsed',
-                'raw'     => $aiOutput,
-            ], 500);
-        }
-        DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
-        DB::table('usage_activities')->insert([
-            'user_id'     => $user->id,
-            'action'      => 'cv_revamp',
-            'status'      => 'success',
-            'message'     => 'CV Revamp Generation',
-            'tokens_used' => $response->usage->totalTokens ?? 0,
-
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
-        // ✅ Return structured response
-        return response()->json([
-            'success'       => true,
-            'revampedCv'    => $analysis['revampedCv'] ?? '',
-            // 'recommendations' => $analysis['recommendations'] ?? [],
-            'cv_path'       => asset('storage/' . $user->cv_path),
-        ]);
-    }
-
-    public function coverLetter(Request $request)
-    {
-        $user = auth('api')->user();
-
-        $job  = Job::findOrFail($request->jobId);
-
-        if (!$user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.'
-            ], 400);
+                'success'    => true,
+                'revampedCv' => $analysis['revampedCv'] ?? '',
+                // 'recommendations' => $analysis['recommendations'] ?? [],
+                'cv_path'    => asset('storage/' . $user->cv_path),
+            ]);
         }
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
+        public function coverLetter(Request $request)
+        {
+            $user = auth('api')->user();
 
-        if (!file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.'
-            ], 404);
-        }
+            $job = Job::findOrFail($request->jobId);
 
-        // Extract text from CV
-        try {
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf    = $parser->parseFile($cvPath);
-            $cvText = $pdf->getText() ?? '';
-
-            if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. File: $cvPath");
+            if (! $user->cv_path) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No CV uploaded. Please upload your CV first.',
+                ], 400);
             }
 
-            // Clean text
-            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-            $cvText = preg_replace('/\s+/', ' ', $cvText);
-            $cvText = trim($cvText);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
+            $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        // Build AI prompt for cover letter
-        $prompt = <<<PROMPT
+            if (! file_exists($cvPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CV file not found on server.',
+                ], 404);
+            }
+
+            // Extract text from CV
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf    = $parser->parseFile($cvPath);
+                $cvText = $pdf->getText() ?? '';
+
+                if (strlen(trim($cvText)) === 0) {
+                    info("CV parsing returned empty text. File: $cvPath");
+                }
+
+                // Clean text
+                $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+                $cvText = preg_replace('/\s+/', ' ', $cvText);
+                $cvText = trim($cvText);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to read CV: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            // Build AI prompt for cover letter
+            $prompt = <<<PROMPT
 You are a professional career coach and expert cover letter writer.
 
 Task:
@@ -415,64 +435,62 @@ Example output structure:
 }
 PROMPT;
 
+            // Call OpenAI
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are an expert cover letter assistant. Always respond with valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.3,
+            ]);
 
-        // Call OpenAI
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert cover letter assistant. Always respond with valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.3,
-        ]);
+            $aiOutput = $response->choices[0]->message->content ?? '';
 
-        $aiOutput = $response->choices[0]->message->content ?? '';
+            // Cleanup JSON formatting
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        // Cleanup JSON formatting
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            $analysis = json_decode($cleanOutput, true);
 
-        $analysis = json_decode($cleanOutput, true);
+            if (json_last_error() !== JSON_ERROR_NONE || ! $analysis) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI response could not be parsed',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
+            DB::table('usage_activities')->insert([
+                'user_id'     => $user->id,
+                'action'      => 'email_template',
+                'status'      => 'success',
+                'message'     => 'Cover letter Generation',
+                'tokens_used' => $response->usage->totalTokens ?? 0,
 
-        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+
+            // Return structured response
             return response()->json([
-                'success' => false,
-                'message' => 'AI response could not be parsed',
-                'raw'     => $aiOutput,
-            ], 500);
+                'success'     => true,
+                'coverLetter' => $analysis['coverLetter'] ?? '',
+                // 'recommendations'=> $analysis['recommendations'] ?? [],
+                'cv_path'     => asset('storage/' . $user->cv_path),
+            ]);
         }
-        DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
-        DB::table('usage_activities')->insert([
-            'user_id'     => $user->id,
-            'action'      => 'email_template',
-            'status'      => 'success',
-            'message'     => 'Cover letter Generation',
-            'tokens_used' => $response->usage->totalTokens ?? 0,
 
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
+        public function emailTemplate(Request $request)
+        {
+            $user = auth('api')->user();
 
-        // Return structured response
-        return response()->json([
-            'success'       => true,
-            'coverLetter'   => $analysis['coverLetter'] ?? '',
-            // 'recommendations'=> $analysis['recommendations'] ?? [],
-            'cv_path'       => asset('storage/' . $user->cv_path),
-        ]);
-    }
+            $job = Job::findOrFail($request->jobId);
 
-    public function emailTemplate(Request $request)
-    {
-        $user = auth('api')->user();
-
-        $job = Job::findOrFail($request->jobId);
-
-
-        // Build AI prompt for email template
-        $prompt = <<<PROMPT
+            // Build AI prompt for email template
+            $prompt = <<<PROMPT
 You are a professional career coach and recruiter assistant.
 
 Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job.
@@ -501,52 +519,50 @@ Example output structure:
 }
 PROMPT;
 
+            // Call OpenAI
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are an expert email template assistant. Always respond with valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.3,
+            ]);
 
+            $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // Call OpenAI
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are an expert email template assistant. Always respond with valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.3,
-        ]);
+            // Cleanup JSON formatting
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        $aiOutput = $response->choices[0]->message->content ?? '';
+            $analysis = json_decode($cleanOutput, true);
 
-        // Cleanup JSON formatting
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            if (json_last_error() !== JSON_ERROR_NONE || ! $analysis) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI response could not be parsed',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
+            // Log usage on success only
+            DB::table('usage_activities')->insert([
+                'user_id'     => $user->id,
+                'action'      => 'email_template',
+                'status'      => 'success',
+                'message'     => 'Email template Generation',
+                'tokens_used' => $response->usage->totalTokens ?? 0,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
 
-        $analysis = json_decode($cleanOutput, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE || !$analysis) {
+            // Return structured response
             return response()->json([
-                'success' => false,
-                'message' => 'AI response could not be parsed',
-                'raw'     => $aiOutput,
-            ], 500);
+                'success'  => true,
+                'template' => $analysis['emailTemplate'] ?? '',
+                'job_id'   => $job->id,
+            ]);
         }
-        DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
-        // Log usage on success only
-        DB::table('usage_activities')->insert([
-            'user_id'     => $user->id,
-            'action'      => 'email_template',
-            'status'      => 'success',
-            'message'     => 'Email template Generation',
-            'tokens_used' => $response->usage->totalTokens ?? 0,
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
-
-        // Return structured response
-        return response()->json([
-            'success'       => true,
-            'template' => $analysis['emailTemplate'] ?? '',
-            'job_id'        => $job->id,
-        ]);
     }
-}
