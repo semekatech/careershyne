@@ -318,7 +318,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (!isPublic && auth.token) {
     try {
-      await axios.get("/api/auth/verify-token", {
+      await axios.get("/api/api/auth/verify-token", {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
       return next();
