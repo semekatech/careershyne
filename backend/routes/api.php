@@ -11,7 +11,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 use App\Http\Middleware\CheckSubscriptionLimit;
-
+use App\Http\Middleware\LogActivity;
+Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -113,4 +114,5 @@ Route::get('/debug-auth', function(Request $request) {
         'authorization' => $request->header('Authorization'),
         'user' => $request->user(), // null if not authenticated
     ]);
+});
 });
