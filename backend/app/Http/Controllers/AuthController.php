@@ -293,6 +293,7 @@ class AuthController extends Controller
     {
         info('reached here');
         $token = $request->bearerToken();
+        info($token);
         $user  = User::where('api_token', hash('sha256', $token))->first();
         info($user);
         if (! $user) {
