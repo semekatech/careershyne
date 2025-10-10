@@ -1,56 +1,65 @@
 <template>
-  <section class="relative bg-gradient-to-br from-green-50 via-white to-purple-100 py-32" id="ai-hero">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 flex justify-center items-starts text-center">
+  <section
+    class="relative bg-gradient-to-br from-green-50 via-white to-purple-100 py-32"
+    id="ai-hero"
+  >
+    <div
+      class="max-w-7xl mx-auto px-6 lg:px-8 py-20 flex justify-center items-starts text-center"
+    >
       <!-- LEFT CONTENT -->
       <div>
-        <p class="mt-[-50px] text-sm font-semibold text-orange-600 uppercase tracking-wide">
+        <p
+          class="mt-[-150px] sm:mt-[-50px] text-sm font-semibold text-orange-600 uppercase tracking-wide"
+        >
           AI THAT GETS YOU HIRED
         </p>
 
-        <h1 class="mt-4 text-4xl font-extrabold text-gray-900 sm:text-5xl text-center">
-         Your All-in-One Career<br /> Helper
+        <h1
+          class="mt-4 text-4xl font-extrabold text-gray-900 sm:text-5xl text-center"
+        >
+          Your All-in-One Career<br />
+          Helper
         </h1>
 
         <p class="mt-6 text-lg text-gray-600 text-center">
-         Why use many different tools? Careershyne AI does everything for you — it helps you make your cv,<br /> write cover letters,
-        check if you qualify for jobs, <br />and even write professional emails — all in one place, so you can focus on getting hired.
+          Why use many different tools? Careershyne AI does everything for you —
+          it helps you make your cv,<br />
+          write cover letters, check if you qualify for jobs, <br />and even
+          write professional emails — all in one place, so you can focus on
+          getting hired.
         </p>
 
         <!-- SOCIAL PROOF -->
-        <div class="mt-8 flex items-center justify-center gap-4">
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 text-center">
+
           <!-- AVATAR STACK -->
           <div class="flex items-center space-x-[-10px]">
             <div
-              class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold
-                     transform transition duration-300 hover:scale-110 hover:rotate-6 hover:z-10 cursor-pointer"
+              class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold transform transition duration-300 hover:scale-110 hover:rotate-6 hover:z-10 cursor-pointer"
             >
               N
             </div>
 
             <div
-              class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-white font-bold
-                     transform transition duration-300 hover:scale-110 hover:-rotate-6 hover:z-10 cursor-pointer"
+              class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-white font-bold transform transition duration-300 hover:scale-110 hover:-rotate-6 hover:z-10 cursor-pointer"
             >
               C
             </div>
 
             <div
-              class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold
-                     transform transition duration-300 hover:scale-110 hover:rotate-3 hover:z-10 cursor-pointer"
+              class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold transform transition duration-300 hover:scale-110 hover:rotate-3 hover:z-10 cursor-pointer"
             >
               J
             </div>
 
             <div
-              class="w-12 h-12 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold
-                     transform transition duration-300 hover:scale-110 hover:-rotate-3 hover:z-10 cursor-pointer"
+              class="w-12 h-12 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold transform transition duration-300 hover:scale-110 hover:-rotate-3 hover:z-10 cursor-pointer"
             >
               K
             </div>
 
             <div
-              class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold
-                     transform transition duration-300 hover:scale-110 hover:rotate-6 hover:z-10 cursor-pointer"
+              class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold transform transition duration-300 hover:scale-110 hover:rotate-6 hover:z-10 cursor-pointer"
             >
               99+
             </div>
@@ -82,7 +91,7 @@
         </div>
 
         <!-- Primary CTA -->
-        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6">
+        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6 mb-[-170px] sm:mb-[-5px]" >
           <router-link
             to="/login"
             class="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition text-center rounded-lg"

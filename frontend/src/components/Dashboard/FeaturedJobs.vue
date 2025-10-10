@@ -75,7 +75,7 @@
 
             <!-- OPEN DETAILS MODAL -->
             <button
-              class="mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center whitespace-nowrap"
+              class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
               @click="openModal(job)"
             >
               View Details
@@ -87,7 +87,7 @@
           <div
             class="border-t border-border-light dark:border-border-dark pt-3"
           >
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 @click="openEligibility(job)"
                 class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
