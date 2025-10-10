@@ -1,7 +1,7 @@
 // services/DashboardService.js
 
 import axios from "axios";
-const API_URL = "https://careershyne.com/api/dashboard";
+const API_URL = "https://careershyne.com/api/api/dashboard";
 export default {
   async getDashboardStats() {
     try {

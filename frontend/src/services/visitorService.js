@@ -8,7 +8,7 @@ export const logVisitor = async (page) => {
 
     // send IP + page to backend
     const res = await axios.post(
-      "https://careershyne.com/api/log-visitor",
+      "https://careershyne.com/api/api/log-visitor",
       { ip: clientIp, page },
       { timeout: 5000 } // optional
     );

@@ -1,7 +1,7 @@
 // src/services/ProfileService.js
 import axios from "axios";
 
-const API = "https://careershyne.com/api/auth/";
+const API = "https://careershyne.com/api/api/auth/";
 
 // Create axios instance
 const api = axios.create({

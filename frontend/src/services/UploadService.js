@@ -1,7 +1,7 @@
 // services/UploadService.js
 import axios from "axios";
 
-const API = "https://careershyne.com/api/ai/upload";
+const API = "https://careershyne.com/api/api/ai/upload";
 
 export default {
   async uploadFile(file, hcaptchaToken, onUploadProgress) {

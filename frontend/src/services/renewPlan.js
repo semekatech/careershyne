@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create Axios instance with baseURL and timeout
 const api = axios.create({
-  baseURL: "https://careershyne.com/api",
+  baseURL: "https://careershyne.com/api/api",
   timeout: 5000,
 });
 
