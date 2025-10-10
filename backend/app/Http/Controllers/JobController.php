@@ -782,7 +782,7 @@ Requirements:
 - Keep it short, friendly, and professional (120–200 words).
 - Do not fabricate false information.
 - Return ONLY valid JSON with this field:
-  - "revampedCv"
+  - "template"
 
 --- PERSONAL DETAILS ---
 {$user->name}, {$user->email}, {$user->phone}
