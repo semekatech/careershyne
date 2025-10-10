@@ -40,17 +40,17 @@ app.use(useToast)
 app.use(router)
 
 // ✅ Auto logout on 401 interceptor
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      const auth = useAuthStore()
-      auth.clearToken()
-      window.location.href = '/login' 
-    }
-    return Promise.reject(error)
-  }
-)
+// axios.interceptors.response.use(
+//   response => response,
+//   error => {
+//     if (error.response && error.response.status === 401) {
+//       const auth = useAuthStore()
+//       auth.clearToken()
+//       window.location.href = '/login' 
+//     }
+//     return Promise.reject(error)
+//   }
+// )
 
 app.config.globalProperties.$axios = axios
 
