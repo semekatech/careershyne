@@ -118,6 +118,9 @@ class AuthController extends Controller
             ]);
             // Send welcome email
             try {
+                $adminMsg = "📢 New Jobseeker has Joined Careershyne: name: " . $request->fullName;
+                $this->sendMessage('254705030613', $adminMsg);
+                $this->sendMessage('254703644281', $adminMsg);
                 Mail::to($user->email)->send(new WelcomeUserMail($user));
             } catch (\Exception $e) {
                 info('Failed to send welcome email: ' . $e->getMessage());
@@ -142,6 +145,34 @@ class AuthController extends Controller
                 'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
+    }
+    public function sendMessage($phone, $message)
+    {
+        $apiUrl = 'https://ngumzo.com/v1/send-message';
+        $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
+        $data   = [
+            'sender'  => "254758428993",
+            'number'  => $phone,
+            'message' => $message,
+        ];
+        $ch = curl_init($apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'api-key: ' . $apiKey, // Include your API key here
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+        // Check for errors
+        if ($response === false) {
+            // Log the error (you can handle this more gracefully in production)
+            error_log('cURL Error: ' . curl_error($ch));
+        }
+        // Close the cURL session
+        curl_close($ch);
+        error_log('Response: ' . $response);
     }
     public function profileSetup(Request $request)
     {
@@ -294,10 +325,10 @@ class AuthController extends Controller
         info('reached here');
         $token = $request->bearerToken();
         info($token);
-        $user  = User::where('api_token', hash('sha256', $token))->first();
+        $user = User::where('api_token', hash('sha256', $token))->first();
         info($user);
         if (! $user) {
-        info('user not found');
+            info('user not found');
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         return response()->json([
