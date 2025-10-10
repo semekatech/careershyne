@@ -7,6 +7,7 @@
       class="absolute inset-0 bg-[url('https://www.toptal.com/designers/subtlepatterns/patterns/dots.png')] opacity-10 rounded-3xl"
     ></div>
 
+    
     <div class="relative max-w-4xl mx-auto text-center px-6">
       <!-- HEADLINE -->
       <h2 class="text-3xl md:text-4xl font-extrabold drop-shadow-lg">
