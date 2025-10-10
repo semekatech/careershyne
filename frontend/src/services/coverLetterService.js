@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: "https://careershyne.com/api",
+  baseURL: "https://careershyne.com",
 });
 
 // Add request interceptor to include token if available

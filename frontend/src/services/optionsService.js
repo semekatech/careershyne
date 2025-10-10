@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/api",
+  baseURL: "https://careershyne.com",
 });
 
 export default {

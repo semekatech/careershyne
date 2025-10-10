@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/api", // change to your API
+  baseURL: "https://careershyne.com", // change to your API
   timeout: 5000,
 });
 
