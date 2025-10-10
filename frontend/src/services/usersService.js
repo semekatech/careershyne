@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://careershyne.com/users";
+const API_URL = "https://careershyne.com/api/users";
 
 export default {
   store: (formData) => {

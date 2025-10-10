@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/jobs",
+  baseURL: "https://careershyne.com/api/jobs",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   },
