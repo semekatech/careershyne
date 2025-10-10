@@ -282,53 +282,107 @@ PROMPT;
         }
     }
 
-    public function revampCv(Request $request)
-    {
+  public function revampCv(Request $request)
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
+    info($user);
 
-        $user = auth('api')->user();
-        $job  = Job::findOrFail($request->jobId);
-        info($user);
+    // ✅ Ensure CV exists
+    if (! $user->cv_path) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.',
+        ], 400);
+    }
 
-        // ✅ Ensure CV exists
-        if (! $user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.',
-            ], 400);
-        }
+    $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
+    if (! file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.',
+        ], 404);
+    }
 
-        if (! file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.',
-            ], 404);
-        }
+    $cvText = '';
 
-        // ✅ Extract text from CV
+    // -------------------------
+    // 1️⃣ Try Smalot PDF Parser
+    // -------------------------
+    try {
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf    = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+    } catch (\Throwable $e) {
+        info("Smalot parser failed for: $cvPath — " . $e->getMessage());
+        $cvText = '';
+    }
+
+    // -------------------------
+    // 2️⃣ Fallback to OCR if empty
+    // -------------------------
+    if (strlen(trim($cvText)) === 0) {
         try {
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf    = $parser->parseFile($cvPath);
-            $cvText = $pdf->getText() ?? '';
+            info("CV parsing returned empty text. Trying OCR... File: $cvPath");
 
-            if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. File: $cvPath");
+            $imagick = new \Imagick();
+            $imagick->setResolution(300, 300);
+            $imagick->readImage($cvPath); // Convert PDF pages to images
+            $imagick->setImageFormat('png');
+
+            $ocrText = '';
+
+            foreach ($imagick as $index => $page) {
+                $tmpImg = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+                $page->writeImage($tmpImg);
+
+                $tmpOutput = tempnam(sys_get_temp_dir(), 'txt_');
+                $command   = sprintf('tesseract %s %s -l eng 2>&1', escapeshellarg($tmpImg), escapeshellarg($tmpOutput));
+                exec($command, $cmdOutput, $status);
+
+                if ($status === 0 && file_exists($tmpOutput . '.txt')) {
+                    $ocrText .= file_get_contents($tmpOutput . '.txt') . "\n";
+                    unlink($tmpOutput . '.txt');
+                } else {
+                    info("OCR page {$index} failed for {$cvPath}. Output: " . implode("\n", $cmdOutput));
+                }
+
+                unlink($tmpImg);
             }
 
-            // Basic cleaning
-            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-            $cvText = preg_replace('/\s+/', ' ', $cvText);
-            $cvText = trim($cvText);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
+            $imagick->clear();
+            $imagick->destroy();
 
-        // ✅ Build AI prompt
-        $prompt = <<<PROMPT
+            $cvText = trim($ocrText);
+
+            if (strlen($cvText) === 0) {
+                info("OCR also returned empty text for file: $cvPath");
+            }
+        } catch (\Throwable $ocrError) {
+            info("OCR failed for $cvPath — " . $ocrError->getMessage());
+            $cvText = '';
+        }
+    }
+
+    if (strlen(trim($cvText)) === 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
+        ], 422);
+    }
+
+    // -------------------------
+    // 3️⃣ Basic cleaning
+    // -------------------------
+    $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+    $cvText = preg_replace('/\s+/', ' ', $cvText);
+    $cvText = trim($cvText);
+
+    // -------------------------
+    // 4️⃣ Build AI prompt
+    // -------------------------
+    $prompt = <<<PROMPT
 You are a professional CV writer and career branding specialist.
 
 Task:
@@ -344,7 +398,7 @@ Requirements:
 - Improve language, grammar, and phrasing to sound polished and professional.
 - Use concise bullet points for skills and experience where relevant.
 - Do not fabricate false information — only enhance or rephrase existing content.
-- Format the output in valid **HTML** (use `<h2>`, `<ul>`, `<li>`, `<p>`, etc.).
+- Format the output in valid **HTML** (use <h2>, <ul>, <li>, <p>, etc.).
 - If any section data is missing, omit that section gracefully.
 - Return **ONLY** valid JSON with this field:
   - "revampedCv" (HTML formatted CV content, well-structured)
@@ -359,14 +413,12 @@ Requirements:
 {$job->title}
 --- ORIGINAL CV TEXT ---
 {$cvText}
-
-Example output structure:
-{
-  "revampedCv": "<h2>Summary</h2><p>Results-driven professional with proven experience in...</p><h2>Key Skills</h2><ul><li>Team Leadership</li><li>Project Management</li></ul><h2>Experience</h2><p>...</p><h2>Education</h2><p>...</p>"
-}
 PROMPT;
 
-        // ✅ Call OpenAI
+    // -------------------------
+    // 5️⃣ Call OpenAI
+    // -------------------------
+    try {
         $client   = OpenAI::client(env('OPENAI_API_KEY'));
         $response = $client->chat()->create([
             'model'       => 'gpt-4o-mini',
@@ -379,7 +431,6 @@ PROMPT;
 
         $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // ✅ Cleanup (remove code fences if present)
         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
         $cleanOutput = trim($cleanOutput);
@@ -393,6 +444,7 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
+
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
         DB::table('usage_activities')->insert([
             'user_id'     => $user->id,
@@ -400,64 +452,133 @@ PROMPT;
             'status'      => 'success',
             'message'     => 'CV Revamp Generation',
             'tokens_used' => $response->usage->totalTokens ?? 0,
-
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
-        // ✅ Return structured response
+
         return response()->json([
             'success'    => true,
             'revampedCv' => $analysis['revampedCv'] ?? '',
-            // 'recommendations' => $analysis['recommendations'] ?? [],
             'cv_path'    => asset('storage/' . $user->cv_path),
         ]);
+    } catch (\Throwable $aiError) {
+        info("OpenAI call failed: " . $aiError->getMessage());
+
+        DB::table('usage_activities')->insert([
+            'user_id'    => $user->id,
+            'action'     => 'cv_revamp',
+            'status'     => 'failed',
+            'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'AI service error: ' . $aiError->getMessage(),
+        ], 500);
+    }
+}
+
+  public function coverLetter(Request $request)
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
+
+    if (! $user->cv_path) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.',
+        ], 400);
     }
 
-    public function coverLetter(Request $request)
-    {
-        $user = auth('api')->user();
+    $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        $job = Job::findOrFail($request->jobId);
+    if (! file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.',
+        ], 404);
+    }
 
-        if (! $user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.',
-            ], 400);
-        }
+    $cvText = '';
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
+    // -------------------------
+    // 1️⃣ Try Smalot PDF Parser
+    // -------------------------
+    try {
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf    = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+    } catch (\Throwable $e) {
+        info("Smalot parser failed for: $cvPath — " . $e->getMessage());
+        $cvText = '';
+    }
 
-        if (! file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.',
-            ], 404);
-        }
-
-        // Extract text from CV
+    // -------------------------
+    // 2️⃣ Fallback to OCR if empty
+    // -------------------------
+    if (strlen(trim($cvText)) === 0) {
         try {
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf    = $parser->parseFile($cvPath);
-            $cvText = $pdf->getText() ?? '';
+            info("CV parsing returned empty text. Trying OCR... File: $cvPath");
 
-            if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. File: $cvPath");
+            $imagick = new \Imagick();
+            $imagick->setResolution(300, 300);
+            $imagick->readImage($cvPath); // Convert PDF pages to images
+            $imagick->setImageFormat('png');
+
+            $ocrText = '';
+
+            foreach ($imagick as $index => $page) {
+                $tmpImg = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+                $page->writeImage($tmpImg);
+
+                $tmpOutput = tempnam(sys_get_temp_dir(), 'txt_');
+                $command   = sprintf('tesseract %s %s -l eng 2>&1', escapeshellarg($tmpImg), escapeshellarg($tmpOutput));
+                exec($command, $cmdOutput, $status);
+
+                if ($status === 0 && file_exists($tmpOutput . '.txt')) {
+                    $ocrText .= file_get_contents($tmpOutput . '.txt') . "\n";
+                    unlink($tmpOutput . '.txt');
+                } else {
+                    info("OCR page {$index} failed for {$cvPath}. Output: " . implode("\n", $cmdOutput));
+                }
+
+                unlink($tmpImg);
             }
 
-            // Clean text
-            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-            $cvText = preg_replace('/\s+/', ' ', $cvText);
-            $cvText = trim($cvText);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read CV: ' . $e->getMessage(),
-            ], 500);
-        }
+            $imagick->clear();
+            $imagick->destroy();
 
-        // Build AI prompt for cover letter
-        $prompt = <<<PROMPT
+            $cvText = trim($ocrText);
+
+            if (strlen($cvText) === 0) {
+                info("OCR also returned empty text for file: $cvPath");
+            }
+        } catch (\Throwable $ocrError) {
+            info("OCR failed for $cvPath — " . $ocrError->getMessage());
+            $cvText = '';
+        }
+    }
+
+    if (strlen(trim($cvText)) === 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
+        ], 422);
+    }
+
+    // -------------------------
+    // 3️⃣ Clean CV text
+    // -------------------------
+    $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+    $cvText = preg_replace('/\s+/', ' ', $cvText);
+    $cvText = trim($cvText);
+
+    // -------------------------
+    // 4️⃣ Build AI prompt
+    // -------------------------
+    $prompt = <<<PROMPT
 You are a professional career coach and expert cover letter writer.
 
 Task:
@@ -468,13 +589,11 @@ Requirements:
 - Mention the candidate’s name and optionally include their contact information at the top (email and phone).
 - Highlight the candidate’s most relevant qualifications and achievements that match the job description.
 - Keep the tone confident, polite, and professional.
-- Length: 150–250 words (concise but detailed enough to show fit).
-- End with a strong closing paragraph or call to action (e.g., expressing interest in an interview).
-- Format the output in valid **HTML** with paragraph tags and line breaks.
-- If any field (like company name or phone) is missing, omit it gracefully.
-- Do not fabricate false information — use the provided CV text and personal details.
-- Return **ONLY** valid JSON with this field:
-  - "coverLetter" (HTML formatted)
+- Length: 150–250 words.
+- Format the output in valid HTML with paragraph tags and line breaks.
+- Do not fabricate false information.
+- Return ONLY valid JSON with this field:
+  - "coverLetter"
 
 --- PERSONAL DETAILS ---
 {$user->name}, {$user->email}, {$user->phone}
@@ -486,14 +605,12 @@ Requirements:
 {$job->title}
 --- CV TEXT ---
 {$cvText}
-
-Example output structure:
-{
-  "coverLetter": "<p><strong>{$user->name}</strong><br>{$user->email} | {$user->phone}</p><p>Dear Hiring Manager,</p><p>I am excited to apply for the [Job Title] position at [Company]. ...</p><p>Kind regards,<br>{$user->name}</p>"
-}
 PROMPT;
 
-        // Call OpenAI
+    // -------------------------
+    // 5️⃣ Call OpenAI
+    // -------------------------
+    try {
         $client   = OpenAI::client(env('OPENAI_API_KEY'));
         $response = $client->chat()->create([
             'model'       => 'gpt-4o-mini',
@@ -506,7 +623,6 @@ PROMPT;
 
         $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // Cleanup JSON formatting
         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
         $cleanOutput = trim($cleanOutput);
@@ -520,64 +636,170 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
+
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('coverletters', 1);
         DB::table('usage_activities')->insert([
             'user_id'     => $user->id,
-            'action'      => 'email_template',
+            'action'      => 'cover_letter',
             'status'      => 'success',
             'message'     => 'Cover letter Generation',
             'tokens_used' => $response->usage->totalTokens ?? 0,
-
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
 
-        // Return structured response
         return response()->json([
             'success'     => true,
             'coverLetter' => $analysis['coverLetter'] ?? '',
-            // 'recommendations'=> $analysis['recommendations'] ?? [],
             'cv_path'     => asset('storage/' . $user->cv_path),
         ]);
+    } catch (\Throwable $aiError) {
+        info("OpenAI call failed: " . $aiError->getMessage());
+
+        DB::table('usage_activities')->insert([
+            'user_id'    => $user->id,
+            'action'     => 'cover_letter',
+            'status'     => 'failed',
+            'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'AI service error: ' . $aiError->getMessage(),
+        ], 500);
     }
+}
 
     public function emailTemplate(Request $request)
-    {
-        $user = auth('api')->user();
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
 
-        $job = Job::findOrFail($request->jobId);
+    if (! $user->cv_path) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.',
+        ], 400);
+    }
 
-        // Build AI prompt for email template
-        $prompt = <<<PROMPT
+    $cvPath = storage_path('app/public/' . $user->cv_path);
+
+    if (! file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.',
+        ], 404);
+    }
+
+    $cvText = '';
+
+    // -------------------------
+    // 1️⃣ Try Smalot PDF Parser
+    // -------------------------
+    try {
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf    = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+    } catch (\Throwable $e) {
+        info("Smalot parser failed for: $cvPath — " . $e->getMessage());
+        $cvText = '';
+    }
+
+    // -------------------------
+    // 2️⃣ Fallback to OCR if empty
+    // -------------------------
+    if (strlen(trim($cvText)) === 0) {
+        try {
+            info("CV parsing returned empty text. Trying OCR... File: $cvPath");
+
+            $imagick = new \Imagick();
+            $imagick->setResolution(300, 300);
+            $imagick->readImage($cvPath);
+            $imagick->setImageFormat('png');
+
+            $ocrText = '';
+
+            foreach ($imagick as $index => $page) {
+                $tmpImg = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+                $page->writeImage($tmpImg);
+
+                $tmpOutput = tempnam(sys_get_temp_dir(), 'txt_');
+                $command   = sprintf('tesseract %s %s -l eng 2>&1', escapeshellarg($tmpImg), escapeshellarg($tmpOutput));
+                exec($command, $cmdOutput, $status);
+
+                if ($status === 0 && file_exists($tmpOutput . '.txt')) {
+                    $ocrText .= file_get_contents($tmpOutput . '.txt') . "\n";
+                    unlink($tmpOutput . '.txt');
+                } else {
+                    info("OCR page {$index} failed for {$cvPath}. Output: " . implode("\n", $cmdOutput));
+                }
+
+                unlink($tmpImg);
+            }
+
+            $imagick->clear();
+            $imagick->destroy();
+
+            $cvText = trim($ocrText);
+
+            if (strlen($cvText) === 0) {
+                info("OCR also returned empty text for file: $cvPath");
+            }
+        } catch (\Throwable $ocrError) {
+            info("OCR failed for $cvPath — " . $ocrError->getMessage());
+            $cvText = '';
+        }
+    }
+
+    if (strlen(trim($cvText)) === 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
+        ], 422);
+    }
+
+    // -------------------------
+    // 3️⃣ Clean CV text
+    // -------------------------
+    $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+    $cvText = preg_replace('/\s+/', ' ', $cvText);
+    $cvText = trim($cvText);
+
+    // -------------------------
+    // 4️⃣ Build AI prompt
+    // -------------------------
+    $prompt = <<<PROMPT
 You are a professional career coach and recruiter assistant.
 
-Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job.
+Task:
+Generate a concise, professional, and engaging email template that a candidate can send when applying for the following job. Use the candidate’s CV text to highlight relevant skills, achievements, and experience.
 
-IMPORTANT:
-- Use the job details and the candidate's personal details provided below.
+Requirements:
 - Include the **email subject** as the first line (e.g., "Subject: Application for [Job Title] at [Company]").
-- Write the email in HTML format (with paragraphs, line breaks, etc.).
+- Write the email in HTML format (paragraphs, line breaks, etc.).
 - Keep it short, friendly, and professional (120–200 words).
-- If any personal detail is missing, omit it gracefully.
+- Do not fabricate false information.
 - Return ONLY valid JSON with this field:
-  - emailTemplate (HTML formatted)
+  - "emailTemplate"
 
 --- PERSONAL DETAILS ---
-{$user->name},{$user->email},{$user->phone}
+{$user->name}, {$user->email}, {$user->phone}
 --- JOB DESCRIPTION ---
 {$job->description}
 --- HIRING COMPANY ---
 {$job->company}
 --- JOB TITLE ---
 {$job->title}
-
-Example output structure:
-{
-  "emailTemplate": "<p><strong>Subject:</strong> Application for [Job Title] at [Company]</p><p>Dear Hiring Manager, ...</p><p>Kind regards,<br>[Candidate Name]</p>"
-}
+--- CV TEXT ---
+{$cvText}
 PROMPT;
 
-        // Call OpenAI
+    // -------------------------
+    // 5️⃣ Call OpenAI
+    // -------------------------
+    try {
         $client   = OpenAI::client(env('OPENAI_API_KEY'));
         $response = $client->chat()->create([
             'model'       => 'gpt-4o-mini',
@@ -590,7 +812,6 @@ PROMPT;
 
         $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // Cleanup JSON formatting
         $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
         $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
         $cleanOutput = trim($cleanOutput);
@@ -604,8 +825,8 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
+
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('emails', 1);
-        // Log usage on success only
         DB::table('usage_activities')->insert([
             'user_id'     => $user->id,
             'action'      => 'email_template',
@@ -616,11 +837,29 @@ PROMPT;
             'updated_at'  => now(),
         ]);
 
-        // Return structured response
         return response()->json([
-            'success'  => true,
-            'template' => $analysis['emailTemplate'] ?? '',
-            'job_id'   => $job->id,
+            'success'       => true,
+            'emailTemplate' => $analysis['emailTemplate'] ?? '',
+            'cv_path'       => asset('storage/' . $user->cv_path),
+            'job_id'        => $job->id,
         ]);
+    } catch (\Throwable $aiError) {
+        info("OpenAI call failed: " . $aiError->getMessage());
+
+        DB::table('usage_activities')->insert([
+            'user_id'    => $user->id,
+            'action'     => 'email_template',
+            'status'     => 'failed',
+            'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'AI service error: ' . $aiError->getMessage(),
+        ], 500);
     }
+}
+
 }
