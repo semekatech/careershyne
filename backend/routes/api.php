@@ -106,3 +106,11 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
         ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
 ;
 });
+
+Route::get('/debug-auth', function(Request $request) {
+    return response()->json([
+        'headers' => $request->headers->all(),
+        'authorization' => $request->header('Authorization'),
+        'user' => $request->user(), // null if not authenticated
+    ]);
+});
