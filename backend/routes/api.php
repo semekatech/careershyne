@@ -31,6 +31,8 @@ Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
 Route::post('/callback-confirm', [PaymentController::class, 'confirm']);
 Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
     ->name('check.stk.status');
+
+
 Route::middleware('auth:api')->post('/payments/pay', [PaymentController::class, 'initiate']);
 Route::get('industries', [AuthController::class, 'industries']);
 Route::get('education-levels', [AuthController::class, 'educationLevels']);
