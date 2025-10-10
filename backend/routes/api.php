@@ -12,7 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 use App\Http\Middleware\CheckSubscriptionLimit;
 use App\Http\Middleware\LogActivity;
-
+Route::prefix('api')->group(function () {
 Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -113,4 +113,5 @@ Route::get('/status', function () {
     return response()->json(['status' => 'API is live']);
 });
 
+});
 });
