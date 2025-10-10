@@ -11,7 +11,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 use App\Http\Middleware\CheckSubscriptionLimit;
+use App\Http\Middleware\LogActivity;
 
+Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -105,4 +107,5 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
 ;
+});
 });

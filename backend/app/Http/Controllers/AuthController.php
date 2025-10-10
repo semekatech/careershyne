@@ -1,22 +1,17 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Bid;
-use App\Models\Campaign;
-use App\Models\Subscription;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use DB;
 use App\Mail\WelcomeUserMail;
 use App\Models\CvOrder;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -24,28 +19,28 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
-        $ipKey = 'login_attempts:ip:' . $request->ip();
+        $ipKey    = 'login_attempts:ip:' . $request->ip();
         $emailKey = 'login_attempts:email:' . strtolower($request->email);
 
         // check if locked out by IP
         if (Cache::get($ipKey, 0) >= 10) {
             return response()->json([
-                'message' => 'Too many failed login attempts from this IP. Please try again later.'
+                'message' => 'Too many failed login attempts from this IP. Please try again later.',
             ], 429);
         }
 
         // check if locked out by email
         if (Cache::get($emailKey, 0) >= 3) {
             return response()->json([
-                'message' => 'Too many failed login attempts for this account. Please try again later.'
+                'message' => 'Too many failed login attempts for this account. Please try again later.',
             ], 429);
         }
 
         $user = User::where('email', $request->email)->first();
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             // increase attempts
             Cache::add($ipKey, 0, now()->addMinutes(5));
             Cache::increment($ipKey);
@@ -61,26 +56,26 @@ class AuthController extends Controller
         Cache::forget($emailKey);
 
         // Generate token
-        $token = Str::random(60);
-        $user->api_token = hash('sha256', $token);
+        $token               = Str::random(60);
+        $user->api_token     = hash('sha256', $token);
         $user->last_login_at = now();
         $user->save();
         // Determine redirect route
         $redirectRoute = 'dashboard';
         if ($user->role == 1098) {
-            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            if (! $user->county_id || ! $user->industry_id || ! $user->education_level_id) {
                 $redirectRoute = 'profile-setup';
             }
         }
         return response()->json([
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
+            'token_type'   => 'Bearer',
+            'user'         => [
+                'id'   => $user->id,
                 'name' => $user->name,
                 'role' => $user->role,
             ],
-            'redirect' => $redirectRoute,
+            'redirect'     => $redirectRoute,
         ]);
     }
 
@@ -89,37 +84,37 @@ class AuthController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'fullName' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20|unique:users,phone',
+            'email'    => 'required|email|unique:users,email',
+            'phone'    => 'nullable|string|max:20|unique:users,phone',
             'password' => 'required|string|confirmed|min:6',
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
         }
         try {
             // Create user
             $user = User::create([
-                'name' => $request->fullName,
-                'email' => $request->email,
-                'role' => '1098',
-                'status' => 'active',
-                'phone' => $request->phone,
+                'name'     => $request->fullName,
+                'email'    => $request->email,
+                'role'     => '1098',
+                'status'   => 'active',
+                'phone'    => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
             // Create subscription
             DB::table('subscriptions')->insert([
-                'user_id' => $user->id,
-                'plan' => 'Free',
-                'cv' => 0,
-                'coverletters' => 0,
-                'emails' => 0,
-                'checks' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'      => $user->id,
+                'plan'         => 'Free',
+                'cv'           => 5,
+                'coverletters' => 5,
+                'emails'       => 5,
+                'checks'       => 5,
+                'created_at'   => now(),
+                'updated_at'   => now(),
             ]);
             // Send welcome email
             try {
@@ -127,42 +122,42 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 info('Failed to send welcome email: ' . $e->getMessage());
                 return response()->json([
-                    'status' => 'warning',
+                    'status'  => 'warning',
                     'message' => 'User registered, but welcome email failed to send',
-                    'user' => $user
+                    'user'    => $user,
                 ], 201);
             }
             return response()->json([
-                'status' => 'success',
+                'status'  => 'success',
                 'message' => 'User registered successfully',
-                'user' => $user
+                'user'    => $user,
             ], 201);
         } catch (\Exception $e) {
             info('User registration failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return response()->json([
-                'status' => 'error',
-                'message' => 'Registration failed: ' . $e->getMessage()
+                'status'  => 'error',
+                'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
     }
     public function profileSetup(Request $request)
     {
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         // Validate incoming request
         $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'industry_id' => 'nullable|integer|exists:industries,id',
+            'name'               => 'nullable|string|max:255',
+            'phone'              => 'nullable|string|max:20',
+            'industry_id'        => 'nullable|integer|exists:industries,id',
             'education_level_id' => 'nullable|integer|exists:education_levels,id',
-            'county_id' => 'nullable|integer|exists:counties,id',
-            'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'county_id'          => 'nullable|integer|exists:counties,id',
+            'cv'                 => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'cover_letter'       => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
         // Update text fields
@@ -184,26 +179,25 @@ class AuthController extends Controller
 
         // Handle CV upload
         if ($request->hasFile('cv')) {
-            $cvPath = $request->file('cv')->store('cvs', 'public');
+            $cvPath        = $request->file('cv')->store('cvs', 'public');
             $user->cv_path = $cvPath;
         }
 
         // Handle Cover Letter upload
         if ($request->hasFile('cover_letter')) {
-            $coverLetterPath = $request->file('cover_letter')->store('cover_letters', 'public');
+            $coverLetterPath         = $request->file('cover_letter')->store('cover_letters', 'public');
             $user->cover_letter_path = $coverLetterPath;
         }
 
         $user->save();
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Profile updated successfully',
         ], 200);
     }
 
     public function industries()
-
     {
         $industries = DB::table('industries')
             ->select('id', 'name')
@@ -237,29 +231,28 @@ class AuthController extends Controller
     {
         $authHeader = $request->header('Authorization');
 
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        if (! $authHeader || ! str_starts_with($authHeader, 'Bearer ')) {
             return response()->json(['valid' => false, 'message' => 'Authorization header missing or invalid'], 401);
         }
 
-        $plainToken = substr($authHeader, 7);
+        $plainToken  = substr($authHeader, 7);
         $hashedToken = hash('sha256', $plainToken);
 
         $user = User::where('api_token', $hashedToken)->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['valid' => false, 'message' => 'Invalid token'], 401);
         }
         return response()->json([
             'valid' => true,
-            'user' => $user,
+            'user'  => $user,
         ]);
     }
-
 
     public function getStats(Request $request)
     {
         $token = $request->bearerToken();
-        $user = User::where('api_token', hash('sha256', $token))->first();
-        if (!$user) {
+        $user  = User::where('api_token', hash('sha256', $token))->first();
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -270,11 +263,11 @@ class AuthController extends Controller
         }
 
         // ✅ General stats
-        $all = (clone $baseQuery)->count();
-        $pending = (clone $baseQuery)->where('status', 'pending')->count();
-        $approved = (clone $baseQuery)->where('status', 'paid')->count();
-        $totalAmount = (clone $baseQuery)->sum('amount');
-        $totalPendingAmount = (clone $baseQuery)->where('status', 'pending')->sum('amount');
+        $all                 = (clone $baseQuery)->count();
+        $pending             = (clone $baseQuery)->where('status', 'pending')->count();
+        $approved            = (clone $baseQuery)->where('status', 'paid')->count();
+        $totalAmount         = (clone $baseQuery)->sum('amount');
+        $totalPendingAmount  = (clone $baseQuery)->where('status', 'pending')->sum('amount');
         $totalApprovedAmount = (clone $baseQuery)->where('status', 'paid')->sum('amount');
 
         // ✅ Graph Data: paid orders per day
@@ -286,27 +279,25 @@ class AuthController extends Controller
             ->get();
         info($paidOrdersByDay);
         return response()->json([
-            'pending' => $pending,
-            'approved' => $approved,
-            'all' => $all,
-            'totalAmount' => $totalAmount,
-            'totalPendingAmount' => $totalPendingAmount,
+            'pending'             => $pending,
+            'approved'            => $approved,
+            'all'                 => $all,
+            'totalAmount'         => $totalAmount,
+            'totalPendingAmount'  => $totalPendingAmount,
             'totalApprovedAmount' => $totalApprovedAmount,
-            'graphData' => $paidOrdersByDay
+            'graphData'           => $paidOrdersByDay,
         ]);
     }
-
-
 
     public function userDetails(Request $request)
     {
         $user = auth('api')->user();
         return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
+            'id'    => $user->id,
+            'name'  => $user->name,
             'phone' => $user->phone,
             'email' => $user->email,
-            'role' => $user->role,
+            'role'  => $user->role,
         ]);
     }
 
@@ -314,57 +305,55 @@ class AuthController extends Controller
     {
 
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'industry_id' => $user->industry_id,
+            'id'                 => $user->id,
+            'name'               => $user->name,
+            'email'              => $user->email,
+            'phone'              => $user->phone,
+            'industry_id'        => $user->industry_id,
             'education_level_id' => $user->education_level_id,
-            'county_id' => $user->county_id,
-            'cv' => $user->cv_path,
-            'cover_letter' => $user->cover_letter_path,
-            'photo_url' => $user->photo_url,
+            'county_id'          => $user->county_id,
+            'cv'                 => $user->cv_path,
+            'cover_letter'       => $user->cover_letter_path,
+            'photo_url'          => $user->photo_url,
         ]);
     }
-
-
 
     public function impersonateLogin(Request $request, User $user)
     {
         $admin = $request->user();
 
-        if (!$admin || $admin->role != 1109) { // admin role
+        if (! $admin || $admin->role != 1109) { // admin role
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         // Generate new token for the impersonated user
-        $token = Str::random(60);
+        $token           = Str::random(60);
         $user->api_token = hash('sha256', $token);
         $user->save();
 
         // Determine redirect route
         $redirectRoute = 'dashboard';
         if ($user->role == 1098) { // normal user
-            if (!$user->county_id || !$user->industry_id || !$user->education_level_id) {
+            if (! $user->county_id || ! $user->industry_id || ! $user->education_level_id) {
                 $redirectRoute = 'profile-setup';
             }
         }
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
+            'access_token'    => $token,
+            'token_type'      => 'Bearer',
+            'user'            => [
+                'id'    => $user->id,
+                'name'  => $user->name,
                 'photo' => $user->photo,
-                'role' => $user->role,
+                'role'  => $user->role,
             ],
-            'redirect' => $redirectRoute,
+            'redirect'        => $redirectRoute,
             'impersonator_id' => $admin->id,
         ]);
     }
@@ -374,27 +363,27 @@ class AuthController extends Controller
 
         // info('hello');
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         // info('user ni' . $user);
         // Validate input
         $validator = Validator::make($request->all(), [
             'current_password' => 'required',
-            'new_password' => 'required|string|min:8|confirmed',
+            'new_password'     => 'required|string|min:8|confirmed',
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
         // info('sasaa' . $request->current_password);
         // Check if current password matches
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Current password is incorrect.'
+                'status'  => 'error',
+                'message' => 'Current password is incorrect.',
             ], 400);
         }
 
@@ -402,8 +391,8 @@ class AuthController extends Controller
         $user->password = Hash::make($request->new_password);
         $user->save();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Password updated successfully.'
+            'status'  => 'success',
+            'message' => 'Password updated successfully.',
         ]);
     }
 }

@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/api", 
+  baseURL: "https://careershyne.com/api",
   timeout: 5000,
 });
 
@@ -38,4 +38,4 @@ const subscriptionService = {
   },
 };
 
-export default subscriptionService
+export default subscriptionService;

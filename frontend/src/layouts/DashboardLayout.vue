@@ -199,7 +199,12 @@ const sidebarLinks = [
     iconName: "business_center",
     roles: ["1109", "manager"],
   },
- 
+  {
+    name: "Manage Categories",
+    href: "/manage-categories",
+    faIcon: ["fas", "briefcase"],
+    roles: ["1109", "manager"],
+  },
   {
     name: "Subscriptions",
     href: "/my-plans",
@@ -221,7 +226,7 @@ const sidebarLinks = [
     iconName: "history",
     roles: ["1098"],
   },
-   {
+  {
     name: "Personal Summary",
     href: "/profile",
     icon: "material-icons-sharp",

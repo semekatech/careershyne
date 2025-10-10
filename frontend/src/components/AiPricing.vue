@@ -5,17 +5,21 @@
         Clear. Simple. Affordable.
       </p>
       <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
-       Pay As You Go
+        Pay As You Go
       </h2>
       <p>Only pay for what you use. Build your own plan based on your needs.</p>
     </div>
-    <div class="max-w-5xl mx-auto px-1">
+    <div class="max-w-5xl mx-auto px-4">
       <div
         class="bg-white p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-start"
       >
         <!-- Budget Card -->
         <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-         
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Pay As You Go</h3>
+          <p>
+            Only pay for what you use. Build your own plan based on your needs.
+          </p>
+          <br />
           <p class="text-gray-600 mb-6">
             Adjust the slider to see the corresponding features.
           </p>
@@ -99,7 +103,7 @@
             class="flex justify-between text-lg font-bold text-gray-900 mb-6"
           >
             <span>Total cost</span>
-            <span>KES {{ items.total }}</span>
+            <span>KES {{ budget }}</span>
           </div>
 
           <button
@@ -107,47 +111,50 @@
             @click="openModal = true"
             class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Get Started
+            Pay {{ budget }} Via STK
           </button>
         </div>
       </div>
     </div>
 
     <!-- Modal -->
-  
   </section>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
-// Budget
+import { ref, reactive, computed } from "vue";
+// Budget (in multiples of 100)
 const budget = ref(100);
-
-// Prices
+// Prices per item
 const prices = reactive({
   cv: 20,
-  coverLetter: 20,
-  eligibility: 20,
+  coverLetter: 15,
+  eligibility: 15,
   email: 10,
 });
-
-// Computed items
+// Computed allocation
 const items = computed(() => {
   const P = budget.value;
   if (P <= 0 || P % 100 !== 0)
     return { cv: 0, coverLetter: 0, eligibility: 0, email: 0, total: 0 };
-  const n = Math.floor(P / 100);
-  const cv = 2 * n;
-  const eligibility = n;
-  const email = 2 * Math.floor(P / 200);
-  const coverLetter = 2 * n - Math.floor(P / 200);
+
+  // Split budget based on percentage
+  const allocation = {
+    cv: P * 0.4,
+    coverLetter: P * 0.3,
+    eligibility: P * 0.2,
+    email: P * 0.1,
+  };
+  const cv = Math.floor(allocation.cv / prices.cv);
+  const coverLetter = Math.floor(allocation.coverLetter / prices.coverLetter);
+  const eligibility = Math.floor(allocation.eligibility / prices.eligibility);
+  const email = Math.floor(allocation.email / prices.email);
   const total =
     cv * prices.cv +
     coverLetter * prices.coverLetter +
     eligibility * prices.eligibility +
     email * prices.email;
+
   return { cv, coverLetter, eligibility, email, total };
 });
-
-
 </script>
