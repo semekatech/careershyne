@@ -170,12 +170,12 @@
         </form>
         <div class="mt-6 text-center text-sm">
           Don't have an account?
-          <a
-            href="/register"
+          <router-link
+            to="/register"
             class="font-medium text-red-600 hover:text-red-500"
           >
             Register here
-          </a>
+          </router-link>
         </div>
       </div>
     </div>
