@@ -16,6 +16,8 @@ use App\Http\Middleware\LogActivity;
 //     Route::post('auth/login', [AuthController::class, 'login']);
 // });
 
+
+
 Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
