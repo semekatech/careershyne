@@ -11,14 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsapController;
 use App\Http\Middleware\CheckSubscriptionLimit;
-use App\Http\Middleware\LogActivity;
-// Route::prefix('api')->group(function () {
-//     Route::post('auth/login', [AuthController::class, 'login']);
-// });
 
-
-
-Route::middleware(LogActivity::class)->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -26,15 +19,12 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:api')->get('/fetch-profile', [AuthController::class, 'fetchProfile']);
     Route::middleware('auth:api')->post('/update-password', [AuthController::class, 'updatePassword']);
 });
-
 Route::post('/cv-orders', [CvOrderController::class, 'store']);
 Route::get('cv-orders/{id}', [CvOrderController::class, 'show']);
 Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
 Route::post('/callback-confirm', [PaymentController::class, 'confirm']);
 Route::post('/payments/status', [PaymentController::class, 'checkStatus'])
     ->name('check.stk.status');
-
-
 Route::middleware('auth:api')->post('/payments/pay', [PaymentController::class, 'initiate']);
 Route::get('industries', [AuthController::class, 'industries']);
 Route::get('education-levels', [AuthController::class, 'educationLevels']);
@@ -59,7 +49,7 @@ Route::post('/log-visitor', function (Request $request) {
 Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
 Route::get('/profile', [AuthController::class, 'profile']);
-Route::middleware('auth:api')->get('api/me', [AuthController::class, 'userDetails']);
+Route::middleware('auth:api')->get('/me', [AuthController::class, 'userDetails']);
 Route::post('/whatsapp-bot', [WhatsapController::class, 'index']);
 Route::prefix('orders')->group(function () {
     Route::post('/register', [CvOrderController::class, 'store']);
@@ -115,10 +105,4 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
     Route::post('/cv-revamp', [AiController::class, 'cvRevamp'])
         ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
 ;
-});
-
-Route::get('/status', function () {
-    return response()->json(['status' => 'API is live']);
-});
-
 });
