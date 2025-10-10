@@ -316,17 +316,17 @@ router.beforeEach(async (to, from, next) => {
     return next("/login");
   }
 
-  // if (!isPublic && auth.token) {
-  //   try {
-  //     await axios.get("/api/api/auth/verify-token", {
-  //       headers: { Authorization: `Bearer ${auth.token}` },
-  //     });
-  //     return next();
-  //   } catch (err) {
-  //     auth.clearToken();
-  //     return next("/login");
-  //   }
-  // }
+  if (!isPublic && auth.token) {
+    try {
+      await axios.get("/api/api/auth/verify-token", {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      return next();
+    } catch (err) {
+      auth.clearToken();
+      return next("/login");
+    }
+  }
 
   return next();
 });
