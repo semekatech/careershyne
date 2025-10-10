@@ -47,7 +47,7 @@ Route::post('/log-visitor', function (Request $request) {
 });
 //Dashboard apis
 Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
-Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
+Route::middleware('auth:api')->get('/auth/verify-token', [AuthController::class, 'verifyToken']);
 Route::get('/profile', [AuthController::class, 'profile']);
 Route::middleware('auth:api')->get('/me', [AuthController::class, 'userDetails']);
 Route::post('/whatsapp-bot', [WhatsapController::class, 'index']);
