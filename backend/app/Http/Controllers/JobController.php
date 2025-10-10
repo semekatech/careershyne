@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use OpenAI;
-use Smalot\PdfParser\Parser;
-use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class JobController extends Controller
 {
@@ -93,104 +91,104 @@ class JobController extends Controller
         // Return raw pagination data (Laravel default)
         return response()->json($jobs);
     }
- public function checkEligibility(Request $request)
-{
-    $user = auth('api')->user();
-    $job  = Job::findOrFail($request->jobId);
+    public function checkEligibility(Request $request)
+    {
+        $user = auth('api')->user();
+        $job  = Job::findOrFail($request->jobId);
 
-    if (! $user->cv_path) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No CV uploaded. Please upload your CV first.',
-        ], 400);
-    }
+        if (! $user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.',
+            ], 400);
+        }
 
-    $cvPath = storage_path('app/public/' . $user->cv_path);
+        $cvPath = storage_path('app/public/' . $user->cv_path);
 
-    if (! file_exists($cvPath)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'CV file not found on server.',
-        ], 404);
-    }
+        if (! file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.',
+            ], 404);
+        }
 
-    // -------------------------
-    // 1️⃣ Extract text from CV
-    // -------------------------
-    $cvText = '';
-
-    // 🔹 Try Smalot parser first
-    try {
-        $parser = new \Smalot\PdfParser\Parser();
-        $pdf    = $parser->parseFile($cvPath);
-        $cvText = $pdf->getText() ?? '';
-    } catch (\Throwable $e) {
-        info("Smalot parser failed for: $cvPath — " . $e->getMessage());
+        // -------------------------
+        // 1️⃣ Extract text from CV
+        // -------------------------
         $cvText = '';
-    }
 
-    // 🔹 If empty, try OCR (Imagick + Tesseract)
-    if (strlen(trim($cvText)) === 0) {
+        // 🔹 Try Smalot parser first
         try {
-            info("CV parsing returned empty text. Trying OCR... File: $cvPath");
-
-            $imagick = new \Imagick();
-            $imagick->setResolution(300, 300);
-            $imagick->readImage($cvPath); // Convert PDF pages to images
-            $imagick->setImageFormat('png');
-
-            $ocrText = '';
-
-            foreach ($imagick as $index => $page) {
-                $tmpImg = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
-                $page->writeImage($tmpImg);
-
-                // Run tesseract on the image
-                $tmpOutput = tempnam(sys_get_temp_dir(), 'txt_');
-                $command = sprintf('tesseract %s %s -l eng 2>&1', escapeshellarg($tmpImg), escapeshellarg($tmpOutput));
-                exec($command, $cmdOutput, $status);
-
-                if ($status === 0 && file_exists($tmpOutput . '.txt')) {
-                    $ocrText .= file_get_contents($tmpOutput . '.txt') . "\n";
-                    unlink($tmpOutput . '.txt');
-                } else {
-                    info("OCR page {$index} failed for {$cvPath}. Output: " . implode("\n", $cmdOutput));
-                }
-
-                unlink($tmpImg);
-            }
-
-            $imagick->clear();
-            $imagick->destroy();
-
-            $cvText = trim($ocrText);
-
-            if (strlen($cvText) === 0) {
-                info("OCR also returned empty text for file: $cvPath");
-            }
-        } catch (\Throwable $ocrError) {
-            info("OCR failed for $cvPath — " . $ocrError->getMessage());
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf    = $parser->parseFile($cvPath);
+            $cvText = $pdf->getText() ?? '';
+        } catch (\Throwable $e) {
+            info("Smalot parser failed for: $cvPath — " . $e->getMessage());
             $cvText = '';
         }
-    }
 
-    // 🔹 Final fallback check
-    if (strlen(trim($cvText)) === 0) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
-        ], 422);
-    }
+        // 🔹 If empty, try OCR (Imagick + Tesseract)
+        if (strlen(trim($cvText)) === 0) {
+            try {
+                info("CV parsing returned empty text. Trying OCR... File: $cvPath");
 
-    // 🔹 Basic cleaning
-    $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-    $cvText = preg_replace('/\s+/', ' ', $cvText);
-    $cvText = trim($cvText);
+                $imagick = new \Imagick();
+                $imagick->setResolution(300, 300);
+                $imagick->readImage($cvPath); // Convert PDF pages to images
+                $imagick->setImageFormat('png');
 
-    // -------------------------
-    // 2️⃣ Build AI prompt
-    // -------------------------
-    $prompt = <<<PROMPT
+                $ocrText = '';
+
+                foreach ($imagick as $index => $page) {
+                    $tmpImg = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+                    $page->writeImage($tmpImg);
+
+                    // Run tesseract on the image
+                    $tmpOutput = tempnam(sys_get_temp_dir(), 'txt_');
+                    $command   = sprintf('tesseract %s %s -l eng 2>&1', escapeshellarg($tmpImg), escapeshellarg($tmpOutput));
+                    exec($command, $cmdOutput, $status);
+
+                    if ($status === 0 && file_exists($tmpOutput . '.txt')) {
+                        $ocrText .= file_get_contents($tmpOutput . '.txt') . "\n";
+                        unlink($tmpOutput . '.txt');
+                    } else {
+                        info("OCR page {$index} failed for {$cvPath}. Output: " . implode("\n", $cmdOutput));
+                    }
+
+                    unlink($tmpImg);
+                }
+
+                $imagick->clear();
+                $imagick->destroy();
+
+                $cvText = trim($ocrText);
+
+                if (strlen($cvText) === 0) {
+                    info("OCR also returned empty text for file: $cvPath");
+                }
+            } catch (\Throwable $ocrError) {
+                info("OCR failed for $cvPath — " . $ocrError->getMessage());
+                $cvText = '';
+            }
+        }
+
+        // 🔹 Final fallback check
+        if (strlen(trim($cvText)) === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
+            ], 422);
+        }
+
+        // 🔹 Basic cleaning
+        $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+        $cvText = preg_replace('/\s+/', ' ', $cvText);
+        $cvText = trim($cvText);
+
+        // -------------------------
+        // 2️⃣ Build AI prompt
+        // -------------------------
+        $prompt = <<<PROMPT
 Compare the following CV and Job Description.
 Return ONLY valid JSON with the following fields:
 - matchPercentage (0-100)
@@ -205,84 +203,84 @@ Return ONLY valid JSON with the following fields:
 {$cvText}
 PROMPT;
 
-    // -------------------------
-    // 3️⃣ Call OpenAI
-    // -------------------------
-    try {
-        $client   = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model'       => 'gpt-4o-mini',
-            'messages'    => [
-                ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.2,
-        ]);
+        // -------------------------
+        // 3️⃣ Call OpenAI
+        // -------------------------
+        try {
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.2,
+            ]);
 
-        $aiOutput = $response->choices[0]->message->content ?? '';
+            $aiOutput = $response->choices[0]->message->content ?? '';
 
-        // Cleanup JSON fences
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            // Cleanup JSON fences
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        $analysis = json_decode($cleanOutput, true);
+            $analysis = json_decode($cleanOutput, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($analysis)) {
+            if (json_last_error() !== JSON_ERROR_NONE || ! is_array($analysis)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI response could not be parsed',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+
+            // -------------------------
+            // 4️⃣ Record usage
+            // -------------------------
+            DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
+            $tokensUsed = $response->usage->totalTokens ?? $response->usage->total_tokens ?? 0;
+
+            DB::table('usage_activities')->insert([
+                'user_id'     => $user->id,
+                'action'      => 'check_eligibility',
+                'status'      => 'success',
+                'message'     => 'Check Eligibility',
+                'tokens_used' => $tokensUsed,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+
+            // -------------------------
+            // 5️⃣ Return results
+            // -------------------------
+            return response()->json([
+                'success'         => true,
+                'matchPercentage' => $analysis['matchPercentage'] ?? null,
+                'matchedSkills'   => $analysis['matchedSkills'] ?? [],
+                'missingSkills'   => $analysis['missingSkills'] ?? [],
+                'recommendations' => $analysis['recommendations'] ?? '',
+                'cv_path'         => asset('storage/' . $user->cv_path),
+                'cv_excerpt'      => substr($cvText, 0, 300) . '...',
+            ]);
+
+        } catch (\Throwable $aiError) {
+            info("OpenAI call failed: " . $aiError->getMessage());
+
+            DB::table('usage_activities')->insert([
+                'user_id'    => $user->id,
+                'action'     => 'check_eligibility',
+                'status'     => 'failed',
+                'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'AI response could not be parsed',
-                'raw'     => $aiOutput,
+                'message' => 'AI service error: ' . $aiError->getMessage(),
             ], 500);
         }
-
-        // -------------------------
-        // 4️⃣ Record usage
-        // -------------------------
-        DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
-        $tokensUsed = $response->usage->totalTokens ?? $response->usage->total_tokens ?? 0;
-
-        DB::table('usage_activities')->insert([
-            'user_id'     => $user->id,
-            'action'      => 'check_eligibility',
-            'status'      => 'success',
-            'message'     => 'Check Eligibility',
-            'tokens_used' => $tokensUsed,
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
-
-        // -------------------------
-        // 5️⃣ Return results
-        // -------------------------
-        return response()->json([
-            'success'         => true,
-            'matchPercentage' => $analysis['matchPercentage'] ?? null,
-            'matchedSkills'   => $analysis['matchedSkills'] ?? [],
-            'missingSkills'   => $analysis['missingSkills'] ?? [],
-            'recommendations' => $analysis['recommendations'] ?? '',
-            'cv_path'         => asset('storage/' . $user->cv_path),
-            'cv_excerpt'      => substr($cvText, 0, 300) . '...',
-        ]);
-
-    } catch (\Throwable $aiError) {
-        info("OpenAI call failed: " . $aiError->getMessage());
-
-        DB::table('usage_activities')->insert([
-            'user_id'    => $user->id,
-            'action'     => 'check_eligibility',
-            'status'     => 'failed',
-            'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'AI service error: ' . $aiError->getMessage(),
-        ], 500);
     }
-}
 
     public function revampCv(Request $request)
     {
