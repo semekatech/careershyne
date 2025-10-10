@@ -108,4 +108,9 @@ Route::prefix('ai')->middleware('auth:api')->group(function () {
         ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
 ;
 });
+
+Route::get('/status', function () {
+    return response()->json(['status' => 'API is live']);
+});
+
 });
