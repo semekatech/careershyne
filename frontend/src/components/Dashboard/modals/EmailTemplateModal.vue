@@ -196,7 +196,7 @@
 
         <!-- Editor state -->
         <EditorContent
-          v-else-if="editor && props.result?.template"
+          v-else-if="editor && props.result?.email_template"
           :editor="editor"
           class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
         />
@@ -242,7 +242,7 @@ const fontFamilies = [
 ];
 
 watch(
-  () => props.result?.template,
+  () => props.result?.email_template,
   async (val) => {
     if (!val) return;
     await nextTick();
