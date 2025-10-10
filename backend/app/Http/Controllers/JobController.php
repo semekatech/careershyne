@@ -239,6 +239,7 @@ PROMPT;
             'updated_at' => now(),
         ]);
 
+
         return response()->json([
             'success' => false,
             'message' => 'AI service error: ' . $aiError->getMessage(),
