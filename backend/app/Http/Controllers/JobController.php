@@ -93,74 +93,73 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
-    public function checkEligibility(Request $request)
-    {
-        $user = auth('api')->user();
-        $job  = Job::findOrFail($request->jobId);
+  public function checkEligibility(Request $request)
+{
+    $user = auth('api')->user();
+    $job  = Job::findOrFail($request->jobId);
 
-        if (! $user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.',
-            ], 400);
-        }
+    if (! $user->cv_path) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CV uploaded. Please upload your CV first.',
+        ], 400);
+    }
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
+    $cvPath = storage_path('app/public/' . $user->cv_path);
 
-        if (! file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.',
-            ], 404);
-        }
+    if (! file_exists($cvPath)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'CV file not found on server.',
+        ], 404);
+    }
 
-        // ✅ Extract text from CV
+    // -------------------------
+    // 1) Extract text from CV
+    // -------------------------
+    $cvText = '';
+
+    // Try Smalot parser first
+    try {
+        $parser = new Parser();
+        $pdf = $parser->parseFile($cvPath);
+        $cvText = $pdf->getText() ?? '';
+    } catch (\Throwable $e) {
+        info("Smalot parser failed for: $cvPath — " . $e->getMessage());
+        $cvText = '';
+    }
+
+    // If empty, try OCR fallback
+    if (strlen(trim($cvText)) === 0) {
         try {
-            $parser = new Parser();
-            $pdf    = $parser->parseFile($cvPath);
-            $cvText = $pdf->getText() ?? '';
-
-            // Check if parser returned empty text
-            if (strlen(trim($cvText)) === 0) {
-                info("CV parsing returned empty text. Trying OCR... File: $cvPath");
-
-                try {
-                    // 🔹 Fallback: Tesseract OCR for scanned/image-based PDFs
-                    $ocrText = (new TesseractOCR($cvPath))->run();
-                    $cvText  = trim($ocrText);
-
-                    if (strlen($cvText) === 0) {
-                        info("OCR also returned empty text for file: $cvPath");
-                    }
-                } catch (\Throwable $ocrError) {
-                    info("OCR failed for $cvPath — " . $ocrError->getMessage());
-                }
+            info("CV parsing returned empty text. Trying OCR... File: $cvPath");
+            $ocrText = (new TesseractOCR($cvPath))->run();
+            $cvText = trim($ocrText);
+            if (strlen($cvText) === 0) {
+                info("OCR also returned empty text for file: $cvPath");
             }
+        } catch (\Throwable $ocrError) {
+            info("OCR failed for $cvPath — " . $ocrError->getMessage());
+            $cvText = '';
+        }
+    }
 
-            // Basic cleaning (after either method)
-            $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
-            $cvText = preg_replace('/\s+/', ' ', $cvText);
-            $cvText = trim($cvText);
+    if (strlen(trim($cvText)) === 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read CV. Please upload a valid, text-based or scanned PDF file.',
+        ], 422);
+    }
 
-        } catch (\Throwable $e) {
-            info("PDF parsing failed for: $cvPath — " . $e->getMessage());
+    // Basic cleaning
+    $cvText = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $cvText);
+    $cvText = preg_replace('/\s+/', ' ', $cvText);
+    $cvText = trim($cvText);
 
-            // 🔹 Attempt OCR if parser completely fails
-            try {
-                info("Trying OCR fallback for failed parser file: $cvPath");
-                $ocrText = (new TesseractOCR($cvPath))->run();
-                $cvText  = trim($ocrText);
-            } catch (\Throwable $ocrError) {
-                info("OCR fallback also failed for $cvPath — " . $ocrError->getMessage());
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to read CV. Please upload a valid, text-based PDF file.',
-                ], 422);
-            }
-
-            // ✅ Build AI prompt
-            $prompt = <<<PROMPT
+    // -------------------------
+    // 2) Build prompt & call AI
+    // -------------------------
+    $prompt = <<<PROMPT
 Compare the following CV and Job Description.
 Return ONLY valid JSON with the following fields:
 - matchPercentage (0-100)
@@ -175,55 +174,77 @@ Return ONLY valid JSON with the following fields:
 {$cvText}
 PROMPT;
 
-            // ✅ Call OpenAI
-            $client   = OpenAI::client(env('OPENAI_API_KEY'));
-            $response = $client->chat()->create([
-                'model'       => 'gpt-4o-mini',
-                'messages'    => [
-                    ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => 0.2,
-            ]);
+    try {
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
+        $response = $client->chat()->create([
+            'model'       => 'gpt-4o-mini', // adjust if you use another model
+            'messages'    => [
+                ['role' => 'system', 'content' => 'You are a CV-job matching assistant. Always respond with valid JSON only.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'temperature' => 0.2,
+        ]);
 
-            $aiOutput = $response->choices[0]->message->content ?? '';
+        $aiOutput = $response->choices[0]->message->content ?? '';
+        // Remove triple-backtick fences if present
+        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+        $cleanOutput = trim($cleanOutput);
 
-            // ✅ Cleanup (remove ```json fences if present)
-            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-            $cleanOutput = trim($cleanOutput);
+        $analysis = json_decode($cleanOutput, true);
 
-            $analysis = json_decode($cleanOutput, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE || ! $analysis) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'AI response could not be parsed',
-                    'raw'     => $aiOutput,
-                ], 500);
-            }
-            DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
-            DB::table('usage_activities')->insert([
-                'user_id'     => $user->id,
-                'action'      => 'check_eligibility',
-                'status'      => 'success',
-                'message'     => 'Check Eligibility',
-                'tokens_used' => $response->usage->totalTokens ?? 0,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ]);
-
-            // ✅ Return structured response
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($analysis)) {
+            // preserve raw AI output for debugging
             return response()->json([
-                'success'         => true,
-                'matchPercentage' => $analysis['matchPercentage'] ?? null,
-                'matchedSkills'   => $analysis['matchedSkills'] ?? [],
-                'missingSkills'   => $analysis['missingSkills'] ?? [],
-                'recommendations' => $analysis['recommendations'] ?? '',
-                'cv_path'         => asset('storage/' . $user->cv_path),
-                'cv_excerpt'      => substr($cvText, 0, 300) . '...',
-            ]);
+                'success' => false,
+                'message' => 'AI response could not be parsed',
+                'raw'     => $aiOutput,
+            ], 500);
         }
+
+        // Safely decrement user's subscription checks (only after success)
+        DB::table('subscriptions')->where('user_id', $user->id)->decrement('checks', 1);
+
+        // Log usage (be tolerant of different usage field names)
+        $tokensUsed = $response->usage->totalTokens ?? $response->usage->total_tokens ?? 0;
+        DB::table('usage_activities')->insert([
+            'user_id'     => $user->id,
+            'action'      => 'check_eligibility',
+            'status'      => 'success',
+            'message'     => 'Check Eligibility',
+            'tokens_used' => $tokensUsed,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        // Return structured response
+        return response()->json([
+            'success'         => true,
+            'matchPercentage' => $analysis['matchPercentage'] ?? null,
+            'matchedSkills'   => $analysis['matchedSkills'] ?? [],
+            'missingSkills'   => $analysis['missingSkills'] ?? [],
+            'recommendations' => $analysis['recommendations'] ?? '',
+            'cv_path'         => asset('storage/' . $user->cv_path),
+            'cv_excerpt'      => substr($cvText, 0, 300) . '...',
+        ]);
+    } catch (\Throwable $aiError) {
+        info("OpenAI call failed: " . $aiError->getMessage());
+        // Optional: log failed usage attempt
+        DB::table('usage_activities')->insert([
+            'user_id'    => $user->id,
+            'action'     => 'check_eligibility',
+            'status'     => 'failed',
+            'message'    => 'OpenAI call failed: ' . $aiError->getMessage(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'AI service error: ' . $aiError->getMessage(),
+        ], 500);
+    }
+}
         public function revampCv(Request $request)
         {
 
