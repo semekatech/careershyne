@@ -11,7 +11,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
+        '*',
         'auth/*',
+        '/dashboard/stats',
         'cv-orders/*',
         'payments/*',
         'orders/*',
@@ -20,6 +22,7 @@ class VerifyCsrfToken extends Middleware
         'ai/*',
         'whatsapp-bot',
         'log-visitor',
+
     ];
 
 }
