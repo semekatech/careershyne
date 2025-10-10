@@ -108,10 +108,10 @@
 
           <button
             :disabled="items.total === 0"
-            @click="openModal = true"
+            @click="gotoLogin"
             class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Pay {{ budget }} Via STK
+            Get Started
           </button>
         </div>
       </div>
@@ -123,7 +123,8 @@
 
 <script setup>
 import { ref, reactive, computed } from "vue";
-// Budget (in multiples of 100)
+import { useRouter } from "vue-router";
+const router = useRouter();
 const budget = ref(100);
 // Prices per item
 const prices = reactive({
@@ -137,7 +138,6 @@ const items = computed(() => {
   const P = budget.value;
   if (P <= 0 || P % 100 !== 0)
     return { cv: 0, coverLetter: 0, eligibility: 0, email: 0, total: 0 };
-
   // Split budget based on percentage
   const allocation = {
     cv: P * 0.4,
@@ -157,4 +157,7 @@ const items = computed(() => {
 
   return { cv, coverLetter, eligibility, email, total };
 });
+function gotoLogin() {
+  router.push("/login");
+}
 </script>
