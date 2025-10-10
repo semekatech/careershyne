@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = 'https://careershyne.com/api/api/auth/';
+const API = 'https://careershyne.com/api/auth/';
 
 export default {
   post: (formData) => {

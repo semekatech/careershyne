@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://careershyne.com/api/api/jobs",
+  baseURL: "https://careershyne.com/api/jobs",
 });
 
 // ✅ Request interceptor to attach the latest token dynamically
