@@ -11,27 +11,27 @@
         <p
           class="mt-[-150px] sm:mt-[-50px] text-sm font-semibold text-orange-600 uppercase tracking-wide"
         >
-          AI THAT GETS YOU HIRED
+          Tired of Applying and Never Hearing Back?
         </p>
 
         <h1
           class="mt-4 text-4xl font-extrabold text-gray-900 sm:text-5xl text-center"
         >
-          Your All-in-One Career<br />
-          Helper
+          Meet the AI That Actually Gets You Hired.
         </h1>
 
         <p class="mt-6 text-lg text-gray-600 text-center">
-          Why use many different tools? Careershyne AI does everything for you —
-          it helps you make your cv,<br />
-          write cover letters, check if you qualify for jobs, <br />and even
-          write professional emails — all in one place, so you can focus on
-          getting hired.
+          Stop wasting hours fixing your CV, guessing what recruiters want, and
+          writing cover letters that go nowhere.<br />
+          CareerShyne AI gives you everything you need —<br /> CV builder, job match
+          analysis, smart cover letters, and even email templates — all in one
+          place.
         </p>
 
         <!-- SOCIAL PROOF -->
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 text-center">
-
+        <div
+          class="mt-8 flex flex-wrap items-center justify-center gap-4 text-center"
+        >
           <!-- AVATAR STACK -->
           <div class="flex items-center space-x-[-10px]">
             <div
@@ -91,12 +91,14 @@
         </div>
 
         <!-- Primary CTA -->
-        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-6 mb-[-170px] sm:mb-[-5px]" >
+        <div
+          class="mt-6 flex flex-col sm:flex-row justify-center gap-6 mb-[-170px] sm:mb-[-5px]"
+        >
           <router-link
             to="/login"
             class="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition text-center rounded-lg"
           >
-            Unlock My Career
+            Try CareerShyne Now
           </router-link>
         </div>
       </div>

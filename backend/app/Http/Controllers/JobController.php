@@ -444,7 +444,6 @@ PROMPT;
                 'raw'     => $aiOutput,
             ], 500);
         }
-
         DB::table('subscriptions')->where('user_id', $user->id)->decrement('cv', 1);
         DB::table('usage_activities')->insert([
             'user_id'     => $user->id,
@@ -455,7 +454,6 @@ PROMPT;
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
-
         return response()->json([
             'success'    => true,
             'revampedCv' => $analysis['revampedCv'] ?? '',
@@ -463,7 +461,6 @@ PROMPT;
         ]);
     } catch (\Throwable $aiError) {
         info("OpenAI call failed: " . $aiError->getMessage());
-
         DB::table('usage_activities')->insert([
             'user_id'    => $user->id,
             'action'     => 'cv_revamp',
@@ -472,14 +469,12 @@ PROMPT;
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
         return response()->json([
             'success' => false,
             'message' => 'AI service error: ' . $aiError->getMessage(),
         ], 500);
     }
 }
-
   public function coverLetter(Request $request)
 {
     $user = auth('api')->user();
