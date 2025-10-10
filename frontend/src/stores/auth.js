@@ -37,7 +37,7 @@ export const useAuthStore = defineStore("auth", {
 
     async refreshUser() {
       try {
-        const response = await axios.get("https://careershyne.com/api/me", {
+        const response = await axios.get("https://careershyne.com/api/api/me", {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },

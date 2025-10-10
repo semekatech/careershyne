@@ -59,7 +59,7 @@ Route::post('/log-visitor', function (Request $request) {
 Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
 Route::get('/auth/verify-token', [AuthController::class, 'verifyToken']);
 Route::get('/profile', [AuthController::class, 'profile']);
-Route::get('/me', [AuthController::class, 'userDetails']);
+Route::middleware('auth:api')->get('api/me', [AuthController::class, 'userDetails']);
 Route::post('/whatsapp-bot', [WhatsapController::class, 'index']);
 Route::prefix('orders')->group(function () {
     Route::post('/register', [CvOrderController::class, 'store']);
