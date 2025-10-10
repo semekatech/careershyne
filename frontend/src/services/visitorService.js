@@ -18,3 +18,5 @@ export const logVisitor = async (page) => {
     throw error;
   }
 };
+
+
