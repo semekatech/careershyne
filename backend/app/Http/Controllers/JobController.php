@@ -859,7 +859,7 @@ PROMPT;
 
     public function categories()
     {
-          $user = auth('api')->user();
+        $user = auth('api')->user();
         if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
@@ -880,7 +880,7 @@ PROMPT;
     }
     public function storeCategory(Request $request)
     {
-          $user = auth('api')->user();
+        $user = auth('api')->user();
         if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
@@ -890,8 +890,8 @@ PROMPT;
 
         $id = DB::table('industries')->insertGetId([
             'name'       => $request->name,
-            'created_at' => now(),
-            'updated_at' => now(),
+            // 'created_at' => now(),
+            // 'updated_at' => now(),
         ]);
 
         return response()->json([
@@ -902,7 +902,7 @@ PROMPT;
 
     public function deleteCategory($id)
     {
-          $user = auth('api')->user();
+        $user = auth('api')->user();
         if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
@@ -934,7 +934,7 @@ PROMPT;
 
         DB::table('industries')->where('id', $id)->update([
             'name'       => $request->name,
-            'updated_at' => now(),
+            // 'updated_at' => now(),
         ]);
 
         return response()->json([
