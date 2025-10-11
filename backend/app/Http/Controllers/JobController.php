@@ -28,7 +28,7 @@ class JobController extends Controller
             'education'               => 'required|string|max:255',
             'salary'                  => 'required|string|max:255',
             'deadline'                => 'required|date',
-            'field'                   => 'required|string|max:255',
+            'field'                   => 'required|max:255',
             'description'             => 'required|string',
             'applicationInstructions' => 'required|string',
             'country'                 => 'required|string|max:255',
