@@ -860,7 +860,7 @@ PROMPT;
     public function categories()
     {
         $industries = DB::table('industries as i')
-            ->leftJoin('job_listings as j', 'i.id', '=', 'j.industry_id')
+            ->leftJoin('job_listings as j', 'i.id', '=', 'j.field')
             ->leftJoin('users as u', 'i.id', '=', 'u.industry_id')
             ->select(
                 'i.id',
