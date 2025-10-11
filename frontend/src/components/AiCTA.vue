@@ -56,7 +56,7 @@
             <!-- CTA BUTTONS -->
       <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
         <a
-          href="/admin"
+          href="/login"
           class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-orange-500 transition duration-300"
         >
           Unlock My Career

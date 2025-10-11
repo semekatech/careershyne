@@ -1,7 +1,7 @@
 <template>
   <section class="bg-white py-16">
-    <div class="max-w-6xl mx-auto px-2 lg:px-8">
-      
+    <div class="max-w-5xl mx-auto px-4">
+
       <!-- Header -->
       <div class="text-center mb-12">
         <p class="text-sm font-semibold text-orange-500 uppercase tracking-wide">
@@ -12,84 +12,73 @@
         </h2>
       </div>
 
-      <!-- Pricing Grid -->
-      <div class="flex flex-col md:flex-row justify-center items-stretch gap-12">
-        
-        <!-- Free Plan -->
-        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
-          <div class="p-6 pt-12 sm:p-8 sm:pt-16 flex-1 flex flex-col">
-            <h2 class="text-2xl font-bold text-orange-600 mb-4">Basic</h2>
+      <!-- Parent Card -->
+      <div class="bg-white rounded-3xl shadow-xl p-8 grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-200">
 
-            <!-- Crossed old price -->
-            <p class="text-xl text-gray-500 font-semibold">Free</p>
-            
-            <!-- New price -->
-            <p class="text-5xl font-extrabold text-gray-900 mb-2">
-              KES 0
-              <span class="text-xl font-semibold text-gray-500">/month</span>
-            </p>
+        <!-- Left Inner Card -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">See what you get</h3>
+          <p class="text-gray-600 mb-6">
+            Slide or input the amount you want to see the items you will receive.
+          </p>
 
-            <button
-              @click="$router.push('/admin')"
-              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
-            >
-              Get Started
-            </button>
-
-            <div class="mt-8 flex-1">
-              <h3 class="text-base font-semibold text-gray-700 mb-3">Included Features</h3>
-              <ul class="space-y-3">
-                <li v-for="(feature, index) in freeFeatures" :key="index" class="flex items-start">
-                  <svg class="flex-shrink-0 w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span class="ml-3 text-gray-700 text-base">{{ feature }}</span>
-                </li>
-              </ul>
-            </div>
+          <!-- Amount Input -->
+          <label class="block text-gray-700 text-sm font-medium mb-2">Amount</label>
+          <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg p-2 mb-6">
+            <span class="mr-2">🇰🇪</span>
+            <span class="text-gray-700 mr-3">KES</span>
+            <input
+              type="number"
+              v-model="budget"
+              min="100"
+              max="10000"
+              step="100"
+              class="bg-transparent text-gray-900 w-24 outline-none"
+            />
           </div>
+
+          <!-- Slider -->
+          <input
+            type="range"
+            min="100"
+            max="10000"
+            step="100"
+            v-model="budget"
+            class="w-full accent-orange-500"
+          />
         </div>
 
-        <!-- Premium Plan -->
-        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
-          <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-semibold uppercase px-4 py-1 rounded-bl-xl">
-            Most Popular
+        <!-- Right Inner Card -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">You Will Receive</h3>
+
+          <ul class="space-y-4 mb-6">
+            <li v-for="(product, key) in products" :key="key" class="flex justify-between">
+              <span class="text-gray-700">{{ product.label }}</span>
+              <span class="text-orange-600 font-semibold">{{ calculateItems(product.price) }}</span>
+            </li>
+          </ul>
+
+          <hr class="border-gray-200 mb-6" />
+
+          <div class="flex justify-between text-lg font-bold text-gray-900 mb-6">
+            <span>Total amount</span>
+            <span>KES {{ budget }}</span>
           </div>
 
-          <div class="p-6 pt-12 sm:p-8 sm:pt-16 flex-1 flex flex-col">
-            <h2 class="text-2xl font-bold text-orange-600 mb-4">Premium</h2>
-            
-            <!-- Crossed old price -->
-            <p class="text-xl text-gray-500 font-semibold line-through">KES 1,500</p>
-            
-            <!-- New price -->
-            <p class="text-5xl font-extrabold text-gray-900 mb-2">
-              KES 800
-              <span class="text-xl font-semibold text-gray-500">/month</span>
-            </p>
-            
-            <button
-              @click="$router.push('/admin')"
-              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
-            >
-              Subscribe Now
-            </button>
+          <!-- CTA Button -->
+          <button
+            @click="$router.push('/login')"
+            class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md"
+          >
+            Get Started Today
+          </button>
 
-
-            <div class="mt-8 flex-1">
-              <h3 class="text-base font-semibold text-gray-700 mb-3">Included Features</h3>
-              <ul class="space-y-3">
-                <li v-for="(feature, index) in premiumFeatures" :key="index" class="flex items-start">
-                  <svg class="flex-shrink-0 w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span :class="{'ml-3 font-bold': feature.highlight}" class="ml-3 text-gray-700 text-base">
-                    {{ feature.text }}
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
+            <!-- <button
+            class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md"
+          >
+            Pay KES {{ budget }} with M-PESA
+          </button> -->
         </div>
 
       </div>
@@ -99,22 +88,21 @@
 
 <script>
 export default {
-  name: "AiPricing",
+  name: "PricingSection",
   data() {
     return {
-      freeFeatures: [
-        "1 CV Revamp",
-        "1 Cover Letter",
-        "1 Email Draft",
-        "1 Job Eligibility Check"
-      ],
-      premiumFeatures: [
-        { text: "5 CV Revamps", highlight: true },
-        { text: "5 Cover Letters", highlight: false },
-        { text: "10 Email Drafts", highlight: false },
-        { text: "8 Job Eligibility Checks", highlight: false },
-        { text: "Priority Support", highlight: false }
-      ]
+      budget: 500,
+      products: {
+        cv: { label: "CV Items", price: 20 },
+        coverLetter: { label: "Cover Letters", price: 20 },
+        eligibility: { label: "Eligibility Checks", price: 20 },
+        email: { label: "Email Credits", price: 10 }
+      }
+    }
+  },
+  methods: {
+    calculateItems(price) {
+      return Math.floor(this.budget / (price * Object.keys(this.products).length));
     }
   }
 }
