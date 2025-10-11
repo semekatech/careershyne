@@ -39,6 +39,7 @@ Route::middleware(LogActivity::class)->group(function () {
         $userAgent = $request->header('User-Agent');
         $page      = $request->input('page', 'unknown');
 
+
         \DB::table('visitors')->insert([
             'ip'         => $ip,
             'user_agent' => $userAgent,
