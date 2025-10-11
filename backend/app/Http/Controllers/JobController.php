@@ -859,6 +859,10 @@ PROMPT;
 
     public function categories()
     {
+          $user = auth('api')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $industries = DB::table('industries as i')
             ->leftJoin('job_listings as j', 'i.id', '=', 'j.field')
             ->leftJoin('users as u', 'i.id', '=', 'u.industry_id')
@@ -874,35 +878,69 @@ PROMPT;
 
         return response()->json($industries);
     }
-     public function storeCategory(Request $request)
+    public function storeCategory(Request $request)
     {
+          $user = auth('api')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $request->validate([
             'name' => 'required|string|max:255|unique:industries,name',
         ]);
 
         $id = DB::table('industries')->insertGetId([
-            'name' => $request->name,
+            'name'       => $request->name,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         return response()->json([
-            'message' => 'Category added successfully',
+            'message'  => 'Category added successfully',
             'category' => DB::table('industries')->where('id', $id)->first(),
         ]);
     }
 
     public function deleteCategory($id)
     {
+          $user = auth('api')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $exists = DB::table('industries')->where('id', $id)->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             return response()->json(['message' => 'Category not found'], 404);
         }
 
         DB::table('industries')->where('id', $id)->delete();
 
         return response()->json(['message' => 'Category deleted successfully']);
+    }
+    public function updateCategory(Request $request, $id)
+    {
+        $user = auth('api')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $exists = DB::table('industries')->where('id', $id)->exists();
+
+        if (! $exists) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        DB::table('industries')->where('id', $id)->update([
+            'name'       => $request->name,
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'message'  => 'Category updated successfully',
+            'category' => DB::table('industries')->where('id', $id)->first(),
+        ]);
     }
 
 }
