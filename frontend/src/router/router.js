@@ -23,7 +23,7 @@ import Profile from "@/pages/Dashboard/Profile.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
 import UserJobs from "@/pages/Dashboard/UserJobs.vue";
 import UserActivity from "@/pages/Dashboard/UserActivity.vue";
-
+import ManageCategories from "@/pages/Dashboard/ManageCategories.vue";
 
 const routes = [
   {
@@ -159,6 +159,20 @@ const routes = [
       },
     ],
   },
+{
+    path: "/manage-categories",
+    component: DashboardLayout,
+    meta: {
+      title: "Manage Categories",
+    },
+    children: [
+      {
+        path: "",
+        component: ManageCategories,
+      },
+    ],
+  },
+
   {
     path: "/add-job",
     component: DashboardLayout,
@@ -265,6 +279,7 @@ const routes = [
       },
     ],
   },
+
    {
     path: "/browse-acctivities",
     component: DashboardLayout,

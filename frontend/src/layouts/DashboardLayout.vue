@@ -202,7 +202,8 @@ const sidebarLinks = [
   {
     name: "Manage Categories",
     href: "/manage-categories",
-    faIcon: ["fas", "briefcase"],
+    icon: "material-icons-sharp",
+    iconName: "business_center",
     roles: ["1109", "manager"],
   },
   {
