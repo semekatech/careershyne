@@ -937,6 +937,7 @@ PROMPT;
             // 'updated_at' => now(),
         ]);
 
+
         return response()->json([
             'message'  => 'Category updated successfully',
             'category' => DB::table('industries')->where('id', $id)->first(),
