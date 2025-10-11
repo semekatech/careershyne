@@ -29,6 +29,9 @@ Route::middleware(LogActivity::class)->group(function () {
     Route::middleware('auth:api')->post('/payments/pay', [PaymentController::class, 'initiate']);
     Route::get('industries', [AuthController::class, 'industries']);
     Route::middleware('auth:api')->get('categories', [JobController::class, 'categories']);
+    Route::middleware('auth:api')->put('/categories/{id}', [JobController::class, 'updateCategory']);
+    Route::middleware('auth:api')->post('/categories', [JobController::class, 'storeCategory']);
+    Route::middleware('auth:api')->delete('/categories/{id}', [JobController::class, 'deleteCategory']);
     Route::get('education-levels', [AuthController::class, 'educationLevels']);
     Route::get('counties', [AuthController::class, 'counties']);
     Route::post('/log-visitor', function (Request $request) {

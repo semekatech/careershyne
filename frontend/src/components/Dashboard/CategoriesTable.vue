@@ -180,6 +180,7 @@ async function fetchCategories() {
 }
 
 
+
 // Filtered & Paginated
 const filteredCategories = computed(() => {
   if (!search.value) return categories.value;

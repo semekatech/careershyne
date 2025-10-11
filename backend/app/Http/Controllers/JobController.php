@@ -857,22 +857,52 @@ PROMPT;
         }
     }
 
-  public function categories()
-{
-    $industries = DB::table('industries as i')
-        ->leftJoin('job_listings as j', 'i.id', '=', 'j.field')
-        ->leftJoin('users as u', 'i.id', '=', 'u.industry_id')
-        ->select(
-            'i.id',
-            'i.name',
-            DB::raw('COUNT(DISTINCT j.id) as jobs_count'),
-            DB::raw('COUNT(DISTINCT u.id) as subscribers_count')
-        )
-        ->groupBy('i.id', 'i.name')
-        ->orderBy(DB::raw('COUNT(DISTINCT j.id)'), 'desc')
-        ->get();
+    public function categories()
+    {
+        $industries = DB::table('industries as i')
+            ->leftJoin('job_listings as j', 'i.id', '=', 'j.field')
+            ->leftJoin('users as u', 'i.id', '=', 'u.industry_id')
+            ->select(
+                'i.id',
+                'i.name',
+                DB::raw('COUNT(DISTINCT j.id) as jobs_count'),
+                DB::raw('COUNT(DISTINCT u.id) as subscribers_count')
+            )
+            ->groupBy('i.id', 'i.name')
+            ->orderBy(DB::raw('COUNT(DISTINCT j.id)'), 'desc')
+            ->get();
 
-    return response()->json($industries);
-}
+        return response()->json($industries);
+    }
+     public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:industries,name',
+        ]);
+
+        $id = DB::table('industries')->insertGetId([
+            'name' => $request->name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Category added successfully',
+            'category' => DB::table('industries')->where('id', $id)->first(),
+        ]);
+    }
+
+    public function deleteCategory($id)
+    {
+        $exists = DB::table('industries')->where('id', $id)->exists();
+
+        if (!$exists) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        DB::table('industries')->where('id', $id)->delete();
+
+        return response()->json(['message' => 'Category deleted successfully']);
+    }
 
 }
