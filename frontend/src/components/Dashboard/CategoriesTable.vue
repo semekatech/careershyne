@@ -173,11 +173,12 @@ const form = ref({
 async function fetchCategories() {
   try {
     const { data } = await categoriesService.getIndustries();
-    categories.value = data.categories;
+    categories.value = data;
   } catch (err) {
-    console.error(err);
+    console.error("Failed to fetch categories:", err);
   }
 }
+
 
 // Filtered & Paginated
 const filteredCategories = computed(() => {

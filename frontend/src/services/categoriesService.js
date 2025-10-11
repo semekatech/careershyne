@@ -23,7 +23,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       console.warn("Unauthorized, logging out...");
       localStorage.removeItem("token");
-     window.location.href = "/login";
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -33,7 +33,13 @@ export default {
   getIndustries() {
     return api.get("/categories");
   },
-  getJobs() {
-    return api.get("/jobs");
+  store(data) {
+    return api.post("/categories", data);
+  },
+  update(id, data) {
+    return api.put(`/categories/${id}`, data);
+  },
+  delete(id) {
+    return api.delete(`/categories/${id}`);
   },
 };
