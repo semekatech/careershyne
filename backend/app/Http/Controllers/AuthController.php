@@ -109,10 +109,10 @@ class AuthController extends Controller
             DB::table('subscriptions')->insert([
                 'user_id'      => $user->id,
                 'plan'         => 'Free',
-                'cv'           => 5,
-                'coverletters' => 5,
-                'emails'       => 5,
-                'checks'       => 5,
+                'cv'           => 1,
+                'coverletters' => 1,
+                'emails'       => 1,
+                'checks'       => 1,
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ]);

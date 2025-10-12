@@ -30,17 +30,16 @@
       <!-- Employment Type -->
       <div>
         <label class="block text-sm font-medium mb-2">Employment Type *</label>
-        <select
+        <Multiselect
           v-model="job.type"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select type</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Internship">Internship</option>
-        </select>
+          :options="employmentOptions"
+          :multiple="true"
+          :close-on-select="false"
+          :clear-on-select="false"
+          placeholder="Select job type(s)"
+          label="label"
+          track-by="value"
+        />
       </div>
 
       <!-- Experience -->
@@ -89,9 +88,7 @@
 
       <!-- Application Deadline -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Application Deadline *</label
-        >
+        <label class="block text-sm font-medium mb-2">Application Deadline *</label>
         <input
           v-model="job.deadline"
           type="date"
@@ -100,23 +97,18 @@
         />
       </div>
 
-      <!-- Job Field -->
+      <!-- Job Categories -->
       <div>
-        <label class="block text-sm font-medium mb-2">Job Field *</label>
-        <select
+        <label class="block text-sm font-medium mb-2">Job Categories *</label>
+        <Multiselect
           v-model="job.field"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select Job Category</option>
-          <option
-            v-for="option in industryOptions"
-            :key="option.id || option.value"
-            :value="option.id || option.label || option.value"
-          >
-            {{ option.name || option.label || option.value }}
-          </option>
-        </select>
+          :options="industryOptions"
+          :multiple="true"
+          label="name"
+          track-by="id"
+          :close-on-select="false"
+          placeholder="Select job categories"
+        />
       </div>
 
       <!-- Job Details -->
@@ -133,11 +125,8 @@
       </div>
 
       <!-- Application Instructions -->
-      <!-- Application Instructions -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Application Instructions *</label
-        >
+        <label class="block text-sm font-medium mb-2">Application Instructions *</label>
         <quill-editor
           v-model:content="job.applicationInstructions"
           content-type="html"
@@ -161,28 +150,21 @@
 
       <!-- County -->
       <div>
-        <label class="block text-sm font-medium mb-2">County *</label>
-        <select
+        <label class="block text-sm font-medium mb-2">Counties *</label>
+        <Multiselect
           v-model="job.county"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select County</option>
-          <option
-            v-for="option in countyOptions"
-            :key="option.id || option.value"
-            :value="option.name || option.label || option.value"
-          >
-            {{ option.name || option.label || option.value }}
-          </option>
-        </select>
+          :options="countyOptions"
+          :multiple="true"
+          :close-on-select="false"
+          placeholder="Select applicable counties"
+          label="name"
+          track-by="name"
+        />
       </div>
 
       <!-- Job Location / Office -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Job Location / Office *</label
-        >
+        <label class="block text-sm font-medium mb-2">Job Location / Office *</label>
         <input
           v-model="job.office"
           type="text"
@@ -206,6 +188,7 @@
           {{ loading ? "Posting..." : "Post Job" }}
         </button>
       </div>
+
       <div v-if="successMessage" class="mt-4 text-green-600 font-medium">
         {{ successMessage }}
       </div>
@@ -219,29 +202,39 @@ import { useAuthStore } from "@/stores/auth";
 import OptionsService from "@/services/optionsService";
 import JobService from "@/services/jobService";
 import { QuillEditor } from "@vueup/vue-quill";
+import Multiselect from "vue-multiselect";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import "vue-multiselect/dist/vue-multiselect.css";
 
 const auth = useAuthStore();
 
 const job = ref({
   company: "",
   title: "",
-  type: "",
+  type: [],
   experience: "",
   education: "",
   salary: "",
   deadline: "",
-  field: "",
+  field: [],
   description: "",
   applicationInstructions: "",
   country: "Kenya",
-  county: "",
+  county: [],
   office: "",
 });
 
 const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
+
+const employmentOptions = [
+  { label: "Full-time", value: "Full-time" },
+  { label: "Part-time", value: "Part-time" },
+  { label: "Contract", value: "Contract" },
+  { label: "Internship", value: "Internship" },
+  { label: "Remote", value: "Remote" },
+];
 
 const loading = ref(false);
 const successMessage = ref("");
@@ -270,25 +263,37 @@ async function submitJob() {
 
   const payload = {
     ...job.value,
+    type: Array.isArray(job.value.type)
+      ? job.value.type.map((t) => (t.value ? t.value : t)).join(",")
+      : job.value.type,
+    field: Array.isArray(job.value.field)
+      ? job.value.field.map((f) => f.id).join(",")
+      : job.value.field,
+    county: Array.isArray(job.value.county)
+      ? job.value.county.map((c) => c.name || c).join(",")
+      : job.value.county,
     postedBy: auth.user?.id || null,
   };
+
   try {
     const res = await JobService.createJob(payload);
     console.log("Job created:", res);
     successMessage.value = "Job posted successfully!";
+
+    // Reset form
     job.value = {
       company: "",
       title: "",
-      type: "",
+      type: [],
       experience: "",
       education: "",
       salary: "",
       deadline: "",
-      field: "",
+      field: [],
       description: "",
       applicationInstructions: "",
       country: "Kenya",
-      county: "",
+      county: [],
       office: "",
     };
   } catch (err) {

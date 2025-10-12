@@ -51,6 +51,7 @@
     "sweetalert2": "^11.22.5",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
+    "vue-multiselect": "^3.4.0",
     "vue-recaptcha": "^3.0.0-alpha.6",
     "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "^4.5.1",
