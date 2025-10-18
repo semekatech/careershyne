@@ -7,6 +7,7 @@ const api = axios.create({
   },
 });
 
+// Attach token to protected requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -18,6 +19,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Handle API errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -26,54 +28,43 @@ api.interceptors.response.use(
       if (status === 401) {
         console.warn("Unauthorized. Token may have expired.");
       } else if (status === 403) {
-        console.warn(
-          "Forbidden. You might have exceeded limits or lack permissions."
-        );
+        console.warn("Forbidden. You might lack permissions.");
       }
     }
     return Promise.reject(error);
   }
 );
 
-// Public API instance (no token required)
+// Public instance (no token)
 const publicApi = axios.create({
   baseURL: "https://careershyne.com/api/jobs",
 });
 
 const JobService = {
-  // Protected routes
+  /** 🔒 Authenticated routes */
   async createJob(payload) {
-    try {
-      const response = await api.post("/add", payload);
-      return response.data;
-    } catch (err) {
-      console.error("Error saving job:", err);
-      throw err;
-    }
-  },
-  async getJobs() {
-    try {
-      const response = await api.get("/all");
-      return response.data;
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-      throw err;
-    }
-  },
-  async getUsersJobs() {
-    try {
-      const response = await api.get("/user-jobs");
-      return response.data;
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-      throw err;
-    }
+    const response = await api.post("/add", payload);
+    return response.data;
   },
 
-  // Public route
-  async getPublicJobs() {
+  async getJobs() {
+    const response = await api.get("/all");
+    return response.data;
+  },
+
+  async getUsersJobs() {
+    const response = await api.get("/user-jobs");
+    return response.data;
+  },
+
+  /** 🌍 Public route — supports pagination + search */
+  async getPublicJobs(page = 1, search = "") {
     try {
-      const response = await publicApi.get("/public"); 
+      const params = new URLSearchParams();
+      params.append("page", page);
+      if (search) params.append("search", search);
+
+      const response = await publicApi.get(`/public?${params.toString()}`);
       return response.data;
     } catch (err) {
       console.error("Error fetching public jobs:", err);
