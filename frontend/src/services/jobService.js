@@ -58,13 +58,11 @@ const JobService = {
   },
 
   /** 🌍 Public route — supports pagination + search */
-  async getPublicJobs(page = 1, search = "") {
+  async getPublicJobs(page = 1, search = "", county = "") {
     try {
-      const params = new URLSearchParams();
-      params.append("page", page);
-      if (search) params.append("search", search);
-
-      const response = await publicApi.get(`/public?${params.toString()}`);
+      const response = await publicApi.get("/public", {
+        params: { page, search, county },
+      });
       return response.data;
     } catch (err) {
       console.error("Error fetching public jobs:", err);

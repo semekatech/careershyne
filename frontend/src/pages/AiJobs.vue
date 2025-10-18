@@ -128,7 +128,7 @@
                 class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark mt-1"
               >
                 <span class="material-icons-sharp text-base">location_on</span>
-                <span>{{ job.location ?? "Not specified" }}</span>
+                <span>{{ job.office ?? "Not specified" }}</span>
               </div>
 
               <p
