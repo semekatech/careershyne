@@ -67,7 +67,29 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
+  public function fetchPublicJobs(Request $request)
+    {
+        $query = Job::query()
+            ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
+            ->select('job_listings.*', 'industries.name as field_name');
 
+        // Optional search
+        if ($request->has('search') && ! empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('job_listings.title', 'like', "%{$search}%")
+                    ->orWhere('job_listings.company', 'like', "%{$search}%")
+                    ->orWhere('job_listings.county', 'like', "%{$search}%")
+                    ->orWhere('job_listings.country', 'like', "%{$search}%")
+                    ->orWhere('job_listings.name', 'like', "%{$search}%");
+            });
+        }
+
+        $perPage = $request->get('per_page', 100);
+        $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
+
+        return response()->json($jobs);
+    }
     public function userJobs(Request $request)
     {
         $query = Job::from('job_listings as job_listings')

@@ -95,7 +95,7 @@ Route::middleware(LogActivity::class)->group(function () {
 
         Route::put('/update/{id}', [JobController::class, 'update']);
     });
-
+Route::get('/public', [JobController::class, 'fetchPublicJobs']);
     Route::prefix('ai')->middleware('auth:api')->group(function () {
         Route::post('/upload', [AiController::class, 'uploadCV'])
             ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');

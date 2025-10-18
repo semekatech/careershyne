@@ -37,6 +37,9 @@ const scrollToSection = (id) => {
           <router-link to="/ai" @click.prevent="scrollToSection('ai-services')" class="nav-link">
             Services
           </router-link>
+            <router-link to="/jobs" @click.prevent="scrollToSection('ai-pricing')" class="nav-link">
+            Jobs
+          </router-link>
           <router-link to="/ai" @click.prevent="scrollToSection('ai-pricing')" class="nav-link">
             Pricing
           </router-link>

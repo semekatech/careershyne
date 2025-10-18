@@ -76,6 +76,11 @@ const routes = [
     name: "AI",
     component: () => import("@/pages/AiReview.vue"),
   },
+{
+    path: "/jobs",
+    name: "Jobs",
+    component: () => import("@/pages/AiJobs.vue"),
+  },
   //backend
   {
     path: "/login",
@@ -313,6 +318,7 @@ router.beforeEach(async (to, from, next) => {
     "/how-it-works",
     "/custom-cv-order",
     "/contact-us",
+    "/jobs",
     "/about-us",
     "/services",
     "/pricing",
