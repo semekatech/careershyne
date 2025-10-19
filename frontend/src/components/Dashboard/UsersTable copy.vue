@@ -1,92 +1,108 @@
 <template>
   <div class="grid grid-cols-1 gap-6 mb-6">
     <!-- Users Table Card -->
-    <div
-      class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
-    >
+    <div class="bg-white rounded-lg shadow overflow-hidden">
       <!-- Header -->
       <div
-        class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-orange-50"
+        class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
       >
-        <h2 class="text-xl font-semibold text-gray-800">Manage Users</h2>
+        <h2 class="text-lg font-semibold text-gray-800">Manage Users</h2>
         <div v-if="auth.user?.role != 'radio'">
           <button
-            class="py-2 px-6 rounded-lg text-white font-semibold transition-all duration-300 hover:opacity-90 shadow-sm"
+            class="py-2 px-6 text-white rounded font-medium transition duration-500"
             :style="{ background: '#fd624e' }"
             @click="openModal"
           >
-            <font-awesome-icon :icon="['fas', 'plus']" class="mr-2" />
-            Add User
+            <font-awesome-icon :icon="['fas', 'plus']" /> Add User
           </button>
         </div>
       </div>
 
       <!-- Search -->
-      <div
-        class="p-4 bg-white border-b border-gray-100 flex flex-col sm:flex-row gap-3 sm:items-center"
-      >
+      <div class="p-4">
         <input
           v-model="search"
-          placeholder="🔍 Search users..."
-          class="p-2.5 border rounded-lg w-full sm:w-1/3 focus:ring-2 focus:ring-orange-300 focus:outline-none transition"
+          placeholder="Search users..."
+          class="p-2 border rounded w-full md:w-1/2"
         />
       </div>
 
       <!-- Users Table -->
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm divide-y divide-gray-200">
-          <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left font-semibold">#</th>
-              <th class="px-6 py-3 text-left font-semibold">Name</th>
-              <th class="px-6 py-3 text-left font-semibold">Type</th>
-              <th class="px-6 py-3 text-left font-semibold">Phone</th>
-              <th class="px-6 py-3 text-left font-semibold">Date Joined</th>
-              <th class="px-6 py-3 text-left font-semibold">Last Login</th>
-              <th class="px-6 py-3 text-left font-semibold">Status</th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                #
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Name
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Type
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Phone
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Date Joined
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Last Login
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
+                Status
+              </th>
               <th
                 v-if="auth.user?.role != 'radio'"
-                class="px-6 py-3 text-center font-semibold"
+                class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase"
               >
                 Actions
               </th>
             </tr>
           </thead>
-
-          <!-- 🔸 Shimmer Loader -->
-          <tbody v-if="loadingUsers" class="bg-white divide-y divide-gray-100">
-            <tr v-for="n in 6" :key="n" class="animate-pulse">
-              <td v-for="i in 8" :key="i" class="px-6 py-4">
-                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-              </td>
-            </tr>
-          </tbody>
-
-          <tbody v-else class="bg-white divide-y divide-gray-100">
-            <tr
-              v-for="(user, index) in paginatedUsers"
-              :key="user.id"
-              class="hover:bg-gray-50 transition"
-            >
-              <td class="px-6 py-4">
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="(user, index) in paginatedUsers" :key="user.id">
+              <td class="px-6 py-4 whitespace-nowrap">
                 {{ (currentPage - 1) * perPage + index + 1 }}
               </td>
-              <td class="px-6 py-4 font-medium text-blue-600">
+              <td class="px-6 py-4 whitespace-nowrap text-blue-500">
                 {{ user.name }}
               </td>
-              <td class="px-6 py-4">
+              <td class="px-6 py-4 whitespace-nowrap">
                 {{ user.user_type === "registered" ? "Indirect" : "Direct" }}
               </td>
-              <td class="px-6 py-4">{{ formatPhone(user.phone) }}</td>
-              <td class="px-6 py-4">{{ formatDate(user.created_at) }}</td>
-              <td class="px-6 py-4">{{ formatDate(user.last_login_at) }}</td>
-              <td class="px-6 py-4">
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ formatPhone(user.phone) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ formatDate(user.created_at) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ formatDate(user.last_login_at) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   :class="[
-                    'px-3 py-1 rounded-full text-xs font-semibold capitalize',
+                    'px-2 py-1 rounded text-xs font-semibold',
                     user.status === 'active'
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'bg-red-100 text-red-700 border border-red-200',
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800',
                   ]"
                 >
                   {{ user.status }}
@@ -94,23 +110,23 @@
               </td>
               <td
                 v-if="auth.user?.role != 'radio'"
-                class="px-6 py-4 text-center flex justify-center gap-2"
+                class="px-6 py-4 whitespace-nowrap text-center flex justify-center gap-2"
               >
                 <button
                   @click="editUser(user)"
-                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs transition shadow-sm"
+                  class="px-2 py-1 bg-blue-600 text-white rounded text-xs"
                 >
                   Edit
                 </button>
                 <button
                   @click="impersonateUser(user)"
-                  class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-xs transition shadow-sm"
+                  class="px-2 py-1 bg-purple-600 text-white rounded text-xs"
                 >
                   Login
                 </button>
                 <button
                   @click="impersonateUser(user)"
-                  class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-xs transition shadow-sm"
+                  class="px-2 py-1 bg-orange-600 text-white rounded text-xs"
                 >
                   Activities
                 </button>
@@ -120,24 +136,13 @@
         </table>
 
         <!-- Pagination -->
-        <div
-          v-if="!loadingUsers"
-          class="flex justify-between items-center p-4 border-t border-gray-100 text-sm text-gray-600"
-        >
-          <button
-            @click="prevPage"
-            :disabled="currentPage <= 1"
-            class="px-3 py-1 rounded border bg-gray-50 hover:bg-gray-100 disabled:opacity-50"
-          >
-            ← Previous
+        <div class="flex justify-between p-4">
+          <button @click="prevPage" :disabled="currentPage <= 1">
+            Previous
           </button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button
-            @click="nextPage"
-            :disabled="currentPage >= totalPages"
-            class="px-3 py-1 rounded border bg-gray-50 hover:bg-gray-100 disabled:opacity-50"
-          >
-            Next →
+          <span>{{ currentPage }} / {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage >= totalPages">
+            Next
           </button>
         </div>
       </div>
@@ -148,52 +153,46 @@
       v-if="showModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div
-        class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-3xl relative animate-fadeIn"
-      >
+      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl relative">
         <!-- Close Button -->
         <button
           @click="closeModal"
-          class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition"
+          class="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
         >
           ✕
         </button>
-        <h3 class="text-2xl font-semibold mb-6 text-gray-800 border-b pb-2">
+        <h3 class="text-xl font-semibold mb-4">
           {{ editMode ? "Edit User" : "Add New User" }}
         </h3>
 
-        <form @submit.prevent="submitForm" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form @submit.prevent="submitForm" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Full Name -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Full Name</label
-              >
+              <label class="block text-gray-700 font-medium">Full Name</label>
               <input
                 v-model="form.name"
                 type="text"
                 placeholder="John Doe"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all outline-none"
+                class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
               />
-              <p v-if="validationErrors.name" class="text-red-600 text-xs mt-1">
+              <p v-if="validationErrors.name" class="text-red-600 text-sm mt-1">
                 {{ validationErrors.name[0] }}
               </p>
             </div>
 
             <!-- Email -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Email</label
-              >
+              <label class="block text-gray-700 font-medium">Email</label>
               <input
                 v-model="form.email"
                 type="email"
                 placeholder="you@example.com"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all outline-none"
+                class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
               />
               <p
                 v-if="validationErrors.email"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.email[0] }}
               </p>
@@ -201,18 +200,16 @@
 
             <!-- Phone -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Phone</label
-              >
+              <label class="block text-gray-700 font-medium">Phone</label>
               <input
                 v-model="form.phone"
                 type="tel"
                 placeholder="+254700000000"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all outline-none"
+                class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-orange-300 focus:outline-none"
               />
               <p
                 v-if="validationErrors.phone"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.phone[0] }}
               </p>
@@ -220,38 +217,34 @@
 
             <!-- Role -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Role</label
-              >
+              <label class="block text-gray-700 font-medium">Role</label>
               <select
                 v-model="form.role"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                class="w-full px-3 py-2 border rounded-lg"
               >
-                <option disabled value="">Select role</option>
                 <option :value="1109">Admin</option>
-                <option :value="1098">User</option>
+                <option :value="1098" selected>User</option>
                 <option value="radio">Radio</option>
               </select>
-              <p v-if="validationErrors.role" class="text-red-600 text-xs mt-1">
+
+              <p v-if="validationErrors.role" class="text-red-600 text-sm mt-1">
                 {{ validationErrors.role[0] }}
               </p>
             </div>
 
             <!-- Status -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Status</label
-              >
+              <label class="block text-gray-700 font-medium">Status</label>
               <select
                 v-model="form.status"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                class="w-full px-3 py-2 border rounded-lg"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
               <p
                 v-if="validationErrors.status"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.status[0] }}
               </p>
@@ -259,14 +252,12 @@
 
             <!-- Industry -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Industry</label
-              >
+              <label class="block text-gray-700 font-medium">Industry</label>
               <select
                 v-model="form.industry_id"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                class="w-full px-3 py-2 border rounded-lg"
               >
-                <option disabled value="">Select industry</option>
+                <option value="" disabled>Select industry</option>
                 <option
                   v-for="option in industryOptions"
                   :key="option.id"
@@ -277,7 +268,7 @@
               </select>
               <p
                 v-if="validationErrors.industry_id"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.industry_id[0] }}
               </p>
@@ -285,14 +276,14 @@
 
             <!-- Education Level -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
+              <label class="block text-gray-700 font-medium"
                 >Education Level</label
               >
               <select
                 v-model="form.education_level_id"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                class="w-full px-3 py-2 border rounded-lg"
               >
-                <option disabled value="">Select education level</option>
+                <option value="" disabled>Select education level</option>
                 <option
                   v-for="option in educationOptions"
                   :key="option.id"
@@ -303,7 +294,7 @@
               </select>
               <p
                 v-if="validationErrors.education_level_id"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.education_level_id[0] }}
               </p>
@@ -311,14 +302,12 @@
 
             <!-- County -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >County</label
-              >
+              <label class="block text-gray-700 font-medium">County</label>
               <select
                 v-model="form.county_id"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                class="w-full px-3 py-2 border rounded-lg"
               >
-                <option disabled value="">Select county</option>
+                <option value="" disabled>Select county</option>
                 <option
                   v-for="option in countyOptions"
                   :key="option.id"
@@ -329,7 +318,7 @@
               </select>
               <p
                 v-if="validationErrors.county_id"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.county_id[0] }}
               </p>
@@ -337,54 +326,28 @@
 
             <!-- CV Upload -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
-                >Attach CV</label
-              >
-              <label
-                class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 transition"
-              >
-                <span class="text-gray-500 text-sm">
-                  Click to upload or drag and drop (PDF)
-                </span>
-                <input
-                  type="file"
-                  @change="handleCvUpload"
-                  accept=".pdf"
-                  class="hidden"
-                />
-              </label>
-              <p v-if="form.cv" class="text-sm text-gray-600 mt-1">
-                📎 {{ form.cv.name }}
-              </p>
-              <p v-if="validationErrors.cv" class="text-red-600 text-xs mt-1">
+              <label class="block text-gray-700 font-medium">Attach CV</label>
+              <input type="file" @change="handleCvUpload" accept=".pdf" />
+              <p v-if="form.cv">{{ form.cv.name }}</p>
+              <p v-if="validationErrors.cv" class="text-red-600 text-sm mt-1">
                 {{ validationErrors.cv[0] }}
               </p>
             </div>
 
             <!-- Cover Letter Upload -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1"
+              <label class="block text-gray-700 font-medium"
                 >Attach Cover Letter (Optional)</label
               >
-              <label
-                class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-400 transition"
-              >
-                <span class="text-gray-500 text-sm">
-                  Click to upload or drag and drop (.pdf, .doc, .docx)
-                </span>
-                <input
-                  type="file"
-                  @change="handleCoverLetterUpload"
-                  accept=".pdf,.doc,.docx"
-                  class="hidden"
-                />
-              </label>
-              <p v-if="form.cover_letter" class="text-sm text-gray-600 mt-1">
-                📎 {{ form.cover_letter.name }}
-              </p>
+              <input
+                type="file"
+                @change="handleCoverLetterUpload"
+                accept=".pdf,.doc,.docx"
+              />
+              <p v-if="form.cover_letter">{{ form.cover_letter.name }}</p>
               <p
                 v-if="validationErrors.cover_letter"
-                class="text-red-600 text-xs mt-1"
+                class="text-red-600 text-sm mt-1"
               >
                 {{ validationErrors.cover_letter[0] }}
               </p>
@@ -395,25 +358,19 @@
           <button
             type="submit"
             :disabled="loading || !isFormValid"
-            class="w-full bg-orange-500 text-white py-3.5 font-semibold rounded-lg shadow hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            class="w-full bg-[#ff9c30] text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 mt-4"
           >
-            <span v-if="loading" class="animate-pulse">Submitting...</span>
+            <span v-if="loading">Submitting...</span>
             <span v-else>{{ editMode ? "Update User" : "Submit User" }}</span>
           </button>
 
-          <!-- Feedback Messages -->
-          <div
-            v-if="errorMessage"
-            class="text-red-600 text-sm text-center mt-2"
-          >
+          <!-- General Error Message -->
+          <p v-if="errorMessage" class="text-red-600 text-sm mt-2">
             {{ errorMessage }}
-          </div>
-          <div
-            v-if="successMessage"
-            class="text-green-600 text-sm text-center mt-2"
-          >
+          </p>
+          <p v-if="successMessage" class="text-green-600 text-sm mt-2">
             {{ successMessage }}
-          </div>
+          </p>
         </form>
       </div>
     </div>
@@ -437,9 +394,6 @@ const loading = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
 const validationErrors = ref({});
-
-// 🔸 shimmer loading flag
-const loadingUsers = ref(true);
 
 const users = ref([]);
 const search = ref("");
@@ -470,14 +424,11 @@ function formatDate(dateString) {
 
 // Fetch users
 async function fetchUsers() {
-  loadingUsers.value = true;
   try {
     const { data } = await usersService.get();
     users.value = data.users;
   } catch (err) {
     console.error(err);
-  } finally {
-    loadingUsers.value = false;
   }
 }
 
@@ -565,7 +516,7 @@ async function submitForm() {
   if (!phonePattern.test(form.value.phone)) {
     errorMessage.value =
       "Invalid phone number. Use format 254XXXXXXXXX (12 digits) or 07XXXXXXXX / 01XXXXXXXX (10 digits).";
-    loading.value = false;
+    loading.value = false; // stop loading
     return;
   }
 
@@ -609,13 +560,22 @@ async function impersonateUser(user) {
 
   try {
     const { data } = await usersService.impersonate(user.id);
+
+    // ✅ Save token persistently
     auth.setToken(data.access_token);
     localStorage.setItem("token", data.access_token);
+
+    // ✅ Save user
     auth.setUser(data.user);
+
+    // ✅ Refresh user details to keep everything in sync
     await auth.refreshUser();
+
+    // ✅ Redirect
     router.push(
       data.redirect === "profile-setup" ? "/profile-setup" : "/dashboard"
     );
+
     $toast.success(`You are now logged in as ${data.user.name}`);
   } catch (err) {
     console.error(err);
@@ -659,18 +619,5 @@ onMounted(async () => {
 <style scoped>
 body {
   overflow-x: hidden;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
 }
 </style>

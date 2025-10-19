@@ -53,6 +53,7 @@ class UserController extends Controller
                 'phone' => $request->phone,
                 'role' => $request->role,
                 'status' => $request->status,
+                'last_login_at' => now(),
                 'user_type'=>'registered',
                 'password' => Hash::make('Careershyne@2025'),
             ]);

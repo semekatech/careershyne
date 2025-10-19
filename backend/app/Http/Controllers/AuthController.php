@@ -74,6 +74,7 @@ class AuthController extends Controller
                 'id'   => $user->id,
                 'name' => $user->name,
                 'role' => $user->role,
+                'user_type' => $user->user_type,
             ],
             'redirect'     => $redirectRoute,
         ]);
@@ -337,6 +338,7 @@ class AuthController extends Controller
             'phone' => $user->phone,
             'email' => $user->email,
             'role'  => $user->role,
+            'user_type' => $user->user_type,
         ]);
     }
 
@@ -391,6 +393,7 @@ class AuthController extends Controller
                 'name'  => $user->name,
                 'photo' => $user->photo,
                 'role'  => $user->role,
+                'user_type' => $user->user_type,
             ],
             'redirect'        => $redirectRoute,
             'impersonator_id' => $admin->id,
