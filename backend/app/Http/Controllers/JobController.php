@@ -96,8 +96,8 @@ class JobController extends Controller
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);
-
     }
+
     public function userJobs(Request $request)
     {
         $query = Job::from('job_listings as job_listings')
