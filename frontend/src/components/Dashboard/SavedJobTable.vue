@@ -366,24 +366,30 @@ async function generateAIContent(job) {
     Swal.fire({
       title: "Generating...",
       text: "AI is generating your email...",
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
       allowOutsideClick: false,
     });
-    const res = await JobService.generateContent(applyJob.value.id);
 
-    applyForm.value.subject = res.data.subject || "";
-    applyForm.value.body = res.data.body || "";
+    const userId = job.user_id || authUser.id; 
+
+    const res = await JobService.generateContent(job.id, userId);
+
+    applyForm.value.subject = res.subject || "";
+    applyForm.value.body = res.body || "";
 
     Swal.close();
   } catch (err) {
     Swal.fire({
       icon: "error",
       title: "Failed",
-      text: "Could not generate AI content. Try again.",
+      text:
+        err.response?.data?.message ||
+        "Could not generate AI content. Try again.",
     });
   }
 }
+
+
+
 onMounted(fetchJobs);
 </script>

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
+use App\Models\User;
 use App\Services\AIReviewService;
 use DB;
 use Google\Client as GoogleClient;
@@ -175,68 +176,122 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
-   public function generateContent($jobId)
+ public function generateContent(Request $request, $jobId)
 {
-    // Fetch the job from DB
-    $job = Job::find($jobId);
-
-    if (! $job) {
-        return response()->json([
-            'message' => 'Job not found',
-        ], 404);
-    }
-
     try {
-        // Strip HTML tags from description
+        // ✅ Get user ID from request instead of auth (or fallback to auth)
+        $userId = $request->input('userId') ?? auth('api')->id();
+        $user = User::find($userId);
+        // 1️⃣ Ensure CV exists
+        if (! $user->cv_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CV uploaded. Please upload your CV first.',
+            ], 400);
+        }
+
+        $cvPath = storage_path('app/public/' . $user->cv_path);
+        if (! file_exists($cvPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV file not found on server.',
+            ], 404);
+        }
+
+        // 2️⃣ Extract CV text
+        $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
+        $cvText = $this->trimText($cvText);
+
+        // 3️⃣ Fetch job from DB
+        $job = Job::find($jobId);
+        if (! $job) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Job not found',
+            ], 404);
+        }
+
         $description = strip_tags($job->description);
 
-        // Build a prompt for AI
-        $prompt = "Generate a professional email subject and body for a job application.
-                   Job Title: {$job->title}
-                   Company: {$job->company}
-                   Description: {$description}
-                   The email should be polite, concise, and convincing.
-                   Return the result in this format:
-                   Subject: <subject line>
-                   Body: <email body>";
+        // 4️⃣ Build AI Prompt
+       $prompt = <<<PROMPT
+You are a professional career consultant and email writing expert.
 
-        $client   = OpenAI::client(env('OPENAI_API_KEY'));
+Task:
+Generate a professional **job application email** for the user strictly using the provided CV text, personal information, and job description. Do NOT invent any details or make assumptions. Only use what is explicitly provided.
+
+### Personal Information:
+Name: {$user->name}
+Email: {$user->email}
+Phone: {$user->phone}
+
+### Job Description:
+Title: {$job->title}
+Company: {$job->company}
+Description: {$description}
+
+### CV Text:
+$cvText
+
+### Instructions:
+- Use only the information from the CV and personal details above.
+- Do NOT invent degrees, experience, achievements, or other personal details.
+- Keep the email concise (max 300 words).
+- Use a formal yet engaging tone suitable for job applications.
+- Highlight only relevant skills and experience from the CV.
+- Avoid restating the entire CV — focus on alignment with the job.
+- Structure the email using <p> tags for paragraphs.
+- End politely with a call-to-action (like “Looking forward to your response”).
+- Return ONLY valid JSON in this format:
+
+{
+  "subject": "<Email subject here>",
+  "body": "<HTML formatted email body here>"
+}
+PROMPT;
+
+
+        // 5️⃣ Call OpenAI API
+        $client = OpenAI::client(env('OPENAI_API_KEY'));
         $response = $client->chat()->create([
             'model'       => 'gpt-4o-mini',
             'messages'    => [
-                ['role' => 'system', 'content' => 'You are an expert Job Application Assistant.'],
+                ['role' => 'system', 'content' => 'You are an expert job application email writer. Always return valid JSON only.'],
                 ['role' => 'user', 'content' => $prompt],
             ],
-            'temperature' => 0.3,
+            'temperature' => 0.4,
         ]);
 
-        // Correct way to get text from chat API
-        $text = $response->choices[0]->message->content ?? '';
+        // 6️⃣ Clean & parse output
+        $aiOutput = $response->choices[0]->message->content ?? '';
+        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+        $cleanOutput = trim($cleanOutput);
 
-        $subject = '';
-        $body    = '';
+        $decoded = json_decode($cleanOutput, true);
 
-        if (preg_match('/Subject:\s*(.+?)\nBody:\s*(.+)/s', $text, $matches)) {
-            $subject = trim($matches[1]);
-            $body    = trim($matches[2]);
-        } else {
-            // fallback: first line as subject, rest as body
-            $lines   = explode("\n", $text);
-            $subject = trim($lines[0] ?? '');
-            $body    = trim(implode("\n", array_slice($lines, 1)));
+        if (json_last_error() !== JSON_ERROR_NONE || !isset($decoded['subject'], $decoded['body'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to parse AI response.',
+                'raw'     => $aiOutput,
+            ], 500);
         }
-
+        // 8️⃣ Return final response
         return response()->json([
-            'subject' => $subject,
-            'body'    => $body,
+            'success' => true,
+            'subject' => $decoded['subject'],
+            'body'    => $decoded['body'],
         ]);
+
     } catch (\Exception $e) {
         return response()->json([
-            'message' => 'Failed to generate AI content',
-            'error'   => $e->getMessage(),
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage(),
         ], 500);
     }
 }
+
 
     public function fetchPublicJobs(Request $request)
     {
@@ -1275,4 +1330,87 @@ PROMPT;
         }
     }
 
+
+    private function extractTextFromFile($file, $type = 'File')
+    {
+        try {
+            $mime = $file->getMimeType();
+            $text = '';
+
+            if ($mime === 'application/pdf') {
+                info("$type: Processing PDF.");
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf    = $parser->parseFile($file->getPathname());
+                $text   = $pdf->getText();
+            } else {
+                info("$type: Processing image with OCR.");
+                $ocr = new TesseractOCR($file->getPathname());
+                $ocr->lang('eng')->psm(1)->oem(3);
+                $text = $ocr->run();
+            }
+            $text = $this->aiReview->cleanText($text);
+            return trim($text);
+        } catch (\Exception $e) {
+            info("$type: Text extraction failed - " . $e->getMessage());
+            throw new \Exception("$type text extraction failed: " . $e->getMessage());
+        }
+    }
+    protected function getJobText(Request $request)
+    {
+        if ($request->filled('job_text')) {
+            info("Job text provided in request.");
+            return $this->aiReview->cleanText($request->input('job_text'));
+        }
+
+        if ($request->hasFile('job_file')) {
+            $this->validateJobFile($request->file('job_file'));
+            info("Job file uploaded: " . $request->file('job_file')->getClientOriginalName());
+            return $this->extractTextFromFile($request->file('job_file'), 'Job');
+        }
+
+        if ($request->filled('job_url')) {
+            info("Job URL provided: " . $request->job_url);
+            return "Job details can be found here: " . $request->job_url;
+        }
+
+        return null;
+    }
+    protected function validateJobFile($file)
+    {
+        $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+        if (! in_array($file->getMimeType(), $allowedTypes)) {
+            throw new \Exception('Invalid file type. Only PDF, JPG, PNG are allowed.');
+        }
+
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            throw new \Exception('File too large. Maximum allowed size is 5MB.');
+        }
+
+        if ($file->getMimeType() === 'application/pdf') {
+            $pdf         = new \Smalot\PdfParser\Parser();
+            $pdfDocument = $pdf->parseFile($file->getPathname());
+            if (count($pdfDocument->getPages()) > 3) {
+                throw new \Exception('PDF exceeds 3 pages. Please upload a shorter file.');
+            }
+        }
+    }
+    protected function trimText($text, $maxLength = 8000)
+    {
+        // Remove HTML tags and normalize whitespace
+        $text = strip_tags($text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+
+        // Use mbstring-safe functions
+        if (mb_strlen($text, 'UTF-8') > $maxLength) {
+            // Cut at the last full stop or space before the limit
+            $trimmed    = mb_substr($text, 0, $maxLength, 'UTF-8');
+            $lastPeriod = mb_strrpos($trimmed, '.', 0, 'UTF-8');
+            $lastSpace  = mb_strrpos($trimmed, ' ', 0, 'UTF-8');
+            $cutPoint   = $lastPeriod ?: $lastSpace ?: $maxLength;
+            return mb_substr($text, 0, $cutPoint, 'UTF-8') . " ...[truncated]";
+        }
+
+        return $text;
+    }
 }

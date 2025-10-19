@@ -94,10 +94,12 @@ const JobService = {
   });
   return response.data;
 },
- async generateContent(jobId) {
-    const res = await  api.post(`/${jobId}/generate-content`);
-    return res.data;
-  },
+async generateContent(jobId, userId) {
+  const res = await api.post(`/${jobId}/generate-content`, {
+    userId: userId
+  });
+  return res.data;
+}
 };
 
 export default JobService;
