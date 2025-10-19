@@ -84,6 +84,7 @@
             </div>
 
             <!-- Buttons -->
+            <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
               <button
                 class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
@@ -94,11 +95,19 @@
               </button>
 
               <button
-                class="px-4 py-2 bg-green-500 text-white font-semibold rounded-full shadow-md hover:bg-green-600 transition-colors flex items-center justify-center whitespace-nowrap"
+                :disabled="job.save_status === 'saved'"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  job.save_status === 'saved'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-green-500 text-white hover:bg-green-600',
+                ]"
                 @click="markInterested(job)"
               >
-                <span class="material-icons text-base mr-2">star_border</span>
-                Interested
+                <span class="material-icons text-base mr-2">
+                  {{ job.save_status === "saved" ? "star" : "star_border" }}
+                </span>
+                {{ job.save_status === "saved" ? "Saved" : "Interested" }}
               </button>
             </div>
           </div>
@@ -174,14 +183,16 @@ async function markInterested(job) {
     showCancelButton: true,
     confirmButtonText: "Yes, save it",
     cancelButtonText: "Cancel",
-    confirmButtonColor: "#16a34a", 
-    cancelButtonColor: "#6b7280", 
+    confirmButtonColor: "#16a34a",
+    cancelButtonColor: "#6b7280",
   });
 
-  if (!confirm.isConfirmed) return; 
+  if (!confirm.isConfirmed) return;
 
   try {
     const res = await JobService.markInterested(job.id);
+    job.save_status = "saved";
+
     Swal.fire({
       icon: "success",
       title: "Marked as Interested!",
@@ -207,7 +218,6 @@ async function markInterested(job) {
     }
   }
 }
-
 
 onMounted(fetchJobs);
 </script>

@@ -39,7 +39,6 @@ Route::middleware(LogActivity::class)->group(function () {
         $userAgent = $request->header('User-Agent');
         $page      = $request->input('page', 'unknown');
 
-
         \DB::table('visitors')->insert([
             'ip'         => $ip,
             'user_agent' => $userAgent,
@@ -79,10 +78,9 @@ Route::middleware(LogActivity::class)->group(function () {
 
     Route::prefix('jobs')->middleware('auth:api')->group(function () {
         Route::post('/add', [JobController::class, 'store']);
-
         Route::get('/all', [JobController::class, 'fetchAll']);
         Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
-         Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
+        Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
         Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
             ->middleware(CheckSubscriptionLimit::class . ':checks');
@@ -97,7 +95,7 @@ Route::middleware(LogActivity::class)->group(function () {
 
         Route::put('/update/{id}', [JobController::class, 'update']);
     });
-Route::get('/jobs/public', [JobController::class, 'fetchPublicJobs']);
+    Route::get('/jobs/public', [JobController::class, 'fetchPublicJobs']);
     Route::prefix('ai')->middleware('auth:api')->group(function () {
         Route::post('/upload', [AiController::class, 'uploadCV'])
             ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');

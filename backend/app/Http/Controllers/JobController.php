@@ -95,28 +95,40 @@ class JobController extends Controller
         return response()->json(['message' => 'Job interest saved successfully'], 200);
     }
     public function fetchPersonalizedJobs(Request $request)
-    {
-        $query = Job::query()
-            ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
-            ->select('job_listings.*', 'industries.name as field_name')->where('field', auth('api')->user()->industry_id);
+{
+    $userId = auth('api')->id();
 
-        // Optional search
-        if ($request->has('search') && ! empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('job_listings.title', 'like', "%{$search}%")
-                    ->orWhere('job_listings.company', 'like', "%{$search}%")
-                    ->orWhere('job_listings.county', 'like', "%{$search}%")
-                    ->orWhere('job_listings.country', 'like', "%{$search}%")
-                    ->orWhere('job_listings.name', 'like', "%{$search}%");
-            });
-        }
+    $query = DB::table('job_listings')
+        ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
+        ->leftJoin('job_interests', function ($join) use ($userId) {
+            $join->on('job_interests.job_id', '=', 'job_listings.id')
+                 ->where('job_interests.user_id', '=', $userId);
+        })
+        ->select(
+            'job_listings.*',
+            'industries.name as field_name',
+            DB::raw("CASE WHEN job_interests.id IS NOT NULL THEN 'saved' ELSE 'not_saved' END AS save_status")
+        )
+        ->where('job_listings.field', $userId ? auth('api')->user()->industry_id : null);
 
-        $perPage = $request->get('per_page', 10);
-        $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
-
-        return response()->json($jobs);
+    // Optional search filter
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('job_listings.title', 'like', "%{$search}%")
+                ->orWhere('job_listings.company', 'like', "%{$search}%")
+                ->orWhere('job_listings.county', 'like', "%{$search}%")
+                ->orWhere('job_listings.country', 'like', "%{$search}%")
+                ->orWhere('industries.name', 'like', "%{$search}%");
+        });
     }
+
+    $perPage = $request->get('per_page', 10);
+    $jobs = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
+
+    return response()->json($jobs);
+}
+
 
     public function fetchPublicJobs(Request $request)
     {
