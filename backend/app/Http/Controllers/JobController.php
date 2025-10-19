@@ -1079,9 +1079,8 @@ PROMPT;
             'category' => DB::table('industries')->where('id', $id)->first(),
         ]);
     }
-  public function applyOnBehalf(Request $request, $jobId)
+ public function applyOnBehalf(Request $request, $jobId)
 {
-    // Validate input
     $request->validate([
         'user_id' => 'required|integer',
         'subject' => 'required|string|max:255',
@@ -1094,7 +1093,6 @@ PROMPT;
 
     info('applyOnBehalf called for user_id: ' . $userId);
 
-    // Fetch user who authorized Gmail
     $user = \App\Models\User::findOrFail($userId);
 
     if (!$user->gmail_access_token) {
@@ -1105,40 +1103,46 @@ PROMPT;
 
     try {
         $client = new GoogleClient();
-        $client->setScopes([Gmail::MAIL_GOOGLE_COM]);
+        $client->setClientId(env('GMAIL_CLIENT_ID'));
+        $client->setClientSecret(env('GMAIL_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GMAIL_REDIRECT_URI'));
+        $client->addScope('https://www.googleapis.com/auth/gmail.send');
 
         // Load stored token
         $token = json_decode($user->gmail_access_token, true);
         $client->setAccessToken($token);
 
-        // Refresh token if expired
-        if ($client->isAccessTokenExpired() && isset($token['refresh_token'])) {
-            $newToken = $client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
-            $client->setAccessToken($newToken);
+        // Refresh if expired
+        if ($client->isAccessTokenExpired()) {
+            if (!empty($user->gmail_refresh_token)) {
+                $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+                $client->setAccessToken($newToken);
 
-            // Save updated token back to user
-            $user->update([
-                'gmail_access_token' => json_encode($client->getAccessToken()),
-                'gmail_refresh_token' => $newToken['refresh_token'] ?? $user->gmail_refresh_token,
-                'gmail_access_token_expires_at' => now()->addSeconds($newToken['expires_in'] ?? 3600),
-            ]);
+                $user->update([
+                    'gmail_access_token' => json_encode($client->getAccessToken()),
+                    'gmail_refresh_token' => $newToken['refresh_token'] ?? $user->gmail_refresh_token,
+                    'gmail_token_expires_at' => now()->addSeconds($newToken['expires_in'] ?? 3600),
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Token expired and no refresh token available. Please reconnect Gmail.',
+                ], 401);
+            }
         }
 
-        $gmail = new Gmail($client);
+        $gmail = new \Google\Service\Gmail($client);
 
-        // Compose email
         $rawMessageString = "From: {$user->email}\r\n";
-        $rawMessageString .= "To: info@careershyne.com\r\n"; // recipient
+        $rawMessageString .= "To: info@careershyne.com\r\n";
         $rawMessageString .= "Subject: {$subject}\r\n\r\n";
         $rawMessageString .= $body;
 
         $rawMessage = base64_encode($rawMessageString);
-        $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage); // URL-safe
+        $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage);
 
-        $message = new Message();
+        $message = new \Google\Service\Gmail\Message();
         $message->setRaw($rawMessage);
 
-        // Send email via Gmail API
         $gmail->users_messages->send('me', $message);
 
         return response()->json([
@@ -1146,32 +1150,13 @@ PROMPT;
         ]);
 
     } catch (\Google\Service\Exception $e) {
-        info('Gmail API Exception while sending job application', [
-            'user_id' => $userId,
-            'job_id'  => $jobId,
-            'error'   => $e->getMessage(),
-            'trace'   => $e->getTraceAsString(),
-        ]);
-
-        return response()->json([
-            'message' => 'Failed to send email via Gmail API.',
-            'error'   => $e->getMessage(),
-        ], 500);
+        info('Gmail API Exception', ['user_id'=>$userId,'job_id'=>$jobId,'error'=>$e->getMessage()]);
+        return response()->json(['message'=>'Failed to send email via Gmail API.', 'error'=>$e->getMessage()], 500);
 
     } catch (\Exception $e) {
-        info('Unexpected Exception while sending job application', [
-            'user_id' => $userId,
-            'job_id'  => $jobId,
-            'error'   => $e->getMessage(),
-            'trace'   => $e->getTraceAsString(),
-        ]);
-
-        return response()->json([
-            'message' => 'An unexpected error occurred.',
-            'error'   => $e->getMessage(),
-        ], 500);
+        info('Unexpected Exception', ['user_id'=>$userId,'job_id'=>$jobId,'error'=>$e->getMessage()]);
+        return response()->json(['message'=>'An unexpected error occurred.', 'error'=>$e->getMessage()], 500);
     }
 }
-
 
 }
