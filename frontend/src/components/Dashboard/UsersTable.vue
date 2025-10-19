@@ -60,6 +60,11 @@
               <th
                 class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
               >
+                Last Login
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
+              >
                 Status
               </th>
               <th
@@ -79,9 +84,14 @@
                 {{ user.name }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">{{ user.email }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ user.phone }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ formatPhone(user.phone) }}
+              </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 {{ formatDate(user.created_at) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ formatDate(user.last_login_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
@@ -527,6 +537,15 @@ async function submitForm() {
     loading.value = false;
   }
 }
+function formatPhone(phone) {
+  if (!phone) return "-";
+  phone = phone.toString().replace(/\D/g, "");
+  if (phone.length >= 9) {
+    phone = "254" + phone.slice(-9);
+  }
+  return phone;
+}
+
 async function impersonateUser(user) {
   if (!confirm(`Login as ${user.name}?`)) return;
 
@@ -554,7 +573,6 @@ async function impersonateUser(user) {
     $toast.error("Failed to impersonate user");
   }
 }
-
 
 // Delete User
 async function deleteUser(userId) {
