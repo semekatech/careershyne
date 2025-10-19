@@ -326,6 +326,13 @@ async function submitApplication() {
       formData.append("cover_letter", applyForm.value.coverLetter);
 
     const res = await JobService.applyOnBehalf(applyJob.value.id, formData);
+
+    // Update local job status immediately
+    const jobIndex = jobs.value.findIndex((j) => j.id === applyJob.value.id);
+    if (jobIndex !== -1) {
+      jobs.value[jobIndex].application_status = "applied";
+    }
+
     Swal.fire({
       icon: "success",
       title: "Application Sent",
