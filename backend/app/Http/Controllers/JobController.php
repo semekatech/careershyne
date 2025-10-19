@@ -175,61 +175,68 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
-    public function generateContent($jobId)
-    {
-        // Fetch the job from DB
-        $job = Job::find($jobId);
+   public function generateContent($jobId)
+{
+    // Fetch the job from DB
+    $job = Job::find($jobId);
 
-        if (! $job) {
-            return response()->json([
-                'message' => 'Job not found',
-            ], 404);
-        }
-
-        try {
-            // Strip HTML tags from description
-            $description = strip_tags($job->description);
-
-            // Build a prompt for AI
-            $prompt = "Generate a professional email subject and body for a job application.
-                    Job Title: {$job->title}
-                    Company: {$job->company}
-                    Description: {$description}
-                    The email should be polite, concise, and convincing.";
-
-            $client   = OpenAI::client(env('OPENAI_API_KEY'));
-            $response = $client->chat()->create([
-                'model'       => 'gpt-4o-mini',
-                'messages'    => [
-                    ['role' => 'system', 'content' => 'You are an expert Job Application Assistant'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => 0.3,
-            ]);
-            $text    = $response->choices[0]->text;
-            $subject = '';
-            $body    = '';
-            if (preg_match('/Subject:\s*(.+?)\nBody:\s*(.+)/s', $text, $matches)) {
-                $subject = trim($matches[1]);
-                $body    = trim($matches[2]);
-            } else {
-                // fallback: first line as subject, rest as body
-                $lines   = explode("\n", $text);
-                $subject = trim($lines[0] ?? '');
-                $body    = trim(implode("\n", array_slice($lines, 1)));
-            }
-
-            return response()->json([
-                'subject' => $subject,
-                'body'    => $body,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to generate AI content',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+    if (! $job) {
+        return response()->json([
+            'message' => 'Job not found',
+        ], 404);
     }
+
+    try {
+        // Strip HTML tags from description
+        $description = strip_tags($job->description);
+
+        // Build a prompt for AI
+        $prompt = "Generate a professional email subject and body for a job application.
+                   Job Title: {$job->title}
+                   Company: {$job->company}
+                   Description: {$description}
+                   The email should be polite, concise, and convincing.
+                   Return the result in this format:
+                   Subject: <subject line>
+                   Body: <email body>";
+
+        $client   = OpenAI::client(env('OPENAI_API_KEY'));
+        $response = $client->chat()->create([
+            'model'       => 'gpt-4o-mini',
+            'messages'    => [
+                ['role' => 'system', 'content' => 'You are an expert Job Application Assistant.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'temperature' => 0.3,
+        ]);
+
+        // Correct way to get text from chat API
+        $text = $response->choices[0]->message->content ?? '';
+
+        $subject = '';
+        $body    = '';
+
+        if (preg_match('/Subject:\s*(.+?)\nBody:\s*(.+)/s', $text, $matches)) {
+            $subject = trim($matches[1]);
+            $body    = trim($matches[2]);
+        } else {
+            // fallback: first line as subject, rest as body
+            $lines   = explode("\n", $text);
+            $subject = trim($lines[0] ?? '');
+            $body    = trim(implode("\n", array_slice($lines, 1)));
+        }
+
+        return response()->json([
+            'subject' => $subject,
+            'body'    => $body,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to generate AI content',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
 
     public function fetchPublicJobs(Request $request)
     {
