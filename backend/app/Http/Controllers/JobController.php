@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use OpenAI;
-
+use Google\Client as GoogleClient;
+use Google\Service\Gmail;
 class JobController extends Controller
 {
     protected $aiReview;
@@ -1077,5 +1078,58 @@ PROMPT;
             'category' => DB::table('industries')->where('id', $id)->first(),
         ]);
     }
+    public function applyOnBehalf(Request $request, $jobId)
+    {
 
+        info('data ni');
+        $request->validate([
+            'user_id' => 'required|integer',
+            'subject' => 'required|string|max:255',
+            'body'    => 'required|string',
+        ]);
+
+        $userId  = $request->input('user_id');
+        $subject = $request->input('subject');
+        $body    = $request->input('body');
+
+        // Fetch the user who authorized Gmail
+        $user = \App\Models\User::findOrFail($userId);
+        if (! $user->gmail_token) {
+            return response()->json([
+                'message' => 'User has not authorized Gmail.',
+            ], 403);
+        }
+
+        try {
+            $client = new GoogleClient();
+            $client->setAccessToken($user->gmail_token);
+            $client->setScopes([Gmail::MAIL_GOOGLE_COM]);
+
+            $gmail = new Gmail($client);
+
+            // Create email message
+            $rawMessageString = "From: {$user->email}\r\n";
+            $rawMessageString .= "To: info@careershyne.com\r\n"; 
+            $rawMessageString .= "Subject: {$subject}\r\n\r\n";
+            $rawMessageString .= $body;
+
+            $rawMessage = base64_encode($rawMessageString);
+            $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage); // URL safe
+
+            $message = new Gmail\Message();
+            $message->setRaw($rawMessage);
+
+            $gmail->users_messages->send('me', $message);
+
+            return response()->json([
+                'message' => 'Application email sent successfully!',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to send email.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

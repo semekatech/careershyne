@@ -124,7 +124,8 @@ Route::middleware(LogActivity::class)->group(function () {
         ]);
     });
 
-
+Route::post('/jobs/{jobId}/apply-on-behalf', [JobController::class, 'applyOnBehalf'])
+    ->middleware('auth:api'); // make sure user is authenticated
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 

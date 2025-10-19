@@ -56,28 +56,23 @@ const JobService = {
     const response = await api.get("/personalized-jobs");
     return response.data;
   },
- async getSavedJobs() {
+
+  async getSavedJobs() {
     const response = await api.get("/saved-jobs");
     return response.data;
   },
 
-  
- async markInterested(jobId) {
+  async markInterested(jobId) {
     const response = await api.post(`/${jobId}/interested`);
     return response.data;
   },
+
   async getUsersJobs() {
     const response = await api.get("/user-jobs");
     return response.data;
   },
 
-  async getPublicJobs(
-    page = 1,
-    search = "",
-    county = "",
-    type = "",
-    category = ""
-  ) {
+  async getPublicJobs(page = 1, search = "", county = "", type = "", category = "") {
     try {
       const response = await publicApi.get("/public", {
         params: { page, search, county, type, category },
@@ -87,6 +82,15 @@ const JobService = {
       console.error("Error fetching public jobs:", err);
       throw err;
     }
+  },
+
+  /** ✨ New: Apply on behalf of user */
+  async applyOnBehalf(jobId, userId, payload) {
+    const response = await api.post(`/${jobId}/apply-on-behalf`, {
+      user_id: userId,
+      ...payload,
+    });
+    return response.data;
   },
 };
 

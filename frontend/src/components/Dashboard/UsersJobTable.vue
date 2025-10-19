@@ -11,17 +11,39 @@
     </div>
 
     <!-- Loader (initial) -->
-    <div v-if="loading && jobs.length === 0" class="flex justify-center items-center py-20">
-      <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+    <div
+      v-if="loading && jobs.length === 0"
+      class="flex justify-center items-center py-20"
+    >
+      <svg
+        class="animate-spin h-10 w-10 text-primary"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        ></path>
       </svg>
     </div>
 
     <!-- Error -->
     <div v-else-if="error && jobs.length === 0" class="text-center py-10">
       <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
-      <button @click="reloadAll" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors">
+      <button
+        @click="reloadAll"
+        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
+      >
         Retry
       </button>
     </div>
@@ -34,16 +56,24 @@
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
-                {{ job.title }} <span class="text-sm font-normal">- {{ job.field_name || job.industry || '' }}</span>
+                {{ job.title }}
+                <span class="text-sm font-normal"
+                  >- {{ job.field_name || job.industry || "" }}</span
+                >
               </h3>
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
-                {{ job.company }} <span class="mx-1">•</span> {{ job.type || 'Full-time' }}
+                {{ job.company }} <span class="mx-1">•</span>
+                {{ job.type || "Full-time" }}
               </p>
 
-              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
+              <div
+                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
+              >
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -66,7 +96,9 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="border-t border-border-light dark:border-border-dark pt-3">
+          <div
+            class="border-t border-border-light dark:border-border-dark pt-3"
+          >
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 @click="openEligibility(job)"
@@ -103,14 +135,33 @@
 
       <!-- Loading more indicator -->
       <div v-if="loading && jobs.length > 0" class="flex justify-center py-4">
-        <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        <svg
+          class="animate-spin h-8 w-8 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
         </svg>
       </div>
 
       <!-- No jobs -->
-      <div v-if="!loading && jobs.length === 0 && !error" class="text-center py-10 text-gray-500">
+      <div
+        v-if="!loading && jobs.length === 0 && !error"
+        class="text-center py-10 text-gray-500"
+      >
         No jobs found.
       </div>
 
@@ -119,12 +170,21 @@
         v-if="!loading && !limitsLoading && totalLimits <= 0"
         class="absolute left-0 right-0 top-[10%] bottom-0 bg-white/40 dark:bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-start pt-10 text-center z-20 md:z-30"
       >
-        <div class="bg-white/90 dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl max-w-md w-[90%]">
+        <div
+          class="bg-white/90 dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl max-w-md w-[90%]"
+        >
           <div class="flex flex-col items-center space-y-4">
             <span class="material-icons text-6xl text-gray-500">lock</span>
-            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Access Locked</h3>
-            <p class="text-gray-600 dark:text-gray-400">Kindly choose a plan to unlock job listings.</p>
-            <button @click="goToPlans" class="mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full shadow hover:bg-indigo-700 transition">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              Access Locked
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+              Kindly choose a plan to unlock job listings.
+            </p>
+            <button
+              @click="goToPlans"
+              class="mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full shadow hover:bg-indigo-700 transition"
+            >
               Choose Plan
             </button>
           </div>
@@ -211,7 +271,13 @@ const coverLetterResult = ref(null);
 const emailTemplateProgress = ref(0);
 const emailTemplateResult = ref(null);
 
-const limits = ref({ plan: null, cv: 0, coverletters: 0, emails: 0, checks: 0 });
+const limits = ref({
+  plan: null,
+  cv: 0,
+  coverletters: 0,
+  emails: 0,
+  checks: 0,
+});
 const limitsLoading = ref(true);
 
 // computed total limits
@@ -291,7 +357,11 @@ async function fetchJobs(page = 1) {
     const { results, meta } = parseResults(payload);
 
     // determine last page using meta if available
-    if (meta && meta.current_page !== undefined && meta.last_page !== undefined) {
+    if (
+      meta &&
+      meta.current_page !== undefined &&
+      meta.last_page !== undefined
+    ) {
       if (meta.current_page >= meta.last_page) lastPage.value = true;
     } else {
       // fallback: if returned results length < perPage, assume last page
@@ -313,7 +383,8 @@ async function fetchJobs(page = 1) {
     if (err?.response?.status === 403) {
       error.value = "Access denied. Upgrade your plan to access jobs.";
     } else {
-      error.value = err?.message || "Error fetching jobs. Please try again later.";
+      error.value =
+        err?.message || "Error fetching jobs. Please try again later.";
     }
   } finally {
     loading.value = false;
@@ -363,7 +434,13 @@ async function fetchLimits() {
 }
 
 // --- modal & action handlers (generic) ---
-async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }) {
+async function handleAction({
+  job,
+  serviceFn,
+  modalRef,
+  progressRef,
+  resultRef,
+}) {
   const { isConfirmed } = await Swal.fire({
     title: "Ready?",
     text: `Proceed with action for "${job.title}"?`,
@@ -393,9 +470,15 @@ async function handleAction({ job, serviceFn, modalRef, progressRef, resultRef }
     };
   } catch (err) {
     if (err?.response?.status === 403) {
-      resultRef.value = { template: "", error: "Access denied (403). Tokens limit exceeded." };
+      resultRef.value = {
+        template: "",
+        error: "Access denied (403). Tokens limit exceeded.",
+      };
     } else {
-      resultRef.value = { template: "", error: err?.message || "Action failed" };
+      resultRef.value = {
+        template: "",
+        error: err?.message || "Action failed",
+      };
     }
   } finally {
     clearInterval(interval);
