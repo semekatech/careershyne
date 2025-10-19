@@ -81,6 +81,8 @@ Route::middleware(LogActivity::class)->group(function () {
         Route::post('/add', [JobController::class, 'store']);
 
         Route::get('/all', [JobController::class, 'fetchAll']);
+        Route::get('/personalized-jobsl', [JobController::class, 'fetchPersonalizedJobs']);
+
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
         Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
             ->middleware(CheckSubscriptionLimit::class . ':checks');

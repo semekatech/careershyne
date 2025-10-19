@@ -1,11 +1,11 @@
 <template>
   <div class="w-full px-2 sm:px-4 md:px-6 lg:px-8">
     <!-- Banner -->
-    <!-- <UserBanner /> -->
+    <PremiumUserBanner />
 
     <!-- Space -->
     <div class="mt-4 sm:mt-6">
-      <UserTabs />
+      <PremiumUserTabs />
     </div>
   </div>
 </template>
@@ -15,9 +15,8 @@
 <script setup>
 import { onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
-
-import UserBanner from "@/components/Dashboard/UserBanner.vue";
-import UserTabs from "@/components/Dashboard/UserTabs.vue";
+import PremiumUserBanner from "@/components/Dashboard/PremiumUserBanner.vue";
+import PremiumUserTabs from "@/components/Dashboard/PremiumUserTabs.vue";
 
 const auth = useAuthStore();
 onMounted(async () => {

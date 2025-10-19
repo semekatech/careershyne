@@ -52,16 +52,27 @@ const JobService = {
     return response.data;
   },
 
+  async getPersonalizedJobs() {
+    const response = await api.get("/personalized-jobs");
+    return response.data;
+  },
+
   async getUsersJobs() {
     const response = await api.get("/user-jobs");
     return response.data;
   },
 
   /** 🌍 Public route — supports pagination + search */
-  async getPublicJobs(page = 1, search = "", county = "",type="",category="") {
+  async getPublicJobs(
+    page = 1,
+    search = "",
+    county = "",
+    type = "",
+    category = ""
+  ) {
     try {
       const response = await publicApi.get("/public", {
-        params: { page, search, county, type,category },
+        params: { page, search, county, type, category },
       });
       return response.data;
     } catch (err) {
