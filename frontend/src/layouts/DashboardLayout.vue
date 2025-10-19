@@ -193,6 +193,13 @@ const sidebarLinks = [
     roles: ["1109", "manager"],
   },
   {
+    name: "Manage Saved Jobs",
+    href: "/manage-save-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1109", "manager"],
+  },
+  {
     name: "Manage Jobs",
     href: "/manage-jobs",
     icon: "material-icons-sharp",

@@ -18,6 +18,7 @@ import RegisterPage from "@/pages/RegisterPage.vue";
 import SetupPage from "@/pages/SetupPage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 import ManageJobs from "@/pages/Dashboard/ManageJobs.vue";
+import ManageSavedJobs from "@/pages/Dashboard/ManageSavedJobs.vue"
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 import Profile from "@/pages/Dashboard/Profile.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
@@ -80,6 +81,14 @@ const routes = [
     meta: { title: "Manage Jobs" },
     children: [{ path: "", component: ManageJobs }],
   },
+{
+    path: "/manage-save-jobs",
+    component: DashboardLayout,
+    meta: { title: "Manage Saved Jobs" },
+    children: [{ path: "", component: ManageSavedJobs }],
+  },
+
+  
   {
     path: "/manage-categories",
     component: DashboardLayout,
@@ -140,6 +149,12 @@ const routes = [
     meta: { title: "Activities History" },
     children: [{ path: "", component: UserActivity }],
   },
+  {
+  path: '/gmail-callback',
+  name: 'GmailCallback',
+  component: () => import('@/pages/Dashboard/GmailCallback.vue')
+}
+
 ];
 
 const router = createRouter({
@@ -160,6 +175,7 @@ router.beforeEach(async (to, from, next) => {
     "/payment/:id",
     "/order-cv",
     "/login",
+    "/gmail-callback",
     "/register",
     "/how-it-works",
     "/custom-cv-order",
