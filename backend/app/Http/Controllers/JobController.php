@@ -93,7 +93,7 @@ class JobController extends Controller
             info($request->category);
             $query->where('job_listings.field', $request->category);
         }
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 9);
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);

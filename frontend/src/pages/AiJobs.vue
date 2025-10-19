@@ -9,7 +9,9 @@
         class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 dark:opacity-[0.03]"
       ></div>
       <div class="relative z-10 max-w-2xl mx-auto px-6">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white">
+        <h1
+          class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white"
+        >
           Find Your <span class="text-primary">Dream Job</span> Today
         </h1>
         <p class="mt-3 text-slate-600 dark:text-slate-400">
@@ -41,7 +43,9 @@
           @click="toggleLocationDropdown"
           class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
         >
-          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+          <span
+            class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors"
+          >
             location_on
           </span>
           <p class="text-sm font-semibold leading-normal">
@@ -70,7 +74,9 @@
           @click="toggleTypeDropdown"
           class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
         >
-          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+          <span
+            class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors"
+          >
             work
           </span>
           <p class="text-sm font-semibold leading-normal">
@@ -99,11 +105,13 @@
           @click="toggleIndustryDropdown"
           class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
         >
-          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+          <span
+            class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors"
+          >
             business
           </span>
           <p class="text-sm font-semibold leading-normal">
-            {{ selectedIndustry || "Industry" }}
+            {{ selectedIndustryLabel || "Industry" }}
           </p>
         </button>
 
@@ -114,7 +122,7 @@
           <div
             v-for="industry in industryOptions"
             :key="industry.id"
-            @click="selectIndustry(industry.name)"
+            @click="selectIndustry(industry)"
             class="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary/80"
           >
             {{ industry.name }}
@@ -141,10 +149,16 @@
             class="p-6 bg-white dark:bg-card-dark rounded-xl shadow-lg animate-pulse"
           >
             <div class="flex items-center gap-4 mb-4">
-              <div class="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"></div>
+              <div
+                class="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"
+              ></div>
               <div class="flex-1 space-y-2">
-                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-                <div class="h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                <div
+                  class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"
+                ></div>
+                <div
+                  class="h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2"
+                ></div>
               </div>
             </div>
             <div class="space-y-2">
@@ -152,7 +166,9 @@
               <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
               <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
             </div>
-            <div class="h-10 bg-gray-300 dark:bg-gray-700 rounded-lg mt-4"></div>
+            <div
+              class="h-10 bg-gray-300 dark:bg-gray-700 rounded-lg mt-4"
+            ></div>
           </div>
         </template>
 
@@ -170,9 +186,19 @@
         >
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-4">
-              <img src="/favicon.jpg" alt="Logo" class="w-14 h-14 rounded-lg" />
+              <div
+                class="w-14 h-14 rounded-xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center overflow-hidden"
+              >
+                <img
+                  src="/favicon.jpg"
+                  alt="Company Logo"
+                  class="w-10 h-10 object-cover rounded-lg"
+                />
+              </div>
               <div>
-                <p class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary">
+                <p
+                  class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary"
+                >
                   {{ job.title }}
                 </p>
                 <p class="text-sm text-gray-500">{{ job.company }}</p>
@@ -181,7 +207,10 @@
             <p class="text-sm text-text-light dark:text-text-dark">
               {{ job.office ?? "Not specified" }}
             </p>
-            <p class="text-sm text-text-light dark:text-text-dark line-clamp-3" v-html="job.description"></p>
+            <p
+              class="text-sm text-text-light dark:text-text-dark line-clamp-3"
+              v-html="job.description"
+            ></p>
             <button
               class="mt-2 w-full bg-primary text-white rounded-lg h-11 px-4 font-bold hover:bg-primary-focus transition"
             >
@@ -191,8 +220,27 @@
         </div>
       </div>
 
-      <div v-if="loading && jobs.length > 0" class="text-center py-6 text-gray-500">
-        Loading more jobs...
+      <div
+        v-if="loading && jobs.length > 0"
+        class="flex flex-col items-center justify-center py-10 space-y-4 text-gray-500"
+      >
+        <div class="flex space-x-2">
+          <div
+            class="w-3 h-3 bg-primary rounded-full animate-bounce"
+            style="animation-delay: 0s"
+          ></div>
+          <div
+            class="w-3 h-3 bg-primary rounded-full animate-bounce"
+            style="animation-delay: 0.15s"
+          ></div>
+          <div
+            class="w-3 h-3 bg-primary rounded-full animate-bounce"
+            style="animation-delay: 0.3s"
+          ></div>
+        </div>
+        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+          Loading more jobs...
+        </p>
       </div>
 
       <div v-if="!hasMore && !loading" class="text-center text-gray-400 mt-6">
@@ -202,7 +250,6 @@
   </div>
   <AiFooterSection />
 </template>
-
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import JobService from "@/services/jobService";
@@ -220,13 +267,21 @@ const search = ref("");
 // Filters
 const selectedLocation = ref("");
 const selectedType = ref("");
-const selectedIndustry = ref("");
+const selectedIndustry = ref(""); // store industry ID here
+const selectedIndustryLabel = ref(""); // store industry name for display
 
 const showLocationDropdown = ref(false);
 const showTypeDropdown = ref(false);
 const showIndustryDropdown = ref(false);
 
-const counties = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", "Machakos"];
+const counties = [
+  "Nairobi",
+  "Mombasa",
+  "Kisumu",
+  "Nakuru",
+  "Kiambu",
+  "Machakos",
+];
 const jobTypes = ["Full-time", "Part-time", "Remote", "Contract", "Internship"];
 const industryOptions = ref([]);
 
@@ -259,7 +314,8 @@ const selectType = (type) => {
   reloadJobs();
 };
 const selectIndustry = (industry) => {
-  selectedIndustry.value = industry;
+  selectedIndustry.value = industry.id; // ✅ store ID
+  selectedIndustryLabel.value = industry.name; // ✅ store label for display
   showIndustryDropdown.value = false;
   reloadJobs();
 };
@@ -270,6 +326,7 @@ const clearFilters = () => {
   selectedLocation.value = "";
   selectedType.value = "";
   selectedIndustry.value = "";
+  selectedIndustryLabel.value = "";
   reloadJobs();
 };
 
@@ -277,14 +334,16 @@ const clearFilters = () => {
 const loadJobs = async () => {
   if (loading.value || !hasMore.value) return;
   loading.value = true;
+
   try {
     const data = await JobService.getPublicJobs(
       page.value,
       search.value,
       selectedLocation.value,
       selectedType.value,
-      selectedIndustry.value
+      selectedIndustry.value // ✅ passing industry ID
     );
+
     if (data?.data?.length) {
       jobs.value.push(...data.data);
       hasMore.value = data.current_page < data.last_page;
@@ -310,7 +369,8 @@ const reloadJobs = async () => {
 
 // Infinite scroll
 const handleScroll = () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) loadJobs();
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300)
+    loadJobs();
 };
 
 // Debounced search
@@ -329,9 +389,11 @@ onMounted(async () => {
 onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
 
+
 <style scoped>
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
   }
   50% {
