@@ -88,6 +88,7 @@
             </div>
 
             <!-- Buttons -->
+            <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
               <button
                 class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
@@ -97,13 +98,23 @@
                 <span class="material-icons text-base ml-2">arrow_forward</span>
               </button>
 
-              <!-- Open Apply Modal -->
+              <!-- Apply on behalf -->
               <button
-                class="px-4 py-2 font-semibold rounded-full shadow-md bg-green-500 text-white hover:bg-green-600 flex items-center justify-center whitespace-nowrap transition-colors"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  job.application_status === 'applied'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-green-500 text-white hover:bg-green-600',
+                ]"
+                :disabled="job.application_status === 'applied'"
                 @click="openApplyModal(job)"
               >
                 <span class="material-icons text-base mr-2">send</span>
-                Apply on behalf
+                {{
+                  job.application_status === "applied"
+                    ? "Applied"
+                    : "Apply on behalf"
+                }}
               </button>
             </div>
           </div>
@@ -226,7 +237,6 @@ const showModal = ref(false);
 const showApplyModal = ref(false);
 const applyJob = ref(null);
 
-
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString();
 }
@@ -271,46 +281,57 @@ function closeApplyModal() {
 }
 
 const applyForm = ref({
-  subject: '',
-  body: '',
+  subject: "",
+  body: "",
   cv: null,
   coverLetter: null,
-  cvName: '',
-  coverLetterName: ''
+  cvName: "",
+  coverLetterName: "",
 });
 
 function handleFileChange(event, type) {
   const file = event.target.files[0];
   if (!file) return;
 
-  if (type === 'cv') {
+  if (type === "cv") {
     applyForm.value.cv = file;
     applyForm.value.cvName = file.name;
-  } else if (type === 'coverLetter') {
+  } else if (type === "coverLetter") {
     applyForm.value.coverLetter = file;
     applyForm.value.coverLetterName = file.name;
   }
 }
 
 async function submitApplication() {
-  if (!applyForm.value.subject || !applyForm.value.body || !applyForm.value.cv) {
-    Swal.fire('Validation Error', 'Subject, body, and CV are required.', 'warning');
+  if (
+    !applyForm.value.subject ||
+    !applyForm.value.body ||
+    !applyForm.value.cv
+  ) {
+    Swal.fire(
+      "Validation Error",
+      "Subject, body, and CV are required.",
+      "warning"
+    );
     return;
   }
 
   try {
     const formData = new FormData();
-    formData.append('user_id', applyJob.value.user_id);
-    formData.append('subject', applyForm.value.subject);
-    formData.append('body', applyForm.value.body);
-    formData.append('cv', applyForm.value.cv);
-    if (applyForm.value.coverLetter) formData.append('cover_letter', applyForm.value.coverLetter);
+    formData.append("user_id", applyJob.value.user_id);
+    formData.append("subject", applyForm.value.subject);
+    formData.append("body", applyForm.value.body);
+    formData.append("cv", applyForm.value.cv);
+    if (applyForm.value.coverLetter)
+      formData.append("cover_letter", applyForm.value.coverLetter);
 
     const res = await JobService.applyOnBehalf(applyJob.value.id, formData);
     Swal.fire({
-      icon: 'success',
-      title: 'Application Sent',
-      text: res.data?.message || `Application sent on behalf of ${applyJob.value.user_name}`,
+      icon: "success",
+      title: "Application Sent",
+      text:
+        res.data?.message ||
+        `Application sent on behalf of ${applyJob.value.user_name}`,
       timer: 2000,
       showConfirmButton: false,
     });
@@ -318,13 +339,14 @@ async function submitApplication() {
     closeApplyModal();
   } catch (err) {
     Swal.fire({
-      icon: 'error',
-      title: 'Failed',
-      text: err.response?.data?.message || 'Could not send application. Please try again.',
+      icon: "error",
+      title: "Failed",
+      text:
+        err.response?.data?.message ||
+        "Could not send application. Please try again.",
     });
   }
 }
-
 
 onMounted(fetchJobs);
 </script>

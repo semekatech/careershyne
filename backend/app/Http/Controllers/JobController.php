@@ -90,6 +90,7 @@ class JobController extends Controller
         DB::table('job_interests')->insert([
             'user_id'    => $user->id,
             'job_id'     => $id,
+            'status'     => 'saved',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -146,6 +147,7 @@ class JobController extends Controller
                 'users.name as user_name',
                 'users.email as user_email',
                 'job_interests.created_at as saved_at', // <-- added saved_at
+                'job_interests.status as application_status',
                 DB::raw("'saved' AS save_status")
             );
 
@@ -1079,117 +1081,135 @@ PROMPT;
             'category' => DB::table('industries')->where('id', $id)->first(),
         ]);
     }
-    public function applyOnBehalf(Request $request, $jobId)
-    {
-        $request->validate([
-            'user_id'      => 'required|integer',
-            'subject'      => 'required|string|max:255',
-            'body'         => 'required|string',
-            'cv'           => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-            'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+public function applyOnBehalf(Request $request, $jobId)
+{
+    $request->validate([
+        'user_id'      => 'required|integer',
+        'subject'      => 'required|string|max:255',
+        'body'         => 'required|string',
+        'cv'           => 'required|file|mimes:pdf,doc,docx|max:5120', 
+        'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+    ]);
+
+    $userId  = $request->input('user_id');
+    $subject = $request->input('subject');
+    $body    = $request->input('body');
+
+    $user = \App\Models\User::findOrFail($userId);
+
+    if (! $user->gmail_access_token) {
+        return response()->json(['message' => 'User has not authorized Gmail.'], 403);
+    }
+
+    try {
+        // -------- Gmail sending logic (same as before) --------
+        $client = new GoogleClient();
+        $client->setClientId(env('GMAIL_CLIENT_ID'));
+        $client->setClientSecret(env('GMAIL_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GMAIL_REDIRECT_URI'));
+        $client->addScope('https://www.googleapis.com/auth/gmail.send');
+
+        $token = json_decode($user->gmail_access_token, true);
+        $client->setAccessToken($token);
+
+        if ($client->isAccessTokenExpired()) {
+            if (! empty($user->gmail_refresh_token)) {
+                $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+                $client->setAccessToken($newToken);
+
+                $user->update([
+                    'gmail_access_token'     => json_encode($client->getAccessToken()),
+                    'gmail_refresh_token'    => $newToken['refresh_token'] ?? $user->gmail_refresh_token,
+                    'gmail_token_expires_at' => now()->addSeconds($newToken['expires_in'] ?? 3600),
+                ]);
+            } else {
+                return response()->json(['message' => 'Token expired. Please reconnect Gmail.'], 401);
+            }
+        }
+
+        $gmail = new \Google\Service\Gmail($client);
+
+        // Compose email with attachments (CV + optional cover letter)
+        $boundary = uniqid(rand(), true);
+        $rawMessageString = "From: {$user->email}\r\n";
+        $rawMessageString .= "To: info@careershyne.com\r\n";
+        $rawMessageString .= "Subject: {$subject}\r\n";
+        $rawMessageString .= "MIME-Version: 1.0\r\n";
+        $rawMessageString .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
+        $rawMessageString .= "--{$boundary}\r\n";
+        $rawMessageString .= "Content-Type: text/plain; charset=utf-8\r\n";
+        $rawMessageString .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
+        $rawMessageString .= $body . "\r\n";
+
+        // Attach CV
+        $cvContent = chunk_split(base64_encode(file_get_contents($request->file('cv')->getRealPath())));
+        $cvName    = $request->file('cv')->getClientOriginalName();
+        $rawMessageString .= "--{$boundary}\r\n";
+        $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$cvName}\"\r\n";
+        $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
+        $rawMessageString .= "Content-Disposition: attachment; filename=\"{$cvName}\"\r\n\r\n";
+        $rawMessageString .= $cvContent . "\r\n";
+
+        // Attach cover letter if present
+        $coverLetterPath = null;
+        if ($request->hasFile('cover_letter')) {
+            $clContent = chunk_split(base64_encode(file_get_contents($request->file('cover_letter')->getRealPath())));
+            $clName    = $request->file('cover_letter')->getClientOriginalName();
+            $rawMessageString .= "--{$boundary}\r\n";
+            $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$clName}\"\r\n";
+            $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
+            $rawMessageString .= "Content-Disposition: attachment; filename=\"{$clName}\"\r\n\r\n";
+            $rawMessageString .= $clContent . "\r\n";
+        }
+
+        $rawMessageString .= "--{$boundary}--";
+
+        $rawMessage = base64_encode($rawMessageString);
+        $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage);
+
+        $message = new \Google\Service\Gmail\Message();
+        $message->setRaw($rawMessage);
+        $gmail->users_messages->send('me', $message);
+
+        // -------- Store files locally --------
+        $cvPath = $request->file('cv')->store('applications/cv', 'public');
+
+        if ($request->hasFile('cover_letter')) {
+            $coverLetterPath = $request->file('cover_letter')->store('applications/cover_letters', 'public');
+        }
+
+        // -------- Save application in DB --------
+        DB::table('job_applications')->insert([
+            'job_id'            => $jobId,
+            'user_id'           => $userId,
+            'subject'           => $subject,
+            'body'              => $body,
+            'cv_path'           => $cvPath,
+            'cover_letter_path' => $coverLetterPath,
+            'created_at'        => now(),
+            'updated_at'        => now(),
         ]);
 
-        $userId  = $request->input('user_id');
-        $subject = $request->input('subject');
-        $body    = $request->input('body');
+        // Mark as applied in job_interests
+        DB::table('job_interests')
+            ->where('job_id', $jobId)
+            ->where('user_id', $userId)
+            ->update(['status' => 'applied', 'updated_at' => now()]);
 
-        info('applyOnBehalf called for user_id: ' . $userId);
+        info('Application sent, saved to DB, and job marked as applied', ['user_id' => $userId, 'job_id' => $jobId]);
 
-        $user = \App\Models\User::findOrFail($userId);
+        return response()->json([
+            'message' => 'Application email sent, saved in database, and job marked as applied!',
+        ]);
 
-        if (! $user->gmail_access_token) {
-            return response()->json([
-                'message' => 'User has not authorized Gmail.',
-            ], 403);
-        }
+    } catch (\Google\Service\Exception $e) {
+        info('Gmail API Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to send email via Gmail API.', 'error' => $e->getMessage()], 500);
 
-        try {
-            $client = new GoogleClient();
-            $client->setClientId(env('GMAIL_CLIENT_ID'));
-            $client->setClientSecret(env('GMAIL_CLIENT_SECRET'));
-            $client->setRedirectUri(env('GMAIL_REDIRECT_URI'));
-            $client->addScope('https://www.googleapis.com/auth/gmail.send');
-
-            // Load stored token
-            $token = json_decode($user->gmail_access_token, true);
-            $client->setAccessToken($token);
-
-            // Refresh if expired
-            if ($client->isAccessTokenExpired()) {
-                if (! empty($user->gmail_refresh_token)) {
-                    $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
-                    $client->setAccessToken($newToken);
-
-                    $user->update([
-                        'gmail_access_token'     => json_encode($client->getAccessToken()),
-                        'gmail_refresh_token'    => $newToken['refresh_token'] ?? $user->gmail_refresh_token,
-                        'gmail_token_expires_at' => now()->addSeconds($newToken['expires_in'] ?? 3600),
-                    ]);
-                } else {
-                    return response()->json([
-                        'message' => 'Token expired and no refresh token available. Please reconnect Gmail.',
-                    ], 401);
-                }
-            }
-
-            $gmail = new \Google\Service\Gmail($client);
-
-            // Compose email with attachments
-            $boundary         = uniqid(rand(), true);
-            $rawMessageString = "From: {$user->email}\r\n";
-            $rawMessageString .= "To: info@careershyne.com\r\n";
-            $rawMessageString .= "Subject: {$subject}\r\n";
-            $rawMessageString .= "MIME-Version: 1.0\r\n";
-            $rawMessageString .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
-            $rawMessageString .= "--{$boundary}\r\n";
-            $rawMessageString .= "Content-Type: text/plain; charset=utf-8\r\n";
-            $rawMessageString .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
-            $rawMessageString .= $body . "\r\n";
-
-            // Attach CV
-            $cvContent = chunk_split(base64_encode(file_get_contents($request->file('cv')->getRealPath())));
-            $cvName    = $request->file('cv')->getClientOriginalName();
-            $rawMessageString .= "--{$boundary}\r\n";
-            $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$cvName}\"\r\n";
-            $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
-            $rawMessageString .= "Content-Disposition: attachment; filename=\"{$cvName}\"\r\n\r\n";
-            $rawMessageString .= $cvContent . "\r\n";
-
-            // Attach cover letter if present
-            if ($request->hasFile('cover_letter')) {
-                $clContent = chunk_split(base64_encode(file_get_contents($request->file('cover_letter')->getRealPath())));
-                $clName    = $request->file('cover_letter')->getClientOriginalName();
-                $rawMessageString .= "--{$boundary}\r\n";
-                $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$clName}\"\r\n";
-                $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
-                $rawMessageString .= "Content-Disposition: attachment; filename=\"{$clName}\"\r\n\r\n";
-                $rawMessageString .= $clContent . "\r\n";
-            }
-
-            $rawMessageString .= "--{$boundary}--";
-
-            $rawMessage = base64_encode($rawMessageString);
-            $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage);
-
-            $message = new \Google\Service\Gmail\Message();
-            $message->setRaw($rawMessage);
-
-            $gmail->users_messages->send('me', $message);
-
-            info('Application email sent successfully', ['user_id' => $userId, 'job_id' => $jobId]);
-
-            return response()->json([
-                'message' => 'Application email sent successfully!',
-            ]);
-
-        } catch (\Google\Service\Exception $e) {
-            info('Gmail API Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to send email via Gmail API.', 'error' => $e->getMessage()], 500);
-
-        } catch (\Exception $e) {
-            info('Unexpected Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'An unexpected error occurred.', 'error' => $e->getMessage()], 500);
-        }
+    } catch (\Exception $e) {
+        info('Unexpected Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
+        return response()->json(['message' => 'An unexpected error occurred.', 'error' => $e->getMessage()], 500);
     }
+}
 
 }
