@@ -58,7 +58,7 @@ const JobService = {
   },
 
   /** 🌍 Public route — supports pagination + search */
-  async getPublicJobs(page = 1, search = "", county = "",type="") {
+  async getPublicJobs(page = 1, search = "", county = "",type="",category="") {
     try {
       const response = await publicApi.get("/public", {
         params: { page, search, county, type,category },

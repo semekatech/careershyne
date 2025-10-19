@@ -90,7 +90,8 @@ class JobController extends Controller
             $query->where('job_listings.type', 'like', "%{$request->type}%");
         }
         if ($request->filled('category')) {
-            $query->where('job_listings.field', $request->type);
+            info($request->category);
+            $query->where('job_listings.field', $request->category);
         }
         $perPage = $request->get('per_page', 10);
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
