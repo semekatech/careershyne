@@ -72,7 +72,7 @@ const JobService = {
     return response.data;
   },
 
-  
+
   async getPublicJobs(page = 1, search = "", county = "", type = "", category = "") {
     try {
       const response = await publicApi.get("/public", {
@@ -86,13 +86,15 @@ const JobService = {
   },
 
   /** ✨ New: Apply on behalf of user */
-  async applyOnBehalf(jobId, userId, payload) {
-    const response = await api.post(`/${jobId}/apply-on-behalf`, {
-      user_id: userId,
-      ...payload,
-    });
-    return response.data;
-  },
+ async applyOnBehalf(jobId, formData) {
+  const response = await api.post(`/${jobId}/apply-on-behalf`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+}
+
 };
 
 export default JobService;
