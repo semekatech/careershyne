@@ -1091,7 +1091,9 @@ PROMPT;
     $userId  = $request->input('user_id');
     $subject = $request->input('subject');
     $body    = $request->input('body');
-    info('user_id'.$userId );
+
+    info('applyOnBehalf called for user_id: ' . $userId);
+
     // Fetch user who authorized Gmail
     $user = \App\Models\User::findOrFail($userId);
 
@@ -1136,15 +1138,32 @@ PROMPT;
         ]);
 
     } catch (\Google\Service\Exception $e) {
+        info('Gmail API Exception while sending job application', [
+            'user_id' => $userId,
+            'job_id'  => $jobId,
+            'error'   => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
+
         return response()->json([
             'message' => 'Failed to send email via Gmail API.',
             'error'   => $e->getMessage(),
         ], 500);
+
     } catch (\Exception $e) {
+        info('Unexpected Exception while sending job application', [
+            'user_id' => $userId,
+            'job_id'  => $jobId,
+            'error'   => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
+
         return response()->json([
             'message' => 'An unexpected error occurred.',
             'error'   => $e->getMessage(),
         ], 500);
     }
 }
+
+
 }
