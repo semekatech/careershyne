@@ -80,7 +80,7 @@ Route::middleware(LogActivity::class)->group(function () {
         Route::post('/add', [JobController::class, 'store']);
         Route::get('/all', [JobController::class, 'fetchAll']);
         Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
-        Route::get('/saved-jobs', [JobController::class, 'fetchPublicJobs']);
+        Route::get('//saved-jobs', [JobController::class, 'fetchSavedJobs']);
         
         Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
