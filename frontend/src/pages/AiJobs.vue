@@ -35,7 +35,7 @@
     <div
       class="flex flex-wrap items-center gap-3 p-2 rounded-full glassmorphic w-full lg:w-max mx-auto shadow-md mt-10 relative"
     >
-      <!-- 🌍 Location Filter -->
+      <!-- 🌍 Location -->
       <div class="relative">
         <button
           @click="toggleLocationDropdown"
@@ -49,7 +49,6 @@
           </p>
         </button>
 
-        <!-- County List Dropdown -->
         <div
           v-if="showLocationDropdown"
           class="absolute z-20 mt-2 bg-white dark:bg-slate-800 shadow-lg rounded-lg w-56 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700"
@@ -65,7 +64,7 @@
         </div>
       </div>
 
-      <!-- 🕒 Job Type Filter -->
+      <!-- 🕒 Job Type -->
       <div class="relative">
         <button
           @click="toggleTypeDropdown"
@@ -79,7 +78,6 @@
           </p>
         </button>
 
-        <!-- Job Type Dropdown -->
         <div
           v-if="showTypeDropdown"
           class="absolute z-20 mt-2 bg-white dark:bg-slate-800 shadow-lg rounded-lg w-48 border border-gray-200 dark:border-gray-700"
@@ -91,6 +89,35 @@
             class="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary/80"
           >
             {{ type }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 🏭 Industry -->
+      <div class="relative">
+        <button
+          @click="toggleIndustryDropdown"
+          class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
+        >
+          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+            business
+          </span>
+          <p class="text-sm font-semibold leading-normal">
+            {{ selectedIndustry || "Industry" }}
+          </p>
+        </button>
+
+        <div
+          v-if="showIndustryDropdown"
+          class="absolute z-20 mt-2 bg-white dark:bg-slate-800 shadow-lg rounded-lg w-64 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700"
+        >
+          <div
+            v-for="industry in industryOptions"
+            :key="industry.id"
+            @click="selectIndustry(industry.name)"
+            class="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary/80"
+          >
+            {{ industry.name }}
           </div>
         </div>
       </div>
@@ -141,48 +168,34 @@
           :key="job.id"
           class="p-6 bg-white dark:bg-card-dark rounded-xl shadow-lg hover:shadow-2xl dark:hover:shadow-lg-dark hover:-translate-y-1 transition-all duration-300 group"
         >
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex flex-col gap-4 w-full">
-              <div class="flex items-center gap-4">
-                <div
-                  class="w-14 h-14 rounded-xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center overflow-hidden"
-                >
-                  <img src="/favicon.jpg" alt="Company Logo" class="w-10 h-10 object-cover rounded-lg" />
-                </div>
-                <div class="flex-1">
-                  <p
-                    class="text-lg font-bold leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors"
-                  >
-                    {{ job.title }}
-                  </p>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {{ job.company }}
-                  </p>
-                </div>
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+              <img src="/favicon.jpg" alt="Logo" class="w-14 h-14 rounded-lg" />
+              <div>
+                <p class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary">
+                  {{ job.title }}
+                </p>
+                <p class="text-sm text-gray-500">{{ job.company }}</p>
               </div>
-              <div class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark mt-1">
-                <span class="material-icons-sharp text-base">location_on</span>
-                <span>{{ job.office ?? "Not specified" }}</span>
-              </div>
-              <p
-                class="text-sm text-text-light dark:text-text-dark line-clamp-3"
-                v-html="job.description"
-              ></p>
-              <button
-                class="mt-2 w-full flex items-center justify-center rounded-lg h-11 px-4 bg-primary text-white text-sm font-bold leading-normal hover:bg-primary-focus transition-colors duration-300 shadow-lg shadow-primary/30 transform group-hover:scale-105"
-              >
-                <span>Apply Now</span>
-              </button>
             </div>
+            <p class="text-sm text-text-light dark:text-text-dark">
+              {{ job.office ?? "Not specified" }}
+            </p>
+            <p class="text-sm text-text-light dark:text-text-dark line-clamp-3" v-html="job.description"></p>
+            <button
+              class="mt-2 w-full bg-primary text-white rounded-lg h-11 px-4 font-bold hover:bg-primary-focus transition"
+            >
+              Apply Now
+            </button>
           </div>
         </div>
       </div>
 
-      <div v-if="loading && jobs.length > 0" class="col-span-full text-center py-6 text-gray-500">
+      <div v-if="loading && jobs.length > 0" class="text-center py-6 text-gray-500">
         Loading more jobs...
       </div>
 
-      <div v-if="!hasMore && !loading" class="col-span-full text-center text-gray-400 mt-6">
+      <div v-if="!hasMore && !loading" class="text-center text-gray-400 mt-6">
         You’ve reached the end.
       </div>
     </main>
@@ -193,6 +206,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import JobService from "@/services/jobService";
+import OptionsService from "@/services/optionsService";
 import AiTheWelcome from "@/components/AiTheWelcome.vue";
 import AiFooterSection from "@/components/AiFooter.vue";
 
@@ -203,34 +217,37 @@ const loading = ref(false);
 const error = ref("");
 const search = ref("");
 
+// Filters
 const selectedLocation = ref("");
 const selectedType = ref("");
+const selectedIndustry = ref("");
+
 const showLocationDropdown = ref(false);
 const showTypeDropdown = ref(false);
+const showIndustryDropdown = ref(false);
 
-const counties = [
-  "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", "Machakos", "Kajiado",
-  "Uasin Gishu", "Kericho", "Meru", "Embu", "Bungoma", "Kakamega", "Busia",
-  "Siaya", "Homa Bay", "Migori", "Kisii", "Nyamira", "Murang'a", "Nyeri",
-  "Kirinyaga", "Laikipia", "Baringo", "Elgeyo Marakwet", "Nandi", "Trans Nzoia",
-  "West Pokot", "Turkana", "Samburu", "Marsabit", "Isiolo", "Garissa", "Wajir",
-  "Mandera", "Kitui", "Makueni", "Taita Taveta", "Kilifi", "Kwale", "Tana River",
-  "Lamu", "Tharaka Nithi", "Bomet", "Narok", "Vihiga"
-];
-
+const counties = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", "Machakos"];
 const jobTypes = ["Full-time", "Part-time", "Remote", "Contract", "Internship"];
+const industryOptions = ref([]);
 
-// 🌍 Dropdown toggle handlers
+// Dropdowns
 const toggleLocationDropdown = () => {
   showLocationDropdown.value = !showLocationDropdown.value;
   showTypeDropdown.value = false;
+  showIndustryDropdown.value = false;
 };
 const toggleTypeDropdown = () => {
   showTypeDropdown.value = !showTypeDropdown.value;
   showLocationDropdown.value = false;
+  showIndustryDropdown.value = false;
+};
+const toggleIndustryDropdown = () => {
+  showIndustryDropdown.value = !showIndustryDropdown.value;
+  showLocationDropdown.value = false;
+  showTypeDropdown.value = false;
 };
 
-// Selection handlers
+// Selection
 const selectLocation = (county) => {
   selectedLocation.value = county;
   showLocationDropdown.value = false;
@@ -241,12 +258,18 @@ const selectType = (type) => {
   showTypeDropdown.value = false;
   reloadJobs();
 };
+const selectIndustry = (industry) => {
+  selectedIndustry.value = industry;
+  showIndustryDropdown.value = false;
+  reloadJobs();
+};
 
 // Clear filters
 const clearFilters = () => {
   search.value = "";
   selectedLocation.value = "";
   selectedType.value = "";
+  selectedIndustry.value = "";
   reloadJobs();
 };
 
@@ -259,7 +282,8 @@ const loadJobs = async () => {
       page.value,
       search.value,
       selectedLocation.value,
-      selectedType.value
+      selectedType.value,
+      selectedIndustry.value
     );
     if (data?.data?.length) {
       jobs.value.push(...data.data);
@@ -276,7 +300,7 @@ const loadJobs = async () => {
   }
 };
 
-// Reload jobs
+// Reload
 const reloadJobs = async () => {
   page.value = 1;
   jobs.value = [];
@@ -296,8 +320,10 @@ watch(search, () => {
   debounceTimeout = setTimeout(() => reloadJobs(), 600);
 });
 
-onMounted(() => {
+onMounted(async () => {
   loadJobs();
+  const industries = await OptionsService.getIndustries();
+  industryOptions.value = industries.data || industries;
   window.addEventListener("scroll", handleScroll);
 });
 onUnmounted(() => window.removeEventListener("scroll", handleScroll));

@@ -61,7 +61,7 @@ const JobService = {
   async getPublicJobs(page = 1, search = "", county = "",type="") {
     try {
       const response = await publicApi.get("/public", {
-        params: { page, search, county, type },
+        params: { page, search, county, type,category },
       });
       return response.data;
     } catch (err) {

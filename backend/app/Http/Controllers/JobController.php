@@ -89,12 +89,15 @@ class JobController extends Controller
         if ($request->filled('type')) {
             $query->where('job_listings.type', 'like', "%{$request->type}%");
         }
+        if ($request->filled('category')) {
+            $query->where('job_listings.field', $request->type);
+        }
         $perPage = $request->get('per_page', 10);
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);
-    }
 
+    }
     public function userJobs(Request $request)
     {
         $query = Job::from('job_listings as job_listings')
