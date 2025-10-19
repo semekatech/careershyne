@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use OpenAI;
 use Google\Client as GoogleClient;
 use Google\Service\Gmail;
+use Google\Service\Gmail\Message;
 class JobController extends Controller
 {
     protected $aiReview;
@@ -1078,58 +1079,72 @@ PROMPT;
             'category' => DB::table('industries')->where('id', $id)->first(),
         ]);
     }
-    public function applyOnBehalf(Request $request, $jobId)
-    {
+  public function applyOnBehalf(Request $request, $jobId)
+{
+    // Validate input
+    $request->validate([
+        'user_id' => 'required|integer',
+        'subject' => 'required|string|max:255',
+        'body'    => 'required|string',
+    ]);
 
-        info('data ni');
-        $request->validate([
-            'user_id' => 'required|integer',
-            'subject' => 'required|string|max:255',
-            'body'    => 'required|string',
+    $userId  = $request->input('user_id');
+    $subject = $request->input('subject');
+    $body    = $request->input('body');
+    info('user_id'.$userId );
+    // Fetch user who authorized Gmail
+    $user = \App\Models\User::findOrFail($userId);
+
+    if (!$user->gmail_token) {
+        return response()->json([
+            'message' => 'User has not authorized Gmail.',
+        ], 403);
+    }
+
+    try {
+        // Initialize Google Client
+        $client = new GoogleClient();
+        $client->setAccessToken($user->gmail_token);
+        $client->setScopes([Gmail::MAIL_GOOGLE_COM]);
+
+        // Refresh token if expired
+        if ($client->isAccessTokenExpired() && $user->gmail_refresh_token) {
+            $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+            $user->gmail_token = $client->getAccessToken();
+            $user->save();
+        }
+
+        $gmail = new Gmail($client);
+
+        // Compose email
+        $rawMessageString = "From: {$user->email}\r\n";
+        $rawMessageString .= "To: info@careershyne.com\r\n"; // recipient
+        $rawMessageString .= "Subject: {$subject}\r\n\r\n";
+        $rawMessageString .= $body;
+
+        $rawMessage = base64_encode($rawMessageString);
+        $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage); // URL-safe
+
+        $message = new Message();
+        $message->setRaw($rawMessage);
+
+        // Send email on behalf of authenticated Gmail user
+        $gmail->users_messages->send('me', $message);
+
+        return response()->json([
+            'message' => 'Application email sent successfully!',
         ]);
 
-        $userId  = $request->input('user_id');
-        $subject = $request->input('subject');
-        $body    = $request->input('body');
-
-        // Fetch the user who authorized Gmail
-        $user = \App\Models\User::findOrFail($userId);
-        if (! $user->gmail_token) {
-            return response()->json([
-                'message' => 'User has not authorized Gmail.',
-            ], 403);
-        }
-
-        try {
-            $client = new GoogleClient();
-            $client->setAccessToken($user->gmail_token);
-            $client->setScopes([Gmail::MAIL_GOOGLE_COM]);
-
-            $gmail = new Gmail($client);
-
-            // Create email message
-            $rawMessageString = "From: {$user->email}\r\n";
-            $rawMessageString .= "To: info@careershyne.com\r\n"; 
-            $rawMessageString .= "Subject: {$subject}\r\n\r\n";
-            $rawMessageString .= $body;
-
-            $rawMessage = base64_encode($rawMessageString);
-            $rawMessage = str_replace(['+', '/', '='], ['-', '_', ''], $rawMessage); // URL safe
-
-            $message = new Gmail\Message();
-            $message->setRaw($rawMessage);
-
-            $gmail->users_messages->send('me', $message);
-
-            return response()->json([
-                'message' => 'Application email sent successfully!',
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to send email.',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+    } catch (\Google\Service\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to send email via Gmail API.',
+            'error'   => $e->getMessage(),
+        ], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'An unexpected error occurred.',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
 }
