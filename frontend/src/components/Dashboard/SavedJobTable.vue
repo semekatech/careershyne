@@ -12,23 +12,37 @@
           :key="n"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div class="w-full">
-              <div class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+              <div
+                class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"
+              ></div>
+              <div
+                class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"
+              ></div>
               <div class="flex items-center space-x-3">
-                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"></div>
-                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"
+                ></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"
+                ></div>
               </div>
             </div>
-            <div class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"></div>
+            <div
+              class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"
+            ></div>
           </div>
         </div>
       </div>
 
       <!-- Error -->
       <div v-else-if="error" class="text-center py-10">
-        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">
+          {{ error }}
+        </p>
         <button
           @click="fetchJobs"
           class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -54,13 +68,16 @@
       </div>
 
       <!-- Jobs List -->
+      <!-- Jobs List -->
       <div v-else class="space-y-4">
         <div
           v-for="job in jobs.slice(0, 100)"
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -68,7 +85,11 @@
               <p class="text-subtext-light dark:text-subtext-dark mb-1">
                 {{ job.company }} - {{ job.type }}
               </p>
-              <div class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3">
+
+              <!-- Location and Deadline -->
+              <div
+                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3 mb-2"
+              >
                 <div class="flex items-center">
                   <span class="material-icons text-base mr-1">location_on</span>
                   <span>{{ job.county }}, {{ job.country }}</span>
@@ -77,6 +98,14 @@
                   <span class="material-icons text-base mr-1">event</span>
                   <span>Deadline: {{ formatDate(job.deadline) }}</span>
                 </div>
+              </div>
+
+              <!-- User who saved & date -->
+              <div class="text-sm text-subtext-light dark:text-subtext-dark">
+                <span class="font-medium">Saved by:</span>
+                {{ job.user_name || "You" }} |
+                <span class="font-medium">Saved on:</span>
+                {{ formatDate(job.saved_at || job.created_at) }}
               </div>
             </div>
 
@@ -101,9 +130,9 @@
                 @click="markInterested(job)"
               >
                 <span class="material-icons text-base mr-2">
-                  {{ job.save_status === 'saved' ? 'star' : 'star_border' }}
+                  {{ job.save_status === "saved" ? "star" : "star_border" }}
                 </span>
-                {{ job.save_status === 'saved' ? 'Saved' : 'Interested' }}
+                {{ job.save_status === "saved" ? "Saved" : "Interested" }}
               </button>
             </div>
           </div>
@@ -117,14 +146,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import Swal from 'sweetalert2';
-import JobService from '@/services/jobService';
-import JobModal from '@/components/Dashboard/modals/JobModal.vue';
+import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
+import JobService from "@/services/jobService";
+import JobModal from "@/components/Dashboard/modals/JobModal.vue";
 
 const jobs = ref([]);
 const loading = ref(true);
-const error = ref('');
+const error = ref("");
 const selectedJob = ref(null);
 const showModal = ref(false);
 
@@ -134,7 +163,7 @@ function formatDate(dateString) {
 
 async function fetchJobs() {
   loading.value = true;
-  error.value = '';
+  error.value = "";
   try {
     const data = await JobService.getSavedJobs();
     if (Array.isArray(data.data)) jobs.value = data.data;
@@ -142,8 +171,8 @@ async function fetchJobs() {
   } catch (err) {
     error.value =
       err.response?.status === 403
-        ? 'Access denied. Upgrade your plan to access jobs.'
-        : 'Error fetching jobs. Please try again later.';
+        ? "Access denied. Upgrade your plan to access jobs."
+        : "Error fetching jobs. Please try again later.";
   } finally {
     loading.value = false;
   }
@@ -161,37 +190,37 @@ function closeModal() {
 
 async function markInterested(job) {
   const confirm = await Swal.fire({
-    title: 'Mark as Interested?',
+    title: "Mark as Interested?",
     text: `Do you want to save "${job.title}" to your interested jobs?`,
-    icon: 'question',
+    icon: "question",
     showCancelButton: true,
-    confirmButtonText: 'Yes, save it',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#16a34a',
-    cancelButtonColor: '#6b7280',
+    confirmButtonText: "Yes, save it",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#16a34a",
+    cancelButtonColor: "#6b7280",
   });
 
   if (!confirm.isConfirmed) return;
 
   try {
     const res = await JobService.markInterested(job.id);
-    job.save_status = 'saved';
+    job.save_status = "saved";
 
     Swal.fire({
-      icon: 'success',
-      title: 'Marked as Interested!',
+      icon: "success",
+      title: "Marked as Interested!",
       text: res.data?.message || `${job.title} has been saved.`,
       timer: 2000,
       showConfirmButton: false,
     });
   } catch (err) {
     Swal.fire({
-      icon: 'error',
-      title: 'Something went wrong',
+      icon: "error",
+      title: "Something went wrong",
       text:
         err.response?.status === 403
-          ? 'Job already marked as interested.'
-          : 'Unable to mark this job. Please try again.',
+          ? "Job already marked as interested."
+          : "Unable to mark this job. Please try again.",
     });
   }
 }
