@@ -86,10 +86,10 @@ class JobController extends Controller
         if ($request->filled('county')) {
             $query->where('job_listings.county', 'like', "%{$request->county}%");
         }
- if ($request->filled('type')) {
+        if ($request->filled('type')) {
             $query->where('job_listings.type', 'like', "%{$request->type}%");
         }
-        $perPage = $request->get('per_page', 1);
+        $perPage = $request->get('per_page', 10);
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);
