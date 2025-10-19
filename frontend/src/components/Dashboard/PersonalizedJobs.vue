@@ -52,11 +52,10 @@
           Retry
         </button>
       </div>
-
       <!-- Jobs List -->
       <div v-else class="space-y-4">
         <div
-          v-for="job in jobs.slice(0, 5)"
+          v-for="job in jobs.slice(0, 10)"
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
@@ -84,18 +83,27 @@
               </div>
             </div>
 
-            <!-- OPEN DETAILS MODAL -->
-            <button
-              class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
-              @click="openModal(job)"
-            >
-              View Details
-              <span class="material-icons text-base ml-2">arrow_forward</span>
-            </button>
-          </div>
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
+              <button
+                class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
+                @click="openModal(job)"
+              >
+                View Details
+                <span class="material-icons text-base ml-2">arrow_forward</span>
+              </button>
 
-          <!-- Action Buttons -->
+              <button
+                class="px-4 py-2 bg-green-500 text-white font-semibold rounded-full shadow-md hover:bg-green-600 transition-colors flex items-center justify-center whitespace-nowrap"
+                @click="markInterested(job)"
+              >
+                <span class="material-icons text-base mr-2">star_border</span>
+                Interested
+              </button>
+            </div>
+          </div>
         </div>
+
         <div class="flex justify-center mt-6">
           <router-link
             to="/browse-jobs"
@@ -158,48 +166,48 @@ function closeModal() {
   showModal.value = false;
 }
 
-// Generic async action handler with 403 checks
-async function handleAction({
-  job,
-  serviceFn,
-  modalRef,
-  progressRef,
-  resultRef,
-}) {
-  const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
-    text: `Ready to proceed for ${job.title}?`,
-    icon: "warning",
+async function markInterested(job) {
+  const confirm = await Swal.fire({
+    title: "Mark as Interested?",
+    text: `Do you want to save "${job.title}" to your interested jobs?`,
+    icon: "question",
     showCancelButton: true,
-    confirmButtonText: "Yes, proceed",
-    cancelButtonText: "No, cancel",
+    confirmButtonText: "Yes, save it",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#16a34a", 
+    cancelButtonColor: "#6b7280", 
   });
-  if (!isConfirmed) return;
 
-  selectedJob.value = job;
-  modalRef.value = true;
-  progressRef.value = 0;
-  resultRef.value = null;
-
-  const interval = setInterval(() => {
-    if (progressRef.value < 90) progressRef.value += 10;
-  }, 400);
+  if (!confirm.isConfirmed) return; 
 
   try {
-    const result = await serviceFn(job.id);
-    clearInterval(interval);
-    progressRef.value = 100;
-    resultRef.value = result;
+    const res = await JobService.markInterested(job.id);
+    Swal.fire({
+      icon: "success",
+      title: "Marked as Interested!",
+      text:
+        res.data?.message ||
+        `${job.title} has been saved to your interested jobs.`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
   } catch (err) {
-    clearInterval(interval);
-    progressRef.value = 100;
-    if (err.response?.status === 403)
-      resultRef.value = {
-        error: err.response.data.message || "Limit reached for this action.",
-      };
-    else resultRef.value = { error: "Action failed. Please try again later." };
+    if (err.response?.status === 403) {
+      Swal.fire({
+        icon: "warning",
+        title: "Job Already Marked",
+        text: "You have Already Marked This Job.",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: "Unable to mark this job as interested. Please try again.",
+      });
+    }
   }
 }
+
 
 onMounted(fetchJobs);
 </script>

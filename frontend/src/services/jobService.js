@@ -56,13 +56,15 @@ const JobService = {
     const response = await api.get("/personalized-jobs");
     return response.data;
   },
-
+ async markInterested(jobId) {
+    const response = await api.post(`/jobs/${jobId}/interested`);
+    return response.data;
+  },
   async getUsersJobs() {
     const response = await api.get("/user-jobs");
     return response.data;
   },
 
-  /** 🌍 Public route — supports pagination + search */
   async getPublicJobs(
     page = 1,
     search = "",

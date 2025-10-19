@@ -82,7 +82,7 @@ Route::middleware(LogActivity::class)->group(function () {
 
         Route::get('/all', [JobController::class, 'fetchAll']);
         Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
-
+         Route::get('/{id}/interested', [JobController::class, 'saveJobInterest']);
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
         Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
             ->middleware(CheckSubscriptionLimit::class . ':checks');

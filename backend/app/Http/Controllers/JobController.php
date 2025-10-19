@@ -67,8 +67,34 @@ class JobController extends Controller
 
         return response()->json($jobs);
     }
+    public function saveJobInterest($id)
+    {
 
-public function fetchPersonalizedJobs(Request $request)
+        info('saving job');
+        $user = auth('api')->user();
+
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        // Check if the user already marked this job as interested
+        $exists = DB::table('job_interests')
+            ->where('user_id', $user->id)
+            ->where('job_id', $id)
+            ->exists();
+        if ($exists) {
+            return response()->json(['message' => 'Already marked as interested'], 403);
+        }
+        // Insert a new record
+        DB::table('job_interests')->insert([
+            'user_id'    => $user->id,
+            'job_id'     => $id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Job interest saved successfully'], 200);
+    }
+    public function fetchPersonalizedJobs(Request $request)
     {
         $query = Job::query()
             ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
