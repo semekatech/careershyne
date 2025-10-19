@@ -9,9 +9,7 @@
         class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 dark:opacity-[0.03]"
       ></div>
       <div class="relative z-10 max-w-2xl mx-auto px-6">
-        <h1
-          class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white"
-        >
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white">
           Find Your <span class="text-primary">Dream Job</span> Today
         </h1>
         <p class="mt-3 text-slate-600 dark:text-slate-400">
@@ -35,22 +33,68 @@
 
     <!-- 🧭 Filters -->
     <div
-      class="flex flex-wrap items-center gap-3 p-2 rounded-full glassmorphic w-full lg:w-max mx-auto shadow-md mt-10"
+      class="flex flex-wrap items-center gap-3 p-2 rounded-full glassmorphic w-full lg:w-max mx-auto shadow-md mt-10 relative"
     >
-      <button
-        v-for="(filter, index) in filters"
-        :key="index"
-        class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
-      >
-        <span
-          class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors"
+      <!-- 🌍 Location Filter -->
+      <div class="relative">
+        <button
+          @click="toggleLocationDropdown"
+          class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
         >
-          {{ filter.icon }}
-        </span>
-        <p class="text-sm font-semibold leading-normal">
-          {{ filter.label }}
-        </p>
-      </button>
+          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+            location_on
+          </span>
+          <p class="text-sm font-semibold leading-normal">
+            {{ selectedLocation || "Location" }}
+          </p>
+        </button>
+
+        <!-- County List Dropdown -->
+        <div
+          v-if="showLocationDropdown"
+          class="absolute z-20 mt-2 bg-white dark:bg-slate-800 shadow-lg rounded-lg w-56 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700"
+        >
+          <div
+            v-for="county in counties"
+            :key="county"
+            @click="selectLocation(county)"
+            class="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary/80"
+          >
+            {{ county }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 🕒 Job Type Filter -->
+      <div class="relative">
+        <button
+          @click="toggleTypeDropdown"
+          class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white/80 dark:bg-card-dark/80 px-4 shadow-sm hover:bg-primary hover:text-white dark:hover:bg-primary dark:text-white group transition-all duration-300 transform hover:scale-105"
+        >
+          <span class="material-icons-sharp text-text-light dark:text-text-dark group-hover:text-white transition-colors">
+            work
+          </span>
+          <p class="text-sm font-semibold leading-normal">
+            {{ selectedType || "Job Type" }}
+          </p>
+        </button>
+
+        <!-- Job Type Dropdown -->
+        <div
+          v-if="showTypeDropdown"
+          class="absolute z-20 mt-2 bg-white dark:bg-slate-800 shadow-lg rounded-lg w-48 border border-gray-200 dark:border-gray-700"
+        >
+          <div
+            v-for="type in jobTypes"
+            :key="type"
+            @click="selectType(type)"
+            class="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary/80"
+          >
+            {{ type }}
+          </div>
+        </div>
+      </div>
+
       <button
         @click="clearFilters"
         class="text-sm font-medium text-primary hover:underline ml-auto pr-4"
@@ -100,18 +144,11 @@
           <div class="flex items-start justify-between gap-4">
             <div class="flex flex-col gap-4 w-full">
               <div class="flex items-center gap-4">
-                <!-- 🖼️ Logo Container -->
                 <div
                   class="w-14 h-14 rounded-xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center overflow-hidden"
                 >
-                  <img
-                    src="/favicon.jpg"
-                    alt="Company Logo"
-                    class="w-10 h-10 object-cover rounded-lg"
-                  />
+                  <img src="/favicon.jpg" alt="Company Logo" class="w-10 h-10 object-cover rounded-lg" />
                 </div>
-
-                <!-- 💼 Job Info -->
                 <div class="flex-1">
                   <p
                     class="text-lg font-bold leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors"
@@ -123,19 +160,14 @@
                   </p>
                 </div>
               </div>
-
-              <div
-                class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark mt-1"
-              >
+              <div class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark mt-1">
                 <span class="material-icons-sharp text-base">location_on</span>
                 <span>{{ job.office ?? "Not specified" }}</span>
               </div>
-
               <p
                 class="text-sm text-text-light dark:text-text-dark line-clamp-3"
                 v-html="job.description"
               ></p>
-
               <button
                 class="mt-2 w-full flex items-center justify-center rounded-lg h-11 px-4 bg-primary text-white text-sm font-bold leading-normal hover:bg-primary-focus transition-colors duration-300 shadow-lg shadow-primary/30 transform group-hover:scale-105"
               >
@@ -146,18 +178,11 @@
         </div>
       </div>
 
-      <!-- 🌀 Infinite Scroll Loader -->
-      <div
-        v-if="loading && jobs.length > 0"
-        class="col-span-full text-center py-6 text-gray-500"
-      >
+      <div v-if="loading && jobs.length > 0" class="col-span-full text-center py-6 text-gray-500">
         Loading more jobs...
       </div>
 
-      <div
-        v-if="!hasMore && !loading"
-        class="col-span-full text-center text-gray-400 mt-6"
-      >
+      <div v-if="!hasMore && !loading" class="col-span-full text-center text-gray-400 mt-6">
         You’ve reached the end.
       </div>
     </main>
@@ -178,27 +203,64 @@ const loading = ref(false);
 const error = ref("");
 const search = ref("");
 
-const filters = [
-  { icon: "location_on", label: "Location" },
-  { icon: "work", label: "Job Type" },
-  { icon: "business_center", label: "Industry" },
-  { icon: "paid", label: "Salary" },
+const selectedLocation = ref("");
+const selectedType = ref("");
+const showLocationDropdown = ref(false);
+const showTypeDropdown = ref(false);
+
+const counties = [
+  "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", "Machakos", "Kajiado",
+  "Uasin Gishu", "Kericho", "Meru", "Embu", "Bungoma", "Kakamega", "Busia",
+  "Siaya", "Homa Bay", "Migori", "Kisii", "Nyamira", "Murang'a", "Nyeri",
+  "Kirinyaga", "Laikipia", "Baringo", "Elgeyo Marakwet", "Nandi", "Trans Nzoia",
+  "West Pokot", "Turkana", "Samburu", "Marsabit", "Isiolo", "Garissa", "Wajir",
+  "Mandera", "Kitui", "Makueni", "Taita Taveta", "Kilifi", "Kwale", "Tana River",
+  "Lamu", "Tharaka Nithi", "Bomet", "Narok", "Vihiga"
 ];
 
-// 🧹 Clear filters (placeholder for now)
-const clearFilters = () => {
-  search.value = "";
+const jobTypes = ["Full-time", "Part-time", "Remote", "Contract", "Internship"];
+
+// 🌍 Dropdown toggle handlers
+const toggleLocationDropdown = () => {
+  showLocationDropdown.value = !showLocationDropdown.value;
+  showTypeDropdown.value = false;
+};
+const toggleTypeDropdown = () => {
+  showTypeDropdown.value = !showTypeDropdown.value;
+  showLocationDropdown.value = false;
+};
+
+// Selection handlers
+const selectLocation = (county) => {
+  selectedLocation.value = county;
+  showLocationDropdown.value = false;
+  reloadJobs();
+};
+const selectType = (type) => {
+  selectedType.value = type;
+  showTypeDropdown.value = false;
   reloadJobs();
 };
 
-// 🔥 Load jobs
+// Clear filters
+const clearFilters = () => {
+  search.value = "";
+  selectedLocation.value = "";
+  selectedType.value = "";
+  reloadJobs();
+};
+
+// Load jobs
 const loadJobs = async () => {
   if (loading.value || !hasMore.value) return;
   loading.value = true;
-
   try {
-    const data = await JobService.getPublicJobs(page.value, search.value);
-
+    const data = await JobService.getPublicJobs(
+      page.value,
+      search.value,
+      selectedLocation.value,
+      selectedType.value
+    );
     if (data?.data?.length) {
       jobs.value.push(...data.data);
       hasMore.value = data.current_page < data.last_page;
@@ -214,7 +276,7 @@ const loadJobs = async () => {
   }
 };
 
-// 🔁 Reload jobs
+// Reload jobs
 const reloadJobs = async () => {
   page.value = 1;
   jobs.value = [];
@@ -222,30 +284,23 @@ const reloadJobs = async () => {
   await loadJobs();
 };
 
-// 🧭 Infinite scroll
+// Infinite scroll
 const handleScroll = () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-    loadJobs();
-  }
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) loadJobs();
 };
 
-// 👀 Debounced search
+// Debounced search
 let debounceTimeout;
-watch(search, (newVal) => {
+watch(search, () => {
   clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(() => {
-    reloadJobs();
-  }, 600); // Wait 600ms after user stops typing
+  debounceTimeout = setTimeout(() => reloadJobs(), 600);
 });
 
 onMounted(() => {
   loadJobs();
   window.addEventListener("scroll", handleScroll);
 });
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
 
 <style scoped>

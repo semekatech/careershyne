@@ -72,7 +72,6 @@ class JobController extends Controller
         $query = Job::query()
             ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
             ->select('job_listings.*', 'industries.name as field_name');
-
         // Optional search
         if ($request->filled('search')) {
             $search = $request->search;
@@ -87,8 +86,10 @@ class JobController extends Controller
         if ($request->filled('county')) {
             $query->where('job_listings.county', 'like', "%{$request->county}%");
         }
-
-        $perPage = $request->get('per_page', 100);
+ if ($request->filled('type')) {
+            $query->where('job_listings.type', 'like', "%{$request->type}%");
+        }
+        $perPage = $request->get('per_page', 1);
         $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);
