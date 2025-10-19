@@ -57,7 +57,7 @@ const JobService = {
     return response.data;
   },
  async markInterested(jobId) {
-    const response = await api.post(`/jobs/${jobId}/interested`);
+    const response = await api.post(`/${jobId}/interested`);
     return response.data;
   },
   async getUsersJobs() {
