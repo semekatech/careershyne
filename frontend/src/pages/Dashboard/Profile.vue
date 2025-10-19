@@ -610,6 +610,9 @@ async function submitPassword() {
   }
 }
 
+
+
+
 function resetForm() {
   fetchProfile();
   validationErrors.value = {};
