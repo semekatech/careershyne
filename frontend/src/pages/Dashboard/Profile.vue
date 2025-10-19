@@ -422,7 +422,8 @@
 import { ref, onMounted } from "vue";
 import usersService from "@/services/profileService";
 import OptionsService from "@/services/optionsService";
-
+import { useAuthStore } from "@/stores/auth";
+const auth = useAuthStore();
 const activeTab = ref("profile");
 
 // loaders & messages
@@ -616,7 +617,8 @@ function resetForm() {
   profileSuccess.value = "";
 }
 const connectGmail = () => {
-  window.location.href = "/auth/google"; // Laravel route
+  const userId = auth.user?.id;
+  window.location.href = `https://careershyne.com/api/auth/google?user_id=${userId}`;
 };
 onMounted(async () => {
   loading.value = true;
