@@ -27,6 +27,13 @@
           >
             <i class="material-icons mr-2 !text-base">lock</i> Change Password
           </a>
+          <a
+            href="#"
+            @click.prevent="activeTab = 'gmail'"
+            :class="tabClass('gmail')"
+          >
+            <i class="material-icons mr-2 !text-base">user</i>Authenticate
+          </a>
         </nav>
       </div>
 
@@ -394,6 +401,18 @@
             </form>
           </div>
         </div>
+        <div v-if="activeTab === 'gmail'" class="mt-8">
+          <div class="bg-card-light dark:bg-card-dark p-8">
+            <!-- Alerts -->
+
+            <button
+              @click="connectGmail"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+            >
+              <i class="fab fa-google mr-2"></i> Connect Gmail
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -486,7 +505,6 @@ async function fetchProfile() {
     loading.value = false;
   }
 }
-
 
 async function loadOptions() {
   try {
@@ -597,7 +615,9 @@ function resetForm() {
   profileError.value = "";
   profileSuccess.value = "";
 }
-
+const connectGmail = () => {
+  window.location.href = "/auth/google"; // Laravel route
+};
 onMounted(async () => {
   loading.value = true;
   await loadOptions();

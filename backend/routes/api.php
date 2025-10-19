@@ -11,7 +11,10 @@ use App\Http\Middleware\CheckSubscriptionLimit;
 use App\Http\Middleware\LogActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Session;
+use Google\Client as GoogleClient;
+use App\Http\Controllers\GoogleController;
+use Google\Service\Gmail;
 Route::middleware(LogActivity::class)->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
@@ -120,4 +123,9 @@ Route::middleware(LogActivity::class)->group(function () {
             'user'          => $request->user(), // null if not authenticated
         ]);
     });
+
+
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
 });
