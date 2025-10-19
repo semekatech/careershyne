@@ -56,6 +56,12 @@ const JobService = {
     const response = await api.get("/personalized-jobs");
     return response.data;
   },
+ async getSavedJobs() {
+    const response = await api.get("/saved-jobs");
+    return response.data;
+  },
+
+  
  async markInterested(jobId) {
     const response = await api.post(`/${jobId}/interested`);
     return response.data;

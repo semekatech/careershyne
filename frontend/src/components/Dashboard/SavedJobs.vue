@@ -2,31 +2,42 @@
   <div>
     <section>
       <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
-        Featured Jobs
+        Saved Jobs
       </h2>
 
       <!-- Loader -->
-      <div v-if="loading" class="flex justify-center items-center py-20">
-        <svg
-          class="animate-spin h-8 w-8 text-primary"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
+      <!-- Loader -->
+      <div v-if="loading" class="space-y-4 animate-pulse">
+        <!-- Simulated job cards -->
+        <div
+          v-for="n in 5"
+          :key="n"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          ></path>
-        </svg>
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
+            <div class="w-full">
+              <div
+                class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"
+              ></div>
+              <div
+                class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"
+              ></div>
+              <div class="flex items-center space-x-3">
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"
+                ></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"
+                ></div>
+              </div>
+            </div>
+            <div
+              class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"
+            ></div>
+          </div>
+        </div>
       </div>
 
       <!-- Error -->
@@ -41,11 +52,10 @@
           Retry
         </button>
       </div>
-
       <!-- Jobs List -->
       <div v-else class="space-y-4">
         <div
-          v-for="job in jobs.slice(0, 5)"
+          v-for="job in jobs.slice(0, 100)"
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
         >
@@ -73,93 +83,42 @@
               </div>
             </div>
 
-            <!-- OPEN DETAILS MODAL -->
-            <button
-              class="w-full sm:w-auto mt-3 sm:mt-0 px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
-              @click="openModal(job)"
-            >
-              View Details
-              <span class="material-icons text-base ml-2">arrow_forward</span>
-            </button>
-          </div>
+            <!-- Buttons -->
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
+              <button
+                class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
+                @click="openModal(job)"
+              >
+                View Details
+                <span class="material-icons text-base ml-2">arrow_forward</span>
+              </button>
 
-          <!-- Action Buttons -->
-          <div
-            class="border-t border-border-light dark:border-border-dark pt-3"
-          >
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <button
-                @click="openEligibility(job)"
-                class="flex items-center justify-center py-2 px-3 border border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-50 dark:hover:bg-green-900 transition-colors text-center"
+                :disabled="job.save_status === 'saved'"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  job.save_status === 'saved'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-green-500 text-white hover:bg-green-600',
+                ]"
+                @click="markInterested(job)"
               >
-                <span class="material-icons text-lg mr-1">check_circle</span>
-                Check Eligibility
-              </button>
-              <button
-                @click="openCvRevamp(job)"
-                class="flex items-center justify-center py-2 px-3 border border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors text-center"
-              >
-                <span class="material-icons text-lg mr-1">description</span>
-                CV Revamp
-              </button>
-              <button
-                @click="openCoverLetter(job)"
-                class="flex items-center justify-center py-2 px-3 border border-yellow-500 text-yellow-500 font-semibold rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900 transition-colors text-center"
-              >
-                <span class="material-icons text-lg mr-1">mail</span>
-                Cover Letter
-              </button>
-              <button
-                @click="openEmailTemplate(job)"
-                class="flex items-center justify-center py-2 px-3 border border-purple-500 text-purple-500 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors text-center"
-              >
-                <span class="material-icons text-lg mr-1">drafts</span>
-                Email Template
+                <span class="material-icons text-base mr-2">
+                  {{ job.save_status === "saved" ? "star" : "star_border" }}
+                </span>
+                {{ job.save_status === "saved" ? "Saved" : "Interested" }}
               </button>
             </div>
           </div>
         </div>
-        <div class="flex justify-center mt-6">
-          <router-link
-            to="/browse-jobs"
-            class="px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-indigo-700 transition-colors"
-          >
-            View More Jobs
-          </router-link>
-        </div>
+
+       
       </div>
     </section>
 
     <!-- MODALS -->
     <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
-    <EligibilityModal
-      v-if="showEligibilityModal"
-      :job="selectedJob"
-      :result="eligibilityResult"
-      :progress="eligibilityProgress"
-      @close="closeEligibility"
-    />
-    <CvRevampModal
-      v-if="showCvRevampModal"
-      :job="selectedJob"
-      :result="cvRevampResult"
-      :progress="cvRevampProgress"
-      @close="closeCvRevamp"
-    />
-    <CoverLetterModal
-      v-if="showCoverLetterModal"
-      :job="selectedJob"
-      :result="coverLetterResult"
-      :progress="coverLetterProgress"
-      @close="closeCoverLetter"
-    />
-    <EmailTemplateModal
-      v-if="showEmailTemplateModal"
-      :job="selectedJob"
-      :result="emailTemplateResult"
-      :progress="emailTemplateProgress"
-      @close="closeEmailTemplate"
-    />
   </div>
 </template>
 
@@ -168,16 +127,8 @@ import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 
 import JobService from "@/services/jobService";
-import eligibilityService from "@/services/eligibilityService";
-import coverLetterService from "@/services/coverLetter";
-import cvRevampService from "@/services/cvRevamp";
-import emailTemplateService from "@/services/emailTemplate";
 
 import JobModal from "@/components/Dashboard/modals/JobModal.vue";
-import EligibilityModal from "@/components/Dashboard/modals/EligibilityModal.vue";
-import CoverLetterModal from "@/components/Dashboard/modals/CoverModal.vue";
-import CvRevampModal from "@/components/Dashboard/modals/CvRevampModal.vue";
-import EmailTemplateModal from "@/components/Dashboard/modals/EmailTemplateModal.vue";
 
 const jobs = ref([]);
 const loading = ref(true);
@@ -185,19 +136,6 @@ const error = ref("");
 const selectedJob = ref(null);
 
 const showModal = ref(false);
-const showEligibilityModal = ref(false);
-const showCvRevampModal = ref(false);
-const showCoverLetterModal = ref(false);
-const showEmailTemplateModal = ref(false);
-
-const eligibilityProgress = ref(0);
-const eligibilityResult = ref(null);
-const cvRevampProgress = ref(0);
-const cvRevampResult = ref(null);
-const coverLetterProgress = ref(0);
-const coverLetterResult = ref(null);
-const emailTemplateProgress = ref(0);
-const emailTemplateResult = ref(null);
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString();
@@ -207,7 +145,7 @@ async function fetchJobs() {
   loading.value = true;
   error.value = "";
   try {
-    const data = await JobService.getJobs();
+    const data = await JobService.getSavedJobs();
     if (Array.isArray(data.data)) jobs.value = data.data;
     else error.value = "No jobs found.";
   } catch (err) {
@@ -230,106 +168,48 @@ function closeModal() {
   showModal.value = false;
 }
 
-// Generic async action handler with 403 checks
-async function handleAction({
-  job,
-  serviceFn,
-  modalRef,
-  progressRef,
-  resultRef,
-}) {
-  const { isConfirmed } = await Swal.fire({
-    title: "Ready?",
-    text: `Ready to proceed for ${job.title}?`,
-    icon: "warning",
+async function markInterested(job) {
+  const confirm = await Swal.fire({
+    title: "Mark as Interested?",
+    text: `Do you want to save "${job.title}" to your interested jobs?`,
+    icon: "question",
     showCancelButton: true,
-    confirmButtonText: "Yes, proceed",
-    cancelButtonText: "No, cancel",
+    confirmButtonText: "Yes, save it",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#16a34a",
+    cancelButtonColor: "#6b7280",
   });
-  if (!isConfirmed) return;
 
-  selectedJob.value = job;
-  modalRef.value = true;
-  progressRef.value = 0;
-  resultRef.value = null;
-
-  const interval = setInterval(() => {
-    if (progressRef.value < 90) progressRef.value += 10;
-  }, 400);
+  if (!confirm.isConfirmed) return;
 
   try {
-    const result = await serviceFn(job.id);
-    clearInterval(interval);
-    progressRef.value = 100;
-    resultRef.value = result;
+    const res = await JobService.markInterested(job.id);
+    job.save_status = "saved";
+
+    Swal.fire({
+      icon: "success",
+      title: "Marked as Interested!",
+      text:
+        res.data?.message ||
+        `${job.title} has been saved to your interested jobs.`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
   } catch (err) {
-    clearInterval(interval);
-    progressRef.value = 100;
-    if (err.response?.status === 403)
-      resultRef.value = {
-        error: err.response.data.message || "Limit reached for this action.",
-      };
-    else resultRef.value = { error: "Action failed. Please try again later." };
+    if (err.response?.status === 403) {
+      Swal.fire({
+        icon: "warning",
+        title: "Job Already Marked",
+        text: "You have Already Marked This Job.",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: "Unable to mark this job as interested. Please try again.",
+      });
+    }
   }
-}
-
-// Action wrappers
-function openEligibility(job) {
-  handleAction({
-    job,
-    serviceFn: eligibilityService.checkEligibility,
-    modalRef: showEligibilityModal,
-    progressRef: eligibilityProgress,
-    resultRef: eligibilityResult,
-  });
-}
-function openCvRevamp(job) {
-  handleAction({
-    job,
-    serviceFn: cvRevampService.revamp,
-    modalRef: showCvRevampModal,
-    progressRef: cvRevampProgress,
-    resultRef: cvRevampResult,
-  });
-}
-function openCoverLetter(job) {
-  handleAction({
-    job,
-    serviceFn: coverLetterService.generate,
-    modalRef: showCoverLetterModal,
-    progressRef: coverLetterProgress,
-    resultRef: coverLetterResult,
-  });
-}
-function openEmailTemplate(job) {
-  handleAction({
-    job,
-    serviceFn: emailTemplateService.generate,
-    modalRef: showEmailTemplateModal,
-    progressRef: emailTemplateProgress,
-    resultRef: emailTemplateResult,
-  });
-}
-
-function closeEligibility() {
-  showEligibilityModal.value = false;
-  eligibilityProgress.value = 0;
-  eligibilityResult.value = null;
-}
-function closeCvRevamp() {
-  showCvRevampModal.value = false;
-  cvRevampProgress.value = 0;
-  cvRevampResult.value = null;
-}
-function closeCoverLetter() {
-  showCoverLetterModal.value = false;
-  coverLetterProgress.value = 0;
-  coverLetterResult.value = null;
-}
-function closeEmailTemplate() {
-  showEmailTemplateModal.value = false;
-  emailTemplateProgress.value = 0;
-  emailTemplateResult.value = null;
 }
 
 onMounted(fetchJobs);
