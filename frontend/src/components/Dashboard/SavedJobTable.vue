@@ -205,6 +205,12 @@
         <!-- Actions -->
         <div class="flex justify-end gap-2">
           <button
+            @click="generateAIContent(applyJob)"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Generate With AI
+          </button>
+          <button
             @click="closeApplyModal"
             class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors"
           >
@@ -354,6 +360,30 @@ async function submitApplication() {
     });
   }
 }
+async function generateAIContent(job) {
+  if (!job) return;
+  try {
+    Swal.fire({
+      title: "Generating...",
+      text: "AI is generating your email...",
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      allowOutsideClick: false,
+    });
+    const res = await JobService.generateContent(applyJob.value.id);
 
+    applyForm.value.subject = res.data.subject || "";
+    applyForm.value.body = res.data.body || "";
+
+    Swal.close();
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Failed",
+      text: "Could not generate AI content. Try again.",
+    });
+  }
+}
 onMounted(fetchJobs);
 </script>

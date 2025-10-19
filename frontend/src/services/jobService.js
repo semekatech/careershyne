@@ -93,8 +93,11 @@ const JobService = {
     },
   });
   return response.data;
-}
-
+},
+ async generateContent(jobId) {
+    const res = await axios.post(`/${jobId}/generate-content`);
+    return res.data;
+  },
 };
 
 export default JobService;
