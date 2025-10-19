@@ -1095,7 +1095,7 @@ PROMPT;
     // Fetch user who authorized Gmail
     $user = \App\Models\User::findOrFail($userId);
 
-    if (!$user->gmail_token) {
+    if (!$user->gmail_access_token) {
         return response()->json([
             'message' => 'User has not authorized Gmail.',
         ], 403);
@@ -1104,13 +1104,13 @@ PROMPT;
     try {
         // Initialize Google Client
         $client = new GoogleClient();
-        $client->setAccessToken($user->gmail_token);
+        $client->setAccessToken($user->gmail_access_token);
         $client->setScopes([Gmail::MAIL_GOOGLE_COM]);
 
         // Refresh token if expired
         if ($client->isAccessTokenExpired() && $user->gmail_refresh_token) {
             $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
-            $user->gmail_token = $client->getAccessToken();
+            $user->gmail_access_token = $client->getAccessToken();
             $user->save();
         }
 
