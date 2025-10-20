@@ -7,7 +7,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
+import { useToast } from "vue-toast-notification";
 const router = useRouter();
 const toast = useToast();
 
