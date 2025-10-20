@@ -194,6 +194,7 @@ class JobController extends Controller
                 'users.name as user_name',
                 'users.email as user_email',
                 'job_interests.created_at as saved_at',
+                'job_interests.updated_at as applied_on',
                 'job_interests.status as application_status',
                 'users.cv_path as existing_cv',                     
                 'users.cover_letter_path as existing_cover_letter',

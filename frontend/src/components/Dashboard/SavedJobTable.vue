@@ -81,7 +81,7 @@
         >
           <p class="text-lg mb-4 font-medium">
             No
-            {{ activeTab === 'pending' ? 'pending' : 'applied' }} jobs found.
+            {{ activeTab === "pending" ? "pending" : "applied" }} jobs found.
           </p>
           <router-link
             to="/jobs"
@@ -160,25 +160,32 @@
       v-if="showApplyModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
+      <!-- Make entire modal scrollable -->
       <div
-        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative"
+        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl relative max-h-[95vh] overflow-y-auto"
       >
-        <button
-          @click="closeApplyModal"
-          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        <!-- Header -->
+        <div
+          class="sticky top-0 z-10 bg-white dark:bg-gray-900 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700"
         >
-          <span class="material-icons text-2xl">close</span>
-        </button>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Apply for {{ applyJob.title }}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+              Applying on behalf of <strong>{{ applyJob.user_name }}</strong>
+            </p>
+          </div>
+          <button
+            @click="closeApplyModal"
+            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <span class="material-icons text-2xl">close</span>
+          </button>
+        </div>
 
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Apply for {{ applyJob.title }}
-        </h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-          Applying on behalf of <strong>{{ applyJob.user_name }}</strong>
-        </p>
-
-        <!-- Form -->
-        <div class="space-y-5">
+        <!-- Body -->
+        <div class="px-6 py-6 space-y-5">
           <!-- Subject -->
           <div>
             <label class="block text-sm font-medium mb-2"
@@ -201,12 +208,12 @@
               v-model:content="applyForm.body"
               contentType="html"
               theme="snow"
-              class="min-h-[180px] rounded-lg overflow-hidden"
+              class="min-h-[200px] rounded-lg overflow-hidden"
               placeholder="Write your message here..."
             />
           </div>
 
-          <!-- CV -->
+          <!-- CV Upload -->
           <div>
             <label class="block text-sm font-medium mb-2"
               >CV (PDF, DOC, DOCX)</label
@@ -246,8 +253,10 @@
           </div>
         </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-3 mt-8">
+        <!-- Footer -->
+        <div
+          class="sticky bottom-0 z-10 bg-white dark:bg-gray-900 flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700"
+        >
           <button
             @click="generateAIContent(applyJob)"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition"
@@ -421,18 +430,14 @@ async function submitApplication() {
     formData.append("subject", applyForm.value.subject);
     formData.append("body", applyForm.value.body);
 
-    if (applyForm.value.cv)
-      formData.append("cv", applyForm.value.cv);
+    if (applyForm.value.cv) formData.append("cv", applyForm.value.cv);
     else if (applyJob.value.existing_cv)
       formData.append("cv_url", applyJob.value.existing_cv);
 
     if (applyForm.value.coverLetter)
       formData.append("cover_letter", applyForm.value.coverLetter);
     else if (applyJob.value.existing_cover_letter)
-      formData.append(
-        "cover_letter_url",
-        applyJob.value.existing_cover_letter
-      );
+      formData.append("cover_letter_url", applyJob.value.existing_cover_letter);
 
     const res = await JobService.applyOnBehalf(applyJob.value.id, formData);
 

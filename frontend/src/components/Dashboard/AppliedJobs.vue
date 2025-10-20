@@ -53,67 +53,89 @@
         </button>
       </div>
       <!-- Jobs List -->
-      <div v-else class="space-y-4">
+      <!-- Jobs List -->
+      <div v-else>
+        <!-- No Jobs -->
         <div
-          v-for="job in jobs.slice(0, 100)"
-          :key="job.id"
-          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
+          v-if="!jobs.length"
+          class="text-center py-10 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-2xl"
         >
+          <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mb-3">
+            You haven’t applied for any jobs yet.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Browse available jobs and start applying today!
+          </p>
+        </div>
+
+        <!-- Job Cards -->
+        <div v-else class="space-y-4">
           <div
-            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+            v-for="job in jobs.slice(0, 100)"
+            :key="job.id"
+            class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
           >
-            <div>
-              <h3 class="text-lg font-semibold text-primary mb-1">
-                {{ job.title }} - {{ job.county }}, {{ job.country }}
-              </h3>
-              <p class="text-subtext-light dark:text-subtext-dark mb-1">
-                {{ job.company }} - {{ job.type }}
-              </p>
-              <div
-                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
-              >
-                <div class="flex items-center">
-                  <span class="material-icons text-base mr-1">location_on</span>
-                  <span>{{ job.county }}, {{ job.country }}</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="material-icons text-base mr-1">event</span>
-                  <span>Deadline: {{ formatDate(job.deadline) }}</span>
+            <div
+              class="flex flex-col sm:flex-row justify-between items-start mb-3"
+            >
+              <div>
+                <h3 class="text-lg font-semibold text-primary mb-1">
+                  {{ job.title }} - {{ job.county }}, {{ job.country }}
+                </h3>
+                <p class="text-subtext-light dark:text-subtext-dark mb-1">
+                  {{ job.company }} - {{ job.type }}
+                </p>
+                <div
+                  class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
+                >
+                  <div class="flex items-center">
+                    <span class="material-icons text-base mr-1"
+                      >location_on</span
+                    >
+                    <span>{{ job.county }}, {{ job.country }}</span>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="material-icons text-base mr-1">event</span>
+                    <span>Deadline: {{ formatDate(job.deadline) }}</span>
+                  </div>
+                   <div class="flex items-center">
+                    <span class="material-icons text-base mr-1">event</span>
+                    <span>Applied On: {{ formatDate(job.applied_on) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Buttons -->
-            <!-- Buttons -->
-            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
-              <button
-                class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
-                @click="openModal(job)"
-              >
-                View Details
-                <span class="material-icons text-base ml-2">arrow_forward</span>
-              </button>
+              <!-- Buttons -->
+              <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
+                <button
+                  class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
+                  @click="openModal(job)"
+                >
+                  View Details
+                  <span class="material-icons text-base ml-2"
+                    >arrow_forward</span
+                  >
+                </button>
 
-              <button
-                :disabled="job.save_status === 'saved'"
-                :class="[
-                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
-                  job.save_status === 'saved'
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-green-500 text-white hover:bg-green-600',
-                ]"
-                @click="markInterested(job)"
-              >
-                <span class="material-icons text-base mr-2">
-                  {{ job.save_status === "saved" ? "star" : "star_border" }}
-                </span>
-                {{ job.save_status === "saved" ? "Saved" : "Interested" }}
-              </button>
+                <button
+                  :disabled="job.save_status === 'saved'"
+                  :class="[
+                    'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                    job.save_status === 'saved'
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600',
+                  ]"
+                  @click="markInterested(job)"
+                >
+                  <span class="material-icons text-base mr-2">
+                    {{ job.save_status === "saved" ? "star" : "star_border" }}
+                  </span>
+                  {{ job.save_status === "saved" ? "Saved" : "Interested" }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-       
       </div>
     </section>
 
