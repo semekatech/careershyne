@@ -47,7 +47,7 @@
         <label class="block text-sm font-medium mb-2">Experience (Yrs) *</label>
         <input
           v-model="job.experience"
-          type="number"
+          type="text"
           min="0"
           placeholder="e.g. 3"
           class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
@@ -137,6 +137,18 @@
         />
       </div>
 
+      <!-- Application Email -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Application Email *</label>
+        <input
+          v-model="job.applicationEmail"
+          type="email"
+          placeholder="Enter email to receive applications"
+          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
+          required
+        />
+      </div>
+
       <!-- Job Country -->
       <div>
         <label class="block text-sm font-medium mb-2">Job Country *</label>
@@ -162,15 +174,14 @@
         />
       </div>
 
-      <!-- Job Location / Office -->
+      <!-- Job Location / Office (Optional) -->
       <div>
-        <label class="block text-sm font-medium mb-2">Job Location / Office *</label>
+        <label class="block text-sm font-medium mb-2">Job Location / Office (Optional)</label>
         <input
           v-model="job.office"
           type="text"
           placeholder="e.g. Westlands, Nairobi"
           class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
         />
       </div>
 
@@ -219,6 +230,7 @@ const job = ref({
   field: [],
   description: "",
   applicationInstructions: "",
+  applicationEmail: "",
   country: "Kenya",
   county: [],
   office: "",
@@ -262,16 +274,26 @@ async function submitJob() {
   successMessage.value = "";
 
   const payload = {
-    ...job.value,
+    company: job.value.company,
+    title: job.value.title,
     type: Array.isArray(job.value.type)
       ? job.value.type.map((t) => (t.value ? t.value : t)).join(",")
       : job.value.type,
+    experience: job.value.experience,
+    education: job.value.education,
+    salary: job.value.salary,
+    deadline: job.value.deadline,
     field: Array.isArray(job.value.field)
       ? job.value.field.map((f) => f.id).join(",")
       : job.value.field,
+    description: job.value.description,
+    applicationInstructions: job.value.applicationInstructions,
+    applicationEmail: job.value.applicationEmail,
+    country: job.value.country,
     county: Array.isArray(job.value.county)
       ? job.value.county.map((c) => c.name || c).join(",")
       : job.value.county,
+    office: job.value.office || null,
     postedBy: auth.user?.id || null,
   };
 
@@ -292,6 +314,7 @@ async function submitJob() {
       field: [],
       description: "",
       applicationInstructions: "",
+      applicationEmail: "",
       country: "Kenya",
       county: [],
       office: "",
