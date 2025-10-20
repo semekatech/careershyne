@@ -6,45 +6,29 @@
       </h2>
 
       <!-- Loader -->
-      <!-- Loader -->
       <div v-if="loading" class="space-y-4 animate-pulse">
-        <!-- Simulated job cards -->
         <div
           v-for="n in 5"
           :key="n"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div
-            class="flex flex-col sm:flex-row justify-between items-start mb-3"
-          >
+          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
             <div class="w-full">
-              <div
-                class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"
-              ></div>
-              <div
-                class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"
-              ></div>
+              <div class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+              <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
               <div class="flex items-center space-x-3">
-                <div
-                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"
-                ></div>
-                <div
-                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"
-                ></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
               </div>
             </div>
-            <div
-              class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"
-            ></div>
+            <div class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"></div>
           </div>
         </div>
       </div>
 
       <!-- Error -->
       <div v-else-if="error" class="text-center py-10">
-        <p class="text-red-600 dark:text-red-400 font-medium mb-4">
-          {{ error }}
-        </p>
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
         <button
           @click="fetchJobs"
           class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -52,16 +36,34 @@
           Retry
         </button>
       </div>
+
+      <!-- If job limit is zero -->
+      <div v-else-if="limits.jobs <= 0" class="text-center py-16">
+        <div class="max-w-md mx-auto">
+          <span class="material-icons text-6xl text-gray-400 mb-4">lock</span>
+          <h3 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
+            Job Access Locked
+          </h3>
+          <p class="text-subtext-light dark:text-subtext-dark mb-6">
+            Your current plan doesn’t include job access. Upgrade to unlock featured jobs and applications.
+          </p>
+          <button
+            @click="goToPlans"
+            class="px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition-all"
+          >
+            Choose a Plan
+          </button>
+        </div>
+      </div>
+
       <!-- Jobs List -->
       <div v-else class="space-y-4">
         <div
           v-for="job in jobs.slice(0, 10)"
           :key="job.id"
-          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div
-            class="flex flex-col sm:flex-row justify-between items-start mb-3"
-          >
+          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -84,7 +86,6 @@
             </div>
 
             <!-- Buttons -->
-            <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
               <button
                 class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
@@ -105,26 +106,17 @@
                 @click="markInterested(job)"
               >
                 <span class="material-icons text-base mr-2">
-                  {{ job.save_status === "saved" ? "star" : "star_border" }}
+                  {{ job.save_status === 'saved' ? 'star' : 'star_border' }}
                 </span>
-                {{ job.save_status === "saved" ? "Saved" : "Interested" }}
+                {{ job.save_status === 'saved' ? 'Saved' : 'Interested' }}
               </button>
             </div>
           </div>
         </div>
-
-        <div class="flex justify-center mt-6">
-          <router-link
-            to="/browse-jobs"
-            class="px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-indigo-700 transition-colors"
-          >
-            View More Jobs
-          </router-link>
-        </div>
       </div>
     </section>
 
-    <!-- MODALS -->
+    <!-- Job Modal -->
     <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
   </div>
 </template>
@@ -132,17 +124,20 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
-
 import JobService from "@/services/jobService";
-
+import subscriptionService from "@/services/subscriptionService";
 import JobModal from "@/components/Dashboard/modals/JobModal.vue";
+import { useRouter } from "vue-router";
 
 const jobs = ref([]);
 const loading = ref(true);
 const error = ref("");
 const selectedJob = ref(null);
-
 const showModal = ref(false);
+const limits = ref({ jobs: 0 });
+const limitsLoading = ref(true);
+
+const router = useRouter();
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString();
@@ -165,7 +160,25 @@ async function fetchJobs() {
   }
 }
 
-// Modal handlers
+// Fetch user subscription limits
+async function fetchLimits() {
+  limitsLoading.value = true;
+  try {
+    const res = await subscriptionService.getLimits();
+    limits.value = res?.data ?? res ?? { jobs: 0 };
+  } catch (err) {
+    console.error("Error fetching limits:", err);
+  } finally {
+    limitsLoading.value = false;
+  }
+}
+
+// Navigation
+function goToPlans() {
+  router.push({ name: "Plans" });
+}
+
+// Modals
 function openModal(job) {
   selectedJob.value = job;
   showModal.value = true;
@@ -175,6 +188,7 @@ function closeModal() {
   showModal.value = false;
 }
 
+// Save Job
 async function markInterested(job) {
   const confirm = await Swal.fire({
     title: "Mark as Interested?",
@@ -192,7 +206,6 @@ async function markInterested(job) {
   try {
     const res = await JobService.markInterested(job.id);
     job.save_status = "saved";
-
     Swal.fire({
       icon: "success",
       title: "Marked as Interested!",
@@ -207,7 +220,7 @@ async function markInterested(job) {
       Swal.fire({
         icon: "warning",
         title: "Job Already Marked",
-        text: "You have Already Marked This Job.",
+        text: "You have already marked this job.",
       });
     } else {
       Swal.fire({
@@ -219,5 +232,8 @@ async function markInterested(job) {
   }
 }
 
-onMounted(fetchJobs);
+onMounted(() => {
+  fetchJobs();
+  fetchLimits();
+});
 </script>

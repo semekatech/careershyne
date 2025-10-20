@@ -22,7 +22,9 @@ import ManageSavedJobs from "@/pages/Dashboard/ManageSavedJobs.vue"
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 import Profile from "@/pages/Dashboard/Profile.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
+import PremiumPlans from "@/pages/Dashboard/PremiumPlans.vue";
 import UserJobs from "@/pages/Dashboard/UserJobs.vue";
+import PremiumUserJobs from "@/pages/Dashboard/PremiumUserJobs.vue";
 import UserActivity from "@/pages/Dashboard/UserActivity.vue";
 import ManageCategories from "@/pages/Dashboard/ManageCategories.vue";
 
@@ -38,6 +40,9 @@ const routes = [
   { path: "/free-review", name: "FreeReview", component: () => import("@/pages/CvUpload.vue") },
   { path: "/ai", name: "AI", component: () => import("@/pages/AiReview.vue") },
   { path: "/jobs", name: "Jobs", component: () => import("@/pages/AiJobs.vue") },
+
+
+  
 
   // Auth routes
   {
@@ -81,6 +86,7 @@ const routes = [
     meta: { title: "Manage Jobs" },
     children: [{ path: "", component: ManageJobs }],
   },
+
 {
     path: "/manage-save-jobs",
     component: DashboardLayout,
@@ -131,6 +137,14 @@ const routes = [
     meta: { title: "My Plans" },
     children: [{ path: "", component: Plans }],
   },
+{
+    path: "/premium-plans",
+    component: DashboardLayout,
+    meta: { title: "My Plans" },
+    children: [{ path: "", component: PremiumPlans }],
+  },
+
+  
   {
     path: "/profile",
     component: DashboardLayout,
@@ -143,6 +157,14 @@ const routes = [
     meta: { title: "Browse Jobs" },
     children: [{ path: "", component: UserJobs }],
   },
+{
+    path: "/job-activities",
+    component: DashboardLayout,
+    meta: { title: "My Jobs" },
+    children: [{ path: "", component: PremiumUserJobs }],
+  },
+
+  
   {
     path: "/browse-activities",
     component: DashboardLayout,

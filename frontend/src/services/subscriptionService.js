@@ -25,6 +25,8 @@ const subscriptionService = {
         emails: response.data.emails ?? 0,
         checks: response.data.checks ?? 0,
         plan: response.data.plan ?? "Free",
+        jobs: response.data.jobs ?? 0,
+        applications: response.data.applications ?? 0,
       };
     } catch (err) {
       console.error("Failed to fetch subscription limits:", err);
@@ -33,6 +35,8 @@ const subscriptionService = {
         coverLetters: 0,
         emails: 0,
         plan: "Free",
+        jobs: 0,
+        applications: 0,
       };
     }
   },

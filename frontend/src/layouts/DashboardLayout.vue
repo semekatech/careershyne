@@ -92,7 +92,6 @@
         class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 flex-shrink-0"
       >
         <div class="flex items-center">
-          <!-- Hamburger button on small devices -->
           <button
             class="md:hidden text-gray-500 dark:text-gray-300 focus:outline-none"
             @click="toggleSidebar"
@@ -121,6 +120,7 @@
           </a>
         </div>
       </header>
+
       <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-800">
         <router-view />
       </main>
@@ -158,107 +158,59 @@ onBeforeUnmount(() => window.removeEventListener("resize", handleResize));
 const defaultAvatar = auth.user?.photo
   ? `https://demo.ngumzo.com/storage/${auth.user.photo}`
   : "/profile.jpg";
-const preview = ref(null); // optional for avatar preview
+const preview = ref(null);
 
-// Logout function
+// Logout
 const handleLogout = () => {
   auth.clearToken();
   router.push("/login");
 };
 
-// Sidebar links with Material & FontAwesome icons
+// Sidebar Links
 const sidebarLinks = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: "material-icons-sharp",
-    iconName: "dashboard",
-  },
-  {
-    name: "Manage Orders",
-    href: "/manage-orders",
-    faIcon: ["fas", "shopping-cart"],
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Manage Payments",
-    href: "/manage-payments",
-    faIcon: ["fas", "credit-card"],
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Manage Users",
-    href: "/manage-users",
-    faIcon: ["fas", "users"],
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Manage Saved Jobs",
-    href: "/manage-save-jobs",
-    icon: "material-icons-sharp",
-    iconName: "business_center",
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Manage Jobs",
-    href: "/manage-jobs",
-    icon: "material-icons-sharp",
-    iconName: "business_center",
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Manage Categories",
-    href: "/manage-categories",
-    icon: "material-icons-sharp",
-    iconName: "business_center",
-    roles: ["1109", "manager"],
-  },
-  {
-    name: "Subscriptions",
-    href: "/my-plans",
-    icon: "material-icons-sharp",
-    iconName: "workspace_premium",
-    roles: ["1098"],
-  },
-  {
-    name: "My Jobs",
-    href: "/browse-jobs",
-    icon: "material-icons-sharp",
-    iconName: "business_center",
-    roles: ["1098"],
-  },
-  {
-    name: "My Activities",
-    href: "/browse-acctivities",
-    icon: "material-icons-sharp",
-    iconName: "history",
-    roles: ["1098"],
-  },
-  {
-    name: "Personal Summary",
-    href: "/profile",
-    icon: "material-icons-sharp",
-    iconName: "person",
-    roles: ["1109", "1098"],
-  },
+  { name: "Dashboard", href: "/dashboard", icon: "material-icons-sharp", iconName: "dashboard" },
+
+  // Manager/Admin Links
+  { name: "Manage Orders", href: "/manage-orders", faIcon: ["fas", "shopping-cart"], roles: ["1109", "manager"] },
+  { name: "Manage Payments", href: "/manage-payments", faIcon: ["fas", "credit-card"], roles: ["1109", "manager"] },
+  { name: "Manage Users", href: "/manage-users", faIcon: ["fas", "users"], roles: ["1109", "manager"] },
+  { name: "Manage Saved Jobs", href: "/manage-save-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
+  { name: "Manage Jobs", href: "/manage-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
+  { name: "Manage Categories", href: "/manage-categories", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
+
+  // Regular user (role 1098)
+  { name: "Subscriptions", href: "/my-plans", icon: "material-icons-sharp", iconName: "workspace_premium", roles: ["1098"] },
+  { name: "My Jobs", href: "/browse-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1098"] },
+  { name: "My Activities", href: "/browse-acctivities", icon: "material-icons-sharp", iconName: "history", roles: ["1098"] },
+
+  // Shared links
+  { name: "Personal Summary", href: "/profile", icon: "material-icons-sharp", iconName: "person", roles: ["1109", "1098"] },
   { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
 ];
 
-// Filter links by user role
+// Filter logic
 const filteredLinks = computed(() => {
+  // Show limited set for registered users
+  if (auth.user?.user_type === "registered") {
+    return [
+      { name: "Dashboard", href: "/dashboard", icon: "material-icons-sharp", iconName: "dashboard" },
+      { name: "My Jobs", href: "/job-activities", icon: "material-icons-sharp", iconName: "business_center" },
+      { name: "My Subscriptions", href: "/premium-plans", icon: "material-icons-sharp", iconName: "workspace_premium" },
+      { name: "Personal Summary", href: "/profile", icon: "material-icons-sharp", iconName: "person" },
+      { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
+    ];
+  }
+
+  // Default: filter by role
   return sidebarLinks.filter(
     (link) => !link.roles || link.roles.includes(auth.user?.role)
   );
 });
 
-// Highlight active route
-const isActive = (href) => {
-  return route.path === href;
-};
+const isActive = (href) => route.path === href;
 </script>
 
 <style scoped>
-/* Sidebar slide transition */
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.3s ease;
@@ -271,8 +223,6 @@ const isActive = (href) => {
 .slide-leave-from {
   transform: translateX(0);
 }
-
-/* Material icon size */
 .material-icons-sharp {
   font-size: 1.25rem;
   line-height: 1;

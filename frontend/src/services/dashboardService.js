@@ -39,15 +39,17 @@ export default {
   // 🟣 Admin / Dashboard Stats
   async getDashboardStats() {
     try {
-      const { data } = await axiosInstance.get("/dashboard/stats");
+      const response = await axiosInstance.get("/dashboard/stats");
+      const data = response.data?.data || response.data || {};
+
       return {
-        pending: data.pending,
-        approved: data.approved,
-        all: data.all,
-        totalAmount: data.totalAmount,
-        totalPendingAmount: data.totalPendingAmount,
-        totalApprovedAmount: data.totalApprovedAmount,
-        graphData: data.graphData,
+        pending: data.pending ?? 0,
+        approved: data.approved ?? 0,
+        all: data.all ?? 0,
+        totalAmount: data.totalAmount ?? 0,
+        totalPendingAmount: data.totalPendingAmount ?? 0,
+        totalApprovedAmount: data.totalApprovedAmount ?? 0,
+        graphData: data.graphData ?? [],
       };
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
@@ -58,11 +60,15 @@ export default {
   // 🟢 User Stats
   async getUserStats() {
     try {
-      const { data } = await axiosInstance.get("/dashboard/user-stats");
+      const response = await axiosInstance.get("/dashboard/user-stats");
+
+      // ✅ This line ensures compatibility with any backend structure
+      const data = response.data?.data || response.data || {};
+
       return {
-        total_jobs: data.total_jobs,
-        total_applied: data.total_applied,
-        total_saved: data.total_saved,
+        total_jobs: data.total_jobs ?? 0,
+        total_applied: data.total_applied ?? 0,
+        total_saved: data.total_saved ?? 0,
       };
     } catch (error) {
       console.error("Error loading user stats:", error);

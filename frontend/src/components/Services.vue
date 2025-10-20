@@ -79,9 +79,6 @@
         <li>⭐ Branding with your CV</li>
       </ul>
     </div>
-    <!-- <a href="#" class="mt-6 text-orange-500 font-semibold hover:underline">
-      🔹 Shine on LinkedIn
-    </a> -->
   </div>
 
 </div>
