@@ -254,6 +254,7 @@ async function makePayment() {
       phone,
       amount: order.data.amount,
       orderID: order.data.orderID,
+      isPremium: 0,
     });
     pollPayment(response.reference);
   } catch (err) {

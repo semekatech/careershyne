@@ -1,7 +1,9 @@
 <template>
   <section class="bg-white dark:bg-gray-900 py-16">
     <div class="text-center mb-12">
-      <h1 class="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100">
+      <h1
+        class="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100"
+      >
         Find the Perfect Plan
       </h1>
       <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
@@ -24,7 +26,9 @@
         </p>
 
         <div class="mt-8">
-          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50">KES 1,000</span>
+          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50"
+            >KES 1,000</span
+          >
           <span class="text-gray-600 dark:text-gray-400">/ month</span>
         </div>
 
@@ -44,6 +48,7 @@
         </ul>
 
         <button
+          @click="selectPlan('Starter', 1000)"
           class="mt-10 w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
         >
           Choose Starter
@@ -68,7 +73,9 @@
         </p>
 
         <div class="mt-8">
-          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50">KES 1,500</span>
+          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50"
+            >KES 1,500</span
+          >
           <span class="text-gray-600 dark:text-gray-400">/ month</span>
         </div>
 
@@ -88,6 +95,7 @@
         </ul>
 
         <button
+          @click="selectPlan('Professional', 1500)"
           class="mt-10 w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
         >
           Choose Professional
@@ -106,7 +114,9 @@
         </p>
 
         <div class="mt-8">
-          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50">KES 3,000</span>
+          <span class="text-5xl font-bold text-gray-900 dark:text-gray-50"
+            >KES 3,000</span
+          >
           <span class="text-gray-600 dark:text-gray-400">/ month</span>
         </div>
 
@@ -126,68 +136,67 @@
         </ul>
 
         <button
+          @click="selectPlan('Premium', 3000)"
           class="mt-10 w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
         >
           Choose Premium
         </button>
       </div>
     </div>
+
+    <!-- Phone Payment Modal -->
+    <div
+      v-if="openModal"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      @keydown.esc="closeModal"
+    >
+      <div class="bg-white rounded-xl p-6 w-full max-w-md relative">
+        <h3 class="text-lg font-bold mb-4">
+          Pay for {{ selectedPlan.name }} (KES {{ selectedPlan.amount }})
+        </h3>
+
+        <label class="block mb-2 text-gray-700">Phone Number</label>
+        <input
+          v-model="payment.phone"
+          type="tel"
+          placeholder="e.g., 254712345678 or 0712345678"
+          class="w-full border border-gray-300 rounded-lg p-2 mb-1"
+        />
+        <p v-if="phoneError" class="text-red-600 text-sm mb-2">
+          {{ phoneError }}
+        </p>
+
+        <div class="flex justify-between items-center mt-4">
+          <button
+            @click="makePayment"
+            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
+          >
+            Pay KES {{ selectedPlan.amount }}
+          </button>
+          <button
+            @click="closeModal"
+            class="text-gray-700 px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive } from "vue";
 import Swal from "sweetalert2";
 import renewPlanService from "@/services/renewPlan";
+
 const { initiatePayment, checkPaymentStatus } = renewPlanService;
 
-// Budget (in multiples of 100)
-const budget = ref(100);
-
-// Prices per item
-const prices = reactive({
-  cv: 20,
-  coverLetter: 15,
-  eligibility: 15,
-  email: 10,
-});
-
-// Computed allocation
-const items = computed(() => {
-  const P = budget.value;
-  if (P <= 0 || P % 100 !== 0)
-    return { cv: 0, coverLetter: 0, eligibility: 0, email: 0, total: 0 };
-
-  // Split budget based on percentage
-  const allocation = {
-    cv: P * 0.4,
-    coverLetter: P * 0.3,
-    eligibility: P * 0.2,
-    email: P * 0.1,
-  };
-
-  // Calculate how many of each item can be bought
-  const cv = Math.floor(allocation.cv / prices.cv);
-  const coverLetter = Math.floor(allocation.coverLetter / prices.coverLetter);
-  const eligibility = Math.floor(allocation.eligibility / prices.eligibility);
-  const email = Math.floor(allocation.email / prices.email);
-
-  // Calculate total spent value
-  const total =
-    cv * prices.cv +
-    coverLetter * prices.coverLetter +
-    eligibility * prices.eligibility +
-    email * prices.email;
-
-  return { cv, coverLetter, eligibility, email, total };
-});
-
-// Modal & Payment
+// State
 const openModal = ref(false);
 const payment = reactive({ phone: "" });
 const phoneError = ref("");
-
-// Order
+const selectedPlan = reactive({ name: "", amount: 0 });
 const order = reactive({
   data: {
     amount: 0,
@@ -195,6 +204,13 @@ const order = reactive({
     status: "pending",
   },
 });
+
+// Choose plan
+function selectPlan(name, amount) {
+  selectedPlan.name = name;
+  selectedPlan.amount = amount;
+  openModal.value = true;
+}
 
 // Validate Kenyan phone
 function isValidPhone(num) {
@@ -211,28 +227,31 @@ function closeModal() {
 
 // Payment
 async function makePayment() {
-  order.data.amount = items.value.total;
   const phone = payment.phone.trim();
+  const amount = selectedPlan.amount;
+
   if (!isValidPhone(phone)) {
     phoneError.value =
       "Invalid Kenyan number. Use 254XXXXXXXXX or 07/01XXXXXXXX";
     return;
   }
+
   phoneError.value = "";
 
   const confirmResult = await Swal.fire({
     title: "Confirm Payment",
-    html: `<b>Phone:</b> ${phone}<br/><b>Amount:</b> KES ${order.data.amount}`,
+    html: `<b>Plan:</b> ${selectedPlan.name}<br/><b>Phone:</b> ${phone}<br/><b>Amount:</b> KES ${amount}`,
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Yes, Proceed",
     cancelButtonText: "Cancel",
   });
+
   if (!confirmResult.isConfirmed) return;
 
   Swal.fire({
     title: "Processing...",
-    text: "Check your phone...",
+    text: "Check your phone for the STK prompt...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
   });
@@ -240,8 +259,9 @@ async function makePayment() {
   try {
     const response = await initiatePayment({
       phone,
-      amount: order.data.amount,
+      amount,
       orderID: order.data.orderID,
+      isPremium: 1,
     });
     pollPayment(response.reference);
   } catch (err) {

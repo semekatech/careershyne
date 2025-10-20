@@ -175,7 +175,7 @@ async function fetchLimits() {
 
 // Navigation
 function goToPlans() {
-  router.push({ name: "Plans" });
+  router.push("/premium-plans");
 }
 
 // Modals
