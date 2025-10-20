@@ -87,31 +87,54 @@
 
             <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
+              <!-- View Details -->
               <button
                 class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
                 @click="openModal(job)"
               >
-                View Details
+                View
                 <span class="material-icons text-base ml-2">arrow_forward</span>
               </button>
 
+              <!-- Mark Interested -->
               <button
                 :disabled="job.save_status === 'saved'"
-                :class="[
+                :class="[ 
                   'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
                   job.save_status === 'saved'
                     ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-green-500 text-white hover:bg-green-600',
+                    : 'bg-green-500 text-white hover:bg-green-600'
                 ]"
                 @click="markInterested(job)"
               >
                 <span class="material-icons text-base mr-2">
                   {{ job.save_status === 'saved' ? 'star' : 'star_border' }}
                 </span>
-                {{ job.save_status === 'saved' ? 'Saved' : 'Interested' }}
+                {{ job.save_status === 'saved' ? 'Saved' : 'Save' }}
+              </button>
+
+              <!-- Not Interested -->
+              <button
+                class="px-4 py-2 bg-red-500 text-white font-semibold rounded-full shadow-md hover:bg-red-600 transition-colors flex items-center justify-center whitespace-nowrap"
+                @click="markNotInterested(job)"
+              >
+                <span class="material-icons text-base mr-2">hide_source</span> Hide
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- No Featured Jobs -->
+        <div
+          v-if="!jobs.length"
+          class="text-center py-10 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-2xl"
+        >
+          <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mb-3">
+            No featured jobs available right now.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Please check back later for new opportunities.
+          </p>
         </div>
       </div>
     </section>
@@ -188,7 +211,7 @@ function closeModal() {
   showModal.value = false;
 }
 
-// Save Job
+// Mark as Interested
 async function markInterested(job) {
   const confirm = await Swal.fire({
     title: "Mark as Interested?",
@@ -229,6 +252,44 @@ async function markInterested(job) {
         text: "Unable to mark this job as interested. Please try again.",
       });
     }
+  }
+}
+
+// Mark as Not Interested (Hide)
+async function markNotInterested(job) {
+  const confirm = await Swal.fire({
+    title: "Not Interested?",
+    text: `You won’t see "${job.title}" again in your job list.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Hide Job",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#6b7280",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    // Call backend service to store not interested flag
+    await JobService.markNotInterested(job.id);
+
+    // Remove from list
+    jobs.value = jobs.value.filter((j) => j.id !== job.id);
+
+    Swal.fire({
+      icon: "success",
+      title: "Job Hidden",
+      text: `"${job.title}" has been hidden and won’t appear again.`,
+      timer: 1800,
+      showConfirmButton: false,
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Could not hide this job. Please try again later.",
+    });
   }
 }
 

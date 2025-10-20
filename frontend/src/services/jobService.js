@@ -71,6 +71,10 @@ const JobService = {
     return response.data;
   },
 
+async markNotInterested(jobId) {
+    const response = await api.post(`/${jobId}/not-interested`);
+    return response.data;
+  },
   async getUsersJobs() {
     const response = await api.get("/user-jobs");
     return response.data;

@@ -89,6 +89,7 @@ Route::middleware(LogActivity::class)->group(function () {
         Route::get('/applied-jobs', [JobController::class, 'fetchAppliedJobs']);
         
         Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
+        Route::post('/{id}/not-interested', [JobController::class, 'saveJobNotInterested']);
         Route::post('/{id}/generate-content', [JobController::class, 'generateContent']);
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
         Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])

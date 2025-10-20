@@ -35,7 +35,7 @@
         <ul class="mt-8 space-y-4 text-gray-700 dark:text-gray-300">
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>
-            Up to 3 new jobs daily
+           Access to personalized Jobs
           </li>
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>
@@ -82,7 +82,7 @@
         <ul class="mt-8 space-y-4 text-gray-700 dark:text-gray-300">
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>
-            Up to 8 new jobs daily
+            Access to personalized Jobs
           </li>
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>
@@ -123,7 +123,7 @@
         <ul class="mt-8 space-y-4 text-gray-700 dark:text-gray-300">
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>
-            Up to 15 new jobs daily
+            Access to personalized Jobs
           </li>
           <li class="flex items-center">
             <span class="material-icons text-green-500 mr-3">check_circle</span>

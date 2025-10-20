@@ -17,7 +17,7 @@
   :to="{ path: '/profile', query: { tab: 'gmail' } }"
   class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105"
 >
-  Learn More
+  Connect Gmail
 </router-link>
 
   </div>
