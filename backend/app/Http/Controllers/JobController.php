@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI;
+use Illuminate\Support\Facades\Log;
 
 class JobController extends Controller
 {
@@ -1303,7 +1304,6 @@ PROMPT;
     public function applyOnBehalf(Request $request, $jobId)
     {
         info($request->all());
-
         $request->validate([
             'user_id'          => 'required|integer',
             'subject'          => 'required|string|max:255',
@@ -1320,7 +1320,6 @@ PROMPT;
 
         $user         = \App\Models\User::findOrFail($userId);
         $userFullName = str_replace(' ', '_', $user->name ?? 'Applicant');
-
         if (! $user->gmail_access_token) {
             return response()->json(['message' => 'User has not authorized Gmail.'], 403);
         }
@@ -1454,21 +1453,40 @@ PROMPT;
             $gmail->users_messages->send('me', $message);
 
             // ===== Save to Database =====
-            DB::table('job_applications')->insert([
-                'job_id'            => $jobId,
-                'user_id'           => $userId,
-                'subject'           => $subject,
-                'body'              => $body,
-                'cv_path'           => $cvPath,
-                'cover_letter_path' => $coverLetterPath,
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ]);
 
-            DB::table('job_interests')
-                ->where('job_id', $jobId)
-                ->where('user_id', $userId)
-                ->update(['status' => 'applied', 'updated_at' => now()]);
+try {
+      $admin = auth('api')->user();
+    // Insert the job application
+    DB::table('job_applications')->insert([
+        'job_id'            => $jobId,
+        'user_id'           => $userId,
+         'applied_by'           => $admin->id,
+        'subject'           => $subject,
+        'body'              => $body,
+        'cv_path'           => $cvPath,
+        'cover_letter_path' => $coverLetterPath,
+        'created_at'        => now(),
+        'updated_at'        => now(),
+    ]);
+
+    // Update job interest status
+    DB::table('job_interests')
+        ->where('job_id', $jobId)
+        ->where('user_id', $userId)
+        ->update([
+            'status'     => 'applied',
+            'updated_at' => now()
+        ]);
+
+} catch (\Exception $e) {
+    // Log the error for debugging
+    Log::error('Job application failed', [
+        'job_id'  => $jobId,
+        'user_id' => $userId,
+        'error'   => $e->getMessage()
+    ]);
+
+}
 
             return response()->json([
                 'message' => 'Application sent and saved successfully!',
