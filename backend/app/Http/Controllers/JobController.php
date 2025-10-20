@@ -1209,9 +1209,9 @@ PROMPT;
             'subject'          => 'required|string|max:255',
             'body'             => 'required|string',
             'cv'               => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'cv_url'           => 'nullable|url', // ✅ allow CV from URL
+            'cv_url'           => 'nullable', 
             'cover_letter'     => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'cover_letter_url' => 'nullable|url', // ✅ allow Cover Letter from URL
+            'cover_letter_url' => 'nullable',
         ]);
 
         $userId  = $request->input('user_id');
