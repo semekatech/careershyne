@@ -192,8 +192,8 @@ class JobController extends Controller
                 'users.email as user_email',
                 'job_interests.created_at as saved_at',
                 'job_interests.status as application_status',
-                'users.cv_path as existing_cv',                     // <-- CV URL/path
-                'users.cover_letter_path as existing_cover_letter', // optional
+                'users.cv_path as existing_cv',                   
+                'users.cover_letter_path as existing_cover_letter',
                 'job_interests.created_at as saved_on',
                 DB::raw("'saved' AS save_status")
             );
@@ -217,7 +217,7 @@ class JobController extends Controller
         }
 
         $perPage = $request->get('per_page', 10);
-        $jobs    = $query->orderBy('job_listings.created_at', 'desc')->paginate($perPage);
+        $jobs    = $query->orderBy('job_interests.created_at', 'desc')->paginate($perPage);
 
         return response()->json($jobs);
     }

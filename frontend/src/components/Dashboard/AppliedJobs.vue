@@ -109,7 +109,9 @@
                   disabled
                   class="px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors bg-green-500 text-white"
                 >
-                  <span class="material-icons text-base mr-2">check_circle</span>
+                  <span class="material-icons text-base mr-2"
+                    >check_circle</span
+                  >
                   Applied
                 </button>
               </div>
@@ -122,10 +124,10 @@
     <!-- Application Details Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4 overflow-auto"
     >
       <div
-        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 relative"
+        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full mx-auto p-6 relative max-h-[90vh] overflow-y-auto"
       >
         <!-- Close button -->
         <button
@@ -152,7 +154,7 @@
         <hr class="my-4 border-gray-200 dark:border-gray-700" />
 
         <!-- Application Content -->
-        <div class="space-y-3">
+        <div class="space-y-4">
           <div v-if="selectedJob.subject">
             <h4 class="font-semibold text-gray-800 dark:text-gray-200">
               Subject:
@@ -166,11 +168,11 @@
             <h4 class="font-semibold text-gray-800 dark:text-gray-200">
               Application Body:
             </h4>
-            <p
-              class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed"
-            >
-              {{ selectedJob.body }}
-            </p>
+            <!-- Render HTML content safely -->
+            <div
+              class="text-gray-700 dark:text-gray-300 leading-relaxed"
+              v-html="selectedJob.body"
+            ></div>
           </div>
 
           <div v-if="selectedJob.application_cv">

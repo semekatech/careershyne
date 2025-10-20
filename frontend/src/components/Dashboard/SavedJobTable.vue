@@ -107,19 +107,29 @@
                 >
                   {{ job.title }}
                 </h3>
+               
                 <p
                   class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex items-center gap-1"
                 >
                   <span class="material-icons text-base">business</span>
                   {{ job.company }} • {{ job.type }}
                 </p>
-
+ <p
+                  class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex items-center gap-1"
+                >
+                  <span class="material-icons text-base">person</span>
+                  {{ job.user_name }}
+                </p>
                 <div
                   class="flex flex-wrap items-center text-sm text-gray-500 dark:text-gray-400 gap-4"
                 >
                   <div class="flex items-center gap-1">
                     <span class="material-icons text-base">place</span>
                     {{ job.county }}, {{ job.country }}
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="material-icons text-base">event</span>
+                    Saved On: {{ formatDate(job.saved_on) }}
                   </div>
                   <div class="flex items-center gap-1">
                     <span class="material-icons text-base">event</span>
