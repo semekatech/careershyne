@@ -360,29 +360,29 @@ async function openApplyModal(job) {
   applyForm.value.body = "";
 
   // Pre-fill CV
+  // ✅ Pre-fill CV (just show filename, don’t fetch or re-upload)
+  // ✅ Pre-fill CV
   if (job.existing_cv) {
-    const cvFile = await fetchFileFromUrl(
-      job.existing_cv,
-      getFileNameFromPath(job.existing_cv)
-    );
-    applyForm.value.cv = cvFile;
-    applyForm.value.cvName = cvFile.name;
+    applyForm.value.cv = null;
+    applyForm.value.cvName = getFileNameFromPath(job.existing_cv);
+    applyJob.value.existing_cv = job.existing_cv; // <-- keep full URL
   } else {
     applyForm.value.cv = null;
     applyForm.value.cvName = "";
+    applyJob.value.existing_cv = "";
   }
 
-  // Pre-fill Cover Letter
+  // ✅ Pre-fill Cover Letter
   if (job.existing_cover_letter) {
-    const clFile = await fetchFileFromUrl(
-      job.existing_cover_letter,
-      getFileNameFromPath(job.existing_cover_letter)
+    applyForm.value.coverLetter = null;
+    applyForm.value.coverLetterName = getFileNameFromPath(
+      job.existing_cover_letter
     );
-    applyForm.value.coverLetter = clFile;
-    applyForm.value.coverLetterName = clFile.name;
+    applyJob.value.existing_cover_letter = job.existing_cover_letter; // <-- keep full URL
   } else {
     applyForm.value.coverLetter = null;
     applyForm.value.coverLetterName = "";
+    applyJob.value.existing_cover_letter = "";
   }
 
   showApplyModal.value = true;
@@ -446,13 +446,14 @@ async function submitApplication() {
     formData.append("body", applyForm.value.body);
 
     // 🟢 Attach new or existing CV
+    // CV upload
     if (applyForm.value.cv) {
       formData.append("cv", applyForm.value.cv);
     } else if (applyJob.value.existing_cv) {
       formData.append("cv_url", applyJob.value.existing_cv);
     }
 
-    // 🟢 Attach new or existing cover letter
+    // Cover letter upload
     if (applyForm.value.coverLetter) {
       formData.append("cover_letter", applyForm.value.coverLetter);
     } else if (applyJob.value.existing_cover_letter) {

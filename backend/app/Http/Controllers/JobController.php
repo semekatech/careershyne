@@ -1202,6 +1202,8 @@ PROMPT;
     }
     public function applyOnBehalf(Request $request, $jobId)
     {
+
+        info($request->all());
         $request->validate([
             'user_id'          => 'required|integer',
             'subject'          => 'required|string|max:255',
