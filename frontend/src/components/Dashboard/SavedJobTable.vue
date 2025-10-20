@@ -180,52 +180,59 @@
             />
           </div>
           <!-- Attach CV -->
-          <div>
-            <label class="block font-medium mb-2">
-              Attach CV <span class="text-red-500">*</span>
-            </label>
+          <!-- CV Upload -->
+         <!-- ✅ CV Upload (with preview beneath, not inside) -->
+<div>
+  <label
+    for="cv"
+    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+  >
+    CV (PDF/DOC/DOCX)
+  </label>
 
-            <!-- Show existing CV if present -->
-            <div
-              v-if="applyJob.value?.existing_cv"
-              class="mb-3 flex items-center gap-3"
-            >
-              <span class="material-icons text-gray-500">description</span>
-              <a
-                :href="applyJob.value.existing_cv"
-                target="_blank"
-                class="text-indigo-600 hover:underline"
-              >
-                {{ getFileNameFromPath(applyJob.value.existing_cv) }}
-              </a>
-            </div>
+  <!-- Upload Box -->
+  <div
+    class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition"
+  >
+    <input
+      id="cv"
+      type="file"
+      @change="handleFileChange($event, 'cv')"
+      accept=".pdf,.doc,.docx"
+      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+    />
+    <div class="text-center">
+      <span class="material-icons text-3xl text-gray-400 mb-2">
+        upload_file
+      </span>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">
+        Drag & drop your CV here, or click to select
+      </p>
+      <p
+        v-if="applyForm.cvName"
+        class="text-sm mt-2 text-gray-700 dark:text-gray-200"
+      >
+        Selected file: {{ applyForm.cvName }}
+      </p>
+    </div>
+  </div>
 
-            <!-- Upload new CV -->
-            <div
-              class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition"
-            >
-              <input
-                type="file"
-                @change="handleFileChange($event, 'cv')"
-                accept=".pdf,.doc,.docx"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div class="text-center">
-                <span class="material-icons text-3xl text-gray-400 mb-2"
-                  >upload_file</span
-                >
-                <p class="text-gray-500 dark:text-gray-400 text-sm">
-                  Drag & drop your CV here, or click to select
-                </p>
-                <p
-                  v-if="applyForm.cvName"
-                  class="text-sm mt-2 text-gray-700 dark:text-gray-200"
-                >
-                  Selected file: {{ applyForm.cvName }}
-                </p>
-              </div>
-            </div>
-          </div>
+  <!-- ✅ Show Existing CV Preview Beneath Upload -->
+  <div v-if="applyJob?.existing_cv" class="mt-3">
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+      Current CV:
+    </p>
+    <a
+      :href="getFullCVUrl(applyJob.existing_cv)"
+      target="_blank"
+      class="text-indigo-600 hover:underline break-all"
+    >
+      {{ getFileNameFromPath(applyJob.existing_cv) }}
+    </a>
+  </div>
+</div>
+
+
           <!-- Cover Letter -->
           <div>
             <label class="block font-medium mb-2"
@@ -291,9 +298,33 @@
           </button>
           <button
             @click="submitApplication"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition"
+            :disabled="submitting"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg shadow transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Send Application
+            <span v-if="!submitting">Send Application</span>
+            <span v-else class="flex items-center gap-2">
+              <svg
+                class="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              Sending...
+            </span>
           </button>
         </div>
       </div>
@@ -322,6 +353,7 @@ const applyJob = ref(null);
 import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore();
 const authUser = authStore.user;
+const submitting = ref(false);
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString();
@@ -439,21 +471,22 @@ async function submitApplication() {
     return;
   }
 
+  submitting.value = true; // disable button
+
   try {
     const formData = new FormData();
     formData.append("user_id", applyJob.value.user_id);
     formData.append("subject", applyForm.value.subject);
     formData.append("body", applyForm.value.body);
 
-    // 🟢 Attach new or existing CV
-    // CV upload
+    // Attach CV
     if (applyForm.value.cv) {
       formData.append("cv", applyForm.value.cv);
     } else if (applyJob.value.existing_cv) {
       formData.append("cv_url", applyJob.value.existing_cv);
     }
 
-    // Cover letter upload
+    // Attach Cover Letter
     if (applyForm.value.coverLetter) {
       formData.append("cover_letter", applyForm.value.coverLetter);
     } else if (applyJob.value.existing_cover_letter) {
@@ -487,6 +520,8 @@ async function submitApplication() {
         err.response?.data?.message ||
         "Could not send application. Please try again.",
     });
+  } finally {
+    submitting.value = false; // re-enable button
   }
 }
 
@@ -501,11 +536,17 @@ const editorOptions = {
     ],
   },
 };
-function decodeHtml(html) {
-  const txt = document.createElement("textarea");
-  txt.innerHTML = html;
-  return txt.value;
+// function getFileNameFromPath(path) {
+//   if (!path) return "";
+//   return path.split("/").pop();
+// }
+
+function getFullCVUrl(path) {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `https://careershyne.com/storage/${path}`;
 }
+
 async function generateAIContent(job) {
   if (!job) return;
 
