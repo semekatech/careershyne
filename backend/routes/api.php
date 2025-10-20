@@ -52,7 +52,9 @@ Route::middleware(LogActivity::class)->group(function () {
         return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
     });
 //Dashboard apis
-    Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
+    Route::middleware('auth:api')->get('/dashboard/stats', [AuthController::class, 'getStats']);
+    Route::middleware('auth:api')->get('/dashboard/user-stats', [AuthController::class, 'getUserStats']);
+    
     Route::middleware('auth:api')->get('/auth/verify-token', [AuthController::class, 'verifyToken']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::middleware('auth:api')->get('/me', [AuthController::class, 'userDetails']);

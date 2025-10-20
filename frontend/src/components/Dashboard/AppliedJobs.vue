@@ -94,10 +94,10 @@
                     >
                     <span>{{ job.county }}, {{ job.country }}</span>
                   </div>
-                  <div class="flex items-center">
+                  <!-- <div class="flex items-center">
                     <span class="material-icons text-base mr-1">event</span>
                     <span>Deadline: {{ formatDate(job.deadline) }}</span>
-                  </div>
+                  </div> -->
                    <div class="flex items-center">
                     <span class="material-icons text-base mr-1">event</span>
                     <span>Applied On: {{ formatDate(job.applied_on) }}</span>
@@ -122,15 +122,15 @@
                   :class="[
                     'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
                     job.save_status === 'saved'
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      ? 'bg-green-400 text-white cursor-not-allowed'
                       : 'bg-green-500 text-white hover:bg-green-600',
                   ]"
-                  @click="markInterested(job)"
+                 
                 >
                   <span class="material-icons text-base mr-2">
-                    {{ job.save_status === "saved" ? "star" : "star_border" }}
+                  check_circle
                   </span>
-                  {{ job.save_status === "saved" ? "Saved" : "Interested" }}
+                  Applied
                 </button>
               </div>
             </div>

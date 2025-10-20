@@ -2,7 +2,7 @@
   <div>
     <section>
       <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
-        Personalized Jobs
+        Featured Jobs
       </h2>
 
       <!-- Loader -->
