@@ -119,7 +119,9 @@ class PaymentController extends Controller
             "plan" =>  $account_number,
             "items" => json_encode($items),
             "payment_type" =>  $request->input('payment_type'),
+            "is_premium" =>  $request->input('isPremium'),
             "user_id" =>  $user->id,
+            "amount" =>  $amount,
             "created_at" => now(),
             "updated_at" => now(),
             "status" => 0,
@@ -158,8 +160,11 @@ class PaymentController extends Controller
         }
 
         // ✅ if payment_type == subscription → call another function
-        if ($order_detail->payment_type === 'subscription') {
+        if ($order_detail->payment_type === 'subscription' && $order_detail->is_premium != 1) {
             return $this->handleSubscriptionPayment($stkCallback, $order_detail);
+        }
+         if ($order_detail->payment_type === 'subscription' && $order_detail->is_premium == 1) {
+            return $this->handlePremiumPayment($stkCallback, $order_detail);
         }
         if (empty($stkCallback->CallbackMetadata)) {
             $order_detail = DB::table('mpesa_stks')
@@ -417,6 +422,93 @@ class PaymentController extends Controller
         info("✅ Subscription payment processed successfully for user {$order_detail->user_id}");
         return response()->json(['message' => 'Subscription processed successfully'], 200);
     }
+      protected function handlePremiumPayment($stkCallback, $order_detail)
+{
+    $ResultCode = $stkCallback->ResultCode;
+    $ResultDesc = $stkCallback->ResultDesc;
+
+    // If transaction failed
+    if ($ResultCode != 0) {
+        DB::table('mpesa_stks')->where('id', $order_detail->id)->update([
+            'status' => 2,
+            'resultCode' => $ResultCode,
+            'ResultDescription' => $ResultDesc,
+            'updated_at' => now(),
+        ]);
+        info("❌ Subscription payment failed for user {$order_detail->user_id}");
+        return response()->json(['message' => 'Subscription payment failed'], 200);
+    }
+
+    // ✅ Extract payment metadata
+    $CallbackMetadata = $stkCallback->CallbackMetadata->Item ?? [];
+    $Amount = null;
+    $MpesaReceiptNumber = null;
+    $PhoneNumber = null;
+    $TransactionDate = null;
+
+    foreach ($CallbackMetadata as $item) {
+        if ($item->Name == "Amount") $Amount = $item->Value;
+        if ($item->Name == "MpesaReceiptNumber") $MpesaReceiptNumber = $item->Value;
+        if ($item->Name == "PhoneNumber") $PhoneNumber = $item->Value;
+        if ($item->Name == "TransactionDate") $TransactionDate = $item->Value;
+    }
+
+    // ✅ Update mpesa_stks record
+    DB::table('mpesa_stks')->where('id', $order_detail->id)->update([
+        'status' => 1,
+        'resultCode' => $ResultCode,
+        'ResultDescription' => $ResultDesc,
+        'updated_at' => now(),
+    ]);
+
+    // Decode items (benefits from subscription)
+    $items = json_decode($order_detail->items, true);
+
+    // ✅ Determine benefits based on Amount
+    $jobs = 5;
+    $applications = 5;
+    $expires_at = now()->addDays(30);
+
+    if ($Amount == 1000) {
+        $jobs = 3;
+        $applications = 1;
+    } elseif ($Amount == 1500) {
+        $jobs = 8;
+        $applications = 3;
+    } elseif ($Amount == 3000) {
+        $jobs = 15;
+        $applications = 5;
+    }
+
+    // ✅ Update subscription table
+    $subscription = DB::table('subscriptions')->where('user_id', $order_detail->user_id)->first();
+    if ($subscription) {
+        DB::table('subscriptions')
+            ->where('user_id', $order_detail->user_id)
+            ->update([
+                'cv' => 1,
+                'checks' => 1,
+                'coverletters' => 1,
+                'emails' => 1,
+                'jobs' => $jobs,
+                'applications' => $applications,
+                'expires_at' => $expires_at,
+                'updated_at' => now(),
+            ]);
+    }
+    // ✅ Send confirmation SMS / WhatsApp
+    $formattedPhone = (strpos($PhoneNumber, '254') === 0) ? $PhoneNumber : '254' . substr($PhoneNumber, -9);
+    $message = "✅ Your Careershyne subscription has been activated successfully!\n\n";
+    $this->sendMessage($formattedPhone, $message);
+    // ✅ Notify admin
+    $adminMsg = "📢 New Subscription Payment For Careershyne Received \n\nUser ID: {$order_detail->user_id}\nAmount: KES {$Amount}\nPlan ID: {$order_detail->plan_id}\nReceipt: {$MpesaReceiptNumber}";
+    $this->sendMessage('254705030613', $adminMsg); // Admin phone
+    $this->sendMessage('254703644281', $adminMsg);
+
+    info("✅ Subscription payment processed successfully for user {$order_detail->user_id}");
+    return response()->json(['message' => 'Subscription processed successfully'], 200);
+}
+
     public function sendMessage($phone, $message)
     {
         $apiUrl = 'https://ngumzo.com/v1/send-message';
