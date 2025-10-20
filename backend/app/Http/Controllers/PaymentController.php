@@ -463,8 +463,7 @@ class PaymentController extends Controller
 
     // Decode items (benefits from subscription)
     $items = json_decode($order_detail->items, true);
-
-    // ✅ Determine benefits based on Amount
+    $Amount=$order_detail->amount;
     $jobs = 5;
     $applications = 5;
     $expires_at = now()->addDays(30);
