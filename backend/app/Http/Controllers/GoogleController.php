@@ -64,6 +64,9 @@ class GoogleController extends Controller
 
     // Retrieve user
     $user = \App\Models\User::find($userId);
+
+
+    info('user huyu ni'.$user);
     if (!$user) {
         return response()->json(['success' => false, 'message' => 'User not found'], 404);
     }
