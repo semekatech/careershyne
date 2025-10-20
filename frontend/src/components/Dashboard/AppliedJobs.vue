@@ -6,9 +6,7 @@
       </h2>
 
       <!-- Loader -->
-      <!-- Loader -->
       <div v-if="loading" class="space-y-4 animate-pulse">
-        <!-- Simulated job cards -->
         <div
           v-for="n in 5"
           :key="n"
@@ -52,7 +50,7 @@
           Retry
         </button>
       </div>
-      <!-- Jobs List -->
+
       <!-- Jobs List -->
       <div v-else>
         <!-- No Jobs -->
@@ -89,16 +87,6 @@
                   class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
                 >
                   <div class="flex items-center">
-                    <span class="material-icons text-base mr-1"
-                      >location_on</span
-                    >
-                    <span>{{ job.county }}, {{ job.country }}</span>
-                  </div>
-                  <!-- <div class="flex items-center">
-                    <span class="material-icons text-base mr-1">event</span>
-                    <span>Deadline: {{ formatDate(job.deadline) }}</span>
-                  </div> -->
-                   <div class="flex items-center">
                     <span class="material-icons text-base mr-1">event</span>
                     <span>Applied On: {{ formatDate(job.applied_on) }}</span>
                   </div>
@@ -118,18 +106,10 @@
                 </button>
 
                 <button
-                  :disabled="job.save_status === 'saved'"
-                  :class="[
-                    'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
-                    job.save_status === 'saved'
-                      ? 'bg-green-400 text-white cursor-not-allowed'
-                      : 'bg-green-500 text-white hover:bg-green-600',
-                  ]"
-                 
+                  disabled
+                  class="px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors bg-green-500 text-white"
                 >
-                  <span class="material-icons text-base mr-2">
-                  check_circle
-                  </span>
+                  <span class="material-icons text-base mr-2">check_circle</span>
                   Applied
                 </button>
               </div>
@@ -139,27 +119,92 @@
       </div>
     </section>
 
-    <!-- MODALS -->
-    <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
+    <!-- Application Details Modal -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 relative"
+      >
+        <!-- Close button -->
+        <button
+          @click="closeModal"
+          class="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+        >
+          <span class="material-icons text-2xl">close</span>
+        </button>
+
+        <!-- Job Header -->
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-primary mb-1">
+            {{ selectedJob.title }}
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300">
+            {{ selectedJob.company }} — {{ selectedJob.county }},
+            {{ selectedJob.country }}
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            Applied on: {{ formatDate(selectedJob.applied_on) }}
+          </p>
+        </div>
+
+        <hr class="my-4 border-gray-200 dark:border-gray-700" />
+
+        <!-- Application Content -->
+        <div class="space-y-3">
+          <div v-if="selectedJob.subject">
+            <h4 class="font-semibold text-gray-800 dark:text-gray-200">
+              Subject:
+            </h4>
+            <p class="text-gray-700 dark:text-gray-300">
+              {{ selectedJob.subject }}
+            </p>
+          </div>
+
+          <div v-if="selectedJob.body">
+            <h4 class="font-semibold text-gray-800 dark:text-gray-200">
+              Application Body:
+            </h4>
+            <p
+              class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed"
+            >
+              {{ selectedJob.body }}
+            </p>
+          </div>
+
+          <div v-if="selectedJob.application_cv">
+            <h4 class="font-semibold text-gray-800 dark:text-gray-200">
+              Attached CV:
+            </h4>
+            <a
+              :href="selectedJob.application_cv"
+              target="_blank"
+              class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              <span class="material-icons text-base mr-1">description</span>
+              View CV
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
-
 import JobService from "@/services/jobService";
-
-import JobModal from "@/components/Dashboard/modals/JobModal.vue";
 
 const jobs = ref([]);
 const loading = ref(true);
 const error = ref("");
 const selectedJob = ref(null);
-
 const showModal = ref(false);
 
 function formatDate(dateString) {
+  if (!dateString) return "N/A";
   return new Date(dateString).toLocaleDateString();
 }
 
@@ -188,50 +233,6 @@ function openModal(job) {
 function closeModal() {
   selectedJob.value = null;
   showModal.value = false;
-}
-
-async function markInterested(job) {
-  const confirm = await Swal.fire({
-    title: "Mark as Interested?",
-    text: `Do you want to save "${job.title}" to your interested jobs?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes, save it",
-    cancelButtonText: "Cancel",
-    confirmButtonColor: "#16a34a",
-    cancelButtonColor: "#6b7280",
-  });
-
-  if (!confirm.isConfirmed) return;
-
-  try {
-    const res = await JobService.markInterested(job.id);
-    job.save_status = "saved";
-
-    Swal.fire({
-      icon: "success",
-      title: "Marked as Interested!",
-      text:
-        res.data?.message ||
-        `${job.title} has been saved to your interested jobs.`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-  } catch (err) {
-    if (err.response?.status === 403) {
-      Swal.fire({
-        icon: "warning",
-        title: "Job Already Marked",
-        text: "You have Already Marked This Job.",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Something went wrong",
-        text: "Unable to mark this job as interested. Please try again.",
-      });
-    }
-  }
 }
 
 onMounted(fetchJobs);
