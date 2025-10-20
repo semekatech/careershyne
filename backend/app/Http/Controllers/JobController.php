@@ -96,9 +96,9 @@ class JobController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-            $adminMsg = "New Job Saved,Kindly login and check";
-    $this->sendMessage('254705030613', $adminMsg); // Admin phone
-    $this->sendMessage('254703644281', $adminMsg);
+        $adminMsg = "New Job Saved,Kindly login and check";
+        $this->sendMessage('254705030613', $adminMsg); // Admin phone
+        $this->sendMessage('254703644281', $adminMsg);
 
         return response()->json(['message' => 'Job interest saved successfully'], 200);
     }
@@ -182,11 +182,11 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
-     public function fetchAppliedJobs(Request $request)
+    public function fetchAppliedJobs(Request $request)
     {
         $userId   = auth('api')->id();
         $userRole = auth('api')->user()->role;
-        $query = DB::table('job_listings')
+        $query    = DB::table('job_listings')
             ->join('job_interests', 'job_interests.job_id', '=', 'job_listings.id')
             ->leftJoin('users', 'users.id', '=', 'job_interests.user_id')
             ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
@@ -199,7 +199,7 @@ class JobController extends Controller
                 'job_interests.created_at as saved_at',
                 'job_interests.updated_at as applied_on',
                 'job_interests.status as application_status',
-                'users.cv_path as existing_cv',                     
+                'users.cv_path as existing_cv',
                 'users.cover_letter_path as existing_cover_letter',
                 DB::raw("'saved' AS save_status")
             )->where('job_interests.status', 'applied');
@@ -1512,20 +1512,20 @@ PROMPT;
         return $text;
     }
 
-     public function sendMessage($phone, $message)
+    public function sendMessage($phone, $message)
     {
         $apiUrl = 'https://ngumzo.com/v1/send-message';
         $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
-        $data = [
-            'sender' => "254758428993",
-            'number' => $phone,
-            'message' => $message
+        $data   = [
+            'sender'  => "254758428993",
+            'number'  => $phone,
+            'message' => $message,
         ];
         $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'api-key: ' . $apiKey  // Include your API key here
+            'api-key: ' . $apiKey, // Include your API key here
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
