@@ -1209,7 +1209,7 @@ PROMPT;
             'subject'          => 'required|string|max:255',
             'body'             => 'required|string',
             'cv'               => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'cv_url'           => 'nullable', 
+            'cv_url'           => 'nullable',
             'cover_letter'     => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'cover_letter_url' => 'nullable',
         ]);
@@ -1276,7 +1276,7 @@ PROMPT;
     $cvUrl = $request->input('cv_url');
 
     // If the provided path is relative, prepend your domain
-    if (!str_starts_with($cvUrl, 'http')) {
+    if (! str_starts_with($cvUrl, 'http')) {
         $cvUrl = 'https://careershyne.com/storage/' . ltrim($cvUrl, '/');
     }
 
@@ -1286,6 +1286,9 @@ PROMPT;
         info('CV download failed', ['url' => $cvUrl, 'error' => $e->getMessage()]);
         return response()->json(['message' => 'Could not fetch CV from provided URL.'], 422);
     }
+
+    // ✅ Add this missing encoding step
+    $cvContent = chunk_split(base64_encode($cvContentRaw));
 
     $cvName = basename(parse_url($cvUrl, PHP_URL_PATH));
     $cvPath = 'applications/cv/' . $cvName;
