@@ -30,7 +30,7 @@ public function store(Request $request)
         'company'                 => 'required|string|max:255',
         'title'                   => 'required|string|max:255',
         'type'                    => 'required', // can be array or string
-        'experience'              => 'required|integer|min:0',
+        'experience'              => 'required|string',
         'education'               => 'required|string|max:255',
         'salary'                  => 'required|string|max:255',
         'deadline'                => 'required|date',
