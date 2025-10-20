@@ -112,7 +112,7 @@ class JobController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         // Check if the user already marked this job as interested
-        $exists = DB::table('job_not_interests')
+        $exists = DB::table('jobs_not_interested')
             ->where('user_id', $user->id)
             ->where('job_id', $id)
             ->exists();
@@ -120,7 +120,7 @@ class JobController extends Controller
             return response()->json(['message' => 'Already marked as interested'], 403);
         }
         // Insert a new record
-        DB::table('job_not_interests')->insert([
+        DB::table('jobs_not_interested')->insert([
             'user_id'    => $user->id,
             'job_id'     => $id,
             'status'     => 'saved',
