@@ -220,5 +220,6 @@ async function markInterested(job) {
   }
 }
 
+
 onMounted(fetchJobs);
 </script>
