@@ -7,7 +7,7 @@
       <section class="p-6 sm:p-8">
         <!-- Header -->
         <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8"
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-8"
         >
           <div>
             <h2
@@ -23,7 +23,7 @@
 
         <!-- Tabs -->
         <div
-          class="inline-flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 mb-8"
+          class="inline-flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 mb-4 sm:mb-8 gap-4"
         >
           <button
             @click="activeTab = 'pending'"
@@ -47,6 +47,16 @@
           >
             Applied
           </button>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-6">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by user name..."
+            class="w-full sm:w-1/2 rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 dark:bg-gray-800 dark:text-gray-100 transition"
+          />
         </div>
 
         <!-- Loader -->
@@ -80,8 +90,7 @@
           class="text-center py-16 text-gray-600 dark:text-gray-400"
         >
           <p class="text-lg mb-4 font-medium">
-            No
-            {{ activeTab === "pending" ? "pending" : "applied" }} jobs found.
+            No {{ activeTab === "pending" ? "pending" : "applied" }} jobs found.
           </p>
           <router-link
             to="/jobs"
@@ -91,6 +100,7 @@
           </router-link>
         </div>
 
+        <!-- Jobs List -->
         <!-- Jobs List -->
         <div v-else class="grid gap-5">
           <div
@@ -107,19 +117,21 @@
                 >
                   {{ job.title }}
                 </h3>
-               
+
                 <p
                   class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex items-center gap-1"
                 >
                   <span class="material-icons text-base">business</span>
                   {{ job.company }} • {{ job.type }}
                 </p>
- <p
+
+                <p
                   class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex items-center gap-1"
                 >
                   <span class="material-icons text-base">person</span>
                   {{ job.user_name }}
                 </p>
+
                 <div
                   class="flex flex-wrap items-center text-sm text-gray-500 dark:text-gray-400 gap-4"
                 >
@@ -129,9 +141,17 @@
                   </div>
                   <div class="flex items-center gap-1">
                     <span class="material-icons text-base">event</span>
-                    Saved On: {{ formatDate(job.saved_on) }}
+                    <span v-if="activeTab === 'pending'"
+                      >Saved On: {{ formatDate(job.saved_on) }}</span
+                    >
+                    <span v-else
+                      >Applied On: {{ formatDate(job.applied_on) }}</span
+                    >
                   </div>
-                  <div class="flex items-center gap-1">
+                  <div
+                    class="flex items-center gap-1"
+                    v-if="activeTab === 'pending'"
+                  >
                     <span class="material-icons text-base">event</span>
                     Deadline: {{ formatDate(job.deadline) }}
                   </div>
@@ -140,7 +160,7 @@
 
               <div class="flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4">
                 <button
-                  @click="openModal(job)"
+                  @click="openModal(job, activeTab)"
                   class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-100 rounded-full font-medium transition flex items-center gap-2"
                 >
                   <span class="material-icons text-base">visibility</span>
@@ -170,7 +190,6 @@
       v-if="showApplyModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
-      <!-- Make entire modal scrollable -->
       <div
         class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl relative max-h-[95vh] overflow-y-auto"
       >
@@ -326,6 +345,7 @@ const jobs = ref([]);
 const loading = ref(true);
 const error = ref("");
 const activeTab = ref("pending");
+const searchQuery = ref("");
 const selectedJob = ref(null);
 const showModal = ref(false);
 const showApplyModal = ref(false);
@@ -345,11 +365,15 @@ const applyForm = ref({
 });
 
 const filteredJobs = computed(() => {
-  return jobs.value.filter((job) =>
-    activeTab.value === "applied"
-      ? job.application_status === "applied"
-      : job.application_status !== "applied"
-  );
+  return jobs.value
+    .filter((job) =>
+      activeTab.value === "applied"
+        ? job.application_status === "applied"
+        : job.application_status !== "applied"
+    )
+    .filter((job) =>
+      job.user_name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
 });
 
 function formatDate(date) {
@@ -358,6 +382,7 @@ function formatDate(date) {
 
 async function fetchJobs() {
   loading.value = true;
+  error.value = "";
   try {
     const data = await JobService.getSavedJobs();
     jobs.value = Array.isArray(data.data) ? data.data : [];

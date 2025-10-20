@@ -175,52 +175,62 @@ class JobController extends Controller
     return response()->json($jobs);
 }
 
-    public function fetchSavedJobs(Request $request)
-    {
-        $userId   = auth('api')->id();
-        $userRole = auth('api')->user()->role;
+   public function fetchSavedJobs(Request $request)
+{
+    $userId   = auth('api')->id();
+    $userRole = auth('api')->user()->role;
 
-        $query = DB::table('job_listings')
-            ->join('job_interests', 'job_interests.job_id', '=', 'job_listings.id')
-            ->leftJoin('users', 'users.id', '=', 'job_interests.user_id')
-            ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
-            ->select(
-                'job_listings.*',
-                'industries.name as field_name',
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.email as user_email',
-                'job_interests.created_at as saved_at',
-                'job_interests.status as application_status',
-                'users.cv_path as existing_cv',                   
-                'users.cover_letter_path as existing_cover_letter',
-                'job_interests.created_at as saved_on',
-                DB::raw("'saved' AS save_status")
-            );
+    $query = DB::table('job_listings')
+        ->join('job_interests', 'job_interests.job_id', '=', 'job_listings.id')
+        ->leftJoin('users', 'users.id', '=', 'job_interests.user_id')
+        ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
+        ->leftJoin('job_applications', function ($join) {
+            $join->on('job_applications.job_id', '=', 'job_listings.id')
+                 ->on('job_applications.user_id', '=', 'job_interests.user_id');
+        })
+        ->select(
+            'job_listings.*',
+            'industries.name as field_name',
+            'users.id as user_id',
+            'users.name as user_name',
+            'users.email as user_email',
+            'job_interests.created_at as saved_at',
+            'job_interests.status as application_status',
+            'users.cv_path as existing_cv',                   
+            'users.cover_letter_path as existing_cover_letter',
+            // Application details
+            'job_applications.created_at as applied_on',
+            'job_applications.subject',
+            'job_applications.body',
+            'job_applications.cv_path as application_cv',
+            'job_applications.cover_letter_path as application_cover_letter',
+            'job_applications.created_at as applied_on',
+            DB::raw("'saved' AS save_status")
+        );
 
-        // Filter by current user if role is NOT 1109
-        if ($userRole != 1109) {
-            $query->where('job_interests.user_id', $userId);
-        }
-
-        // Optional search filter
-        if ($request->has('search') && ! empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('job_listings.title', 'like', "%{$search}%")
-                    ->orWhere('job_listings.company', 'like', "%{$search}%")
-                    ->orWhere('job_listings.county', 'like', "%{$search}%")
-                    ->orWhere('job_listings.country', 'like', "%{$search}%")
-                    ->orWhere('industries.name', 'like', "%{$search}%")
-                    ->orWhere('users.name', 'like', "%{$search}%");
-            });
-        }
-
-        $perPage = $request->get('per_page', 10);
-        $jobs    = $query->orderBy('job_interests.created_at', 'desc')->paginate($perPage);
-
-        return response()->json($jobs);
+    // Filter by current user if role is NOT admin (1109)
+    if ($userRole != 1109) {
+        $query->where('job_interests.user_id', $userId);
     }
+
+    // Optional search filter
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('job_listings.title', 'like', "%{$search}%")
+              ->orWhere('job_listings.company', 'like', "%{$search}%")
+              ->orWhere('job_listings.county', 'like', "%{$search}%")
+              ->orWhere('job_listings.country', 'like', "%{$search}%")
+              ->orWhere('industries.name', 'like', "%{$search}%")
+              ->orWhere('users.name', 'like', "%{$search}%");
+        });
+    }
+
+    $perPage = $request->get('per_page', 10);
+    $jobs = $query->orderBy('job_interests.created_at', 'desc')->paginate($perPage);
+
+    return response()->json($jobs);
+}
 
     public function fetchAppliedJobs(Request $request)
 {
