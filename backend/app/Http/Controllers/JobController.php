@@ -1272,14 +1272,27 @@ PROMPT;
                 $cvName    = $file->getClientOriginalName();
                 $cvPath    = $file->store('applications/cv', 'public');
             } elseif ($request->filled('cv_url')) {
-                // ✅ Fetch file from URL
-                $cvUrl        = $request->input('cv_url');
-                $cvContentRaw = file_get_contents($cvUrl);
-                $cvContent    = chunk_split(base64_encode($cvContentRaw));
-                $cvName       = basename(parse_url($cvUrl, PHP_URL_PATH));
-                $cvPath       = 'applications/cv/' . $cvName;
-                Storage::disk('public')->put($cvPath, $cvContentRaw);
-            } else {
+    // ✅ Fetch file from URL
+    $cvUrl = $request->input('cv_url');
+
+    // If the provided path is relative, prepend your domain
+    if (!str_starts_with($cvUrl, 'http')) {
+        $cvUrl = 'https://careershyne.com/storage/' . ltrim($cvUrl, '/');
+    }
+
+    try {
+        $cvContentRaw = file_get_contents($cvUrl);
+    } catch (\Exception $e) {
+        info('CV download failed', ['url' => $cvUrl, 'error' => $e->getMessage()]);
+        return response()->json(['message' => 'Could not fetch CV from provided URL.'], 422);
+    }
+
+    $cvName = basename(parse_url($cvUrl, PHP_URL_PATH));
+    $cvPath = 'applications/cv/' . $cvName;
+
+    Storage::disk('public')->put($cvPath, $cvContentRaw);
+}
+ else {
                 return response()->json(['message' => 'CV is required (file or URL).'], 422);
             }
 
