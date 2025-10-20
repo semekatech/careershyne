@@ -90,9 +90,14 @@
                     <span class="material-icons text-base mr-1">location_on</span>
                     <span>{{ job.county }}, {{ job.country }}</span>
                   </div>
+                  
                   <div class="flex items-center">
                     <span class="material-icons text-base mr-1">event</span>
                     <span>Deadline: {{ formatDate(job.deadline) }}</span>
+                  </div>
+                    <div class="flex items-center">
+                    <span class="material-icons text-base mr-1">event</span>
+                    <span>Saved On: {{ formatDate(job.saved_on) }}</span>
                   </div>
                 </div>
               </div>

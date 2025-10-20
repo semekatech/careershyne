@@ -12,23 +12,37 @@
           :key="n"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div class="w-full">
-              <div class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+              <div
+                class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"
+              ></div>
+              <div
+                class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"
+              ></div>
               <div class="flex items-center space-x-3">
-                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"></div>
-                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"
+                ></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"
+                ></div>
               </div>
             </div>
-            <div class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"></div>
+            <div
+              class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"
+            ></div>
           </div>
         </div>
       </div>
 
       <!-- Error -->
       <div v-else-if="error" class="text-center py-10">
-        <p class="text-red-600 dark:text-red-400 font-medium mb-4">{{ error }}</p>
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">
+          {{ error }}
+        </p>
         <button
           @click="fetchJobs"
           class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -41,11 +55,14 @@
       <div v-else-if="limits.jobs <= 0" class="text-center py-16">
         <div class="max-w-md mx-auto">
           <span class="material-icons text-6xl text-gray-400 mb-4">lock</span>
-          <h3 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
+          <h3
+            class="text-xl font-semibold text-text-light dark:text-text-dark mb-2"
+          >
             Job Access Locked
           </h3>
           <p class="text-subtext-light dark:text-subtext-dark mb-6">
-            Your current plan doesn’t include job access. Upgrade to unlock featured jobs and applications.
+            Your current plan doesn’t include job access. Upgrade to unlock
+            featured jobs and applications.
           </p>
           <button
             @click="goToPlans"
@@ -63,7 +80,9 @@
           :key="job.id"
           class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
             <div>
               <h3 class="text-lg font-semibold text-primary mb-1">
                 {{ job.title }} - {{ job.county }}, {{ job.country }}
@@ -96,29 +115,62 @@
                 <span class="material-icons text-base ml-2">arrow_forward</span>
               </button>
 
-              <!-- Mark Interested -->
+              <!-- Save Button -->
               <button
-                :disabled="job.save_status === 'saved'"
-                :class="[ 
+                :disabled="job.save_status === 'saved' || savingLoading[job.id]"
+                :class="[
                   'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
                   job.save_status === 'saved'
                     ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-green-500 text-white hover:bg-green-600'
+                    : savingLoading[job.id]
+                    ? 'bg-green-300 text-white cursor-wait'
+                    : 'bg-green-500 text-white hover:bg-green-600',
                 ]"
                 @click="markInterested(job)"
               >
-                <span class="material-icons text-base mr-2">
-                  {{ job.save_status === 'saved' ? 'star' : 'star_border' }}
+                <span
+                  v-if="!savingLoading[job.id]"
+                  class="material-icons text-base mr-2"
+                >
+                  {{ job.save_status === "saved" ? "star" : "star_border" }}
                 </span>
-                {{ job.save_status === 'saved' ? 'Saved' : 'Save' }}
+                <span
+                  v-if="savingLoading[job.id]"
+                  class="material-icons animate-spin mr-2"
+                  >sync</span
+                >
+                {{
+                  job.save_status === "saved"
+                    ? "Saved"
+                    : savingLoading[job.id]
+                    ? "Saving..."
+                    : "Save"
+                }}
               </button>
 
-              <!-- Not Interested -->
+              <!-- Hide Button -->
               <button
-                class="px-4 py-2 bg-red-500 text-white font-semibold rounded-full shadow-md hover:bg-red-600 transition-colors flex items-center justify-center whitespace-nowrap"
+                v-if="job.save_status !== 'saved'"
+                :disabled="hidingLoading[job.id]"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  hidingLoading[job.id]
+                    ? 'bg-red-300 text-white cursor-wait'
+                    : 'bg-red-500 text-white hover:bg-red-600',
+                ]"
                 @click="markNotInterested(job)"
               >
-                <span class="material-icons text-base mr-2">hide_source</span> Hide
+                <span
+                  v-if="!hidingLoading[job.id]"
+                  class="material-icons text-base mr-2"
+                  >hide_source</span
+                >
+                <span
+                  v-if="hidingLoading[job.id]"
+                  class="material-icons animate-spin mr-2"
+                  >sync</span
+                >
+                {{ hidingLoading[job.id] ? "Hiding..." : "Hide" }}
               </button>
             </div>
           </div>
@@ -143,14 +195,17 @@
     <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 import JobService from "@/services/jobService";
 import subscriptionService from "@/services/subscriptionService";
 import JobModal from "@/components/Dashboard/modals/JobModal.vue";
+import dashboardService from "@/services/dashboardService";
+
 import { useRouter } from "vue-router";
+const savingLoading = ref({});
+const hidingLoading = ref({});
 
 const jobs = ref([]);
 const loading = ref(true);
@@ -159,6 +214,7 @@ const selectedJob = ref(null);
 const showModal = ref(false);
 const limits = ref({ jobs: 0 });
 const limitsLoading = ref(true);
+const actionLoading = ref({});
 
 const router = useRouter();
 
@@ -166,6 +222,7 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString();
 }
 
+// Fetch jobs
 async function fetchJobs() {
   loading.value = true;
   error.value = "";
@@ -196,12 +253,12 @@ async function fetchLimits() {
   }
 }
 
-// Navigation
+// Navigate to premium plans
 function goToPlans() {
   router.push("/premium-plans");
 }
 
-// Modals
+// Open / close modal
 function openModal(job) {
   selectedJob.value = job;
   showModal.value = true;
@@ -210,9 +267,10 @@ function closeModal() {
   selectedJob.value = null;
   showModal.value = false;
 }
-
-// Mark as Interested
 async function markInterested(job) {
+  if (savingLoading.value[job.id]) return;
+  savingLoading.value[job.id] = true;
+
   const confirm = await Swal.fire({
     title: "Mark as Interested?",
     text: `Do you want to save "${job.title}" to your interested jobs?`,
@@ -224,7 +282,10 @@ async function markInterested(job) {
     cancelButtonColor: "#6b7280",
   });
 
-  if (!confirm.isConfirmed) return;
+  if (!confirm.isConfirmed) {
+    savingLoading.value[job.id] = false;
+    return;
+  }
 
   try {
     const res = await JobService.markInterested(job.id);
@@ -232,31 +293,30 @@ async function markInterested(job) {
     Swal.fire({
       icon: "success",
       title: "Marked as Interested!",
-      text:
-        res.data?.message ||
-        `${job.title} has been saved to your interested jobs.`,
-      timer: 2000,
+      text: res.data?.message || `${job.title} has been saved.`,
+      timer: 1800,
       showConfirmButton: false,
     });
+    await fetchJobs();
+await refreshDashboardStats(); 
   } catch (err) {
-    if (err.response?.status === 403) {
-      Swal.fire({
-        icon: "warning",
-        title: "Job Already Marked",
-        text: "You have already marked this job.",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Something went wrong",
-        text: "Unable to mark this job as interested. Please try again.",
-      });
-    }
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text:
+        err.response?.status === 403
+          ? "You already marked this job as interested."
+          : "Something went wrong. Please try again.",
+    });
+  } finally {
+    savingLoading.value[job.id] = false;
   }
 }
 
-// Mark as Not Interested (Hide)
 async function markNotInterested(job) {
+  if (hidingLoading.value[job.id]) return;
+  hidingLoading.value[job.id] = true;
+
   const confirm = await Swal.fire({
     title: "Not Interested?",
     text: `You won’t see "${job.title}" again in your job list.`,
@@ -268,15 +328,13 @@ async function markNotInterested(job) {
     cancelButtonColor: "#6b7280",
   });
 
-  if (!confirm.isConfirmed) return;
+  if (!confirm.isConfirmed) {
+    hidingLoading.value[job.id] = false;
+    return;
+  }
 
   try {
-    // Call backend service to store not interested flag
     await JobService.markNotInterested(job.id);
-
-    // Remove from list
-    jobs.value = jobs.value.filter((j) => j.id !== job.id);
-
     Swal.fire({
       icon: "success",
       title: "Job Hidden",
@@ -284,17 +342,40 @@ async function markNotInterested(job) {
       timer: 1800,
       showConfirmButton: false,
     });
+    await fetchJobs();
   } catch (err) {
     Swal.fire({
       icon: "error",
       title: "Error",
       text: "Could not hide this job. Please try again later.",
     });
+  } finally {
+    hidingLoading.value[job.id] = false;
+  }
+}
+const stats = ref({
+  total_jobs: 0,
+  total_applied: 0,
+  total_saved: 0,
+});
+
+async function refreshDashboardStats() {
+  try {
+    const res = await dashboardService.getUserStats();
+    stats.value = res ?? {};
+    // Optionally emit event or store globally
+    window.dispatchEvent(new CustomEvent("dashboard:updated", { detail: stats.value }));
+  } catch (err) {
+    console.error("Failed to refresh dashboard stats:", err);
   }
 }
 
 onMounted(() => {
   fetchJobs();
   fetchLimits();
+ 
 });
+  
+
+
 </script>
