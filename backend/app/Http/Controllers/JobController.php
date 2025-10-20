@@ -9,6 +9,7 @@ use Google\Client as GoogleClient;
 use Google\Service\Gmail\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI;
 
@@ -1202,11 +1203,13 @@ PROMPT;
     public function applyOnBehalf(Request $request, $jobId)
     {
         $request->validate([
-            'user_id'      => 'required|integer',
-            'subject'      => 'required|string|max:255',
-            'body'         => 'required|string',
-            'cv'           => 'required|file|mimes:pdf,doc,docx|max:5120',
-            'cover_letter' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'user_id'          => 'required|integer',
+            'subject'          => 'required|string|max:255',
+            'body'             => 'required|string',
+            'cv'               => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'cv_url'           => 'nullable|url', // ✅ allow CV from URL
+            'cover_letter'     => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'cover_letter_url' => 'nullable|url', // ✅ allow Cover Letter from URL
         ]);
 
         $userId  = $request->input('user_id');
@@ -1220,7 +1223,7 @@ PROMPT;
         }
 
         try {
-            // -------- Gmail sending logic (same as before) --------
+            // ===== Gmail setup =====
             $client = new GoogleClient();
             $client->setClientId(env('GMAIL_CLIENT_ID'));
             $client->setClientSecret(env('GMAIL_CLIENT_SECRET'));
@@ -1247,7 +1250,7 @@ PROMPT;
 
             $gmail = new \Google\Service\Gmail($client);
 
-            // Compose email with attachments (CV + optional cover letter)
+            // ===== Email composition =====
             $boundary         = uniqid(rand(), true);
             $rawMessageString = "From: {$user->email}\r\n";
             $rawMessageString .= "To: info@careershyne.com\r\n";
@@ -1259,20 +1262,48 @@ PROMPT;
             $rawMessageString .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
             $rawMessageString .= $body . "\r\n";
 
-            // Attach CV
-            $cvContent = chunk_split(base64_encode(file_get_contents($request->file('cv')->getRealPath())));
-            $cvName    = $request->file('cv')->getClientOriginalName();
+            // ===== Attach CV =====
+            $cvPath = null;
+            if ($request->hasFile('cv')) {
+                $file      = $request->file('cv');
+                $cvContent = chunk_split(base64_encode(file_get_contents($file->getRealPath())));
+                $cvName    = $file->getClientOriginalName();
+                $cvPath    = $file->store('applications/cv', 'public');
+            } elseif ($request->filled('cv_url')) {
+                // ✅ Fetch file from URL
+                $cvUrl        = $request->input('cv_url');
+                $cvContentRaw = file_get_contents($cvUrl);
+                $cvContent    = chunk_split(base64_encode($cvContentRaw));
+                $cvName       = basename(parse_url($cvUrl, PHP_URL_PATH));
+                $cvPath       = 'applications/cv/' . $cvName;
+                Storage::disk('public')->put($cvPath, $cvContentRaw);
+            } else {
+                return response()->json(['message' => 'CV is required (file or URL).'], 422);
+            }
+
             $rawMessageString .= "--{$boundary}\r\n";
             $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$cvName}\"\r\n";
             $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
             $rawMessageString .= "Content-Disposition: attachment; filename=\"{$cvName}\"\r\n\r\n";
             $rawMessageString .= $cvContent . "\r\n";
 
-            // Attach cover letter if present
+            // ===== Attach Cover Letter (optional) =====
             $coverLetterPath = null;
             if ($request->hasFile('cover_letter')) {
-                $clContent = chunk_split(base64_encode(file_get_contents($request->file('cover_letter')->getRealPath())));
-                $clName    = $request->file('cover_letter')->getClientOriginalName();
+                $file            = $request->file('cover_letter');
+                $clContent       = chunk_split(base64_encode(file_get_contents($file->getRealPath())));
+                $clName          = $file->getClientOriginalName();
+                $coverLetterPath = $file->store('applications/cover_letters', 'public');
+            } elseif ($request->filled('cover_letter_url')) {
+                $url             = $request->input('cover_letter_url');
+                $clRaw           = file_get_contents($url);
+                $clContent       = chunk_split(base64_encode($clRaw));
+                $clName          = basename(parse_url($url, PHP_URL_PATH));
+                $coverLetterPath = 'applications/cover_letters/' . $clName;
+                Storage::disk('public')->put($coverLetterPath, $clRaw);
+            }
+
+            if (! empty($clContent ?? null)) {
                 $rawMessageString .= "--{$boundary}\r\n";
                 $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$clName}\"\r\n";
                 $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
@@ -1289,14 +1320,7 @@ PROMPT;
             $message->setRaw($rawMessage);
             $gmail->users_messages->send('me', $message);
 
-            // -------- Store files locally --------
-            $cvPath = $request->file('cv')->store('applications/cv', 'public');
-
-            if ($request->hasFile('cover_letter')) {
-                $coverLetterPath = $request->file('cover_letter')->store('applications/cover_letters', 'public');
-            }
-
-            // -------- Save application in DB --------
+            // ===== Save DB record =====
             DB::table('job_applications')->insert([
                 'job_id'            => $jobId,
                 'user_id'           => $userId,
@@ -1308,25 +1332,17 @@ PROMPT;
                 'updated_at'        => now(),
             ]);
 
-            // Mark as applied in job_interests
             DB::table('job_interests')
                 ->where('job_id', $jobId)
                 ->where('user_id', $userId)
                 ->update(['status' => 'applied', 'updated_at' => now()]);
 
-            info('Application sent, saved to DB, and job marked as applied', ['user_id' => $userId, 'job_id' => $jobId]);
-
             return response()->json([
-                'message' => 'Application email sent, saved in database, and job marked as applied!',
+                'message' => 'Application sent and saved successfully!',
             ]);
-
-        } catch (\Google\Service\Exception $e) {
-            info('Gmail API Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to send email via Gmail API.', 'error' => $e->getMessage()], 500);
-
         } catch (\Exception $e) {
-            info('Unexpected Exception', ['user_id' => $userId, 'job_id' => $jobId, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'An unexpected error occurred.', 'error' => $e->getMessage()], 500);
+            info('Apply Error', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Error sending application', 'error' => $e->getMessage()], 500);
         }
     }
 

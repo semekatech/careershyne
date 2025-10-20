@@ -218,10 +218,10 @@
                   Drag & drop your CV here, or click to select
                 </p>
                 <p
-                  v-if="applyForm.value.cvName"
+                  v-if="applyForm.cvName"
                   class="text-sm mt-2 text-gray-700 dark:text-gray-200"
                 >
-                  Selected file: {{ applyForm.value.cvName }}
+                  Selected file: {{ applyForm.cvName }}
                 </p>
               </div>
             </div>
@@ -354,16 +354,44 @@ function closeModal() {
   showModal.value = false;
 }
 
-function openApplyModal(job) {
+async function openApplyModal(job) {
   applyJob.value = job;
   applyForm.value.subject = "";
   applyForm.value.body = "";
 
-  // Pre-fill existing files if present
-  applyForm.value.cvName = job.existing_cv ? getFileNameFromPath(job.existing_cv) : "";
-  applyForm.value.coverLetterName = job.existing_cover_letter ? getFileNameFromPath(job.existing_cover_letter) : "";
+  // Pre-fill CV
+  if (job.existing_cv) {
+    const cvFile = await fetchFileFromUrl(
+      job.existing_cv,
+      getFileNameFromPath(job.existing_cv)
+    );
+    applyForm.value.cv = cvFile;
+    applyForm.value.cvName = cvFile.name;
+  } else {
+    applyForm.value.cv = null;
+    applyForm.value.cvName = "";
+  }
+
+  // Pre-fill Cover Letter
+  if (job.existing_cover_letter) {
+    const clFile = await fetchFileFromUrl(
+      job.existing_cover_letter,
+      getFileNameFromPath(job.existing_cover_letter)
+    );
+    applyForm.value.coverLetter = clFile;
+    applyForm.value.coverLetterName = clFile.name;
+  } else {
+    applyForm.value.coverLetter = null;
+    applyForm.value.coverLetterName = "";
+  }
 
   showApplyModal.value = true;
+}
+
+async function fetchFileFromUrl(url, fileName) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new File([blob], fileName, { type: blob.type });
 }
 
 function closeApplyModal() {
@@ -401,11 +429,11 @@ async function submitApplication() {
   if (
     !applyForm.value.subject ||
     !applyForm.value.body ||
-    !applyForm.value.cv
+    (!applyForm.value.cv && !applyJob.value.existing_cv)
   ) {
     Swal.fire(
       "Validation Error",
-      "Subject, body, and CV are required.",
+      "Subject, body, and at least one CV (uploaded or existing) are required.",
       "warning"
     );
     return;
@@ -416,13 +444,24 @@ async function submitApplication() {
     formData.append("user_id", applyJob.value.user_id);
     formData.append("subject", applyForm.value.subject);
     formData.append("body", applyForm.value.body);
-    formData.append("cv", applyForm.value.cv);
-    if (applyForm.value.coverLetter)
+
+    // 🟢 Attach new or existing CV
+    if (applyForm.value.cv) {
+      formData.append("cv", applyForm.value.cv);
+    } else if (applyJob.value.existing_cv) {
+      formData.append("cv_url", applyJob.value.existing_cv);
+    }
+
+    // 🟢 Attach new or existing cover letter
+    if (applyForm.value.coverLetter) {
       formData.append("cover_letter", applyForm.value.coverLetter);
+    } else if (applyJob.value.existing_cover_letter) {
+      formData.append("cover_letter_url", applyJob.value.existing_cover_letter);
+    }
 
     const res = await JobService.applyOnBehalf(applyJob.value.id, formData);
 
-    // Update local job status immediately
+    // Update job status locally
     const jobIndex = jobs.value.findIndex((j) => j.id === applyJob.value.id);
     if (jobIndex !== -1) {
       jobs.value[jobIndex].application_status = "applied";
@@ -449,6 +488,7 @@ async function submitApplication() {
     });
   }
 }
+
 const editorOptions = {
   theme: "snow",
   modules: {
