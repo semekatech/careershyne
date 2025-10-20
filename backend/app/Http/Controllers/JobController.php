@@ -147,8 +147,10 @@ class JobController extends Controller
                 'users.id as user_id',
                 'users.name as user_name',
                 'users.email as user_email',
-                'job_interests.created_at as saved_at', // <-- added saved_at
+                'job_interests.created_at as saved_at',
                 'job_interests.status as application_status',
+                'job_interests.cv_path as existing_cv',                     // <-- CV URL/path
+                'job_interests.cover_letter_path as existing_cover_letter', // optional
                 DB::raw("'saved' AS save_status")
             );
 
@@ -176,45 +178,45 @@ class JobController extends Controller
         return response()->json($jobs);
     }
 
- public function generateContent(Request $request, $jobId)
-{
-    try {
-        // ✅ Get user ID from request instead of auth (or fallback to auth)
-        $userId = $request->input('userId') ?? auth('api')->id();
-        $user = User::find($userId);
-        // 1️⃣ Ensure CV exists
-        if (! $user->cv_path) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No CV uploaded. Please upload your CV first.',
-            ], 400);
-        }
+    public function generateContent(Request $request, $jobId)
+    {
+        try {
+            // ✅ Get user ID from request instead of auth (or fallback to auth)
+            $userId = $request->input('userId') ?? auth('api')->id();
+            $user   = User::find($userId);
+            // 1️⃣ Ensure CV exists
+            if (! $user->cv_path) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No CV uploaded. Please upload your CV first.',
+                ], 400);
+            }
 
-        $cvPath = storage_path('app/public/' . $user->cv_path);
-        if (! file_exists($cvPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CV file not found on server.',
-            ], 404);
-        }
+            $cvPath = storage_path('app/public/' . $user->cv_path);
+            if (! file_exists($cvPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CV file not found on server.',
+                ], 404);
+            }
 
-        // 2️⃣ Extract CV text
-        $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
-        $cvText = $this->trimText($cvText);
+            // 2️⃣ Extract CV text
+            $cvText = $this->extractTextFromFile(new \Illuminate\Http\File($cvPath), 'CV');
+            $cvText = $this->trimText($cvText);
 
-        // 3️⃣ Fetch job from DB
-        $job = Job::find($jobId);
-        if (! $job) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Job not found',
-            ], 404);
-        }
+            // 3️⃣ Fetch job from DB
+            $job = Job::find($jobId);
+            if (! $job) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Job not found',
+                ], 404);
+            }
 
-        $description = strip_tags($job->description);
+            $description = strip_tags($job->description);
 
-        // 4️⃣ Build AI Prompt
-       $prompt = <<<PROMPT
+            // 4️⃣ Build AI Prompt
+            $prompt = <<<PROMPT
 You are a professional career consultant and email writing expert.
 
 Task:
@@ -250,48 +252,46 @@ $cvText
 }
 PROMPT;
 
+            // 5️⃣ Call OpenAI API
+            $client   = OpenAI::client(env('OPENAI_API_KEY'));
+            $response = $client->chat()->create([
+                'model'       => 'gpt-4o-mini',
+                'messages'    => [
+                    ['role' => 'system', 'content' => 'You are an expert job application email writer. Always return valid JSON only.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.4,
+            ]);
 
-        // 5️⃣ Call OpenAI API
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
-        $response = $client->chat()->create([
-            'model'       => 'gpt-4o-mini',
-            'messages'    => [
-                ['role' => 'system', 'content' => 'You are an expert job application email writer. Always return valid JSON only.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => 0.4,
-        ]);
+            // 6️⃣ Clean & parse output
+            $aiOutput    = $response->choices[0]->message->content ?? '';
+            $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
+            $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
+            $cleanOutput = trim($cleanOutput);
 
-        // 6️⃣ Clean & parse output
-        $aiOutput = $response->choices[0]->message->content ?? '';
-        $cleanOutput = preg_replace('/^```(json)?/m', '', $aiOutput);
-        $cleanOutput = preg_replace('/```$/m', '', $cleanOutput);
-        $cleanOutput = trim($cleanOutput);
+            $decoded = json_decode($cleanOutput, true);
 
-        $decoded = json_decode($cleanOutput, true);
+            if (json_last_error() !== JSON_ERROR_NONE || ! isset($decoded['subject'], $decoded['body'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to parse AI response.',
+                    'raw'     => $aiOutput,
+                ], 500);
+            }
+            // 8️⃣ Return final response
+            return response()->json([
+                'success' => true,
+                'subject' => $decoded['subject'],
+                'body'    => $decoded['body'],
+            ]);
 
-        if (json_last_error() !== JSON_ERROR_NONE || !isset($decoded['subject'], $decoded['body'])) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to parse AI response.',
-                'raw'     => $aiOutput,
+                'message' => 'Error: ' . $e->getMessage(),
             ], 500);
         }
-        // 8️⃣ Return final response
-        return response()->json([
-            'success' => true,
-            'subject' => $decoded['subject'],
-            'body'    => $decoded['body'],
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-        ], 500);
     }
-}
-
 
     public function fetchPublicJobs(Request $request)
     {
@@ -1329,7 +1329,6 @@ PROMPT;
             return response()->json(['message' => 'An unexpected error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
-
 
     private function extractTextFromFile($file, $type = 'File')
     {

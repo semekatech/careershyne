@@ -31,7 +31,8 @@
             href="#"
             @click.prevent="activeTab = 'gmail'"
             :class="tabClass('gmail')"
-          > <i class="material-icons mr-2 !text-base">alternate_email</i>
+          >
+            <i class="material-icons mr-2 !text-base">alternate_email</i>
             Gmail Authenticate
           </a>
         </nav>
@@ -475,6 +476,8 @@ import { useAuthStore } from "@/stores/auth";
 const auth = useAuthStore();
 const activeTab = ref("profile");
 import { useToast } from "vue-toast-notification";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
 const toast = useToast();
 // loaders & messages
@@ -687,5 +690,10 @@ onMounted(async () => {
   await loadOptions();
   await fetchProfile();
   loading.value = false;
+
+  // Set tab from query parameter
+  const tab = route.query.tab;
+  if (tab) activeTab.value = tab;
 });
+
 </script>
