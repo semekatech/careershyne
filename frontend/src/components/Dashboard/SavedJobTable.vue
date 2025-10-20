@@ -241,7 +241,6 @@
               placeholder="Write your message here..."
             />
           </div>
-
           <!-- CV Upload -->
           <div>
             <label class="block text-sm font-medium mb-2"
@@ -277,6 +276,49 @@
                 target="_blank"
                 class="text-indigo-600 hover:underline ml-1"
                 >{{ getFileNameFromPath(applyJob.existing_cv) }}</a
+              >
+            </div>
+          </div>
+
+          <!-- Cover Letter Upload -->
+          <div class="mt-5">
+            <label class="block text-sm font-medium mb-2"
+              >Cover Letter (PDF, DOC, DOCX)</label
+            >
+            <div
+              class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition"
+            >
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                @change="handleFileChange($event, 'coverLetter')"
+                class="hidden"
+                ref="coverLetterInput"
+              />
+              <div
+                @click="$refs.coverLetterInput.click()"
+                class="flex flex-col items-center justify-center"
+              >
+                <span class="material-icons text-4xl text-gray-400 mb-2"
+                  >upload_file</span
+                >
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                  {{
+                    applyForm.coverLetterName || "Click to upload Cover Letter"
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <div v-if="applyJob?.existing_cover_letter" class="mt-3 text-sm">
+              <span class="text-gray-500 dark:text-gray-400"
+                >Existing Cover Letter:</span
+              >
+              <a
+                :href="getFullCVUrl(applyJob.existing_cover_letter)"
+                target="_blank"
+                class="text-indigo-600 hover:underline ml-1"
+                >{{ getFileNameFromPath(applyJob.existing_cover_letter) }}</a
               >
             </div>
           </div>
@@ -396,10 +438,23 @@ async function fetchJobs() {
   }
 }
 
-function openModal(job) {
-  selectedJob.value = job;
+function openModal(job, tab) {
+  if (tab === "applied") {
+    // Show application details for applied jobs
+    selectedJob.value = {
+      ...job,
+      isApplied: true, // flag to render application content
+    };
+  } else {
+    // Show regular job details
+    selectedJob.value = {
+      ...job,
+      isApplied: false,
+    };
+  }
   showModal.value = true;
 }
+
 function closeModal() {
   showModal.value = false;
   selectedJob.value = null;
