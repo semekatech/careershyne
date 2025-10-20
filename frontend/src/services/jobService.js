@@ -62,6 +62,10 @@ const JobService = {
     return response.data;
   },
 
+  async getAppliedJobs() {
+    const response = await api.get("/applied-jobs");
+    return response.data;
+  },
   async markInterested(jobId) {
     const response = await api.post(`/${jobId}/interested`);
     return response.data;
@@ -72,8 +76,13 @@ const JobService = {
     return response.data;
   },
 
-
-  async getPublicJobs(page = 1, search = "", county = "", type = "", category = "") {
+  async getPublicJobs(
+    page = 1,
+    search = "",
+    county = "",
+    type = "",
+    category = ""
+  ) {
     try {
       const response = await publicApi.get("/public", {
         params: { page, search, county, type, category },
@@ -86,20 +95,20 @@ const JobService = {
   },
 
   /** ✨ New: Apply on behalf of user */
- async applyOnBehalf(jobId, formData) {
-  const response = await api.post(`/${jobId}/apply-on-behalf`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
-},
-async generateContent(jobId, userId) {
-  const res = await api.post(`/${jobId}/generate-content`, {
-    userId: userId
-  });
-  return res.data;
-}
+  async applyOnBehalf(jobId, formData) {
+    const response = await api.post(`/${jobId}/apply-on-behalf`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+  async generateContent(jobId, userId) {
+    const res = await api.post(`/${jobId}/generate-content`, {
+      userId: userId,
+    });
+    return res.data;
+  },
 };
 
 export default JobService;

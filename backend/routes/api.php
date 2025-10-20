@@ -84,6 +84,7 @@ Route::middleware(LogActivity::class)->group(function () {
         Route::get('/all', [JobController::class, 'fetchAll']);
         Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
         Route::get('/saved-jobs', [JobController::class, 'fetchSavedJobs']);
+        Route::get('/applied-jobs', [JobController::class, 'fetchAppliedJobs']);
         
         Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
         Route::post('/{id}/generate-content', [JobController::class, 'generateContent']);

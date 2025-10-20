@@ -8,13 +8,13 @@
           @click.prevent="activeTab = 'jobs'"
           :class="tabClass('jobs')"
         >
-          Personalized Jobs
+          Featured Jobs
         </a>
         <a href="#" @click.prevent="activeTab = 'saved'" :class="tabClass('saved')">
           Saved Jobs
         </a>
-        <a href="#" @click.prevent="activeTab = 'all'" :class="tabClass('all')">
-          All Jobs
+        <a href="#" @click.prevent="activeTab = 'applied'" :class="tabClass('applied')">
+          Applied Jobs
         </a>
       </nav>
     </div>
@@ -32,7 +32,7 @@ import { ref, computed } from "vue";
 // Import new components
 import PersonalizedJobs from "@/components/Dashboard/PersonalizedJobs.vue";
 import SavedJobs from "@/components/Dashboard/SavedJobs.vue";
-import AllJobs from "@/components/Dashboard/AllJobs.vue";
+import AppliedJobs from "@/components/Dashboard/AppliedJobs.vue";
 
 const activeTab = ref("jobs");
 
@@ -43,8 +43,8 @@ const currentTabComponent = computed(() => {
       return PersonalizedJobs;
     case "saved":
       return SavedJobs;
-    case "all":
-      return AllJobs;
+    case "applied":
+      return AppliedJobs;
     default:
       return PersonalizedJobs;
   }
