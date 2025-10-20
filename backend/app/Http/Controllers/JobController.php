@@ -96,6 +96,9 @@ class JobController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+            $adminMsg = "New Job Saved,Kindly login and check";
+    $this->sendMessage('254705030613', $adminMsg); // Admin phone
+    $this->sendMessage('254703644281', $adminMsg);
 
         return response()->json(['message' => 'Job interest saved successfully'], 200);
     }
@@ -1508,4 +1511,34 @@ PROMPT;
 
         return $text;
     }
+
+     public function sendMessage($phone, $message)
+    {
+        $apiUrl = 'https://ngumzo.com/v1/send-message';
+        $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
+        $data = [
+            'sender' => "254758428993",
+            'number' => $phone,
+            'message' => $message
+        ];
+        $ch = curl_init($apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'api-key: ' . $apiKey  // Include your API key here
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+        // Check for errors
+        if ($response === false) {
+            // Log the error (you can handle this more gracefully in production)
+            error_log('cURL Error: ' . curl_error($ch));
+        }
+        // Close the cURL session
+        curl_close($ch);
+        error_log('Response: ' . $response);
+    }
+
 }
