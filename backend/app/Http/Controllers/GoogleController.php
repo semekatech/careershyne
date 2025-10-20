@@ -78,7 +78,7 @@ class GoogleController extends Controller
 
     // Store full token as JSON for future refreshes
     $user->update([
-        'gmail_token' => json_encode($token),
+        'gmail_access_token' => json_encode($token),
         'gmail_token_expires_at' => now()->addSeconds($token['expires_in'] ?? 3600),
         'gmail_refresh_token' => $token['refresh_token'] ?? $user->gmail_refresh_token,
     ]);
