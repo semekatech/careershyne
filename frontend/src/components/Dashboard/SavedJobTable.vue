@@ -358,6 +358,11 @@ function openApplyModal(job) {
   applyJob.value = job;
   applyForm.value.subject = "";
   applyForm.value.body = "";
+
+  // Pre-fill existing files if present
+  applyForm.value.cvName = job.existing_cv ? getFileNameFromPath(job.existing_cv) : "";
+  applyForm.value.coverLetterName = job.existing_cover_letter ? getFileNameFromPath(job.existing_cover_letter) : "";
+
   showApplyModal.value = true;
 }
 

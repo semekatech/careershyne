@@ -149,8 +149,8 @@ class JobController extends Controller
                 'users.email as user_email',
                 'job_interests.created_at as saved_at',
                 'job_interests.status as application_status',
-                'job_interests.cv_path as existing_cv',                     // <-- CV URL/path
-                'job_interests.cover_letter_path as existing_cover_letter', // optional
+                'users.cv_path as existing_cv',                     // <-- CV URL/path
+                'users.cover_letter_path as existing_cover_letter', // optional
                 DB::raw("'saved' AS save_status")
             );
 
