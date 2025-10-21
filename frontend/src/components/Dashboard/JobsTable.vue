@@ -78,12 +78,12 @@
           <span
             :class="[
               'px-3 py-1 rounded text-xs font-semibold',
-              new Date(job.deadline) >= new Date()
+              isActive(job.deadline)
                 ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800',
             ]"
           >
-            {{ new Date(job.deadline) >= new Date() ? "Active" : "Expired" }}
+            {{ isActive(job.deadline) ? "Active" : "Expired" }}
           </span>
         </div>
 
@@ -217,11 +217,10 @@ async function fetchJobs() {
   }
 }
 
-// Filtered & Paginated
 const filteredJobs = computed(() => {
   const filtered = jobs.value.filter((job) => {
-    const isActive = new Date(job.deadline) >= new Date();
-    return activeTab.value === "active" ? isActive : !isActive;
+    const active = isActive(job.deadline);
+    return activeTab.value === "active" ? active : !active;
   });
 
   if (!search.value) return filtered;
@@ -232,6 +231,17 @@ const filteredJobs = computed(() => {
     )
   );
 });
+
+function isActive(deadline) {
+  const jobDate = new Date(deadline);
+  const today = new Date();
+
+  // Set both to start of the day
+  jobDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  return jobDate >= today;
+}
 
 const paginatedJobs = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;
