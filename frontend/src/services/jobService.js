@@ -7,7 +7,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor: adds the token dynamically in case it changes
+// Attach token to protected requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -19,7 +19,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle errors globally
+// Handle API errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -27,44 +27,91 @@ api.interceptors.response.use(
       const { status } = error.response;
       if (status === 401) {
         console.warn("Unauthorized. Token may have expired.");
-        // Optionally redirect to login page
       } else if (status === 403) {
-        console.warn("Forbidden. You might have exceeded limits or lack permissions.");
+        console.warn("Forbidden. You might lack permissions.");
       }
     }
     return Promise.reject(error);
   }
 );
 
+// Public instance (no token)
+const publicApi = axios.create({
+  baseURL: "https://careershyne.com/api/jobs",
+});
+
 const JobService = {
+  /** 🔒 Authenticated routes */
   async createJob(payload) {
-    try {
-      const response = await api.post("/add", payload);
-      return response.data;
-    } catch (err) {
-      console.error("Error saving job:", err);
-      throw err;
-    }
+    const response = await api.post("/add", payload);
+    return response.data;
   },
 
   async getJobs() {
+    const response = await api.get("/all");
+    return response.data;
+  },
+
+  async getPersonalizedJobs() {
+    const response = await api.get("/personalized-jobs");
+    return response.data;
+  },
+
+  async getSavedJobs() {
+    const response = await api.get("/saved-jobs");
+    return response.data;
+  },
+
+  async getAppliedJobs() {
+    const response = await api.get("/applied-jobs");
+    return response.data;
+  },
+  async markInterested(jobId) {
+    const response = await api.post(`/${jobId}/interested`);
+    return response.data;
+  },
+
+async markNotInterested(jobId) {
+    const response = await api.post(`/${jobId}/not-interested`);
+    return response.data;
+  },
+  async getUsersJobs() {
+    const response = await api.get("/user-jobs");
+    return response.data;
+  },
+
+  async getPublicJobs(
+    page = 1,
+    search = "",
+    county = "",
+    type = "",
+    category = ""
+  ) {
     try {
-      const response = await api.get("/all");
+      const response = await publicApi.get("/public", {
+        params: { page, search, county, type, category },
+      });
       return response.data;
     } catch (err) {
-      console.error("Error fetching jobs:", err);
+      console.error("Error fetching public jobs:", err);
       throw err;
     }
   },
 
-  async getUsersJobs() {
-    try {
-      const response = await api.get("/user-jobs");
-      return response.data;
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-      throw err;
-    }
+  /** ✨ New: Apply on behalf of user */
+  async applyOnBehalf(jobId, formData) {
+    const response = await api.post(`/${jobId}/apply-on-behalf`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+  async generateContent(jobId, userId) {
+    const res = await api.post(`/${jobId}/generate-content`, {
+      userId: userId,
+    });
+    return res.data;
   },
 };
 

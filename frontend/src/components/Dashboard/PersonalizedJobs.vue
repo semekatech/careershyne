@@ -1,0 +1,381 @@
+<template>
+  <div>
+    <section>
+      <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
+        Featured Jobs
+      </h2>
+
+      <!-- Loader -->
+      <div v-if="loading" class="space-y-4 animate-pulse">
+        <div
+          v-for="n in 5"
+          :key="n"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
+        >
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
+            <div class="w-full">
+              <div
+                class="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-3"
+              ></div>
+              <div
+                class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"
+              ></div>
+              <div class="flex items-center space-x-3">
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4"
+                ></div>
+                <div
+                  class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3"
+                ></div>
+              </div>
+            </div>
+            <div
+              class="h-9 w-32 bg-gray-300 dark:bg-gray-700 rounded-full mt-4 sm:mt-0"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="error" class="text-center py-10">
+        <p class="text-red-600 dark:text-red-400 font-medium mb-4">
+          {{ error }}
+        </p>
+        <button
+          @click="fetchJobs"
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+
+      <!-- If job limit is zero -->
+      <div v-else-if="limits.jobs <= 0" class="text-center py-16">
+        <div class="max-w-md mx-auto">
+          <span class="material-icons text-6xl text-gray-400 mb-4">lock</span>
+          <h3
+            class="text-xl font-semibold text-text-light dark:text-text-dark mb-2"
+          >
+            Job Access Locked
+          </h3>
+          <p class="text-subtext-light dark:text-subtext-dark mb-6">
+            Your current plan doesn’t include job access. Upgrade to unlock
+            featured jobs and applications.
+          </p>
+          <button
+            @click="goToPlans"
+            class="px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition-all"
+          >
+            Choose a Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- Jobs List -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="job in jobs.slice(0, 10)"
+          :key="job.id"
+          class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
+        >
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start mb-3"
+          >
+            <div>
+              <h3 class="text-lg font-semibold text-primary mb-1">
+                {{ job.title }} - {{ job.county }}, {{ job.country }}
+              </h3>
+              <p class="text-subtext-light dark:text-subtext-dark mb-1">
+                {{ job.company }} - {{ job.type }}
+              </p>
+              <div
+                class="flex items-center text-sm text-subtext-light dark:text-subtext-dark space-x-3"
+              >
+                <div class="flex items-center">
+                  <span class="material-icons text-base mr-1">location_on</span>
+                  <span>{{ job.county }}, {{ job.country }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="material-icons text-base mr-1">event</span>
+                  <span>Deadline: {{ formatDate(job.deadline) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0">
+              <!-- View Details -->
+              <button
+                class="px-4 py-2 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition-colors flex items-center justify-center whitespace-nowrap"
+                @click="openModal(job)"
+              >
+                View
+                <span class="material-icons text-base ml-2">arrow_forward</span>
+              </button>
+
+              <!-- Save Button -->
+              <button
+                :disabled="job.save_status === 'saved' || savingLoading[job.id]"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  job.save_status === 'saved'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : savingLoading[job.id]
+                    ? 'bg-green-300 text-white cursor-wait'
+                    : 'bg-green-500 text-white hover:bg-green-600',
+                ]"
+                @click="markInterested(job)"
+              >
+                <span
+                  v-if="!savingLoading[job.id]"
+                  class="material-icons text-base mr-2"
+                >
+                  {{ job.save_status === "saved" ? "star" : "star_border" }}
+                </span>
+                <span
+                  v-if="savingLoading[job.id]"
+                  class="material-icons animate-spin mr-2"
+                  >sync</span
+                >
+                {{
+                  job.save_status === "saved"
+                    ? "Saved"
+                    : savingLoading[job.id]
+                    ? "Saving..."
+                    : "Save"
+                }}
+              </button>
+
+              <!-- Hide Button -->
+              <button
+                v-if="job.save_status !== 'saved'"
+                :disabled="hidingLoading[job.id]"
+                :class="[
+                  'px-4 py-2 font-semibold rounded-full shadow-md flex items-center justify-center whitespace-nowrap transition-colors',
+                  hidingLoading[job.id]
+                    ? 'bg-red-300 text-white cursor-wait'
+                    : 'bg-red-500 text-white hover:bg-red-600',
+                ]"
+                @click="markNotInterested(job)"
+              >
+                <span
+                  v-if="!hidingLoading[job.id]"
+                  class="material-icons text-base mr-2"
+                  >hide_source</span
+                >
+                <span
+                  v-if="hidingLoading[job.id]"
+                  class="material-icons animate-spin mr-2"
+                  >sync</span
+                >
+                {{ hidingLoading[job.id] ? "Hiding..." : "Hide" }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Featured Jobs -->
+        <div
+          v-if="!jobs.length"
+          class="text-center py-10 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-2xl"
+        >
+          <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mb-3">
+            No featured jobs available right now.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Please check back later for new opportunities.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Job Modal -->
+    <JobModal v-if="showModal" :job="selectedJob" @close="closeModal" />
+  </div>
+</template>
+<script setup>
+import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
+import JobService from "@/services/jobService";
+import subscriptionService from "@/services/subscriptionService";
+import JobModal from "@/components/Dashboard/modals/JobModal.vue";
+import dashboardService from "@/services/dashboardService";
+
+import { useRouter } from "vue-router";
+const savingLoading = ref({});
+const hidingLoading = ref({});
+
+const jobs = ref([]);
+const loading = ref(true);
+const error = ref("");
+const selectedJob = ref(null);
+const showModal = ref(false);
+const limits = ref({ jobs: 0 });
+const limitsLoading = ref(true);
+const actionLoading = ref({});
+
+const router = useRouter();
+
+function formatDate(dateString) {
+  return new Date(dateString).toLocaleDateString();
+}
+
+// Fetch jobs
+async function fetchJobs() {
+  loading.value = true;
+  error.value = "";
+  try {
+    const data = await JobService.getPersonalizedJobs();
+    if (Array.isArray(data.data)) jobs.value = data.data;
+    else error.value = "No jobs found.";
+  } catch (err) {
+    error.value =
+      err.response?.status === 403
+        ? "Access denied. Upgrade your plan to access jobs."
+        : "Error fetching jobs. Please try again later.";
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Fetch user subscription limits
+async function fetchLimits() {
+  limitsLoading.value = true;
+  try {
+    const res = await subscriptionService.getLimits();
+    limits.value = res?.data ?? res ?? { jobs: 0 };
+  } catch (err) {
+    console.error("Error fetching limits:", err);
+  } finally {
+    limitsLoading.value = false;
+  }
+}
+
+// Navigate to premium plans
+function goToPlans() {
+  router.push("/premium-plans");
+}
+
+// Open / close modal
+function openModal(job) {
+  selectedJob.value = job;
+  showModal.value = true;
+}
+function closeModal() {
+  selectedJob.value = null;
+  showModal.value = false;
+}
+async function markInterested(job) {
+  if (savingLoading.value[job.id]) return;
+  savingLoading.value[job.id] = true;
+
+  const confirm = await Swal.fire({
+    title: "Mark as Interested?",
+    text: `Do you want to save "${job.title}" to your interested jobs?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes, save it",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#16a34a",
+    cancelButtonColor: "#6b7280",
+  });
+
+  if (!confirm.isConfirmed) {
+    savingLoading.value[job.id] = false;
+    return;
+  }
+
+  try {
+    const res = await JobService.markInterested(job.id);
+    job.save_status = "saved";
+    Swal.fire({
+      icon: "success",
+      title: "Marked as Interested!",
+      text: res.data?.message || `${job.title} has been saved.`,
+      timer: 1800,
+      showConfirmButton: false,
+    });
+    await fetchJobs();
+await refreshDashboardStats(); 
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text:
+        err.response?.status === 403
+          ? "You already marked this job as interested."
+          : "Something went wrong. Please try again.",
+    });
+  } finally {
+    savingLoading.value[job.id] = false;
+  }
+}
+
+async function markNotInterested(job) {
+  if (hidingLoading.value[job.id]) return;
+  hidingLoading.value[job.id] = true;
+
+  const confirm = await Swal.fire({
+    title: "Not Interested?",
+    text: `You won’t see "${job.title}" again in your job list.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Hide Job",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#6b7280",
+  });
+
+  if (!confirm.isConfirmed) {
+    hidingLoading.value[job.id] = false;
+    return;
+  }
+
+  try {
+    await JobService.markNotInterested(job.id);
+    Swal.fire({
+      icon: "success",
+      title: "Job Hidden",
+      text: `"${job.title}" has been hidden and won’t appear again.`,
+      timer: 1800,
+      showConfirmButton: false,
+    });
+    await fetchJobs();
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Could not hide this job. Please try again later.",
+    });
+  } finally {
+    hidingLoading.value[job.id] = false;
+  }
+}
+const stats = ref({
+  total_jobs: 0,
+  total_applied: 0,
+  total_saved: 0,
+});
+
+async function refreshDashboardStats() {
+  try {
+    const res = await dashboardService.getUserStats();
+    stats.value = res ?? {};
+    // Optionally emit event or store globally
+    window.dispatchEvent(new CustomEvent("dashboard:updated", { detail: stats.value }));
+  } catch (err) {
+    console.error("Failed to refresh dashboard stats:", err);
+  }
+}
+
+onMounted(() => {
+  fetchJobs();
+  fetchLimits();
+ 
+});
+  
+
+
+</script>

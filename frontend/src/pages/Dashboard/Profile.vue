@@ -27,6 +27,14 @@
           >
             <i class="material-icons mr-2 !text-base">lock</i> Change Password
           </a>
+          <a
+            href="#"
+            @click.prevent="activeTab = 'gmail'"
+            :class="tabClass('gmail')"
+          >
+            <i class="material-icons mr-2 !text-base">alternate_email</i>
+            Gmail Authenticate
+          </a>
         </nav>
       </div>
 
@@ -394,6 +402,67 @@
             </form>
           </div>
         </div>
+        <div v-if="activeTab === 'gmail'" class="mt-8">
+          <div
+            class="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700"
+          >
+            <!-- Header -->
+            <h2
+              class="text-2xl font-bold mb-4 text-text-light dark:text-text-dark flex items-center"
+            >
+              <span class="material-icons mr-3 text-3xl">
+                alternate_email
+              </span>
+              Gmail Authentication
+            </h2>
+
+            <!-- Explanation -->
+            <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+              Connect your Gmail account to allow
+              <strong>automatic job application submissions</strong>
+              and notifications on your behalf. We will only request the minimum
+              permissions required to read your mailbox and send emails
+              securely.
+              <strong>No password is stored on our servers.</strong>
+            </p>
+
+            <!-- Benefits List -->
+            <ul class="mb-6 space-y-2 text-gray-700 dark:text-gray-300">
+              <li class="flex items-start">
+                <span class="material-icons text-primary mr-2"
+                  >check_circle</span
+                >
+                Automatically submit job applications on your behalf.
+              </li>
+              <li class="flex items-start">
+                <span class="material-icons text-primary mr-2"
+                  >check_circle</span
+                >
+                Receive notifications for updates from employers.
+              </li>
+              <li class="flex items-start">
+                <span class="material-icons text-primary mr-2"
+                  >check_circle</span
+                >
+                Secure and easy authentication via Google OAuth.
+              </li>
+            </ul>
+
+            <!-- Connect Gmail Button -->
+            <button
+              @click="connectGmail"
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow-md flex items-center justify-center transition-transform transform hover:scale-105"
+            >
+              <i class="fab fa-google mr-2 text-xl"></i>
+              Connect Gmail
+            </button>
+
+            <!-- Info Note -->
+            <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              You can disconnect Gmail anytime from your profile settings.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -403,9 +472,14 @@
 import { ref, onMounted } from "vue";
 import usersService from "@/services/profileService";
 import OptionsService from "@/services/optionsService";
-
+import { useAuthStore } from "@/stores/auth";
+const auth = useAuthStore();
 const activeTab = ref("profile");
+import { useToast } from "vue-toast-notification";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
+const toast = useToast();
 // loaders & messages
 const loading = ref(false);
 const profileLoading = ref(false);
@@ -486,7 +560,6 @@ async function fetchProfile() {
     loading.value = false;
   }
 }
-
 
 async function loadOptions() {
   try {
@@ -598,10 +671,29 @@ function resetForm() {
   profileSuccess.value = "";
 }
 
+const connectGmail = () => {
+  const userId = auth.user?.id;
+  if (!userId) {
+    toast.error("You must be logged in to connect Gmail.");
+    return;
+  }
+
+  toast.info("Redirecting to Google to authenticate your Gmail account...");
+
+  setTimeout(() => {
+    window.location.href = `https://careershyne.com/api/auth/google?user_id=${userId}`;
+  }, 500);
+};
+
 onMounted(async () => {
   loading.value = true;
   await loadOptions();
   await fetchProfile();
   loading.value = false;
+
+  // Set tab from query parameter
+  const tab = route.query.tab;
+  if (tab) activeTab.value = tab;
 });
+
 </script>

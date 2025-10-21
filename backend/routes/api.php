@@ -11,7 +11,10 @@ use App\Http\Middleware\CheckSubscriptionLimit;
 use App\Http\Middleware\LogActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Session;
+use Google\Client as GoogleClient;
+use App\Http\Controllers\GoogleController;
+use Google\Service\Gmail;
 Route::middleware(LogActivity::class)->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
@@ -39,7 +42,6 @@ Route::middleware(LogActivity::class)->group(function () {
         $userAgent = $request->header('User-Agent');
         $page      = $request->input('page', 'unknown');
 
-
         \DB::table('visitors')->insert([
             'ip'         => $ip,
             'user_agent' => $userAgent,
@@ -50,7 +52,9 @@ Route::middleware(LogActivity::class)->group(function () {
         return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
     });
 //Dashboard apis
-    Route::get('/dashboard/stats', [AuthController::class, 'getStats']);
+    Route::middleware('auth:api')->get('/dashboard/stats', [AuthController::class, 'getStats']);
+    Route::middleware('auth:api')->get('/dashboard/user-stats', [AuthController::class, 'getUserStats']);
+    
     Route::middleware('auth:api')->get('/auth/verify-token', [AuthController::class, 'verifyToken']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::middleware('auth:api')->get('/me', [AuthController::class, 'userDetails']);
@@ -79,8 +83,14 @@ Route::middleware(LogActivity::class)->group(function () {
 
     Route::prefix('jobs')->middleware('auth:api')->group(function () {
         Route::post('/add', [JobController::class, 'store']);
-
         Route::get('/all', [JobController::class, 'fetchAll']);
+        Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
+        Route::get('/saved-jobs', [JobController::class, 'fetchSavedJobs']);
+        Route::get('/applied-jobs', [JobController::class, 'fetchAppliedJobs']);
+        
+        Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
+        Route::post('/{id}/not-interested', [JobController::class, 'saveJobNotInterested']);
+        Route::post('/{id}/generate-content', [JobController::class, 'generateContent']);
         Route::get('/user-jobs', [JobController::class, 'userJobs']);
         Route::post('/check-eligibility', [JobController::class, 'checkEligibility'])
             ->middleware(CheckSubscriptionLimit::class . ':checks');
@@ -95,7 +105,7 @@ Route::middleware(LogActivity::class)->group(function () {
 
         Route::put('/update/{id}', [JobController::class, 'update']);
     });
-
+    Route::get('/jobs/public', [JobController::class, 'fetchPublicJobs']);
     Route::prefix('ai')->middleware('auth:api')->group(function () {
         Route::post('/upload', [AiController::class, 'uploadCV'])
             ->middleware('throttle:2,1')->middleware(CheckSubscriptionLimit::class . ':cv');
@@ -118,4 +128,10 @@ Route::middleware(LogActivity::class)->group(function () {
             'user'          => $request->user(), // null if not authenticated
         ]);
     });
+
+Route::post('/jobs/{jobId}/apply-on-behalf', [JobController::class, 'applyOnBehalf'])
+    ->middleware('auth:api'); // make sure user is authenticated
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
 });

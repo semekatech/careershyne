@@ -11,6 +11,32 @@
       </router-link>
     </div>
 
+    <!-- Tabs -->
+    <div class="inline-flex items-center gap-3 mb-4">
+      <button
+        @click="activeTab = 'active'"
+        :class="[
+          'px-4 py-2 rounded-full text-sm font-semibold transition',
+          activeTab === 'active'
+            ? 'bg-indigo-600 text-white shadow-md'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-600 hover:text-white',
+        ]"
+      >
+        Active
+      </button>
+      <button
+        @click="activeTab = 'expired'"
+        :class="[
+          'px-4 py-2 rounded-full text-sm font-semibold transition',
+          activeTab === 'expired'
+            ? 'bg-indigo-600 text-white shadow-md'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-600 hover:text-white',
+        ]"
+      >
+        Expired
+      </button>
+    </div>
+
     <!-- Search -->
     <div class="mb-4">
       <input
@@ -20,13 +46,27 @@
       />
     </div>
 
+    <!-- Loader -->
+    <div v-if="loading" class="space-y-4">
+      <div
+        v-for="n in 5"
+        :key="n"
+        class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-2xl p-4"
+      >
+        <div class="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+      </div>
+    </div>
+
     <!-- Jobs List -->
-    <div class="space-y-4">
+    <div v-else class="space-y-4">
       <div
         v-for="job in paginatedJobs"
         :key="job.id"
-        class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:border-border-dark"
+        class="bg-card-light dark:bg-card-dark p-4 rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:justify-between md:items-center"
       >
+        <!-- Job Info -->
         <div>
           <h3 class="text-lg font-semibold text-blue-600">{{ job.title }}</h3>
           <p class="text-gray-600">{{ job.company }} - {{ job.type }}</p>
@@ -34,7 +74,8 @@
             Location: {{ job.county }}, {{ job.country }} | Deadline:
             {{ formatDate(job.deadline) }}
           </p>
-           Status:  <span
+          Status:
+          <span
             :class="[
               'px-3 py-1 rounded text-xs font-semibold',
               new Date(job.deadline) >= new Date()
@@ -45,16 +86,24 @@
             {{ new Date(job.deadline) >= new Date() ? "Active" : "Expired" }}
           </span>
         </div>
-        <div class="flex items-center space-x-2">
-        
+
+        <!-- View Details Button -->
+        <div class="mt-2 md:mt-0 flex-shrink-0">
           <button
             @click="openModal(job)"
-            class="ml-2 px-4 py-2 bg-white text-white rounded  transition "
-          style="border: 1px solid #fd624e;color:black" >
+            class="px-4 py-2 bg-white rounded transition border border-[#fd624e] text-black"
+          >
             View Details
           </button>
         </div>
       </div>
+
+      <p
+        v-if="paginatedJobs.length === 0"
+        class="text-center text-gray-500 mt-4"
+      >
+        No {{ activeTab }} jobs found.
+      </p>
     </div>
 
     <!-- Pagination -->
@@ -77,71 +126,69 @@
     </div>
 
     <!-- Full Screen Modal -->
-    <!-- Full Screen Modal -->
-   <!-- Full Screen Modal -->
-<div
-  v-if="showModal"
-  class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
-  @click="closeModal"  
->
-  <div
-    class="bg-white w-full md:max-w-3xl h-[95vh] md:h-[90vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
-    @click.stop  
-  >
-    <!-- Header (Sticky) -->
     <div
-      class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10"
+      v-if="showModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10"
+      @click="closeModal"
     >
-      <h2 class="text-2xl font-semibold">{{ selectedJob.title }}</h2>
-      <button
-        @click="closeModal"
-        class="text-gray-700 hover:text-gray-900 text-2xl font-bold"
+      <div
+        class="bg-white w-full md:max-w-3xl h-[95vh] md:h-[90vh] relative mx-2 md:mx-0 rounded shadow-lg flex flex-col"
+        @click.stop
       >
-        ✕
-      </button>
-    </div>
+        <!-- Header -->
+        <div
+          class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10"
+        >
+          <h2 class="text-2xl font-semibold">{{ selectedJob.title }}</h2>
+          <button
+            @click="closeModal"
+            class="text-gray-700 hover:text-gray-900 text-2xl font-bold"
+          >
+            ✕
+          </button>
+        </div>
 
-    <!-- Content (Scrollable & full width) -->
-    <div class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full">
-      <p class="text-gray-600 mb-2">
-        {{ selectedJob.company }} - {{ selectedJob.type }}
-      </p>
-      <p class="text-gray-500 mb-2">
-        Location: {{ selectedJob.county }}, {{ selectedJob.country }}
-      </p>
-      <p class="text-gray-500 mb-2">
-        Deadline: {{ formatDate(selectedJob.deadline) }}
-      </p>
-      <p class="text-gray-700 mb-2">
-        <strong>Experience:</strong> {{ selectedJob.experience }} years
-      </p>
-      <p class="text-gray-700 mb-2">
-        <strong>Education:</strong> {{ selectedJob.education }}
-      </p>
-      <p class="text-gray-700 mb-2">
-        <strong>Salary:</strong> {{ selectedJob.salary }}
-      </p>
-      <p class="text-gray-700 mb-2">
-        <strong>Field:</strong> {{ selectedJob.field_name }}
-      </p>
-      <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
-      <div
-        v-html="selectedJob.description"
-        class="prose mb-4 max-w-full"
-      ></div>
-      <p class="text-gray-700 mb-2">
-        <strong>Application Instructions:</strong>
-      </p>
-      <div
-        v-html="selectedJob.applicationInstructions"
-        class="prose max-w-full"
-      ></div>
+        <!-- Content -->
+        <div class="p-4 md:p-6 overflow-x-hidden overflow-y-auto flex-1 w-full">
+          <p class="text-gray-600 mb-2">
+            {{ selectedJob.company }} - {{ selectedJob.type }}
+          </p>
+          <p class="text-gray-500 mb-2">
+            Location: {{ selectedJob.county }}, {{ selectedJob.country }}
+          </p>
+          <p class="text-gray-500 mb-2">
+            Deadline: {{ formatDate(selectedJob.deadline) }}
+          </p>
+          <p class="text-gray-700 mb-2">
+            <strong>Experience:</strong> {{ selectedJob.experience }} years
+          </p>
+          <p class="text-gray-700 mb-2">
+            <strong>Education:</strong> {{ selectedJob.education }}
+          </p>
+          <p class="text-gray-700 mb-2">
+            <strong>Salary:</strong> {{ selectedJob.salary }}
+          </p>
+          <p class="text-gray-700 mb-2">
+            <strong>Field:</strong> {{ selectedJob.field_name }}
+          </p>
+          <p class="text-gray-700 mb-2"><strong>Description:</strong></p>
+          <div
+            v-html="selectedJob.description"
+            class="prose mb-4 max-w-full"
+          ></div>
+          <p class="text-gray-700 mb-2">
+            <strong>Application Instructions:</strong>
+          </p>
+          <div
+            v-html="selectedJob.applicationInstructions"
+            class="prose max-w-full"
+          ></div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import JobService from "@/services/jobService";
@@ -150,26 +197,36 @@ const jobs = ref([]);
 const search = ref("");
 const currentPage = ref(1);
 const perPage = ref(10);
+const loading = ref(true);
+const activeTab = ref("active"); // active or expired
 
 const showModal = ref(false);
 const selectedJob = ref({});
 
 // Fetch jobs
 async function fetchJobs() {
+  loading.value = true;
   try {
     const data = await JobService.getJobs();
     jobs.value = Array.isArray(data.data) ? data.data : [];
-    currentPage.value = data.current_page || 1;
   } catch (err) {
     console.error("Error fetching jobs:", err);
     jobs.value = [];
+  } finally {
+    loading.value = false;
   }
 }
 
 // Filtered & Paginated
 const filteredJobs = computed(() => {
-  if (!search.value) return jobs.value;
-  return jobs.value.filter((job) =>
+  const filtered = jobs.value.filter((job) => {
+    const isActive = new Date(job.deadline) >= new Date();
+    return activeTab.value === "active" ? isActive : !isActive;
+  });
+
+  if (!search.value) return filtered;
+
+  return filtered.filter((job) =>
     [job.title, job.company, job.county, job.country].some((f) =>
       f?.toLowerCase().includes(search.value.toLowerCase())
     )

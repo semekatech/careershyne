@@ -9,6 +9,7 @@
   <AiFooterSection />
 </template>
 
+
 <script setup>
 import { ref } from "vue";
 import AiTheWelcome from "@/components/AiTheWelcome.vue";

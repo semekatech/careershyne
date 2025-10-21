@@ -30,17 +30,16 @@
       <!-- Employment Type -->
       <div>
         <label class="block text-sm font-medium mb-2">Employment Type *</label>
-        <select
+        <Multiselect
           v-model="job.type"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select type</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Internship">Internship</option>
-        </select>
+          :options="employmentOptions"
+          :multiple="true"
+          :close-on-select="false"
+          :clear-on-select="false"
+          placeholder="Select job type(s)"
+          label="label"
+          track-by="value"
+        />
       </div>
 
       <!-- Experience -->
@@ -48,7 +47,7 @@
         <label class="block text-sm font-medium mb-2">Experience (Yrs) *</label>
         <input
           v-model="job.experience"
-          type="number"
+          type="text"
           min="0"
           placeholder="e.g. 3"
           class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
@@ -89,9 +88,7 @@
 
       <!-- Application Deadline -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Application Deadline *</label
-        >
+        <label class="block text-sm font-medium mb-2">Application Deadline *</label>
         <input
           v-model="job.deadline"
           type="date"
@@ -100,23 +97,18 @@
         />
       </div>
 
-      <!-- Job Field -->
+      <!-- Job Categories -->
       <div>
-        <label class="block text-sm font-medium mb-2">Job Field *</label>
-        <select
+        <label class="block text-sm font-medium mb-2">Job Categories *</label>
+        <Multiselect
           v-model="job.field"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select Job Category</option>
-          <option
-            v-for="option in industryOptions"
-            :key="option.id || option.value"
-            :value="option.id || option.label || option.value"
-          >
-            {{ option.name || option.label || option.value }}
-          </option>
-        </select>
+          :options="industryOptions"
+          :multiple="true"
+          label="name"
+          track-by="id"
+          :close-on-select="false"
+          placeholder="Select job categories"
+        />
       </div>
 
       <!-- Job Details -->
@@ -133,17 +125,26 @@
       </div>
 
       <!-- Application Instructions -->
-      <!-- Application Instructions -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Application Instructions *</label
-        >
+        <label class="block text-sm font-medium mb-2">Application Instructions *</label>
         <quill-editor
           v-model:content="job.applicationInstructions"
           content-type="html"
           theme="snow"
           class="bg-white border rounded w-full"
           style="min-height: 150px"
+          required
+        />
+      </div>
+
+      <!-- Application Email -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Application Email *</label>
+        <input
+          v-model="job.applicationEmail"
+          type="email"
+          placeholder="Enter email to receive applications"
+          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
           required
         />
       </div>
@@ -161,34 +162,26 @@
 
       <!-- County -->
       <div>
-        <label class="block text-sm font-medium mb-2">County *</label>
-        <select
+        <label class="block text-sm font-medium mb-2">Counties *</label>
+        <Multiselect
           v-model="job.county"
-          class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select County</option>
-          <option
-            v-for="option in countyOptions"
-            :key="option.id || option.value"
-            :value="option.name || option.label || option.value"
-          >
-            {{ option.name || option.label || option.value }}
-          </option>
-        </select>
+          :options="countyOptions"
+          :multiple="true"
+          :close-on-select="false"
+          placeholder="Select applicable counties"
+          label="name"
+          track-by="name"
+        />
       </div>
 
-      <!-- Job Location / Office -->
+      <!-- Job Location / Office (Optional) -->
       <div>
-        <label class="block text-sm font-medium mb-2"
-          >Job Location / Office *</label
-        >
+        <label class="block text-sm font-medium mb-2">Job Location / Office (Optional)</label>
         <input
           v-model="job.office"
           type="text"
           placeholder="e.g. Westlands, Nairobi"
           class="w-full border rounded px-3 py-2 focus:ring focus:ring-indigo-500"
-          required
         />
       </div>
 
@@ -206,6 +199,7 @@
           {{ loading ? "Posting..." : "Post Job" }}
         </button>
       </div>
+
       <div v-if="successMessage" class="mt-4 text-green-600 font-medium">
         {{ successMessage }}
       </div>
@@ -219,29 +213,40 @@ import { useAuthStore } from "@/stores/auth";
 import OptionsService from "@/services/optionsService";
 import JobService from "@/services/jobService";
 import { QuillEditor } from "@vueup/vue-quill";
+import Multiselect from "vue-multiselect";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import "vue-multiselect/dist/vue-multiselect.css";
 
 const auth = useAuthStore();
 
 const job = ref({
   company: "",
   title: "",
-  type: "",
+  type: [],
   experience: "",
   education: "",
   salary: "",
   deadline: "",
-  field: "",
+  field: [],
   description: "",
   applicationInstructions: "",
+  applicationEmail: "",
   country: "Kenya",
-  county: "",
+  county: [],
   office: "",
 });
 
 const industryOptions = ref([]);
 const educationOptions = ref([]);
 const countyOptions = ref([]);
+
+const employmentOptions = [
+  { label: "Full-time", value: "Full-time" },
+  { label: "Part-time", value: "Part-time" },
+  { label: "Contract", value: "Contract" },
+  { label: "Internship", value: "Internship" },
+  { label: "Remote", value: "Remote" },
+];
 
 const loading = ref(false);
 const successMessage = ref("");
@@ -269,26 +274,49 @@ async function submitJob() {
   successMessage.value = "";
 
   const payload = {
-    ...job.value,
+    company: job.value.company,
+    title: job.value.title,
+    type: Array.isArray(job.value.type)
+      ? job.value.type.map((t) => (t.value ? t.value : t)).join(",")
+      : job.value.type,
+    experience: job.value.experience,
+    education: job.value.education,
+    salary: job.value.salary,
+    deadline: job.value.deadline,
+    field: Array.isArray(job.value.field)
+      ? job.value.field.map((f) => f.id).join(",")
+      : job.value.field,
+    description: job.value.description,
+    applicationInstructions: job.value.applicationInstructions,
+    applicationEmail: job.value.applicationEmail,
+    country: job.value.country,
+    county: Array.isArray(job.value.county)
+      ? job.value.county.map((c) => c.name || c).join(",")
+      : job.value.county,
+    office: job.value.office || null,
     postedBy: auth.user?.id || null,
   };
+
   try {
     const res = await JobService.createJob(payload);
     console.log("Job created:", res);
     successMessage.value = "Job posted successfully!";
+
+    // Reset form
     job.value = {
       company: "",
       title: "",
-      type: "",
+      type: [],
       experience: "",
       education: "",
       salary: "",
       deadline: "",
-      field: "",
+      field: [],
       description: "",
       applicationInstructions: "",
+      applicationEmail: "",
       country: "Kenya",
-      county: "",
+      county: [],
       office: "",
     };
   } catch (err) {

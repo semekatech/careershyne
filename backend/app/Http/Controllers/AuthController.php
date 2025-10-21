@@ -71,9 +71,10 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'user'         => [
-                'id'   => $user->id,
-                'name' => $user->name,
-                'role' => $user->role,
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'role'      => $user->role,
+                'user_type' => $user->user_type,
             ],
             'redirect'     => $redirectRoute,
         ]);
@@ -109,10 +110,10 @@ class AuthController extends Controller
             DB::table('subscriptions')->insert([
                 'user_id'      => $user->id,
                 'plan'         => 'Free',
-                'cv'           => 5,
-                'coverletters' => 5,
-                'emails'       => 5,
-                'checks'       => 5,
+                'cv'           => 1,
+                'coverletters' => 1,
+                'emails'       => 1,
+                'checks'       => 1,
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ]);
@@ -281,8 +282,7 @@ class AuthController extends Controller
 
     public function getStats(Request $request)
     {
-        $token = $request->bearerToken();
-        $user  = User::where('api_token', hash('sha256', $token))->first();
+        $user = auth('api')->user();
         if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
@@ -320,6 +320,22 @@ class AuthController extends Controller
         ]);
     }
 
+    public function getUserStats(Request $request)
+    {
+        $user = auth('api')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $total_applied = DB::table('job_interests')->where('user_id', $user->id)->where('status', 'applied')->count();
+        $total_saved   = DB::table('job_interests')->where('user_id', $user->id)->count();
+        $total_jobs    = DB::table('job_listings')->where('field', $user->industry_id)->count();
+        return response()->json([
+            'total_applied' => $total_applied,
+            'total_saved'   => $total_saved,
+            'total_jobs'    => $total_jobs,
+        ]);
+    }
     public function userDetails(Request $request)
     {
         info('reached here');
@@ -332,11 +348,12 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         return response()->json([
-            'id'    => $user->id,
-            'name'  => $user->name,
-            'phone' => $user->phone,
-            'email' => $user->email,
-            'role'  => $user->role,
+            'id'        => $user->id,
+            'name'      => $user->name,
+            'phone'     => $user->phone,
+            'email'     => $user->email,
+            'role'      => $user->role,
+            'user_type' => $user->user_type,
         ]);
     }
 
@@ -387,10 +404,11 @@ class AuthController extends Controller
             'access_token'    => $token,
             'token_type'      => 'Bearer',
             'user'            => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'photo' => $user->photo,
-                'role'  => $user->role,
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'photo'     => $user->photo,
+                'role'      => $user->role,
+                'user_type' => $user->user_type,
             ],
             'redirect'        => $redirectRoute,
             'impersonator_id' => $admin->id,
