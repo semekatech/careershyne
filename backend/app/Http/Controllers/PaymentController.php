@@ -10,22 +10,25 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderMail;
 use App\Models\User;
 use DB;
-
+use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller
 {
 
 
-
-
-    public function initiate(Request $request)
-    {
+public function initiate(Request $request)
+{
+    try {
+        // ✅ Validate input
         $validated = $request->validate([
-            'phone'   => 'required|string|regex:/^254\d{9}$/',
+            'phone'   => 'required|string',
             'amount'  => 'required|numeric|min:1',
         ]);
-        $amount = $request->input('amount');
+
+        $amount = $validated['amount'];
         $items = [];
-        if ($request->input('payment_type') == 'subscription') {
+
+        // ✅ Prepare subscription items if applicable
+        if ($request->input('payment_type') === 'subscription') {
             $n = floor($amount / 100);
             $items = [
                 'cv' => 2 * $n,
@@ -34,104 +37,138 @@ class PaymentController extends Controller
                 'cover_letter' => 2 * $n - floor($amount / 200),
             ];
         }
+
         $plan = $request->input('plan');
         $account_number = $request->input('orderID');
-        $phone1 = $validated['phone'];
-        $phone2 = (int) $phone1;
-        $first = substr($phone2, 0, 3);
-        if ($first != 254) {
-            $phonenumber = "254" . $phone2;
-        } elseif (substr($phone1, 0, 3) == 254) {
-            $phonenumber = $phone1;
-        }
+
+        // ✅ Normalize phone number (extract last 9 digits, prepend 254)
+        $digits = preg_replace('/\D/', '', $validated['phone']); // remove non-digits
+        $lastNine = substr($digits, -9);
+        $phonenumber = '254' . $lastNine;
+
         date_default_timezone_set("Africa/Nairobi");
+
+        // ✅ Safaricom API credentials
         $consumer_key = "mqnWvo8e5l3kpmrYWjCqBTs8w44H7zm73PPDTWINAgcQBKtL";
         $consumer_secret = "3tN8JdOmqH6pzkiHjujcTjQit7t0r2HNNU4F9ry7hWRpfhdGvFeqNb9g2cXaILzt";
-        $access_token_url =
-            "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+
+        // ✅ Get access token
+        $access_token_url = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $access_token_url);
-        $credentials = base64_encode($consumer_key . ":" . $consumer_secret);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            "Authorization: Basic " . $credentials,
-        ]); //setting a custom header
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $access_token_url,
+            CURLOPT_HTTPHEADER => ["Authorization: Basic " . base64_encode($consumer_key . ":" . $consumer_secret)],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
         $curl_response = curl_exec($curl);
-        $access_token = json_decode($curl_response)->access_token;
+        if (curl_errno($curl)) {
+            throw new \Exception('cURL Error (Access Token): ' . curl_error($curl));
+        }
+        $access_token = json_decode($curl_response)->access_token ?? null;
         curl_close($curl);
-        // initiating the transaction
-        $initiate_url =
-            "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+
+        if (!$access_token) {
+            throw new \Exception('Failed to get access token from Safaricom.');
+        }
+
+        // ✅ Initiate STK Push
+        $initiate_url = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
         $stkHeader = [
             "Content-Type:application/json",
             "Authorization:Bearer " . $access_token,
         ];
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $initiate_url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $stkHeader);
+
         $BusinessShortCode = "4167323";
         $Timestamp = date("YmdHis");
-        // $Timestamp = date('YYYYMMDDHHis');
-        $PartyA = $phonenumber;
-        $Amount =$amount;
-        $CallBackURL = "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551";
-        $AccountReference = $account_number;
-        $TransactionDesc = "Subscription ";
         $Passkey = "86b62107f93c1a1d013ab36ab83cd12aca4e6b3f9fd3778c8d5422178bde52a8";
         $Password = base64_encode($BusinessShortCode . $Passkey . $Timestamp);
-        $curl_post_data = [
-            // Fill in the request parameters with valid values
+
+        $payload = [
             "BusinessShortCode" => $BusinessShortCode,
             "Password" => $Password,
             "Timestamp" => $Timestamp,
             "TransactionType" => "CustomerPayBillOnline",
-            "Amount" => $Amount,
-            "PartyA" => $PartyA,
+            "Amount" => $amount,
+            "PartyA" => $phonenumber,
             "PartyB" => $BusinessShortCode,
-            "PhoneNumber" => $PartyA,
-            "CallBackURL" => $CallBackURL,
-            "AccountReference" => $AccountReference,
-            "TransactionDesc" => $TransactionDesc,
+            "PhoneNumber" => $phonenumber,
+            "CallBackURL" => "https://careershyne.com/api/callback-confirm?ngumzo_token=37183551",
+            "AccountReference" => $account_number,
+            "TransactionDesc" => "Subscription",
         ];
-        $data_string = json_encode($curl_post_data);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-        $curl_response = curl_exec($curl);
-        // store feedback start
-        $resp_data = json_decode($curl_response);
-        info('stk data' . collect($resp_data));
-        $MerchantRequestID = $resp_data->MerchantRequestID;
-        $CheckoutRequestID = $resp_data->CheckoutRequestID;
-        $ResponseCode = $resp_data->ResponseCode;
-        $ResponseDescription = $resp_data->ResponseDescription;
+
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $initiate_url,
+            CURLOPT_HTTPHEADER => $stkHeader,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+        ]);
+
+        $stk_response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            throw new \Exception('cURL Error (STK Push): ' . curl_error($curl));
+        }
         curl_close($curl);
+
+        $resp_data = json_decode($stk_response);
+
+        if (isset($resp_data->errorMessage)) {
+            throw new \Exception('Safaricom Error: ' . $resp_data->errorMessage);
+        }
+
+        // ✅ Log response
+        Log::info('STK Push Response:', (array) $resp_data);
+
+        $MerchantRequestID = $resp_data->MerchantRequestID ?? null;
+        $CheckoutRequestID = $resp_data->CheckoutRequestID ?? null;
+        $ResponseCode = $resp_data->ResponseCode ?? '13';
+        $ResponseDescription = $resp_data->ResponseDescription ?? 'No Response';
+
+        // ✅ Store record
         $user = auth('api')->user();
-        $mpesa_stk = DB::table('mpesa_stks')->insert([
+
+        DB::table('mpesa_stks')->insert([
             "merchant_request_id" => $MerchantRequestID,
             "checkout_request_id" => $CheckoutRequestID,
-            "phone_number" => $PartyA,
-            "resultDescription" => $ResponseDescription ?? 'No Response',
-            "resultCode" => $ResponseCode ?? '13',
+            "phone_number" => $phonenumber,
+            "resultDescription" => $ResponseDescription,
+            "resultCode" => $ResponseCode,
             "plan_id" => $account_number,
-            "plan" =>  $account_number,
+            "plan" => $plan,
             "items" => json_encode($items),
-            "payment_type" =>  $request->input('payment_type'),
-            "is_premium" =>  $request->input('isPremium'),
-            "user_id" =>  $user->id,
-            "amount" =>  $amount,
+            "payment_type" => $request->input('payment_type'),
+            "is_premium" => $request->input('isPremium'),
+            "user_id" => $user->id,
+            "amount" => $amount,
+            "status" => 0,
             "created_at" => now(),
             "updated_at" => now(),
-            "status" => 0,
         ]);
+
         return response()->json([
             'reference' => $CheckoutRequestID,
             'success' => true,
-            'message' => 'STK Push initiated'
+            'message' => 'STK Push initiated successfully.'
         ]);
+    } catch (\Throwable $e) {
+        // ✅ Catch and log all errors
+        Log::error('STK Push Error:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while initiating payment.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function confirm(Request $request)
     {

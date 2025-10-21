@@ -24,8 +24,6 @@ async initiatePayment(payload) {
   const { data } = await api.post("/payments/pay", payloadWithType);
   return data;
 },
-
-
   // Check payment status (polling)
   async checkPaymentStatus(trackID) {
     const { data } = await api.post("/payments/status", {
@@ -34,7 +32,6 @@ async initiatePayment(payload) {
     return data;
   },
 
-  // Optional: get subscription/order info
   async getPlan(orderID) {
     const { data } = await api.get(`/plans/${orderID}`);
     return data;
