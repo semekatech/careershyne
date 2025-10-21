@@ -238,8 +238,7 @@ async function makePayment() {
   const amount = selectedPlan.amount;
 
   if (!isValidPhone(phone)) {
-    phoneError.value =
-      "Invalid Kenyan number. Use 254XXXXXXXXX or 07/01XXXXXXXX";
+    phoneError.value = "Invalid Kenyan number. Use 254XXXXXXXXX or 07/01XXXXXXXX";
     return;
   }
 
@@ -264,17 +263,29 @@ async function makePayment() {
   });
 
   try {
+    console.log("📡 Initiating payment with:", {
+      phone,
+      amount,
+      orderID: order.data.orderID,
+      isPremium: 1,
+    });
+
     const response = await initiatePayment({
       phone,
       amount,
       orderID: order.data.orderID,
       isPremium: 1,
     });
+
+    console.log("✅ Payment initiated successfully:", response);
+
     pollPayment(response.reference);
   } catch (err) {
+    console.error("❌ Failed to initiate payment:", err);
     Swal.fire("Error", "Failed to initiate payment. Try again.", "error");
   }
 }
+
 
 async function pollPayment(trackID) {
   const poll = async () => {

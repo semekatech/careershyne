@@ -21,9 +21,21 @@ const renewPlanService = {
   // Initiate M-Pesa STK push
 async initiatePayment(payload) {
   const payloadWithType = { ...payload, payment_type: "subscription" };
-  const { data } = await api.post("/payments/pay", payloadWithType);
-  return data;
+  try {
+    console.log("🚀 Initiating payment with payload:", payloadWithType);
+    const { data } = await api.post("/payments/pay", payloadWithType);
+    console.log("✅ Payment initiation response:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Payment initiation failed:", {
+      message: error.message,
+      status: error.response?.status,
+      response: error.response?.data,
+    });
+    throw error;
+  }
 },
+
   // Check payment status (polling)
   async checkPaymentStatus(trackID) {
     const { data } = await api.post("/payments/status", {
