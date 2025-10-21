@@ -4,7 +4,7 @@ import axios from "axios";
 // Create Axios instance with baseURL and timeout
 const api = axios.create({
   baseURL: "https://careershyne.com/api",
-  timeout: 5000,
+  timeout: 30000,
 });
 
 // Attach auth token if present
