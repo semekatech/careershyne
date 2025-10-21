@@ -459,91 +459,156 @@ public function initiate(Request $request)
         info("✅ Subscription payment processed successfully for user {$order_detail->user_id}");
         return response()->json(['message' => 'Subscription processed successfully'], 200);
     }
-      protected function handlePremiumPayment($stkCallback, $order_detail)
-{
-    $ResultCode = $stkCallback->ResultCode;
-    $ResultDesc = $stkCallback->ResultDesc;
 
-    // If transaction failed
-    if ($ResultCode != 0) {
+protected function handlePremiumPayment($stkCallback, $order_detail)
+{
+    try {
+        Log::info('🔔 STK Callback received for order:', [
+            'order_id' => $order_detail->id,
+            'user_id' => $order_detail->user_id,
+            'stkCallback' => json_encode($stkCallback),
+        ]);
+
+        $ResultCode = $stkCallback->ResultCode ?? null;
+        $ResultDesc = $stkCallback->ResultDesc ?? 'No description provided';
+
+        if ($ResultCode === null) {
+            throw new \Exception('Missing ResultCode in STK Callback');
+        }
+
+        // ❌ Transaction failed
+        if ($ResultCode != 0) {
+            DB::table('mpesa_stks')->where('id', $order_detail->id)->update([
+                'status' => 2,
+                'resultCode' => $ResultCode,
+                'ResultDescription' => $ResultDesc,
+                'updated_at' => now(),
+            ]);
+
+            Log::warning("❌ Subscription payment failed", [
+                'user_id' => $order_detail->user_id,
+                'result_code' => $ResultCode,
+                'description' => $ResultDesc,
+                'stk_callback' => json_encode($stkCallback),
+            ]);
+
+            return response()->json(['message' => 'Subscription payment failed'], 200);
+        }
+
+        // ✅ Extract payment metadata
+        $CallbackMetadata = $stkCallback->CallbackMetadata->Item ?? [];
+        $Amount = null;
+        $MpesaReceiptNumber = null;
+        $PhoneNumber = null;
+        $TransactionDate = null;
+
+        foreach ($CallbackMetadata as $item) {
+            if ($item->Name == "Amount") $Amount = $item->Value;
+            if ($item->Name == "MpesaReceiptNumber") $MpesaReceiptNumber = $item->Value;
+            if ($item->Name == "PhoneNumber") $PhoneNumber = $item->Value;
+            if ($item->Name == "TransactionDate") $TransactionDate = $item->Value;
+        }
+
+        Log::info('💰 Payment Metadata Extracted:', [
+            'Amount' => $Amount,
+            'MpesaReceiptNumber' => $MpesaReceiptNumber,
+            'PhoneNumber' => $PhoneNumber,
+            'TransactionDate' => $TransactionDate,
+        ]);
+
+        // ✅ Update mpesa_stks record
         DB::table('mpesa_stks')->where('id', $order_detail->id)->update([
-            'status' => 2,
+            'status' => 1,
             'resultCode' => $ResultCode,
             'ResultDescription' => $ResultDesc,
             'updated_at' => now(),
         ]);
-        info("❌ Subscription payment failed for user {$order_detail->user_id}");
-        return response()->json(['message' => 'Subscription payment failed'], 200);
-    }
 
-    // ✅ Extract payment metadata
-    $CallbackMetadata = $stkCallback->CallbackMetadata->Item ?? [];
-    $Amount = null;
-    $MpesaReceiptNumber = null;
-    $PhoneNumber = null;
-    $TransactionDate = null;
+        // Decode subscription items
+        $items = json_decode($order_detail->items, true);
+        $Amount = $order_detail->amount;
+        $jobs = 0;
+        $applications = 0;
+        $expires_at = now()->addDays(30);
 
-    foreach ($CallbackMetadata as $item) {
-        if ($item->Name == "Amount") $Amount = $item->Value;
-        if ($item->Name == "MpesaReceiptNumber") $MpesaReceiptNumber = $item->Value;
-        if ($item->Name == "PhoneNumber") $PhoneNumber = $item->Value;
-        if ($item->Name == "TransactionDate") $TransactionDate = $item->Value;
-    }
+        if ($Amount == 1000) {
+            $jobs = 3;
+            $applications = 1;
+        } elseif ($Amount == 1500) {
+            $jobs = 8;
+            $applications = 3;
+        } elseif ($Amount == 3000) {
+            $jobs = 15;
+            $applications = 5;
+        }
 
-    // ✅ Update mpesa_stks record
-    DB::table('mpesa_stks')->where('id', $order_detail->id)->update([
-        'status' => 1,
-        'resultCode' => $ResultCode,
-        'ResultDescription' => $ResultDesc,
-        'updated_at' => now(),
-    ]);
+        // ✅ Update subscription
+        $subscription = DB::table('subscriptions')->where('user_id', $order_detail->user_id)->first();
 
-    // Decode items (benefits from subscription)
-    $items = json_decode($order_detail->items, true);
-    $Amount=$order_detail->amount;
-    $jobs = 0;
-    $applications = 0;
-    $expires_at = now()->addDays(30);
+        if ($subscription) {
+            DB::table('subscriptions')
+                ->where('user_id', $order_detail->user_id)
+                ->update([
+                    'cv' => 1,
+                    'checks' => 1,
+                    'coverletters' => 1,
+                    'emails' => 1,
+                    'jobs' => $jobs,
+                    'applications' => $applications,
+                    'expires_at' => $expires_at,
+                    'updated_at' => now(),
+                ]);
 
-    if ($Amount == 1000) {
-        $jobs = 3;
-        $applications = 1;
-    } elseif ($Amount == 1500) {
-        $jobs = 8;
-        $applications = 3;
-    } elseif ($Amount == 3000) {
-        $jobs = 15;
-        $applications = 5;
-    }
-
-    // ✅ Update subscription table
-    $subscription = DB::table('subscriptions')->where('user_id', $order_detail->user_id)->first();
-    if ($subscription) {
-        DB::table('subscriptions')
-            ->where('user_id', $order_detail->user_id)
-            ->update([
-                'cv' => 1,
-                'checks' => 1,
-                'coverletters' => 1,
-                'emails' => 1,
+            Log::info("✅ Subscription updated successfully", [
+                'user_id' => $order_detail->user_id,
                 'jobs' => $jobs,
                 'applications' => $applications,
                 'expires_at' => $expires_at,
-                'updated_at' => now(),
             ]);
-    }
-    // ✅ Send confirmation SMS / WhatsApp
-    $formattedPhone = (strpos($PhoneNumber, '254') === 0) ? $PhoneNumber : '254' . substr($PhoneNumber, -9);
-    $message = "✅ Your Careershyne subscription has been activated successfully!\n\n";
-    $this->sendMessage($formattedPhone, $message);
-    // ✅ Notify admin
-    $adminMsg = "📢 New Subscription Payment For Careershyne Received \n\nUser ID: {$order_detail->user_id}\nAmount: KES {$Amount}\nPlan ID: {$order_detail->plan_id}\nReceipt: {$MpesaReceiptNumber}";
-    $this->sendMessage('254705030613', $adminMsg); // Admin phone
-    $this->sendMessage('254703644281', $adminMsg);
+        } else {
+            Log::warning("⚠️ No subscription record found for user", [
+                'user_id' => $order_detail->user_id,
+            ]);
+        }
 
-    info("✅ Subscription payment processed successfully for user {$order_detail->user_id}");
-    return response()->json(['message' => 'Subscription processed successfully'], 200);
+        // ✅ Send confirmation messages
+        $formattedPhone = (strpos($PhoneNumber, '254') === 0)
+            ? $PhoneNumber
+            : '254' . substr($PhoneNumber, -9);
+
+        $message = "✅ Your Careershyne subscription has been activated successfully!\n\n"
+            . "You can now enjoy automated job applications and premium benefits for 30 days.";
+
+        $this->sendMessage($formattedPhone, $message);
+
+        $adminMsg = "📢 New Subscription Payment Received\n\n"
+            . "User ID: {$order_detail->user_id}\n"
+            . "Amount: KES {$Amount}\n"
+            . "Plan ID: {$order_detail->plan_id}\n"
+            . "Receipt: {$MpesaReceiptNumber}";
+
+        $this->sendMessage('254705030613', $adminMsg);
+        $this->sendMessage('254703644281', $adminMsg);
+
+        Log::info("✅ Subscription payment processed successfully for user {$order_detail->user_id}");
+
+        return response()->json(['message' => 'Subscription processed successfully'], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('🔥 handlePremiumPayment error:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'order_detail' => $order_detail,
+            'stkCallback' => json_encode($stkCallback),
+        ]);
+
+        return response()->json([
+            'message' => 'Error processing subscription payment',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
 }
+
 
     public function sendMessage($phone, $message)
     {
