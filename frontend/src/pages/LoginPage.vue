@@ -17,8 +17,9 @@
           WELCOME BACK
         </div>
         <p class="text-sm px-8 leading-relaxed">
-          Log in to explore opportunities and let our AI tools help you
-          <br />apply with speed and confidence.
+          Log in to unlock smarter job applications — we’ll apply to matching
+          roles on your behalf,<br />
+          giving you more interviews with less effort.
         </p>
       </div>
     </div>
@@ -35,7 +36,7 @@
           />
           <h2 class="text-2xl font-semibold text-gray-800">Login Account</h2>
           <p class="text-sm text-gray-500 mt-1">
-            Sign in to continue exploring Careershyne AI tools.
+            Sign in to continue.
           </p>
           <p v-if="errorMessage" class="text-sm text-red-600 mt-2 text-center">
             {{ errorMessage }}
