@@ -1,102 +1,284 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 pt-20" id="pricing">
-    <!-- Section header -->
-    <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
-      <div class="mx-auto max-w-2xl lg:max-w-4xl">
-        <h2 class="text-4xl font-bold leading-8 text-black dark:text-orange-400">
-          Pricing
-        </h2>
-        <p class="mt-2 text-1xl  tracking-tight text-gray-900 dark:text-gray-200">
-          Invest in your career with the right plan — affordable, transparent, and designed to help you land interviews faster.
+  <section class="bg-white py-16">
+    <div class="max-w-5xl mx-auto px-4">
+      <div
+        class="bg-white p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-start"
+      >
+        <!-- Budget Card -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Pay As You Go</h3>
+          <p>
+            Only pay for what you use. Build your own plan based on your needs.
+          </p>
+          <br />
+          <p class="text-gray-600 mb-6">
+            Adjust the slider to see the corresponding features.
+          </p>
+
+          <label class="block text-gray-700 text-sm font-medium mb-2"
+            >Amount</label
+          >
+          <div
+            class="flex items-center bg-gray-50 border border-gray-300 rounded-lg p-2 mb-6"
+          >
+            <!-- <span class="mr-2">🇰🇪</span> -->
+            <span class="text-gray-700 mr-3">KES</span>
+            <input
+              type="number"
+              readonly
+              v-model="budget"
+              min="100"
+              max="5000"
+              step="100"
+              class="bg-transparent text-gray-900 w-24 outline-none"
+            />
+          </div>
+
+          <input
+            type="range"
+            min="100"
+            max="5000"
+            step="100"
+            v-model="budget"
+            class="w-full accent-orange-500 appearance-none h-2 rounded-lg outline-none cursor-pointer bg-gray-200"
+          />
+        </div>
+
+        <!-- Items Card -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">You Will Receive</h3>
+
+          <ul class="mt-8 space-y-4 text-sm">
+            <li class="flex justify-between items-center">
+              <span class="flex items-center"
+                ><span class="material-icons text-primary mr-2"
+                  >description</span
+                >CV Items</span
+              >
+              <span class="font-semibold text-primary text-lg">{{
+                items.cv
+              }}</span>
+            </li>
+            <li class="flex justify-between items-center">
+              <span class="flex items-center"
+                ><span class="material-icons text-primary mr-2">mail</span>Cover
+                Letters</span
+              >
+              <span class="font-semibold text-primary text-lg">{{
+                items.coverLetter
+              }}</span>
+            </li>
+            <li class="flex justify-between items-center">
+              <span class="flex items-center"
+                ><span class="material-icons text-primary mr-2"
+                  >check_circle_outline</span
+                >Eligibility Checks</span
+              >
+              <span class="font-semibold text-primary text-lg">{{
+                items.eligibility
+              }}</span>
+            </li>
+            <li class="flex justify-between items-center">
+              <span class="flex items-center"
+                ><span class="material-icons text-primary mr-2">email</span
+                >Email Credits</span
+              >
+              <span class="font-semibold text-primary text-lg">{{
+                items.email
+              }}</span>
+            </li>
+          </ul>
+
+          <hr class="border-gray-200 mb-6" />
+          <div
+            class="flex justify-between text-lg font-bold text-gray-900 mb-6"
+          >
+            <span>Total cost</span>
+            <span>KES {{ budget }}</span>
+          </div>
+
+          <button
+            :disabled="items.total === 0"
+            @click="openModal = true"
+            class="w-full py-3 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Pay {{ budget }} Via STK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      v-if="openModal"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      @keydown.esc="closeModal"
+    >
+      <div class="bg-white rounded-xl p-6 w-full max-w-md relative">
+        <h3 class="text-lg font-bold mb-4">Enter your phone number</h3>
+
+        <label class="block mb-2 text-gray-700">Phone Number</label>
+        <input
+          v-model="payment.phone"
+          type="tel"
+          placeholder="e.g., 254712345678 or 0712345678"
+          class="w-full border border-gray-300 rounded-lg p-2 mb-1"
+        />
+        <p v-if="phoneError" class="text-red-600 text-sm mb-2">
+          {{ phoneError }}
         </p>
-      </div>
-    </div>
-    <!-- Pricing grid -->
-    <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
 
-        <!-- Free CV Review -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV Review (Starter – Free)</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 0</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Kickstart your job search with a free, detailed review of your CV and personalized tips.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ Professional CV assessment</li>
-              <li>✔ Personalized improvement tips</li>
-              <li>✔ ATS optimization suggestions</li>
-            </ul>
-          </div>
-          <a href="mailto:info@careershyne.com?subject=Free%20CV%20Review"
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
-            Start with a Free Review
-          </a>
-        </div>
-
-        <!-- CV Revamp + Cover Letter -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV Revamp + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 200</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Upgrade your CV and cover letter with a tailored solution for a strong first impression.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ 1 CV revamp (ATS-friendly, keyword optimized)</li>
-              <li>✔ 1 tailored cover letter</li>
-              <li>✔ Industry-specific adjustments</li>
-            </ul>
-          </div>
-          <router-link to="/order-cv"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
-            Upgrade My CV
-          </router-link>
-        </div>
-
-        <!-- CV from Scratch + Cover Letter -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV from Scratch + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 300</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Get a brand-new CV and cover letter built from scratch to position you for success.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ CV crafted from scratch</li>
-              <li>✔ 1 personalized cover letter</li>
-              <li>✔ ATS-optimized formatting</li>
-              <li>✔ Tailored to your career goals</li>
-            </ul>
-          </div>
-          <router-link to="/custom-cv-order"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
-            Build My CV from Scratch
-          </router-link>
-        </div>
-
-        <!-- Career Success Package -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">Career Success Package</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 500</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Go all-in with a complete professional upgrade to maximize visibility and opportunities.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ 2 CV revamps (different roles/industries)</li>
-              <li>✔ 2 customized cover letters</li>
-              <li>✔ LinkedIn profile optimization</li>
-              <li>✔ Recruiter visibility boost</li>
-            </ul>
-          </div>
-           <a href="https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne."
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
-           Unlock My Career Package
-          </a>
+        <div class="flex justify-between items-center mt-4">
+          <button
+            @click="makePayment"
+            class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
+          >
+            Pay KES {{ budget }}
+          </button>
+          <button
+            @click="closeModal"
+            class="text-gray-700 px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
+
+<script setup>
+import { ref, reactive, computed } from "vue";
+import Swal from "sweetalert2";
+import renewPlanService from "@/services/renewPlan";
+const { initiatePayment, checkPaymentStatus } = renewPlanService;
+
+// Budget (in multiples of 100)
+const budget = ref(100);
+
+// Prices per item
+const prices = reactive({
+  cv: 20,
+  coverLetter: 15,
+  eligibility: 15,
+  email: 10,
+});
+
+// Computed allocation
+const items = computed(() => {
+  const P = budget.value;
+  if (P <= 0 || P % 100 !== 0)
+    return { cv: 0, coverLetter: 0, eligibility: 0, email: 0, total: 0 };
+
+  // Split budget based on percentage
+  const allocation = {
+    cv: P * 0.4,
+    coverLetter: P * 0.3,
+    eligibility: P * 0.2,
+    email: P * 0.1,
+  };
+
+  // Calculate how many of each item can be bought
+  const cv = Math.floor(allocation.cv / prices.cv);
+  const coverLetter = Math.floor(allocation.coverLetter / prices.coverLetter);
+  const eligibility = Math.floor(allocation.eligibility / prices.eligibility);
+  const email = Math.floor(allocation.email / prices.email);
+
+  // Calculate total spent value
+  const total =
+    cv * prices.cv +
+    coverLetter * prices.coverLetter +
+    eligibility * prices.eligibility +
+    email * prices.email;
+
+  return { cv, coverLetter, eligibility, email, total };
+});
+
+// Modal & Payment
+const openModal = ref(false);
+const payment = reactive({ phone: "" });
+const phoneError = ref("");
+
+// Order
+const order = reactive({
+  data: {
+    amount: 0,
+    orderID: Math.floor(Math.random() * 1000000),
+    status: "pending",
+  },
+});
+
+// Validate Kenyan phone
+function isValidPhone(num) {
+  const clean = num.replace(/\D/g, "");
+  return /^254\d{9}$/.test(clean) || /^(07|01)\d{8}$/.test(clean);
+}
+
+// Close modal
+function closeModal() {
+  payment.phone = "";
+  phoneError.value = "";
+  openModal.value = false;
+}
+
+// Payment
+async function makePayment() {
+  order.data.amount = items.value.total;
+  const phone = payment.phone.trim();
+  if (!isValidPhone(phone)) {
+    phoneError.value =
+      "Invalid Kenyan number. Use 254XXXXXXXXX or 07/01XXXXXXXX";
+    return;
+  }
+  phoneError.value = "";
+
+  const confirmResult = await Swal.fire({
+    title: "Confirm Payment",
+    html: `<b>Phone:</b> ${phone}<br/><b>Amount:</b> KES ${order.data.amount}`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Proceed",
+    cancelButtonText: "Cancel",
+  });
+  if (!confirmResult.isConfirmed) return;
+
+  Swal.fire({
+    title: "Processing...",
+    text: "Check your phone...",
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading(),
+  });
+
+  try {
+    const response = await initiatePayment({
+      phone,
+      amount: order.data.amount,
+      orderID: order.data.orderID,
+    });
+    pollPayment(response.reference);
+  } catch (err) {
+    Swal.fire("Error", "Failed to initiate payment. Try again.", "error");
+  }
+}
+
+// Poll payment confirmation
+async function pollPayment(trackID) {
+  const poll = async () => {
+    try {
+      const res = await checkPaymentStatus(trackID);
+      if (res.status === 1) {
+        Swal.fire("Success!", "Payment confirmed!", "success").then(closeModal);
+        order.data.status = "paid";
+      } else if (res.status === 7 || res.status === 0) {
+        setTimeout(poll, 5000);
+      } else if (res.status === 2) {
+        Swal.fire("Error", res.message, "error");
+      }
+    } catch (err) {
+      console.error(err);
+      setTimeout(poll, 5000);
+    }
+  };
+  poll();
+}
+</script>

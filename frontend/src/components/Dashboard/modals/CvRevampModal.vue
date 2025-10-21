@@ -1,41 +1,71 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start z-50 overflow-auto pt-4 md:pt-10">
+  <div
+    class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 overflow-auto p-4"
+  >
     <div
-      class="bg-white w-full md:max-w-4xl h-[80vh] relative mx-2 md:mx-0 rounded-2xl shadow-xl flex flex-col"
-      @click.stop
+      class="bg-white w-full md:max-w-4xl h-[85vh] rounded-xl shadow-xl flex flex-col overflow-hidden"
     >
       <!-- Header -->
-      <div class="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10 rounded-t-2xl">
-        <h2 class="text-2xl font-bold text-gray-800">CV Revamp</h2>
-        <div class="flex items-center gap-3">
-          <button
-            v-if="editor"
-            @click="downloadWord"
-            class="material-icons text-green-600 hover:text-green-800 cursor-pointer"
-            title="Download as Word"
+      <!-- Header -->
+      <div class="border-b bg-white sticky top-0 z-10">
+        <div class="flex flex-wrap justify-between items-center gap-3 p-4">
+          <!-- Title + Close -->
+          <div class="flex items-center justify-between w-full sm:w-auto">
+            <h2 class="text-2xl font-semibold text-gray-800">CV Revamp</h2>
+            <button
+              @click="$emit('close')"
+              class="text-gray-500 hover:text-gray-800 text-2xl font-bold sm:hidden"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Buttons -->
+          <div
+            class="flex flex-wrap justify-end items-center gap-3 w-full sm:w-auto"
           >
-            download
-          </button>
-          <button
-            v-if="editor"
-            @click="copyToClipboard"
-            class="material-icons text-blue-600 hover:text-blue-800 cursor-pointer"
-            title="Copy to Clipboard"
-          >
-            content_copy
-          </button>
-          <button
-            @click="$emit('close')"
-            class="text-gray-500 hover:text-gray-800 text-2xl font-bold"
-          >
-            ✕
-          </button>
+            <button
+              v-if="editor"
+              @click="downloadWord"
+              class="flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">description</span>
+              Download Word
+            </button>
+
+            <button
+              v-if="editor"
+              @click="downloadPDF"
+              class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">picture_as_pdf</span>
+              Download PDF
+            </button>
+            <!-- 
+            <button
+              v-if="editor"
+              @click="copyToClipboard"
+              class="flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium w-full sm:w-auto justify-center"
+            >
+              <span class="material-icons text-base">content_copy</span>
+              Copy HTML
+            </button> -->
+
+            <button
+              @click="$emit('close')"
+              class="hidden sm:block text-gray-500 hover:text-gray-800 text-2xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Toolbar -->
-      <div v-if="editor && progress >= 100" class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center">
-        <!-- Basic formatting -->
+      <div
+        v-if="editor && props.progress >= 100"
+        class="flex flex-wrap gap-2 p-3 border-b bg-gray-50 items-center"
+      >
         <button @click="toggleBold" :class="toolbarBtnClass(isBold)">
           <span class="material-icons text-sm">format_bold</span>
         </button>
@@ -49,18 +79,22 @@
           <span class="material-icons text-sm">strikethrough_s</span>
         </button>
 
-        <!-- Lists -->
-        <button @click="toggleBulletList" :class="toolbarBtnClass(isBulletList)">
+        <button
+          @click="toggleBulletList"
+          :class="toolbarBtnClass(isBulletList)"
+        >
           <span class="material-icons text-sm">format_list_bulleted</span>
         </button>
-        <button @click="toggleOrderedList" :class="toolbarBtnClass(isOrderedList)">
+        <button
+          @click="toggleOrderedList"
+          :class="toolbarBtnClass(isOrderedList)"
+        >
           <span class="material-icons text-sm">format_list_numbered</span>
         </button>
         <button @click="toggleCodeBlock" :class="toolbarBtnClass(isCodeBlock)">
           <span class="material-icons text-sm">code</span>
         </button>
 
-        <!-- Undo / Redo -->
         <button @click="undo" class="p-2 rounded-md hover:bg-gray-200">
           <span class="material-icons text-sm">undo</span>
         </button>
@@ -68,63 +102,110 @@
           <span class="material-icons text-sm">redo</span>
         </button>
 
-        <!-- Select All -->
-        <button @click="selectAll" class="p-2 rounded-md hover:bg-gray-200" title="Select All">
-          <span class="material-icons text-sm">select_all</span>
-        </button>
-
-        <!-- Font size -->
-        <select v-model="fontSize" @change="setFontSize" class="border rounded p-1 text-sm">
-          <option v-for="size in fontSizes" :key="size" :value="size">{{ size }}</option>
+        <select
+          v-model="fontSize"
+          @change="setFontSize"
+          class="border rounded p-1 text-sm"
+        >
+          <option v-for="size in fontSizes" :key="size" :value="size">
+            {{ size }}
+          </option>
         </select>
 
-        <!-- Font family -->
-        <select v-model="fontFamily" @change="setFontFamily" class="border rounded p-1 text-sm">
-          <option v-for="family in fontFamilies" :key="family" :value="family">{{ family }}</option>
+        <select
+          v-model="fontFamily"
+          @change="setFontFamily"
+          class="border rounded p-1 text-sm"
+        >
+          <option v-for="family in fontFamilies" :key="family" :value="family">
+            {{ family }}
+          </option>
         </select>
 
-        <!-- Text color -->
-        <input type="color" v-model="textColor" @input="setTextColor" title="Text color" class="w-8 h-8 p-0 border-0 cursor-pointer"/>
+        <input
+          type="color"
+          v-model="textColor"
+          @input="setTextColor"
+          title="Text color"
+          class="w-8 h-8 p-0 border-0 cursor-pointer"
+        />
 
-        <!-- Text Align -->
-        <button @click="setTextAlign('left')" class="p-2 rounded-md hover:bg-gray-200" title="Align Left">
+        <button
+          @click="setTextAlign('left')"
+          class="p-2 rounded-md hover:bg-gray-200"
+          title="Align Left"
+        >
           <span class="material-icons text-sm">format_align_left</span>
         </button>
-        <button @click="setTextAlign('center')" class="p-2 rounded-md hover:bg-gray-200" title="Align Center">
+        <button
+          @click="setTextAlign('center')"
+          class="p-2 rounded-md hover:bg-gray-200"
+          title="Align Center"
+        >
           <span class="material-icons text-sm">format_align_center</span>
         </button>
-        <button @click="setTextAlign('right')" class="p-2 rounded-md hover:bg-gray-200" title="Align Right">
+        <button
+          @click="setTextAlign('right')"
+          class="p-2 rounded-md hover:bg-gray-200"
+          title="Align Right"
+        >
           <span class="material-icons text-sm">format_align_right</span>
         </button>
-        <button @click="setTextAlign('justify')" class="p-2 rounded-md hover:bg-gray-200" title="Justify">
+        <button
+          @click="setTextAlign('justify')"
+          class="p-2 rounded-md hover:bg-gray-200"
+          title="Justify"
+        >
           <span class="material-icons text-sm">format_align_justify</span>
         </button>
       </div>
 
-      <!-- Content -->
-      <div class="flex-1 p-6 overflow-y-auto">
-        <div v-if="!result || progress < 100" class="flex flex-col items-center justify-center h-full text-center space-y-4">
+      <!-- Editor -->
+      <!-- Editor / Error / Loading -->
+      <div class="flex-1 p-4 overflow-y-auto bg-gray-50 relative">
+        <!-- Loading state -->
+        <div
+          v-if="props.progress < 100 && !props.result?.error"
+          class="flex flex-col items-center justify-center h-full text-center space-y-2"
+        >
           <p class="text-gray-600 text-lg font-medium">
-            Revamping your CV<span class="inline-block animate-pulse">...</span>
+            Generating CV Revamp
+            <span class="inline-block animate-pulse">...</span>
           </p>
-          <p class="text-gray-500 text-sm italic">{{ loadingMessage }}</p>
 
-          <!-- Progress bar -->
-          <div class="w-3/4 h-4 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-            <div class="h-4 rounded-full animate-slide" :style="{ width: progress + '%', background: currentGradient }"></div>
+          <div class="w-3/4 h-4 rounded-full overflow-hidden bg-gray-200">
+            <div
+              class="h-4 rounded-full animate-slide"
+              :style="{
+                width: props.progress + '%',
+                background: `linear-gradient(to right, #3b82f6, #6366f1, #10b981)`,
+              }"
+            ></div>
           </div>
-          <p class="text-gray-700 font-medium">{{ progress }}%</p>
+          <p class="text-gray-700 font-medium">{{ props.progress }}%</p>
         </div>
 
-        <div v-else>
-          <EditorContent
-            v-if="editor"
-            :editor="editor"
-            class="min-h-[60vh] prose prose-sm max-w-full bg-gray-50 p-4 rounded-lg focus:outline-none"
-          />
-          <div v-else-if="result.error" class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg">
-            {{ result.error }}
-          </div>
+        <!-- Error state -->
+        <div
+          v-else-if="props.result?.error"
+          class="text-red-600 font-medium bg-red-50 border border-red-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+        >
+          {{ props.result.error }}
+        </div>
+
+        <!-- Editor state -->
+        <EditorContent
+          v-else-if="editor && props.result?.revampedCv"
+          :editor="editor"
+          class="prose prose-base max-w-none w-full focus:outline-none leading-relaxed"
+        />
+
+        <!-- Fallback -->
+        <div
+          v-else
+          class="text-gray-500 font-medium bg-gray-50 border border-gray-200 p-4 rounded-lg w-full max-w-4xl mx-auto"
+        >
+          No CV available.
         </div>
       </div>
     </div>
@@ -133,10 +214,9 @@
 
 <script setup>
 import { ref, watch, onBeforeUnmount, nextTick, computed } from "vue";
-
 import { Editor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
+import { Underline } from "@tiptap/extension-underline";
 import { Link } from "@tiptap/extension-link";
 import { CodeBlock } from "@tiptap/extension-code-block";
 import { BulletList } from "@tiptap/extension-bullet-list";
@@ -146,67 +226,104 @@ import { Strike } from "@tiptap/extension-strike";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
-import { Heading } from "@tiptap/extension-heading";
-import { Blockquote } from "@tiptap/extension-blockquote";
-import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
+import html2pdf from "html2pdf.js";
 
-const props = defineProps({
-  job: Object,
-  result: Object,
-  progress: Number,
-});
+const props = defineProps({ job: Object, result: Object, progress: Number });
 
 const editor = ref(null);
-const fontSize = ref("14px");
-const fontFamily = ref("Arial");
+const fontSize = ref("12pt");
+const fontFamily = ref("Times New Roman");
 const textColor = ref("#000000");
-const fontSizes = ["12px","14px","16px","18px","20px","24px"];
-const fontFamilies = ["Arial","Verdana","Georgia","Times New Roman","Courier New"];
+const fontSizes = ["10pt", "11pt", "12pt", "14pt", "16pt", "18pt"];
+const fontFamilies = [
+  "Times New Roman",
+  "Arial",
+  "Verdana",
+  "Georgia",
+  "Courier New",
+];
 
-watch(() => props.result?.revampedCv, async (val) => {
-  if (!val) return;
-  await nextTick();
-  if (!editor.value) {
-    editor.value = new Editor({
-      extensions: [
-        StarterKit,
-        Underline,
-        Link,
-        CodeBlock,
-        BulletList,
-        OrderedList,
-        ListItem,
-        Strike,
-        TextStyle,
-        Color,
-        TextAlign.configure({ types: ["paragraph","heading"] }),
-      ],
-      content: val,
-    });
-  } else {
-    editor.value.commands.setContent(val, false);
-  }
-}, { immediate: true });
+watch(
+  () => props.result?.revampedCv,
+  async (val) => {
+    if (!val) return;
+    await nextTick();
+    if (!editor.value) {
+      editor.value = new Editor({
+        extensions: [
+          StarterKit,
+          Underline,
+          Link,
+          CodeBlock,
+          BulletList,
+          OrderedList,
+          ListItem,
+          Strike,
+          TextStyle,
+          Color,
+          TextAlign.configure({ types: ["heading", "paragraph"] }),
+        ],
+        content: `<div style="font-family:'Times New Roman'; font-size:12pt; line-height:1.6;">${val}</div>`,
+        editorProps: {
+          handleKeyDown(view, event) {
+            if (event.key === "Tab" && !event.shiftKey) {
+              event.preventDefault();
+              const { state, dispatch } = view;
+              const { from, to } = state.selection;
+              dispatch(
+                state.tr.insertText("\u00a0\u00a0\u00a0\u00a0", from, to)
+              );
+              return true;
+            }
+            return false;
+          },
+        },
+      });
+    } else {
+      editor.value.commands.setContent(val, false);
+    }
+  },
+  { immediate: true }
+);
 
-onBeforeUnmount(() => { if(editor.value) editor.value.destroy(); });
+onBeforeUnmount(() => editor.value?.destroy());
 
-// Toolbar actions
+// Formatting
 const toggleBold = () => editor.value.chain().focus().toggleBold().run();
 const toggleItalic = () => editor.value.chain().focus().toggleItalic().run();
-const toggleUnderline = () => editor.value.chain().focus().toggleUnderline().run();
+const toggleUnderline = () =>
+  editor.value.chain().focus().toggleUnderline().run();
 const toggleStrike = () => editor.value.chain().focus().toggleStrike().run();
-const toggleBulletList = () => editor.value.chain().focus().toggleBulletList().run();
-const toggleOrderedList = () => editor.value.chain().focus().toggleOrderedList().run();
-const toggleCodeBlock = () => editor.value.chain().focus().toggleCodeBlock().run();
+const toggleBulletList = () =>
+  editor.value.chain().focus().toggleBulletList().run();
+const toggleOrderedList = () =>
+  editor.value.chain().focus().toggleOrderedList().run();
+const toggleCodeBlock = () =>
+  editor.value.chain().focus().toggleCodeBlock().run();
 const undo = () => editor.value.chain().focus().undo().run();
 const redo = () => editor.value.chain().focus().redo().run();
-const selectAll = () => editor.value.commands.focus().selectAll();
-const setFontSize = () => editor.value.chain().focus().setMark("textStyle",{ fontSize: fontSize.value }).run();
-const setFontFamily = () => editor.value.chain().focus().setMark("textStyle",{ fontFamily: fontFamily.value }).run();
-const setTextColor = () => editor.value.chain().focus().setMark("textStyle",{ color: textColor.value }).run();
-const setTextAlign = align => editor.value.chain().focus().setNode("paragraph",{ textAlign: align }).run();
 
-// Toolbar active states
+const setFontSize = () =>
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { fontSize: fontSize.value })
+    .run();
+const setFontFamily = () =>
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { fontFamily: fontFamily.value })
+    .run();
+const setTextColor = () =>
+  editor.value
+    .chain()
+    .focus()
+    .setMark("textStyle", { color: textColor.value })
+    .run();
+const setTextAlign = (align) =>
+  editor.value.chain().focus().setNode("paragraph", { textAlign: align }).run();
+
 const isBold = computed(() => editor.value?.isActive("bold"));
 const isItalic = computed(() => editor.value?.isActive("italic"));
 const isUnderline = computed(() => editor.value?.isActive("underline"));
@@ -215,53 +332,75 @@ const isBulletList = computed(() => editor.value?.isActive("bulletList"));
 const isOrderedList = computed(() => editor.value?.isActive("orderedList"));
 const isCodeBlock = computed(() => editor.value?.isActive("codeBlock"));
 
-// Toolbar button class
-const toolbarBtnClass = active => `p-2 rounded-md hover:bg-gray-200 ${active?"bg-gray-300":""}`;
+const toolbarBtnClass = (active) =>
+  `p-2 rounded-md hover:bg-gray-200 ${active ? "bg-gray-300" : ""}`;
 
-// Word download
-function downloadWord() {
-  if(!editor.value) return;
-  const content = `<html><head><meta charset="utf-8"><title>Revamped CV</title></head><body>${editor.value.getHTML()}</body></html>`;
-  const blob = new Blob(["\ufeff",content],{type:"application/msword"});
+// --- EXPORTS ---
+
+async function downloadWord() {
+  if (!editor.value) return;
+  editor.value.commands.blur();
+  await nextTick();
+  const editorEl = document.querySelector(".ProseMirror");
+  const latestHTML = editorEl ? editorEl.innerHTML : editor.value.getHTML();
+
+  const content = `
+    <html>
+      <head><meta charset="utf-8"><title>CV Revamp</title></head>
+      <body style="font-family:'Times New Roman'; font-size:12pt; line-height:1.6;">${latestHTML}</body>
+    </html>
+  `;
+
+  const blob = new Blob(["\ufeff", content], { type: "application/msword" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "revamped-cv.doc";
+  link.download = "cv_revamp.doc";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
-// Copy to clipboard
-function copyToClipboard() {
-  if(!editor.value) return;
-  navigator.clipboard.writeText(editor.value.getHTML()).then(()=>alert("Copied to clipboard!"));
+async function downloadPDF() {
+  if (!editor.value) return;
+  const editorEl = document.querySelector(".ProseMirror");
+  const clone = editorEl.cloneNode(true);
+  const container = document.createElement("div");
+  container.style.fontFamily = "'Times New Roman'";
+  container.style.fontSize = "12pt";
+  container.style.lineHeight = "1.6";
+  container.style.whiteSpace = "pre-wrap";
+  container.style.padding = "20px";
+  container.appendChild(clone);
+  html2pdf()
+    .set({ margin: 10, filename: "cv_revamp.pdf" })
+    .from(container)
+    .save();
 }
 
-// Loading messages & dynamic gradients
-const messages = [
-  { text:"Analyzing experience...", color:"linear-gradient(to right, #38bdf8, #60a5fa)" },
-  { text:"Optimizing skills...", color:"linear-gradient(to right, #a78bfa, #f472b6)" },
-  { text:"Formatting layout...", color:"linear-gradient(to right, #facc15, #f97316)" },
-  { text:"Highlighting achievements...", color:"linear-gradient(to right, #34d399, #10b981)" },
-  { text:"Finalizing design...", color:"linear-gradient(to right, #f87171, #ef4444)" },
-];
-const loadingMessage = computed(()=>{
-  if(!props.progress) return messages[0].text;
-  const index = Math.floor((props.progress/100)*messages.length);
-  return messages[Math.min(index, messages.length-1)].text;
-});
-const currentGradient = computed(()=>{
-  if(!props.progress) return messages[0].color;
-  const index = Math.floor((props.progress/100)*messages.length);
-  return messages[Math.min(index, messages.length-1)].color;
-});
+function copyToClipboard() {
+  const editorEl = document.querySelector(".ProseMirror");
+  const html = editorEl ? editorEl.innerHTML : editor.value?.getHTML() || "";
+  navigator.clipboard.writeText(html).then(() => alert("Copied!"));
+}
 </script>
 
 <style>
-@keyframes slide {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.animate-slide {background-size:200% 100%;animation:slide 1.5s linear infinite}
-
-@keyframes pulse {0%,100%{opacity:0}50%{opacity:1}}
-.animate-pulse {animation:pulse 1s infinite}
+@keyframes slide {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animate-slide {
+  background-size: 200% 100%;
+  animation: slide 1.5s linear infinite;
+}
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
 </style>

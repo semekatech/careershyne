@@ -293,14 +293,21 @@ async function submitJobDetails() {
   if (inputType.value === "pdf" && jobFile.value) {
     formData.append("job_pdf", jobFile.value);
   }
-  try {
-    const data = await generateCoverLetter(formData);
-    generatedCoverLetter.value = data.cover_letter;
-  } catch (err) {
-    console.error("Error generating cover letter:", err);
-    generatedCoverLetter.value =
-      "An error occurred while generating your cover letter. Please try again.";
-  } finally {
+try {
+  const data = await generateCoverLetter(formData);
+
+  // Parse the nested JSON string
+  const revamped = JSON.parse(data.revamped_cv);
+
+  // Extract the actual cover letter HTML
+  generatedCoverLetter.value = revamped.revampedCv;
+
+} catch (err) {
+  console.error("Error generating cover letter:", err);
+  generatedCoverLetter.value =
+    "An error occurred while generating your cover letter. Please try again.";
+}
+ finally {
     loading.value = false;
   }
 }

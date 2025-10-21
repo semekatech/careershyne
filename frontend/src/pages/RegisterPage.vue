@@ -283,7 +283,7 @@ const handleRegister = async () => {
 
       // Redirect after 3s
       setTimeout(() => {
-        router.push("/admin");
+        router.push("/login");
       }, 3000);
     } else {
       errorMessage.value =

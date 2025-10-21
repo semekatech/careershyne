@@ -32,11 +32,24 @@ class AIReviewService
     }
     public function cleanText($text)
     {
+        // Remove HTML tags
         $text = strip_tags($text);
-        $text = preg_replace('/[^A-Za-z0-9\s.,!?;:\-()]/u', ' ', $text);
+
+        // Decode HTML entities (e.g., &amp; -> &)
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Remove non-printable and non-standard symbols
+        $text = preg_replace('/[^\p{L}\p{N}\s.,!?;:\-()]/u', ' ', $text);
+
+        // Collapse multiple punctuation marks (e.g. "!!!" → "!")
+        $text = preg_replace('/([.,!?;:\-()]){2,}/', '$1', $text);
+
+        // Normalize whitespace
         $text = preg_replace('/\s+/', ' ', $text);
+
         return trim($text);
     }
+
     /**
      * Build prompt with CV snippet
      */

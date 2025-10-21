@@ -58,9 +58,9 @@ class UserController extends Controller
             DB::table('subscriptions')->insert([
                 'user_id' => $user->id,
                 'plan' => 'Free',
-                'cv' => 1,
-                'coverletters' => 1,
-                'emails' => 1,
+                'cv' => 0,
+                'coverletters' => 0,
+                'emails' => 0,
                 'checks' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),

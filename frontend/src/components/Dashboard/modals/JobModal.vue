@@ -19,7 +19,7 @@
           <p class="text-gray-700"><strong>Experience:</strong> {{ job.experience }} years</p>
           <p class="text-gray-700"><strong>Education:</strong> {{ job.education }}</p>
           <p class="text-gray-700"><strong>Salary:</strong> {{ job.salary }}</p>
-          <p class="text-gray-700"><strong>Field:</strong> {{ job.field }}</p>
+          <p class="text-gray-700"><strong>Field:</strong> {{ job.field_name}}</p>
         </div>
 
         <!-- Job Description -->

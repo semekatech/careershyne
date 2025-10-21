@@ -20,7 +20,7 @@ const scrollToSection = (id) => {
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
-        <router-link to="/" class="flex items-center space-x-2">
+        <router-link to="/ai" class="flex items-center space-x-2">
           <!-- Normal mode -->
           <img src="/logo.png" alt="Logo" class="block dark:hidden h-[80px] w-auto" />
           <!-- Dark mode -->
