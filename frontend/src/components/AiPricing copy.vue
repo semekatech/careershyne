@@ -1,104 +1,121 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 pt-20" id="ai-pricing">
-    <!-- Section header -->
-    <div class="relative mx-auto max-w-7xl px-6 text-center lg:px-8 mb-10">
-      <div class="mx-auto max-w-2xl lg:max-w-4xl">
-        <div class="text-center mb-12">
-          <p class="text-sm font-semibold text-orange-500 uppercase tracking-wide">
+  <section class="bg-white py-16">
+    <div class="max-w-6xl mx-auto px-2 lg:px-8">
+      
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-orange-500 uppercase tracking-wide">
             Clear. Simple. Affordable.
-          </p>
-          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
-         Fair Price. Real Value.
-          </h2>
+        </p>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">
+          Fair Price. Real Value.
+        </h2>
+      </div>
+
+      <!-- Pricing Grid -->
+      <div class="flex flex-col md:flex-row justify-center items-stretch gap-12">
+        
+        <!-- Free Plan -->
+        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
+          <div class="p-6 pt-12 sm:p-8 sm:pt-16 flex-1 flex flex-col">
+            <h2 class="text-2xl font-bold text-orange-600 mb-4">Basic</h2>
+
+            <!-- Crossed old price -->
+            <p class="text-xl text-gray-500 font-semibold">Free</p>
+            
+            <!-- New price -->
+            <p class="text-5xl font-extrabold text-gray-900 mb-2">
+              KES 0
+              <span class="text-xl font-semibold text-gray-500">/month</span>
+            </p>
+
+            <button
+              @click="$router.push('/admin')"
+              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
+            >
+              Get Started
+            </button>
+
+            <div class="mt-8 flex-1">
+              <h3 class="text-base font-semibold text-gray-700 mb-3">Included Features</h3>
+              <ul class="space-y-3">
+                <li v-for="(feature, index) in freeFeatures" :key="index" class="flex items-start">
+                  <svg class="flex-shrink-0 w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="ml-3 text-gray-700 text-base">{{ feature }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
+
+        <!-- Premium Plan -->
+        <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-[350px] border-2 border-orange-500 min-h-[600px] flex flex-col">
+          <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-semibold uppercase px-4 py-1 rounded-bl-xl">
+            Most Popular
+          </div>
+
+          <div class="p-6 pt-12 sm:p-8 sm:pt-16 flex-1 flex flex-col">
+            <h2 class="text-2xl font-bold text-orange-600 mb-4">Premium</h2>
+            
+            <!-- Crossed old price -->
+            <p class="text-xl text-gray-500 font-semibold line-through">KES 1,500</p>
+            
+            <!-- New price -->
+            <p class="text-5xl font-extrabold text-gray-900 mb-2">
+              KES 800
+              <span class="text-xl font-semibold text-gray-500">/month</span>
+            </p>
+            
+            <button
+              @click="$router.push('/admin')"
+              class="w-full mt-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-[#32383f] transition-colors duration-300 shadow-md"
+            >
+              Subscribe Now
+            </button>
+
+
+            <div class="mt-8 flex-1">
+              <h3 class="text-base font-semibold text-gray-700 mb-3">Included Features</h3>
+              <ul class="space-y-3">
+                <li v-for="(feature, index) in premiumFeatures" :key="index" class="flex items-start">
+                  <svg class="flex-shrink-0 w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span :class="{'ml-3 font-bold': feature.highlight}" class="ml-3 text-gray-700 text-base">
+                    {{ feature.text }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-    <!-- Pricing grid -->
-    <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-
-        <!-- Free CV Review -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV Review (Starter – Free)</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 0</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Kickstart your job search with a free, detailed review of your CV and personalized tips.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ Professional CV assessment</li>
-              <li>✔ Personalized improvement tips</li>
-              <li>✔ ATS optimization suggestions</li>
-            </ul>
-          </div>
-          <a href="mailto:info@careershyne.com?subject=Free%20CV%20Review"
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
-            Start with a Free Review
-          </a>
-        </div>
-
-        <!-- CV Revamp + Cover Letter -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV Revamp + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 200</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Upgrade your CV and cover letter with a tailored solution for a strong first impression.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ 1 CV revamp (ATS-friendly, keyword optimized)</li>
-              <li>✔ 1 tailored cover letter</li>
-              <li>✔ Industry-specific adjustments</li>
-            </ul>
-          </div>
-          <router-link to="/order-cv"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
-            Upgrade My CV
-          </router-link>
-        </div>
-
-        <!-- CV from Scratch + Cover Letter -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">CV from Scratch + Cover Letter</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 300</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Get a brand-new CV and cover letter built from scratch to position you for success.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ CV crafted from scratch</li>
-              <li>✔ 1 personalized cover letter</li>
-              <li>✔ ATS-optimized formatting</li>
-              <li>✔ Tailored to your career goals</li>
-            </ul>
-          </div>
-          <router-link to="/custom-cv-order"
-                       class="text-center mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition">
-            Build My CV from Scratch
-          </router-link>
-        </div>
-
-        <!-- Career Success Package -->
-        <div class="flex flex-col justify-between rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition p-6">
-          <div>
-            <h3 class="text-sm text-orange-500 font-semibold">Career Success Package</h3>
-            <div class="mt-4 text-3xl font-bold text-black dark:text-orange-400">KES 500</div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Go all-in with a complete professional upgrade to maximize visibility and opportunities.
-            </p>
-            <ul class="mt-4 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-              <li>✔ 2 CV revamps (different roles/industries)</li>
-              <li>✔ 2 customized cover letters</li>
-              <li>✔ LinkedIn profile optimization</li>
-              <li>✔ Recruiter visibility boost</li>
-            </ul>
-          </div>
-           <a href="https://wa.me/254758428993?text=I%20want%20to%20unlock%20my%20career%20package%20with%20CareersHyne."
-             class="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-[#32383f] transition text-center">
-           Unlock My Career Package
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 </template>
+
+<script>
+export default {
+  name: "AiPricing",
+  data() {
+    return {
+      freeFeatures: [
+        "1 CV Revamp",
+        "1 Cover Letter",
+        "1 Email Draft",
+        "1 Job Eligibility Check"
+      ],
+      premiumFeatures: [
+        { text: "5 CV Revamps", highlight: true },
+        { text: "5 Cover Letters", highlight: false },
+        { text: "10 Email Drafts", highlight: false },
+        { text: "8 Job Eligibility Checks", highlight: false },
+        { text: "Priority Support", highlight: false }
+      ]
+    }
+  }
+}
+</script>

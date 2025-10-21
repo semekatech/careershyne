@@ -49,8 +49,13 @@
       <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
         <!-- Secondary CTA -->
         <a
+<<<<<<< HEAD
+          href="/login"
+          class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-orange-500 transition duration-300"
+=======
           href="/learn-more"
           class="px-6 py-3 border border-white text-white font-semibold rounded-lg hover:bg-white hover:text-gray-900 transition duration-300"
+>>>>>>> 594775f41e99dbbac26f5c5433f2d0d01f525eed
         >
           Learn More
         </a>
