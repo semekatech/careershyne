@@ -151,7 +151,6 @@ public function store(Request $request)
     public function fetchPersonalizedJobs(Request $request)
     {
         $userId = auth('api')->id();
-
         $query = DB::table('job_listings')
             ->leftJoin('industries', 'industries.id', '=', 'job_listings.field')
             ->leftJoin('job_interests', function ($join) use ($userId) {
