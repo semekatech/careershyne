@@ -32,10 +32,9 @@
                                 Thank you for joining <strong>CareerShyne</strong> — we’re excited to have you on board!
                             </p>
                             <p style="margin-bottom: 15px;">
-                                Your journey starts here. Explore our powerful suite of AI-driven tools designed to help
-                                job seekers
-                                craft standout applications, sharpen their skills, and land their dream roles with
-                                confidence.
+                                Your job hunt just got easier. CareerShyne automatically applies to matching job
+                                listings on your behalf — saving you time while increasing your chances of getting
+                                noticed.
                             </p>
 
                             <p style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
@@ -52,7 +51,7 @@
                     <tr>
                         <td align="center"
                             style="padding-top: 20px; margin-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #888888; text-align: center;">
-                            <p style="margin: 0; line-height: 1.5;">Cheers,<br>The Team at Brandmax Media Solutions</p>
+                            <p style="margin: 0; line-height: 1.5;">Cheers,<br>The Team at Careershyne Solutions</p>
                             <div style="margin-top: 10px;">
                                 <a href="#" style="display: inline-block; margin: 0 5px;"><img
                                         src="{{ $message->embed(public_path('facebook.png')) }}" alt="Facebook"

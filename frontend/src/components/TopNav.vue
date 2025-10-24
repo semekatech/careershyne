@@ -51,7 +51,7 @@ const scrollToSection = (id) => {
         <!-- Actions -->
         <div class="flex items-center space-x-3">
           <router-link
-            to="/order-cv"
+            to="/login"
             class="hidden md:inline-block px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-[#32383f] transition-colors duration-300"
           >
             Get Started

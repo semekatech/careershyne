@@ -35,7 +35,7 @@
           />
           <h2 class="text-2xl font-semibold text-gray-800">Create Account</h2>
           <p class="text-sm text-gray-500 mt-1">
-            Fill in your details to get started with Careershyne AI tools.
+            Share your details — CareerShyne will find and apply to matching jobs for you, automatically.
           </p>
           <p v-if="successMessage" class="text-sm text-green-600 mt-2 text-center">
             {{ successMessage }}

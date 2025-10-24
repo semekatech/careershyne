@@ -182,48 +182,6 @@ function closeModal() {
   showModal.value = false;
 }
 
-async function markInterested(job) {
-  const confirm = await Swal.fire({
-    title: "Mark as Interested?",
-    text: `Do you want to save "${job.title}" to your interested jobs?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes, save it",
-    cancelButtonText: "Cancel",
-    confirmButtonColor: "#16a34a",
-    cancelButtonColor: "#6b7280",
-  });
-
-  if (!confirm.isConfirmed) return;
-
-  try {
-    const res = await JobService.markInterested(job.id);
-    job.save_status = "saved";
-    Swal.fire({
-      icon: "success",
-      title: "Marked as Interested!",
-      text:
-        res.data?.message ||
-        `${job.title} has been saved to your interested jobs.`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-  } catch (err) {
-    if (err.response?.status === 403) {
-      Swal.fire({
-        icon: "warning",
-        title: "Job Already Marked",
-        text: "You have already marked this job.",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Something went wrong",
-        text: "Unable to mark this job as interested. Please try again.",
-      });
-    }
-  }
-}
 
 
 onMounted(fetchJobs);

@@ -82,13 +82,14 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // Validation
+        // Validate user input
         $validator = Validator::make($request->all(), [
             'fullName' => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'phone'    => 'nullable|string|max:20|unique:users,phone',
             'password' => 'required|string|confirmed|min:6',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'status'  => 'error',
@@ -96,57 +97,85 @@ class AuthController extends Controller
                 'errors'  => $validator->errors(),
             ], 422);
         }
+
         try {
-            // Create user
+            // 🧩 Normalize phone number
+            $rawPhone = preg_replace('/\D/', '', $request->phone);
+            $phone    = $rawPhone ? '254' . substr($rawPhone, -9) : null;
+
+            // 🧑‍💻 Create user
             $user = User::create([
                 'name'     => $request->fullName,
                 'email'    => $request->email,
                 'role'     => '1098',
                 'status'   => 'active',
-                'phone'    => $request->phone,
+                 'last_login_at' => now(),
+                'user_type'     => 'registered',
+                'phone'    => $phone,
                 'password' => Hash::make($request->password),
             ]);
-            // Create subscription
+            // 💼 Create starter (Free) subscription
             DB::table('subscriptions')->insert([
-                'user_id'      => $user->id,
+                 'user_id'      => $user->id,
                 'plan'         => 'Free',
-                'cv'           => 1,
-                'coverletters' => 1,
-                'emails'       => 1,
-                'checks'       => 1,
+                'cv'           => 0,
+                'coverletters' => 0,
+                'emails'       => 0,
+                'checks'       => 0,
+                'jobs'         => 0,
+                'applications' => 0,
+                'expires_at'   => now()->addDays(2),
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ]);
-            // Send welcome email
+
+            // 💬 Prepare WhatsApp welcome message
+            $loginUrl   = 'https://careershyne.com/login';
+            $welcomeMsg = "🎉 *Welcome to CareerShyne, {$user->name}!* 🎉\n\n"
+                . "We’re excited to have you join a growing community of smart job seekers who are saving time and landing interviews faster! 💼✨\n\n"
+                . "From now on, CareerShyne works *for you* — automatically applying to jobs that fit your profile, personalizing each application to boost your chances of getting noticed. 🙌\n\n"
+                . "All you need to do is log in, and we’ll handle the heavy lifting while you focus on preparing for interviews. 🧠💪\n\n"
+                . "👉 Get started now:\n{$loginUrl}\n\n"
+                . "Your next opportunity might already be waiting — let’s make it happen together 🚀";
+
+            // 📩 Notify Admin & Send Welcome Messages
             try {
-                $adminMsg = "📢 New Jobseeker has Joined Careershyne: name: " . $request->fullName;
+                $adminMsg = "📢 New Jobseeker Joined CareerShyne:\n"
+                    . "👤 Name: {$user->name}\n"
+                    . "📧 Email: {$user->email}\n"
+                    . "📱 Phone: {$phone}";
+
                 $this->sendMessage('254705030613', $adminMsg);
                 $this->sendMessage('254703644281', $adminMsg);
+
+                if ($phone) {
+                    $this->sendMessage($phone, $welcomeMsg);
+                }
+
                 Mail::to($user->email)->send(new WelcomeUserMail($user));
             } catch (\Exception $e) {
-                info('Failed to send welcome email: ' . $e->getMessage());
-                return response()->json([
-                    'status'  => 'warning',
-                    'message' => 'User registered, but welcome email failed to send',
-                    'user'    => $user,
-                ], 201);
+                info('Failed to send welcome notifications: ' . $e->getMessage());
             }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'User registered successfully',
                 'user'    => $user,
             ], 201);
+
         } catch (\Exception $e) {
             info('User registration failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
     }
+
     public function sendMessage($phone, $message)
     {
         $apiUrl = 'https://ngumzo.com/v1/send-message';
