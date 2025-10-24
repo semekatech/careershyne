@@ -29,17 +29,17 @@ public function store(Request $request)
     $validated = $request->validate([
         'company'                 => 'required|string|max:255',
         'title'                   => 'required|string|max:255',
-        'type'                    => 'required', // can be array or string
+        'type'                    => 'required', 
         'experience'              => 'required|string',
         'education'               => 'required|string|max:255',
         'salary'                  => 'required|string|max:255',
         'deadline'                => 'required|date',
-        'field'                   => 'required', // can be array or string
+        'field'                   => 'required',
         'description'             => 'required|string',
         'applicationInstructions' => 'required|string',
         'applicationEmail'        => 'required|email|max:255',
         'country'                 => 'required|string|max:255',
-        'county'                  => 'required', // can be array or string
+        'county'                  => 'required',
         'office'                  => 'nullable|string|max:255',
     ]);
 
