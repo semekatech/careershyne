@@ -51,7 +51,8 @@ Route::middleware(LogActivity::class)->group(function () {
 
         return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
     });
-//Dashboard apis
+
+    //Dashboard apis
     Route::middleware('auth:api')->get('/dashboard/stats', [AuthController::class, 'getStats']);
     Route::middleware('auth:api')->get('/dashboard/user-stats', [AuthController::class, 'getUserStats']);
     
