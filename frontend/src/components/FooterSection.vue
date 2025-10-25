@@ -11,18 +11,18 @@ const scrollToSection = (id) => {
   <footer class="flex flex-col space-y-10 justify-center m-10">
     <!-- Footer Navigation -->
     <nav class="flex justify-center flex-wrap gap-6 text-gray-500 font-medium">
-      <router-link to="/" class="hover:text-gray-900">Home</router-link>
-      <router-link to="/about-us" class="hover:text-gray-900">About</router-link>
+      <router-link to="/terms-of-service" class="hover:text-gray-900">Terms of Use</router-link>
+      <router-link to="/privacy-policy" class="hover:text-gray-900">Privacy Policy</router-link>
       
       <!-- ✅ smooth scroll links -->
-      <button @click="scrollToSection('services')" class="hover:text-gray-900">
+      <!-- <button @click="scrollToSection('services')" class="hover:text-gray-900">
         Services
       </button>
       <button @click="scrollToSection('pricing')" class="hover:text-gray-900">
         Pricing
       </button>
       
-      <router-link to="/contact-us" class="hover:text-gray-900">Contact</router-link>
+      <router-link to="/contact-us" class="hover:text-gray-900">Contact</router-link> -->
     </nav>
 
     <!-- Social Icons -->
