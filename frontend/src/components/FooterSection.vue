@@ -11,8 +11,8 @@ const scrollToSection = (id) => {
   <footer class="flex flex-col space-y-10 justify-center m-10">
     <!-- Footer Navigation -->
     <nav class="flex justify-center flex-wrap gap-6 text-gray-500 font-medium">
-      <router-link to="/terms-of-service" class="hover:text-gray-900">Terms of Use</router-link>
-      <router-link to="/privacy-policy" class="hover:text-gray-900">Privacy Policy</router-link>
+      <router-link to="/terms-of-service" class="hover:text-orange-500">Terms of Use</router-link>
+      <router-link to="/privacy-policy" class="hover:text-orange-500">Privacy Policy</router-link>
       
       <!-- ✅ smooth scroll links -->
       <!-- <button @click="scrollToSection('services')" class="hover:text-gray-900">

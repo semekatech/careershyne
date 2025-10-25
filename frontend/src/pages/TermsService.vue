@@ -20,7 +20,7 @@
         </p>
       </div>
 
-      <div class="mx-auto w-full md:w-3/4 lg:w-3/4 text-gray-800 dark:text-gray-300 prose prose-xl max-w-none">
+      <div class="mx-auto w-full md:w-3/4 lg:w-3/4 text-gray-800 dark:text-gray-300 prose prose-lg max-w-none">
         <h2>1. Introduction</h2>
         <p>Welcome to CareerShyne ("CareerShyne", "we", "our", or "us"). These Terms of Service ("Terms") govern your
           access to and use of our website <a href="https://careershyne.com">https://careershyne.com</a>, mobile
