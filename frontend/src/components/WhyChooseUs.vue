@@ -51,11 +51,12 @@
           </p>
         </div>
 
-        <!-- Card 6 -->
+        <!-- Card 6 - Gmail Authentication Highlight -->
         <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition">
           <h3 class="text-xl font-semibold text-orange-400 mb-2">One-Click Multi-Apply</h3>
           <p class="text-gray-300">
-            With just one click, CareerShyne applies to multiple suitable jobs at once — no repetitive forms or wasted hours.
+            With Gmail authentication, CareerShyne connects securely to your account so you can apply to verified listings instantly.
+            One sign-in — multiple job applications — all handled safely and privately on your behalf.
           </p>
         </div>
       </div>

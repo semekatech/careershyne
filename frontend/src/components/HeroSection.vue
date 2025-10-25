@@ -8,19 +8,21 @@
     >
       <div class="max-w-3xl">
         <p
-          class="text-base font-bold text-orange-600 uppercase tracking-widest"
+          class="text-base font-semibold text-orange-600 uppercase tracking-wide mb-2"
         >
           THE FUTURE OF JOB HUNT IS HERE
         </p>
 
         <h1
-          class="mt-4 text-5xl font-extrabold text-gray-900 sm:text-6xl leading-tight"
+          class="mt-4 text-4xl font-extrabold text-gray-900 sm:text-6xl leading-tight"
         >
           Automate Your Job Hunt. <br class="hidden sm:inline" />Get Interviews Faster.
         </h1>
 
         <p class="mt-6 text-xl text-gray-700 leading-relaxed">
-          CareerShyne is your dedicated application partner. We automatically apply to dozens of jobs for you with personalized, ATS-friendly submissions. <b>Stop filling out forms</b> and start scheduling interviews.
+          CareerShyne is your personal job assistant — we help you find the right roles,
+          craft standout applications, and apply for jobs faster. <b>Skip the stress</b>
+          and let us get you closer to your next interview opportunity.
         </p>
 
         <div class="mt-8 flex items-center justify-center gap-4">

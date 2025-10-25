@@ -3,6 +3,7 @@
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CvOrderController;
+use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -11,10 +12,7 @@ use App\Http\Middleware\CheckSubscriptionLimit;
 use App\Http\Middleware\LogActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
-use Google\Client as GoogleClient;
-use App\Http\Controllers\GoogleController;
-use Google\Service\Gmail;
+
 Route::middleware(LogActivity::class)->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
@@ -51,10 +49,11 @@ Route::middleware(LogActivity::class)->group(function () {
 
         return response()->json(['message' => 'Visitor logged', 'ip' => $ip, 'page' => $page]);
     });
-//Dashboard apis
+
+    //Dashboard apis
     Route::middleware('auth:api')->get('/dashboard/stats', [AuthController::class, 'getStats']);
     Route::middleware('auth:api')->get('/dashboard/user-stats', [AuthController::class, 'getUserStats']);
-    
+
     Route::middleware('auth:api')->get('/auth/verify-token', [AuthController::class, 'verifyToken']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::middleware('auth:api')->get('/me', [AuthController::class, 'userDetails']);
@@ -87,7 +86,7 @@ Route::middleware(LogActivity::class)->group(function () {
         Route::get('/personalized-jobs', [JobController::class, 'fetchPersonalizedJobs']);
         Route::get('/saved-jobs', [JobController::class, 'fetchSavedJobs']);
         Route::get('/applied-jobs', [JobController::class, 'fetchAppliedJobs']);
-        
+
         Route::post('/{id}/interested', [JobController::class, 'saveJobInterest']);
         Route::post('/{id}/not-interested', [JobController::class, 'saveJobNotInterested']);
         Route::post('/{id}/generate-content', [JobController::class, 'generateContent']);
@@ -129,9 +128,9 @@ Route::middleware(LogActivity::class)->group(function () {
         ]);
     });
 
-Route::post('/jobs/{jobId}/apply-on-behalf', [JobController::class, 'applyOnBehalf'])
-    ->middleware('auth:api'); // make sure user is authenticated
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
-Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+    Route::post('/jobs/{jobId}/apply-on-behalf', [JobController::class, 'applyOnBehalf'])
+        ->middleware('auth:api'); // make sure user is authenticated
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 });

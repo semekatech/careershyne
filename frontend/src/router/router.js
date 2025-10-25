@@ -16,6 +16,8 @@ import EmailGenerator from "@/components/EmailGenerator.vue";
 import CvRevamp from "@/pages/Dashboard/CvRevamp.vue";
 import RegisterPage from "@/pages/RegisterPage.vue";
 import SetupPage from "@/pages/SetupPage.vue";
+// import PrivacyPolicy from "@/pages/PrivacyPolicyPage.vue";
+// import TermsService from "@/pages/TermsServicePage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 import ManageJobs from "@/pages/Dashboard/ManageJobs.vue";
 import ManageSavedJobs from "@/pages/Dashboard/ManageSavedJobs.vue"
@@ -28,6 +30,7 @@ import PremiumUserJobs from "@/pages/Dashboard/PremiumUserJobs.vue";
 import UserActivity from "@/pages/Dashboard/UserActivity.vue";
 import ManageCategories from "@/pages/Dashboard/ManageCategories.vue";
 
+
 const routes = [
   { path: "/", component: HomeLayout },
   { path: "/order-cv", name: "OrderCV", component: () => import("@/pages/CVOrder.vue") },
@@ -35,6 +38,8 @@ const routes = [
   { path: "/payment/:id", name: "PaymentPage", component: PaymentPage },
   { path: "/contact-us", name: "Contacts", component: () => import("@/pages/ContactUs.vue") },
   { path: "/about-us", name: "AboutUs", component: () => import("@/pages/AboutUs.vue") },
+  { path: "/terms-of-service", name: "TermsService", component: () => import("@/pages/TermsService.vue") },
+  { path: "/privacy-policy", name: "PrivacyPolicy", component: () => import("@/pages/PrivacyPolicy.vue") },
   { path: "/services", name: "Services", component: () => import("@/pages/Services.vue") },
   { path: "/pricing", name: "Pricing", component: () => import("@/pages/Pricing.vue") },
   { path: "/free-review", name: "FreeReview", component: () => import("@/pages/CvUpload.vue") },
@@ -206,6 +211,8 @@ router.beforeEach(async (to, from, next) => {
     "/about-us",
     "/services",
     "/pricing",
+    "/terms-of-service",
+    "/privacy-policy",
     "/free-review",
     "/ai",
     "/ai-hero",
