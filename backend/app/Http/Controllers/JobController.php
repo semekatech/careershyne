@@ -29,7 +29,7 @@ public function store(Request $request)
     $validated = $request->validate([
         'company'                 => 'required|string|max:255',
         'title'                   => 'required|string|max:255',
-        'type'                    => 'required', 
+        'type'                    => 'required',
         'experience'              => 'required|string',
         'education'               => 'required|string|max:255',
         'salary'                  => 'required|string|max:255',
@@ -1325,7 +1325,6 @@ PROMPT;
     }
     public function applyOnBehalf(Request $request, $jobId)
     {
-        info($request->all());
         $request->validate([
             'user_id'          => 'required|integer',
             'subject'          => 'required|string|max:255',
@@ -1353,16 +1352,13 @@ PROMPT;
             $client->setClientSecret(env('GMAIL_CLIENT_SECRET'));
             $client->setRedirectUri(env('GMAIL_REDIRECT_URI'));
             $client->addScope('https://www.googleapis.com/auth/gmail.send');
-
             $token = json_decode($user->gmail_access_token, true);
             $client->setAccessToken($token);
-
             // Refresh token if expired
             if ($client->isAccessTokenExpired()) {
                 if (! empty($user->gmail_refresh_token)) {
                     $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
                     $client->setAccessToken($newToken);
-
                     $user->update([
                         'gmail_access_token'     => json_encode($client->getAccessToken()),
                         'gmail_refresh_token'    => $newToken['refresh_token'] ?? $user->gmail_refresh_token,
@@ -1372,9 +1368,7 @@ PROMPT;
                     return response()->json(['message' => 'Token expired. Please reconnect Gmail.'], 401);
                 }
             }
-
             $gmail = new \Google\Service\Gmail($client);
-
             // ===== Email Composition =====
             $boundary         = uniqid(rand(), true);
             $rawMessageString = "From: {$user->email}\r\n";
@@ -1397,18 +1391,15 @@ PROMPT;
                 $cvPath    = $file->storeAs('applications/cv', $cvName, 'public');
             } elseif ($request->filled('cv_url')) {
                 $cvUrl = $request->input('cv_url');
-
                 if (! str_starts_with($cvUrl, 'http')) {
                     $cvUrl = 'https://careershyne.com/storage/' . ltrim($cvUrl, '/');
                 }
-
                 try {
                     $cvRaw = file_get_contents($cvUrl);
                 } catch (\Exception $e) {
                     info('CV download failed', ['url' => $cvUrl, 'error' => $e->getMessage()]);
                     return response()->json(['message' => 'Could not fetch CV from provided URL.'], 422);
                 }
-
                 $cvExt     = pathinfo(parse_url($cvUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'pdf';
                 $cvName    = "{$userFullName}_CV.{$cvExt}";
                 $cvContent = chunk_split(base64_encode($cvRaw));
@@ -1417,13 +1408,11 @@ PROMPT;
             } else {
                 return response()->json(['message' => 'CV is required (file or URL).'], 422);
             }
-
             $rawMessageString .= "--{$boundary}\r\n";
             $rawMessageString .= "Content-Type: application/octet-stream; name=\"{$cvName}\"\r\n";
             $rawMessageString .= "Content-Transfer-Encoding: base64\r\n";
             $rawMessageString .= "Content-Disposition: attachment; filename=\"{$cvName}\"\r\n\r\n";
             $rawMessageString .= $cvContent . "\r\n";
-
             // ===== Attach Cover Letter (optional) =====
             $coverLetterPath = null;
             if ($request->hasFile('cover_letter')) {
@@ -1434,11 +1423,9 @@ PROMPT;
                 $coverLetterPath = $file->storeAs('applications/cover_letters', $clName, 'public');
             } elseif ($request->filled('cover_letter_url')) {
                 $clUrl = $request->input('cover_letter_url');
-
                 if (! str_starts_with($clUrl, 'http')) {
                     $clUrl = 'https://careershyne.com/storage/' . ltrim($clUrl, '/');
                 }
-
                 try {
                     $clRaw = file_get_contents($clUrl);
                 } catch (\Exception $e) {
