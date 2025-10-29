@@ -20,7 +20,7 @@ import SetupPage from "@/pages/SetupPage.vue";
 // import TermsService from "@/pages/TermsServicePage.vue";
 import ManageUsers from "@/pages/Dashboard/ManageUsers.vue";
 import ManageJobs from "@/pages/Dashboard/ManageJobs.vue";
-import ManageSavedJobs from "@/pages/Dashboard/ManageSavedJobs.vue"
+import ManageSavedJobs from "@/pages/Dashboard/ManageSavedJobs.vue";
 import AddJobs from "@/pages/Dashboard/AddJobs.vue";
 import Profile from "@/pages/Dashboard/Profile.vue";
 import Plans from "@/pages/Dashboard/Plans.vue";
@@ -30,24 +30,60 @@ import PremiumUserJobs from "@/pages/Dashboard/PremiumUserJobs.vue";
 import UserActivity from "@/pages/Dashboard/UserActivity.vue";
 import ManageCategories from "@/pages/Dashboard/ManageCategories.vue";
 
-
 const routes = [
   { path: "/", component: HomeLayout },
-  { path: "/order-cv", name: "OrderCV", component: () => import("@/pages/CVOrder.vue") },
-  { path: "/custom-cv-order", name: "CustomOrders", component: () => import("@/pages/CustomCV.vue") },
+  {
+    path: "/order-cv",
+    name: "OrderCV",
+    component: () => import("@/pages/CVOrder.vue"),
+  },
+  {
+    path: "/custom-cv-order",
+    name: "CustomOrders",
+    component: () => import("@/pages/CustomCV.vue"),
+  },
   { path: "/payment/:id", name: "PaymentPage", component: PaymentPage },
-  { path: "/contact-us", name: "Contacts", component: () => import("@/pages/ContactUs.vue") },
-  { path: "/about-us", name: "AboutUs", component: () => import("@/pages/AboutUs.vue") },
-  { path: "/terms-of-service", name: "TermsService", component: () => import("@/pages/TermsService.vue") },
-  { path: "/privacy-policy", name: "PrivacyPolicy", component: () => import("@/pages/PrivacyPolicy.vue") },
-  { path: "/services", name: "Services", component: () => import("@/pages/Services.vue") },
-  { path: "/pricing", name: "Pricing", component: () => import("@/pages/Pricing.vue") },
-  { path: "/free-review", name: "FreeReview", component: () => import("@/pages/CvUpload.vue") },
+  {
+    path: "/contact-us",
+    name: "Contacts",
+    component: () => import("@/pages/ContactUs.vue"),
+  },
+  {
+    path: "/about-us",
+    name: "AboutUs",
+    component: () => import("@/pages/AboutUs.vue"),
+  },
+  {
+    path: "/terms-of-service",
+    name: "TermsService",
+    component: () => import("@/pages/TermsService.vue"),
+  },
+  {
+    path: "/privacy-policy",
+    name: "PrivacyPolicy",
+    component: () => import("@/pages/PrivacyPolicy.vue"),
+  },
+  {
+    path: "/services",
+    name: "Services",
+    component: () => import("@/pages/Services.vue"),
+  },
+  {
+    path: "/pricing",
+    name: "Pricing",
+    component: () => import("@/pages/Pricing.vue"),
+  },
+  {
+    path: "/free-review",
+    name: "FreeReview",
+    component: () => import("@/pages/CvUpload.vue"),
+  },
   { path: "/ai", name: "AI", component: () => import("@/pages/AiReview.vue") },
-  { path: "/jobs", name: "Jobs", component: () => import("@/pages/AiJobs.vue") },
-
-
-  
+  {
+    path: "/jobs",
+    name: "Jobs",
+    component: () => import("@/pages/AiJobs.vue"),
+  },
 
   // Auth routes
   {
@@ -92,14 +128,13 @@ const routes = [
     children: [{ path: "", component: ManageJobs }],
   },
 
-{
+  {
     path: "/manage-save-jobs",
     component: DashboardLayout,
     meta: { title: "Manage Saved Jobs" },
     children: [{ path: "", component: ManageSavedJobs }],
   },
 
-  
   {
     path: "/manage-categories",
     component: DashboardLayout,
@@ -142,14 +177,13 @@ const routes = [
     meta: { title: "My Plans" },
     children: [{ path: "", component: Plans }],
   },
-{
+  {
     path: "/premium-plans",
     component: DashboardLayout,
     meta: { title: "My Plans" },
     children: [{ path: "", component: PremiumPlans }],
   },
 
-  
   {
     path: "/profile",
     component: DashboardLayout,
@@ -162,14 +196,13 @@ const routes = [
     meta: { title: "Browse Jobs" },
     children: [{ path: "", component: UserJobs }],
   },
-{
+  {
     path: "/job-activities",
     component: DashboardLayout,
     meta: { title: "My Jobs" },
     children: [{ path: "", component: PremiumUserJobs }],
   },
 
-  
   {
     path: "/browse-activities",
     component: DashboardLayout,
@@ -177,11 +210,10 @@ const routes = [
     children: [{ path: "", component: UserActivity }],
   },
   {
-  path: '/gmail-callback',
-  name: 'GmailCallback',
-  component: () => import('@/pages/Dashboard/GmailCallback.vue')
-}
-
+    path: "/gmail-callback",
+    name: "GmailCallback",
+    component: () => import("@/pages/Dashboard/GmailCallback.vue"),
+  },
 ];
 
 const router = createRouter({
@@ -221,7 +253,9 @@ router.beforeEach(async (to, from, next) => {
     "/profile-setup",
   ];
 
-  const isPublic = to.matched.some((route) => publicRoutes.includes(route.path));
+  const isPublic = to.matched.some((route) =>
+    publicRoutes.includes(route.path)
+  );
 
   if (!isPublic && !auth.token) {
     return next("/login");

@@ -42,10 +42,6 @@ class WhatsapController extends Controller
             ->where('phone', $phone)
             ->where('campaign', 'rlv_sept2025')
             ->first();
-
-        /**
-         * CASE 1: User sends "cv"
-         */
         if ($messageLower === 'cv') {
             if (!$session) {
                 // Create new session
@@ -61,6 +57,15 @@ class WhatsapController extends Controller
 
             // Reply with package list
             return $this->sendMessage($phone, $this->getPackageList($name));
+        }else{
+             DB::table('leads')->insert([
+                    'name'       => $name,
+                    'phone'      => $phone,
+                    'message'       => 'initial',
+                    'campaign'   => 'ss',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
         }
 
         /**
@@ -133,7 +138,7 @@ class WhatsapController extends Controller
             $reply .= "   ✔ 1 CV revamp (ATS-friendly, keyword optimized)\n";
             $reply .= "   ✔ 1 tailored cover letter\n";
             $reply .= "   ✔ Industry-specific adjustments\n\n";
-        
+
             $reply .= "2️⃣ *CV from Scratch + Cover Letter (KES 300)*\n";
             $reply .= "   ✔ CV crafted from scratch\n";
             $reply .= "   ✔ Personalized cover letter\n";

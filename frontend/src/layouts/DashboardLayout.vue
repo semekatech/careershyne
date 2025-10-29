@@ -168,23 +168,85 @@ const handleLogout = () => {
 
 // Sidebar Links
 const sidebarLinks = [
-  { name: "Dashboard", href: "/dashboard", icon: "material-icons-sharp", iconName: "dashboard" },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: "material-icons-sharp",
+    iconName: "dashboard",
+  },
 
   // Manager/Admin Links
-  { name: "Manage Orders", href: "/manage-orders", faIcon: ["fas", "shopping-cart"], roles: ["1109", "manager"] },
-  { name: "Manage Payments", href: "/manage-payments", faIcon: ["fas", "credit-card"], roles: ["1109", "manager"] },
-  { name: "Manage Users", href: "/manage-users", faIcon: ["fas", "users"], roles: ["1109", "manager"] },
-  { name: "Manage Saved Jobs", href: "/manage-save-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
-  { name: "Manage Jobs", href: "/manage-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
-  { name: "Manage Categories", href: "/manage-categories", icon: "material-icons-sharp", iconName: "business_center", roles: ["1109", "manager"] },
+  {
+    name: "Manage Orders",
+    href: "/manage-orders",
+    faIcon: ["fas", "shopping-cart"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Payments",
+    href: "/manage-payments",
+    faIcon: ["fas", "credit-card"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Users",
+    href: "/manage-users",
+    faIcon: ["fas", "users"],
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Saved Jobs",
+    href: "/manage-save-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Jobs",
+    href: "/manage-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1109", "manager"],
+  },
+  {
+    name: "Manage Categories",
+    href: "/manage-categories",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1109", "manager"],
+  },
 
   // Regular user (role 1098)
-  { name: "Subscriptions", href: "/my-plans", icon: "material-icons-sharp", iconName: "workspace_premium", roles: ["1098"] },
-  { name: "My Jobs", href: "/browse-jobs", icon: "material-icons-sharp", iconName: "business_center", roles: ["1098"] },
-  { name: "My Activities", href: "/browse-acctivities", icon: "material-icons-sharp", iconName: "history", roles: ["1098"] },
+  {
+    name: "Subscriptions",
+    href: "/my-plans",
+    icon: "material-icons-sharp",
+    iconName: "workspace_premium",
+    roles: ["1098"],
+  },
+  {
+    name: "My Jobs",
+    href: "/browse-jobs",
+    icon: "material-icons-sharp",
+    iconName: "business_center",
+    roles: ["1098"],
+  },
+  {
+    name: "My Activities",
+    href: "/browse-acctivities",
+    icon: "material-icons-sharp",
+    iconName: "history",
+    roles: ["1098"],
+  },
 
   // Shared links
-  { name: "Personal Summary", href: "/profile", icon: "material-icons-sharp", iconName: "person", roles: ["1109", "1098"] },
+  {
+    name: "Personal Summary",
+    href: "/profile",
+    icon: "material-icons-sharp",
+    iconName: "person",
+    roles: ["1109", "1098"],
+  },
   { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
 ];
 
@@ -193,10 +255,30 @@ const filteredLinks = computed(() => {
   // Show limited set for registered users
   if (auth.user?.user_type === "registered") {
     return [
-      { name: "Dashboard", href: "/dashboard", icon: "material-icons-sharp", iconName: "dashboard" },
-      { name: "My Jobs", href: "/job-activities", icon: "material-icons-sharp", iconName: "business_center" },
-      { name: "My Subscriptions", href: "/premium-plans", icon: "material-icons-sharp", iconName: "workspace_premium" },
-      { name: "Personal Summary", href: "/profile", icon: "material-icons-sharp", iconName: "person" },
+      {
+        name: "Dashboard",
+        href: "/dashboard",
+        icon: "material-icons-sharp",
+        iconName: "dashboard",
+      },
+      {
+        name: "My Jobs",
+        href: "/job-activities",
+        icon: "material-icons-sharp",
+        iconName: "business_center",
+      },
+      {
+        name: "My Subscriptions",
+        href: "/premium-plans",
+        icon: "material-icons-sharp",
+        iconName: "workspace_premium",
+      },
+      {
+        name: "Personal Summary",
+        href: "/profile",
+        icon: "material-icons-sharp",
+        iconName: "person",
+      },
       { name: "Logout", href: "#", faIcon: ["fas", "sign-out-alt"] },
     ];
   }

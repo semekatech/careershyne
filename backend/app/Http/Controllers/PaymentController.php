@@ -78,12 +78,10 @@ public function initiate(Request $request)
             "Content-Type:application/json",
             "Authorization:Bearer " . $access_token,
         ];
-
         $BusinessShortCode = "4167323";
         $Timestamp = date("YmdHis");
         $Passkey = "86b62107f93c1a1d013ab36ab83cd12aca4e6b3f9fd3778c8d5422178bde52a8";
         $Password = base64_encode($BusinessShortCode . $Passkey . $Timestamp);
-
         $payload = [
             "BusinessShortCode" => $BusinessShortCode,
             "Password" => $Password,
@@ -97,7 +95,6 @@ public function initiate(Request $request)
             "AccountReference" => $account_number,
             "TransactionDesc" => "Subscription",
         ];
-
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $initiate_url,
@@ -106,7 +103,6 @@ public function initiate(Request $request)
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($payload),
         ]);
-
         $stk_response = curl_exec($curl);
         if (curl_errno($curl)) {
             throw new \Exception('cURL Error (STK Push): ' . curl_error($curl));
