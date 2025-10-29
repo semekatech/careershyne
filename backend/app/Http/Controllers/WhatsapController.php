@@ -12,7 +12,7 @@ class WhatsapController extends Controller
     public function index(Request $request)
     {
         header('Content-Type: application/xml');
-
+        info('here');
         $message     = $request->input('message');
         $phone       = $request->input('from');
         $name        = $request->input('name');
@@ -107,8 +107,7 @@ class WhatsapController extends Controller
         // }
 
         // /**
-        //  * CASE 3: Invalid input
-        //  */
+   
         // if (! $session) {
         //     // No session → guide to start with "cv"
         //     // $reply = "👋 Hello $name!\n\n"
