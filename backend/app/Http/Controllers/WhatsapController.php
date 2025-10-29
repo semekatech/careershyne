@@ -143,6 +143,8 @@ class WhatsapController extends Controller
 
     public function sendMessage($phone, $message)
     {
+
+        
         // $apiUrl = 'https://ngumzo.com/v1/send-message';
         // $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
         // $data   = [
