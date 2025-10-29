@@ -43,6 +43,8 @@
               <th class="px-6 py-3 text-left font-semibold">Phone</th>
               <th class="px-6 py-3 text-left font-semibold">Date Joined</th>
               <th class="px-6 py-3 text-left font-semibold">Last Login</th>
+               <th class="px-6 py-3 text-left font-semibold">Fully_Registered?</th>
+                <th class="px-6 py-3 text-left font-semibold">Paid</th>
               <th class="px-6 py-3 text-left font-semibold">Status</th>
               <th
                 v-if="auth.user?.role != 'radio'"
