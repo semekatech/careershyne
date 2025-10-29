@@ -532,8 +532,6 @@ async function fetchUsers() {
     loadingUsers.value = false;
   }
 }
-
-// Filtered & Paginated
 const filteredUsers = computed(() => {
   return users.value.filter((u) => {
     const matchesSearch = [u.name, u.email, u.phone, u.role].some((f) =>
@@ -543,7 +541,7 @@ const filteredUsers = computed(() => {
     const matchesPaid =
       !filterPaid.value ||
       (filterPaid.value === "paid" && u.paid === 2) ||
-      (filterPaid.value === "unpaid" && u.paid !== 2);
+      (filterPaid.value === "unpaid" && u.paid === 1);
 
     const matchesRegistered =
       !filterRegistered.value ||
@@ -553,7 +551,6 @@ const filteredUsers = computed(() => {
     return matchesSearch && matchesPaid && matchesRegistered;
   });
 });
-
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;
