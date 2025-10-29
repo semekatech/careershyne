@@ -22,14 +22,35 @@
       </div>
 
       <!-- Search -->
+      <!-- Search + Filters -->
       <div
-        class="p-4 bg-white border-b border-gray-100 flex flex-col sm:flex-row gap-3 sm:items-center"
+        class="p-4 bg-white border-b border-gray-100 flex flex-col sm:flex-row flex-wrap gap-3 sm:items-center"
       >
         <input
           v-model="search"
           placeholder="🔍 Search users..."
           class="p-2.5 border rounded-lg w-full sm:w-1/3 focus:ring-2 focus:ring-orange-300 focus:outline-none transition"
         />
+
+        <!-- Paid Filter -->
+        <select
+          v-model="filterPaid"
+          class="p-2.5 border rounded-lg w-full sm:w-auto focus:ring-2 focus:ring-orange-300 focus:outline-none transition"
+        >
+          <option value="">All Payment Status</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+
+        <!-- Registered Filter -->
+        <select
+          v-model="filterRegistered"
+          class="p-2.5 border rounded-lg w-full sm:w-auto focus:ring-2 focus:ring-orange-300 focus:outline-none transition"
+        >
+          <option value="">All Registration Status</option>
+          <option value="registered">Fully Registered</option>
+          <option value="unregistered">Not Registered</option>
+        </select>
       </div>
 
       <!-- Users Table -->
@@ -43,8 +64,10 @@
               <th class="px-6 py-3 text-left font-semibold">Phone</th>
               <th class="px-6 py-3 text-left font-semibold">Date Joined</th>
               <th class="px-6 py-3 text-left font-semibold">Last Login</th>
-               <th class="px-6 py-3 text-left font-semibold">Fully_Registered?</th>
-                <th class="px-6 py-3 text-left font-semibold">Paid</th>
+              <th class="px-6 py-3 text-left font-semibold">
+                Fully_Registered?
+              </th>
+              <th class="px-6 py-3 text-left font-semibold">Paid</th>
               <th class="px-6 py-3 text-left font-semibold">Status</th>
               <th
                 v-if="auth.user?.role != 'radio'"
@@ -453,6 +476,9 @@ import usersService from "@/services/usersService";
 import OptionsService from "@/services/optionsService";
 import { useToast } from "vue-toast-notification";
 import { useRoute, useRouter } from "vue-router";
+const filterPaid = ref("");
+const filterRegistered = ref("");
+
 const auth = useAuthStore();
 const $toast = useToast();
 const route = useRoute();
@@ -470,7 +496,7 @@ const loadingUsers = ref(true);
 const users = ref([]);
 const search = ref("");
 const currentPage = ref(1);
-const perPage = ref(10);
+const perPage = ref(100);
 
 const form = ref({
   name: "",
@@ -509,13 +535,25 @@ async function fetchUsers() {
 
 // Filtered & Paginated
 const filteredUsers = computed(() => {
-  if (!search.value) return users.value;
-  return users.value.filter((u) =>
-    [u.name, u.email, u.phone, u.role].some((f) =>
+  return users.value.filter((u) => {
+    const matchesSearch = [u.name, u.email, u.phone, u.role].some((f) =>
       f?.toLowerCase().includes(search.value.toLowerCase())
-    )
-  );
+    );
+
+    const matchesPaid =
+      !filterPaid.value ||
+      (filterPaid.value === "paid" && u.paid === 2) ||
+      (filterPaid.value === "unpaid" && u.paid !== 2);
+
+    const matchesRegistered =
+      !filterRegistered.value ||
+      (filterRegistered.value === "registered" && u.industry_id != null) ||
+      (filterRegistered.value === "unregistered" && u.industry_id == null);
+
+    return matchesSearch && matchesPaid && matchesRegistered;
+  });
 });
+
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;
