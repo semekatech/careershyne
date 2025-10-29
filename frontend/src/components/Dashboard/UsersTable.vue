@@ -60,12 +60,12 @@
             <tr>
               <th class="px-6 py-3 text-left font-semibold">#</th>
               <th class="px-6 py-3 text-left font-semibold">Name</th>
-              <th class="px-6 py-3 text-left font-semibold">Type</th>
+              <!-- <th class="px-6 py-3 text-left font-semibold">Type</th> -->
               <th class="px-6 py-3 text-left font-semibold">Phone</th>
-              <th class="px-6 py-3 text-left font-semibold">Date Joined</th>
-              <th class="px-6 py-3 text-left font-semibold">Last Login</th>
+              <th class="px-6 py-3 text-left font-semibold">Date</th>
+              <th class="px-6 py-3 text-left font-semibold">Login</th>
               <th class="px-6 py-3 text-left font-semibold">
-                Fully_Registered?
+               Registered?
               </th>
               <th class="px-6 py-3 text-left font-semibold">Paid</th>
               <th class="px-6 py-3 text-left font-semibold">Status</th>
@@ -99,9 +99,9 @@
               <td class="px-6 py-4 font-medium text-blue-600">
                 {{ user.name }}
               </td>
-              <td class="px-6 py-4">
+              <!-- <td class="px-6 py-4">
                 {{ user.user_type === "registered" ? "Indirect" : "Direct" }}
-              </td>
+              </td> -->
               <td class="px-6 py-4">{{ formatPhone(user.phone) }}</td>
               <td class="px-6 py-4">{{ formatDate(user.created_at) }}</td>
               <td class="px-6 py-4">{{ formatDate(user.last_login_at) }}</td>
