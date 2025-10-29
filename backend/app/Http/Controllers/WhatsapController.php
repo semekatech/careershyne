@@ -17,7 +17,6 @@ class WhatsapController extends Controller
         $phone       = $request->input('from');
         $name        = $request->input('name');
         $participant = $request->input('participant') ?: null;
-
         if (! $participant) {
             $this->prepareMessage($phone, $message, $name);
         }
@@ -25,98 +24,42 @@ class WhatsapController extends Controller
 
     public function prepareMessage($phone, $message, $name)
     {
-
         info('we are here');
-        // Whitelist allowed numbers for testing
-        // $allowedPhones = ['254705030613', '254703644281'];
-        // if (!in_array($phone, $allowedPhones)) {
-        //     return null;
-        // }
 
-        $messageLower = strtolower(preg_replace('/\s+/', '', trim($message)));
-        // Check for existing session
-        // $session = DB::table('whatsapp_sessions')
-        //     ->where('phone', $phone)
-        //     ->where('campaign', 'rlv_sept2025')
-        //     ->first();
-        // if ($messageLower === 'cv') {
-        //     if (! $session) {
-        //         // Create new session
-        //         DB::table('whatsapp_sessions')->insert([
-        //             'name'       => $name,
-        //             'phone'      => $phone,
-        //             'step'       => 'initial',
-        //             'campaign'   => 'rlv_sept2025',
-        //             'created_at' => now(),
-        //             'updated_at' => now(),
-        //         ]);
-        //     }
+        $phone          = preg_replace('/\D/', '', $phone); // normalize phone number
+        $messageTrimmed = trim($message);
 
-        //     // Reply with package list
-        //     // return $this->sendMessage($phone, $this->getPackageList($name));
-        // } else {
-        DB::table('leads')->insert([
-            'name'       => $name,
-            'phone'      => $phone,
-            'message'    => 'initial',
-            'campaign'   => 'ss',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        // }
-        // if (in_array($messageLower, ['1', '2'])) {
-        //     if (! $session) {
-        //         // New user sent 1 or 2 → show initial page first
-        //         DB::table('whatsapp_sessions')->insert([
-        //             'name'       => $name,
-        //             'phone'      => $phone,
-        //             'step'       => 'initial',
-        //             'campaign'   => 'rlv_sept2025',
-        //             'created_at' => now(),
-        //             'updated_at' => now(),
-        //         ]);
+        // Check if phone already exists
+        $existingLead = DB::table('leads')->where('phone', $phone)->first();
+        // Only proceed if it's a new lead and message matches exactly (case-insensitive)
+        if (! $existingLead && strcasecmp($messageTrimmed, 'Hello! Can I get more info on this?') === 0) {
+            // Save new lead
+            DB::table('leads')->insert([
+                'name'       => $name,
+                'phone'      => $phone,
+                'message'    => $message,
+                'campaign'   => 'ss',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        //         $reply = "👋 Hello $name!\n\n"
-        //         . "It looks like you want a CV service, but let's start with our packages first:\n\n"
-        //         . $this->getPackageList($name);
+            // Send default welcome message
+            $reply = "👋 Hello $name!\n\n"
+                . "Thanks for reaching out to *CareerShyne! 🎯*\n"
+                . "We’re here to help you land your next job faster and smarter.\n\n"
+                . "Here’s what you get when you join the *CareerShyne Job Program*:\n"
+                . "✅ Daily job updates in your preferred field.\n"
+                . "✅ Up to 30 top jobs applied on your behalf every month.\n"
+                . "✅ Tailored CVs, Cover Letters & Email templates customized for each role.\n"
+                . "✅ Interview preparation & coaching so you stand out and get hired.\n\n"
+                . "All this for just *KSh 1,000 for 30 days.*\n\n"
+                . "Would you like to proceed with your enrollment today?";
 
-        //         return $this->sendMessage($phone, $reply);
-        //     }
+            return $this->sendMessage($phone, $reply);
+        }
 
-        //     // Existing session → update step
-        //     DB::table('whatsapp_sessions')
-        //         ->where('phone', $phone)
-        //         ->where('campaign', 'rlv_sept2025')
-        //         ->update([
-        //             'step'       => $messageLower,
-        //             'updated_at' => now(),
-        //         ]);
-
-        //     // Craft response based on choice
-        //     $reply = match ($messageLower) {
-        //         '1' => "✅ You chose *CV Revamp + Cover Letter (KES 200)*.\n"
-        //         . "You’ll get ATS-friendly CV writing, a tailored cover letter, and job application guidance.\n\n"
-        //         . "👉 Proceed here: https://careershyne.com/order-cv?ref=rd",
-
-        //         '2' => "✅ You chose *CV from Scratch + Cover Letter (KES 300)*.\n"
-        //         . "You’ll get a CV crafted from scratch (ATS-optimized), a personalized cover letter, and full job application support.\n\n"
-        //         . "👉 Proceed here: https://careershyne.com/custom-cv-order?ref=rd",
-        //     };
-
-        //     // return $this->sendMessage($phone, $reply);
-        // }
-
-        // /**
-
-        // if (! $session) {
-        //     // No session → guide to start with "cv"
-        //     // $reply = "👋 Hello $name!\n\n"
-        //     //     . "To get started, type *cv* and we’ll show you our CV packages.";
-        //     // return $this->sendMessage($phone, $reply);
-        // }
-
-        // // Session exists but input is invalid → optional fallback
-        // return null;
+        // Ignore everything else
+        return null;
     }
 
     /**
@@ -145,31 +88,31 @@ class WhatsapController extends Controller
     public function sendMessage($phone, $message)
     {
 
-        // $apiUrl = 'https://ngumzo.com/v1/send-message';
-        // $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
-        // $data   = [
-        //     'sender'  => "254758428993",
-        //     'number'  => $phone,
-        //     'message' => $message,
-        // ];
-        // $ch = curl_init($apiUrl);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        //     'Content-Type: application/json',
-        //     'api-key: ' . $apiKey, // Include your API key here
-        // ]);
-        // curl_setopt($ch, CURLOPT_POST, true);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        // // Execute the cURL request and get the response
-        // $response = curl_exec($ch);
-        // // Check for errors
-        // if ($response === false) {
-        //     // Log the error (you can handle this more gracefully in production)
-        //     error_log('cURL Error: ' . curl_error($ch));
-        // }
-        // // Close the cURL session
-        // curl_close($ch);
-        // error_log('Response: ' . $response);
+        $apiUrl = 'https://ngumzo.com/v1/send-message';
+        $apiKey = 'tbPCCeImssS8tXSkNUNtCmhmxaPziR';
+        $data   = [
+            'sender'  => "254758428993",
+            'number'  => $phone,
+            'message' => $message,
+        ];
+        $ch = curl_init($apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'api-key: ' . $apiKey, // Include your API key here
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+        // Check for errors
+        if ($response === false) {
+            // Log the error (you can handle this more gracefully in production)
+            error_log('cURL Error: ' . curl_error($ch));
+        }
+        // Close the cURL session
+        curl_close($ch);
+        error_log('Response: ' . $response);
     }
 
     public function fetchPayment(Request $request)
