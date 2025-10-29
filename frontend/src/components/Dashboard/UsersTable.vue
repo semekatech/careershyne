@@ -82,6 +82,30 @@
               <td class="px-6 py-4">{{ formatDate(user.last_login_at) }}</td>
               <td class="px-6 py-4">
                 <span
+                  :class="
+                    user.industry_id != null
+                      ? 'bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full'
+                      : 'bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded-full'
+                  "
+                >
+                  {{ user.industry_id != null ? "Yes" : "No" }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4">
+                <span
+                  :class="
+                    user.paid === 2
+                      ? 'bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full'
+                      : 'bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full'
+                  "
+                >
+                  {{ user.paid === 2 ? "Yes" : "No" }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4">
+                <span
                   :class="[
                     'px-3 py-1 rounded-full text-xs font-semibold capitalize',
                     user.status === 'active'
